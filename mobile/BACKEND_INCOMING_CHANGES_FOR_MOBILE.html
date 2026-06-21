@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Backend Incoming Changes — Mobile Integration & Handover</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    color: #1f2937;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    border-bottom: 3px solid #2563eb;
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: 20pt; color: #1e3a8a; margin: 0 0 4px 0; }
+  .subtitle { font-size: 10pt; color: #4b5563; margin: 0; }
+  .meta { margin-top: 8px; font-size: 9pt; color: #6b7280; }
+  h2 {
+    font-size: 14pt; color: #1e3a8a;
+    margin-top: 26px; margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px solid #e5e7eb;
+    page-break-after: avoid;
+    page-break-before: auto;
+  }
+  h3 { font-size: 11.5pt; color: #1f2937; margin-top: 14px; margin-bottom: 6px; page-break-after: avoid; }
+  h4 { font-size: 10.5pt; color: #374151; margin-top: 10px; margin-bottom: 4px; page-break-after: avoid; font-weight: 600; }
+  ul, ol { padding-left: 22px; margin: 6px 0 10px 0; }
+  ul ul, ol ol, ul ol, ol ul { padding-left: 20px; margin: 4px 0; }
+  li { margin: 3px 0; page-break-inside: avoid; }
+  p { margin: 6px 0 10px 0; }
+  code, .mono {
+    font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+    font-size: 9pt;
+    background: #f3f4f6;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #be185d;
+  }
+  pre {
+    font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+    font-size: 8.5pt;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin: 6px 0 12px 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    page-break-inside: avoid;
+    line-height: 1.4;
+  }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  pre .k { color: #93c5fd; }
+  pre .s { color: #86efac; }
+  pre .n { color: #fbbf24; }
+  pre .c { color: #94a3b8; font-style: italic; }
+  blockquote {
+    border-left: 4px solid #2563eb;
+    background: #eff6ff;
+    padding: 8px 14px;
+    margin: 10px 0;
+    color: #1e3a8a;
+    font-size: 9.5pt;
+  }
+  .callout {
+    border-left: 4px solid #d97706;
+    background: #fffbeb;
+    padding: 8px 14px;
+    margin: 10px 0;
+    color: #78350f;
+    font-size: 9.5pt;
+  }
+  .danger {
+    border-left: 4px solid #dc2626;
+    background: #fef2f2;
+    padding: 8px 14px;
+    margin: 10px 0;
+    color: #7f1d1d;
+    font-size: 9.5pt;
+  }
+  .pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 8pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-left: 4px;
+    vertical-align: 1px;
+  }
+  .new       { background: #dcfce7; color: #166534; }
+  .changed   { background: #fef3c7; color: #92400e; }
+  .auth      { background: #ede9fe; color: #5b21b6; }
+  .public    { background: #dbeafe; color: #1e40af; }
+  .breaking  { background: #fee2e2; color: #991b1b; }
+  .realtime  { background: #cffafe; color: #155e75; }
+  .push      { background: #fce7f3; color: #9d174d; }
+  .feat-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 10px 14px 12px 14px;
+    margin: 8px 0 14px 0;
+    page-break-inside: avoid;
+  }
+  .feat-card h3 { margin-top: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0 12px 0;
+    font-size: 9pt;
+    page-break-inside: auto;
+  }
+  th {
+    background: #f3f4f6;
+    color: #111827;
+    text-align: left;
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    font-weight: 600;
+  }
+  td {
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  tr { page-break-inside: avoid; }
+  .method { font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace; font-weight: 600; font-size: 8.5pt; white-space: nowrap; }
+  .m-get    { color: #1e40af; }
+  .m-post   { color: #15803d; }
+  .m-put    { color: #b45309; }
+  .m-patch  { color: #9333ea; }
+  .m-delete { color: #b91c1c; }
+  .path     { font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace; font-size: 8.5pt; color: #111827; }
+  .footnote { font-size: 8.5pt; color: #6b7280; font-style: italic; margin-top: 4px; }
+  .toc { columns: 2; column-gap: 24px; font-size: 9.5pt; }
+  .toc a { color: #1e40af; text-decoration: none; }
+  .toc ol { padding-left: 22px; margin: 0; }
+  .nochange {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 8px 14px;
+    color: #4b5563;
+    font-size: 9.5pt;
+    margin: 8px 0;
+  }
+  .filetree {
+    font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+    font-size: 8.5pt;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 8px 0 14px 0;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .check {
+    list-style: none;
+    padding-left: 4px;
+  }
+  .check li {
+    padding-left: 22px;
+    position: relative;
+    margin: 6px 0;
+  }
+  .check li::before {
+    content: "☐";
+    position: absolute;
+    left: 0;
+    color: #2563eb;
+    font-weight: 700;
+  }
+  .page-break { page-break-before: always; }
+  .small { font-size: 9pt; color: #4b5563; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Backend Incoming Changes — Mobile Integration &amp; Handover</h1>
+  <p class="subtitle">PIF Directors Gathering · backend pull <code>cd2410b..6704047</code> · branch <code>testing</code></p>
+  <p class="meta">Generated: 2026-05-17 · 181 files · +16,743 / −34 lines · 39 new migrations · 30 new controllers · 21 new models · audience: <strong>mobile team + new dev handover</strong></p>
+</header>
+
+<blockquote>
+  <strong>Purpose of this document.</strong> Three goals:
+  <ol style="margin: 4px 0 0 0;">
+    <li><strong>Mobile integration reference</strong> — every endpoint, every payload shape, every error code with curl examples.</li>
+    <li><strong>Code-change map</strong> — for a new developer to find their way around the diff (which file does what, what depends on what).</li>
+    <li><strong>Pre-merge / pre-production checklist</strong> — concrete items to verify before merging <code>testing → main</code>, including known gotchas and "what can go wrong" scenarios.</li>
+  </ol>
+</blockquote>
+
+<h2 id="toc">Table of contents</h2>
+<div class="toc">
+  <ol>
+    <li><a href="#summary">Summary of features shipped</a></li>
+    <li><a href="#quickstart">Quick-start — base URL, auth header, locale</a></li>
+    <li><a href="#filemap">File map &amp; handover navigation</a></li>
+    <li><a href="#auth">F1 — Identity / OTP login</a></li>
+    <li><a href="#device-tokens">F1b — Device token registration</a></li>
+    <li><a href="#account-deletion">F21 — Account deletion (Apple Review)</a></li>
+    <li><a href="#demo-account">F1c — App Review demo bypass</a></li>
+    <li><a href="#app-config">F5 — App config &amp; white-label theme</a></li>
+    <li><a href="#programs">F2 — Event days / programs</a></li>
+    <li><a href="#speakers">F3 — Speakers</a></li>
+    <li><a href="#sessions">F4 — Sessions + favorites + feedback</a></li>
+    <li><a href="#workshops">F18 — Workshops + registration + feedback</a></li>
+    <li><a href="#attendees">F10 — Attendee directory</a></li>
+    <li><a href="#sponsors">F5b — Sponsors</a></li>
+    <li><a href="#publications">F13 — Publications</a></li>
+    <li><a href="#media-center">F12 — Media Center</a></li>
+    <li><a href="#qr">F14 — QR scanner</a></li>
+    <li><a href="#meeting-rooms">F9 — Meeting-room booking</a></li>
+    <li><a href="#notifications">F6 — In-app notifications</a></li>
+    <li><a href="#chat">F7/F8 — Chat (REST + FCM + Reverb)</a></li>
+    <li><a href="#schema">Database schema overview</a></li>
+    <li><a href="#env">Required environment variables</a></li>
+    <li><a href="#composer">Composer / infra dependencies</a></li>
+    <li><a href="#conventions">Cross-cutting conventions</a></li>
+    <li><a href="#premerge">Pre-merge / pre-production checklist</a></li>
+    <li><a href="#mobile-checklist">Mobile integration checklist</a></li>
+    <li><a href="#handover">Handover notes &amp; debugging tips</a></li>
+    <li><a href="#discussion">Open items to discuss</a></li>
+  </ol>
+</div>
+
+<h2 id="summary">1. Summary of features shipped</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 36px">#</th>
+      <th>Feature</th>
+      <th>Mobile prefix</th>
+      <th>Auth</th>
+      <th>Real-time</th>
+      <th>Push</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>F1</td><td>Identity / OTP login + token expiry</td><td><code>/api/mobile/identity</code></td><td>throttled public + sanctum</td><td>—</td><td>—</td></tr>
+    <tr><td>F2</td><td>Event Days (programs)</td><td><code>/api/mobile/event-days</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F3</td><td>Speakers</td><td><code>/api/mobile/speakers</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F4</td><td>Sessions + favorites + feedback</td><td><code>/api/mobile/sessions</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F5</td><td>App config / white-label theme</td><td><code>/api/app-config</code></td><td><span class="pill public">public</span></td><td>—</td><td>—</td></tr>
+    <tr><td>F5b</td><td>Sponsors (decoupled)</td><td><code>/api/mobile/sponsors</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F6</td><td>In-app notifications</td><td><code>/api/mobile/notifications</code></td><td>sanctum + guest</td><td>—</td><td><span class="pill push">FCM</span></td></tr>
+    <tr><td>F7/F8</td><td>1-on-1 chat</td><td><code>/api/mobile/chat</code></td><td>sanctum + guest</td><td><span class="pill realtime">Reverb</span></td><td><span class="pill push">FCM</span></td></tr>
+    <tr><td>F9</td><td>Meeting-room booking</td><td><code>/api/mobile/rooms</code></td><td>sanctum + guest</td><td>—</td><td><span class="pill push">FCM</span></td></tr>
+    <tr><td>F10</td><td>Attendee directory</td><td><code>/api/mobile/attendees</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F12</td><td>Media Center</td><td><code>/api/mobile/media-center</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F13</td><td>Publications</td><td><code>/api/mobile/publications</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F14</td><td>QR scanner → guest resolve</td><td><code>/api/mobile/qr</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F18</td><td>Workshops + feedback</td><td><code>/api/mobile/workshops</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+    <tr><td>F21</td><td>Account deletion (Apple Review)</td><td><code>/api/mobile/identity/delete-account</code></td><td>sanctum + guest</td><td>—</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<p class="footnote">
+  All sanctum-guarded mobile routes also pass through <code>auth.guest</code>
+  (rejects admin tokens with 403) and <code>localization</code> middleware
+  (<code>Accept-Language</code> / <code>?lang=</code> → <code>en|ar</code>, default <code>en</code>).
+</p>
+
+<h2 id="quickstart">2. Quick-start — base URL, auth header, locale</h2>
+
+<h3>Base URLs</h3>
+<table>
+  <thead><tr><th>Env</th><th>Base URL</th><th>Reverb WSS</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>testing</td>
+      <td><code>https://pif-mobile-api.registration-panel.com/api</code></td>
+      <td><code>wss://pif-mobile-api.registration-panel.com/app/&lt;REVERB_APP_KEY&gt;</code></td>
+    </tr>
+    <tr>
+      <td>production</td>
+      <td><em>(confirm domain with infra before merge)</em></td>
+      <td><em>(confirm)</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Auth header</h3>
+<pre>Authorization: Bearer &lt;sanctum-token&gt;
+Accept: application/json
+Accept-Language: en          # or 'ar'
+X-Requested-With: XMLHttpRequest    # optional but recommended</pre>
+
+<blockquote>
+  <strong>Sanctum header is tolerant.</strong> See
+  <code>app/Providers/AppServiceProvider.php::boot()</code> — the server accepts
+  <code>Bearer X</code>, <code>bearer X</code> <em>and</em> a raw token without
+  any prefix. Flutter <code>http</code> sometimes lowercases <code>bearer</code>
+  on retries; this is handled.
+</blockquote>
+
+<h3>Locale resolution</h3>
+<p>
+  <code>app/Http/Middleware/Localization.php</code>:
+  <code>?lang=</code> query param wins over <code>Accept-Language</code> header.
+  Only <code>ar</code> sets Arabic; anything else (including missing) is treated
+  as <code>en</code>. Resources fall back from <code>*_ar</code> to <code>*_en</code>
+  when the AR field is blank.
+</p>
+
+<h3>Standard errors</h3>
+<table>
+  <thead><tr><th>HTTP</th><th>Typical cause</th><th>Body shape</th></tr></thead>
+  <tbody>
+    <tr><td><code>400</code></td><td>Validation failure (legacy controllers)</td><td><code>{ message, errors? }</code> or <code>{ hasError: true, message }</code></td></tr>
+    <tr><td><code>401</code></td><td>Missing/invalid sanctum token</td><td><code>{ message: "Unauthenticated." }</code></td></tr>
+    <tr><td><code>403</code></td><td>Token is admin (<code>auth.guest</code> blocks it)</td><td><code>{ message: "Forbidden" }</code></td></tr>
+    <tr><td><code>404</code></td><td>Resource not found</td><td><code>{ message: "&lt;Resource&gt; not found" }</code></td></tr>
+    <tr><td><code>409</code></td><td>Workshop full / feedback already submitted</td><td><code>{ message, error: "workshop_full" \| "feedback_already_submitted" }</code></td></tr>
+    <tr><td><code>422</code></td><td>Validation (new controllers)</td><td><code>{ status: "failed", errors }</code> or <code>{ success: false, message }</code></td></tr>
+    <tr><td><code>429</code></td><td>OTP attempts exceeded</td><td><code>{ message: "Too many attempts. Please request a new OTP." }</code></td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Response shape varies by feature.</strong> See §24 — pagination
+  envelopes differ between sessions/workshops, chat, notifications, attendees
+  and meeting rooms. This is intentional (Flutter contract compatibility from
+  the HCI 2026 port) and the client must branch accordingly.
+</div>
+
+<h2 id="filemap">3. File map &amp; handover navigation</h2>
+
+<p>Where to look when you need to understand a feature:</p>
+
+<div class="filetree">pif-directors-gathering-backend/
+├── app/
+│   ├── Events/
+│   │   └── MessageSent.php                ← chat broadcast event (Reverb)
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AppConfigController.php           F5  public app-config
+│   │   │   ├── AdminConferenceController.php     F5  admin white-label CRUD + upload
+│   │   │   ├── AdminNotificationController.php   F6  create + fan-out FCM
+│   │   │   ├── AdminMeetingRoomController.php    F9  admin rooms/slots
+│   │   │   ├── AdminSessionController.php        F4  admin sessions
+│   │   │   ├── AdminWorkshopController.php       F18 admin workshops
+│   │   │   ├── AdminPublicationController.php    F13 admin publications
+│   │   │   ├── AdminMediaCenter*.php             F12 documents / images / videos
+│   │   │   ├── AdminAccountDeletionRequestController.php  F21 read-only list
+│   │   │   ├── EventDaysController.php           F2  admin event days
+│   │   │   ├── Mobile* (15 controllers)          all mobile endpoints
+│   │   │   └── SpeakersController.php            +company/bio/country columns
+│   │   ├── Middleware/
+│   │   │   ├── EnsureIsAdmin.php          ← auth.admin (blocks guest tokens)
+│   │   │   ├── EnsureIsGuest.php          ← auth.guest (blocks admin tokens)
+│   │   │   └── Localization.php           ← ?lang= wins over Accept-Language
+│   │   └── Resources/
+│   │       ├── Admin/      ← AdminXxxResource (15 new)
+│   │       └── Mobile/     ← MobileXxxResource (22 new) ← Flutter contract
+│   ├── Models/             ← 21 new + Guest/Speaker/Admin updated
+│   ├── Providers/
+│   │   ├── AppServiceProvider.php         ← Sanctum bearer tolerance
+│   │   └── BroadcastServiceProvider.php   ← Broadcast::routes uses sanctum
+│   └── Services/
+│       └── FirebaseNotificationService.php  ← FCM multicast w/ chunking
+├── config/
+│   ├── firebase.php        ← kreait/laravel-firebase config (new)
+│   ├── mobile.php          ← OTP TTL, demo creds, register URLs (new)
+│   └── broadcasting.php    ← added 'reverb' connection
+├── database/migrations/    ← 39 new (see §21)
+├── routes/
+│   ├── api.php             ← mobile routes lines ~937-1114; admin ported 1123-end
+│   └── channels.php        ← private chat.{roomId} channel auth
+└── tests/Feature/          ← 17 new feature tests
+                              (AppConfig, Chat, Conference, MediaCenter,
+                               MediaImage, MediaVideo, Notification,
+                               Publications, RoomBooking, SessionFeedback,
+                               Sessions, Speakers, Workshops, ...)
+</div>
+
+<p><strong>Reading order for a new dev</strong> (≈ 2 hours):</p>
+<ol>
+  <li><code>routes/api.php</code> lines 937-1230 — see all mobile + ported admin routes in one pass.</li>
+  <li><code>app/Http/Resources/Mobile/*</code> — these define the wire format Flutter consumes.</li>
+  <li>Pick a feature (e.g. F9 rooms) → read <code>MobileRoomController.php</code> + <code>MeetingRoom.php</code> + <code>MeetingRoomSlot.php</code> + the 4 <code>meeting_room*</code> migrations.</li>
+  <li><code>app/Services/FirebaseNotificationService.php</code> — single point for all FCM sends.</li>
+  <li><code>app/Events/MessageSent.php</code> + <code>routes/channels.php</code> — Reverb channel + auth.</li>
+  <li><code>tests/Feature/*</code> — best living spec for expected request/response shapes.</li>
+</ol>
+
+<h2 id="auth">4. F1 — Identity / OTP login <span class="pill new">New</span></h2>
+
+<h3>Endpoints</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/identity/check-email</td><td><span class="pill public">public</span></td><td>throttled <code>sensitive-api</code>; sends OTP if guest is <code>Accepted</code> / <code>Invited</code></td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/identity/verify-otp</td><td><span class="pill public">public</span></td><td>returns <code>{ user, token }</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/identity/register</td><td><span class="pill public">public</span></td><td>302 → <code>MOBILE_REGISTER_URL</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/identity/register-with-code</td><td><span class="pill public">public</span></td><td>302 → <code>MOBILE_REGISTER_WITH_CODE_URL</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/identity/logout</td><td><span class="pill auth">sanctum</span></td><td>revokes current access token only (not all)</td></tr>
+  </tbody>
+</table>
+
+<h3>Request / response — happy path</h3>
+
+<h4>1. check-email</h4>
+<pre><span class="c"># request</span>
+POST /api/mobile/identity/check-email
+Content-Type: application/json
+Accept: application/json
+
+{ <span class="k">"email"</span>: <span class="s">"jane@example.com"</span> }
+
+<span class="c"># 200 OK</span>
+{ <span class="k">"hasError"</span>: false, <span class="k">"OTPSent"</span>: true, <span class="k">"message"</span>: <span class="s">"OTP sent to your email"</span> }</pre>
+
+<h4>2. verify-otp</h4>
+<pre><span class="c"># request</span>
+POST /api/mobile/identity/verify-otp
+Content-Type: application/json
+
+{ <span class="k">"email"</span>: <span class="s">"jane@example.com"</span>, <span class="k">"otp"</span>: <span class="s">"123456"</span> }
+
+<span class="c"># 200 OK — store token + hydrate UI</span>
+{
+  <span class="k">"user"</span>: {
+    <span class="k">"id"</span>: <span class="s">"uuid"</span>,
+    <span class="k">"name"</span>: <span class="s">"Jane Doe"</span>,
+    <span class="k">"first_name"</span>: <span class="s">"Jane"</span>,
+    <span class="k">"last_name"</span>: <span class="s">"Doe"</span>,
+    <span class="k">"email"</span>: <span class="s">"jane@example.com"</span>,
+    <span class="k">"phone"</span>: <span class="s">"+9665..."</span>,
+    <span class="k">"avatar"</span>: <span class="s">"https://.../personal_image/xxx.jpg"</span>,
+    <span class="k">"role"</span>: <span class="s">"speaker"</span>,         <span class="c">// or "attendee"</span>
+    <span class="k">"category"</span>: <span class="s">"speakers"</span>,
+    <span class="k">"status"</span>: <span class="s">"accepted"</span>,       <span class="c">// or "invited"</span>
+    <span class="k">"company"</span>: <span class="s">"Acme"</span>,
+    <span class="k">"job_title"</span>: <span class="s">"Director"</span>,
+    <span class="k">"isSpeaker"</span>: true,
+    <span class="k">"interests"</span>: [],
+    <span class="k">"createdAt"</span>: <span class="s">"..."</span>,
+    <span class="k">"updatedAt"</span>: <span class="s">"..."</span>
+  },
+  <span class="k">"token"</span>: <span class="s">"1|xxxxxxxxxxxxxxxxxxxxxxx"</span>
+}</pre>
+
+<h3>Error responses</h3>
+<table>
+  <thead><tr><th>HTTP</th><th>Body</th><th>Trigger</th></tr></thead>
+  <tbody>
+    <tr><td>400</td><td><code>{ hasError: true, message: "Invalid email address" }</code></td><td>email fails validation</td></tr>
+    <tr><td>400</td><td><code>{ hasError: true, message: "This email is not registered…", registerURL: "..." }</code></td><td>guest missing, OR a deletion request exists (intentional stealth)</td></tr>
+    <tr><td>400</td><td><code>{ hasError: true, message: "Your application is pending approval…" }</code></td><td>guest status ≠ Accepted/Invited</td></tr>
+    <tr><td>400</td><td><code>{ message: "Email and OTP are required" }</code></td><td>verify-otp missing fields</td></tr>
+    <tr><td>400</td><td><code>{ message: "Invalid OTP" }</code></td><td>wrong OTP or no row in <code>email_verifications</code></td></tr>
+    <tr><td>400</td><td><code>{ message: "OTP expired" }</code></td><td><code>MOBILE_OTP_EXPIRY_MINUTES</code> (default 5) passed</td></tr>
+    <tr><td>429</td><td><code>{ message: "Too many attempts…" }</code></td><td><code>MOBILE_OTP_MAX_ATTEMPTS</code> (default 5) reached</td></tr>
+    <tr><td>404</td><td><code>{ message: "User not found" }</code></td><td>verify-otp for unknown email</td></tr>
+  </tbody>
+</table>
+
+<h3>OTP rules &amp; lifecycle</h3>
+<ul>
+  <li>6-digit numeric, generated with <code>rand(100000, 999999)</code> — <strong>not cryptographically random</strong> (acceptable per spec; OTP is short-lived + rate-limited).</li>
+  <li><code>email_verifications</code> table holds one row per email (upsert on each <code>check-email</code> call). Both wrong OTP and successful verify clear or update the row.</li>
+  <li>Sanctum token TTL: <code>MOBILE_TOKEN_EXPIRY_DAYS</code> (default <strong>30 days</strong>), per-token expiry via <code>createToken('mobile', ['*'], now()-&gt;addDays(...))</code>.</li>
+  <li>OTP delivered by <code>GuestOtpMailable</code> (Mailtrap in testing, prod uses configured SMTP).</li>
+</ul>
+
+<h3>Edge cases / gotchas</h3>
+<div class="callout">
+  <ul style="margin: 0;">
+    <li><strong>Deletion stealth</strong>: a guest who has filed <code>delete-account</code> returns the same "not registered" 400 as if they never existed. Mobile must NOT special-case it.</li>
+    <li><strong>OTP attempts counter</strong>: a wrong OTP <em>increments</em> attempts but does NOT delete the row. Once threshold is hit, only a fresh <code>check-email</code> resets it (because <code>updateOrInsert</code> resets <code>attempts</code> to 0).</li>
+    <li><strong>Demo account bypass</strong> (§7) skips the entire OTP flow — be sure to not log/store the literal demo OTP.</li>
+    <li><strong>Throttle</strong>: <code>sensitive-api</code> rate limit applies to <code>check-email</code> + <code>verify-otp</code> — bursty retries will return 429 from Laravel's throttler (no JSON body).</li>
+    <li><strong>Token does NOT auto-refresh</strong>: when 30-day TTL hits, the next call returns 401. Mobile must catch 401 and route to the OTP screen.</li>
+  </ul>
+</div>
+
+<h3>Code &amp; files</h3>
+<ul>
+  <li><code>app/Http/Controllers/MobileAuthController.php</code> (lines 21-251) — all 5 endpoints.</li>
+  <li><code>config/mobile.php</code> — env-driven knobs (OTP TTL, max attempts, token TTL, demo creds).</li>
+  <li><code>app/Mail/GuestOtpMailable.php</code> — locale-aware OTP email.</li>
+  <li><code>tests/Feature/MobileAuthTest.php</code> (510 lines) — full coverage including throttle, deletion stealth, demo bypass.</li>
+</ul>
+
+<h2 id="device-tokens">5. F1b — Device token registration (FCM / APNs / HMS) <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Body</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="method m-post">POST</td>
+      <td class="path">/api/mobile/identity/device-tokens</td>
+      <td><code>{ token: string, platform?: "fcm" | "apns" | "hms" }</code></td>
+      <td>idempotent on <code>(guest_id, token)</code> (unique constraint); <code>platform</code> defaults to <code>"fcm"</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Why &amp; when mobile must call this</h3>
+<ul>
+  <li>Right after a successful <code>verify-otp</code> (or <code>demo-otp</code>) so push starts working immediately.</li>
+  <li>On every FCM/APNs token refresh callback (token can rotate at any time).</li>
+  <li>After the user grants OS push permission for the first time.</li>
+  <li>On logout: <strong>do NOT delete the token server-side</strong> — the table is global per guest, deletion happens automatically when FCM reports <code>UNREGISTERED</code> (handled by <code>FirebaseNotificationService::isUnregistered</code>). If the user logs in again on the same device, the unique constraint makes re-upsert a no-op.</li>
+</ul>
+
+<h3>Request / response</h3>
+<pre><span class="c"># request</span>
+POST /api/mobile/identity/device-tokens
+Authorization: Bearer 1|xxx
+{
+  <span class="k">"token"</span>: <span class="s">"eYf...fcm_token"</span>,
+  <span class="k">"platform"</span>: <span class="s">"fcm"</span>
+}
+
+<span class="c"># 200 OK</span>
+{
+  <span class="k">"message"</span>: <span class="s">"Device token registered successfully."</span>,
+  <span class="k">"user"</span>: { <span class="c">… GuestMobileResource …</span> }
+}</pre>
+
+<div class="callout">
+  <strong>If this call is missed</strong>, the user receives <strong>no push notifications</strong> for chat, room booking, or admin notifications — the rest of the app continues to work, so this is silent failure on the surface. Add it to the post-login critical path.
+</div>
+
+<h3>Code &amp; files</h3>
+<ul>
+  <li><code>app/Http/Controllers/MobileAuthController.php::registerDeviceToken</code> (line 259).</li>
+  <li><code>app/Models/DeviceToken.php</code> — UUID PK, foreign to guests, cascade delete, unique on <code>(guest_id, token)</code>.</li>
+  <li>Migration: <code>2026_04_21_000001_create_device_tokens_table.php</code>.</li>
+</ul>
+
+<h2 id="account-deletion">6. F21 — Account deletion (Apple Review) <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="method m-get">GET</td>
+      <td class="path">/api/mobile/identity/delete-account</td>
+      <td>
+        Inserts row in <code>account_deletion_requests</code>,
+        <strong>revokes EVERY Sanctum token</strong> for the guest (all devices logged out),
+        and invalidates any pending OTP.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Response</h3>
+<pre>{ <span class="k">"message"</span>: <span class="s">"Account deletion requested. You have been logged out."</span> }</pre>
+
+<h3>What happens next (server side)</h3>
+<ol>
+  <li>Future <code>check-email</code> calls return the "not registered" message (stealth — Apple compliance).</li>
+  <li>Admin sees the request in <code>/admin/account-deletion-requests</code> and hard-deletes the guest row.</li>
+  <li>FK <code>guest_id</code> on <code>device_tokens</code>, chat pivots, registrations etc. cascade-delete with the guest.</li>
+</ol>
+
+<div class="callout">
+  <strong>Mobile UX requirements</strong> (Apple Review):
+  <ul style="margin: 4px 0 0 0;">
+    <li>Reachable from Settings within 1-2 taps.</li>
+    <li>Gated behind <code>features.delete_account</code> from app-config (§8).</li>
+    <li>Confirmation dialog must use the word "permanent" or "irreversible" and a destructive (red) CTA.</li>
+    <li>On 200 response, clear all local state (token, cache, settings) and route to the login screen.</li>
+  </ul>
+</div>
+
+<h2 id="demo-account">7. F1c — App Review demo bypass <span class="pill new">New</span></h2>
+
+<p>
+  Two env vars enable a hard-coded credential pair so Apple Review can log in
+  without our team actually issuing OTPs. When both are set, <code>check-email</code>
+  returns success without sending mail, and <code>verify-otp</code> accepts the
+  literal <code>MOBILE_DEMO_OTP</code>.
+</p>
+
+<pre>MOBILE_DEMO_EMAIL=demo@reviewer.example
+MOBILE_DEMO_OTP=246810</pre>
+
+<ul>
+  <li>The matching guest <strong>must already exist</strong> in DB with status Accepted/Invited.</li>
+  <li>Leave both blank to disable in prod once review passes.</li>
+  <li>Implementation: <code>MobileAuthController::checkEmail</code> lines 68-77 and <code>verifyOtp</code> lines 128-140 — case-insensitive email match (<code>strcasecmp</code>).</li>
+  <li>Mobile doesn't need to change anything — the bypass is server-side only.</li>
+</ul>
+
+<h2 id="app-config">8. F5 — App config &amp; white-label theme <span class="pill new">New</span> <span class="pill public">public</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/app-config/version</td><td>cheap poll → <code>{ version: "abc123..." }</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/app-config</td><td>full themed payload (both EN+AR)</td></tr>
+  </tbody>
+</table>
+
+<h3>Lifecycle</h3>
+<ol>
+  <li>Admin saves Conference → <code>AdminConferenceController::createOrUpdate</code> regenerates a <code>config_version = Str::random(16)</code>, then calls <code>Cache::forget('app_config')</code> and <code>Cache::forget('app_config_version')</code>.</li>
+  <li>Mobile polls <code>/app-config/version</code> on app start / resume / interval.</li>
+  <li>If returned <code>version</code> != cached one, mobile fetches <code>/app-config</code> and stores both.</li>
+  <li>Server caches both endpoints <strong>forever</strong> until the next admin save busts them.</li>
+</ol>
+
+<h3>Full payload shape</h3>
+<pre>{
+  <span class="k">"version"</span>: <span class="s">"16-char-random"</span>,
+  <span class="k">"theme"</span>: {
+    <span class="k">"surfaces"</span>:  { page_background, surface_color, card_secondary, surface_light, navigation_bar, input_background },
+    <span class="k">"brand"</span>:     { accent_color, highlight_color, active_color, gradient_start, gradient_end,
+                   timer_background, timer_border_start, timer_border_end, timer_label_color },
+    <span class="k">"buttons"</span>:   { button_background, button_border },
+    <span class="k">"text"</span>:      { text_primary, text_secondary, icon_color },
+    <span class="k">"borders"</span>:   { card_border, input_border },
+    <span class="k">"status"</span>:    { error_color, warning_color, pending_color },
+    <span class="k">"fonts"</span>:     { primary },
+    <span class="k">"logo"</span>:      { url }
+  },
+  <span class="k">"conference"</span>:  { name_en, name_ar, start_date, end_date, location_en, location_ar,
+                   location_url, hashtag, video_url, sessions_video_url },
+  <span class="k">"content"</span>:     { app_name_en, app_name_ar, welcome_message_en, welcome_message_ar,
+                   about_en, about_ar, terms_url, privacy_url, registration_url },
+  <span class="k">"features"</span>:    { speakers, programs, my_agenda, attendees, chat, room_booking,
+                   media_center, publications, partners, venue, notifications,
+                   survey, qr_scanner, delete_account },
+  <span class="k">"feature_labels"</span>: { },   <span class="c">// ALWAYS object, never []</span>
+  <span class="k">"feature_icons"</span>:  { },   <span class="c">// URLs already resolved; ALWAYS object</span>
+  <span class="k">"navigation"</span>:     { },   <span class="c">// ALWAYS object</span>
+  <span class="k">"links"</span>:    { twitter, instagram, linkedin, youtube, facebook, tiktok, website,
+              support_email, support_phone },
+  <span class="k">"defaults"</span>: { avatar_url, placeholder_image_url, splash_background_url,
+                home_banner_url, speaker_pattern_url }
+}</pre>
+
+<h3>Color format</h3>
+<p>
+  All theme colors are <strong>hex strings</strong> of length 7 (<code>#RRGGBB</code>)
+  or 9 (<code>#RRGGBBAA</code>). Regex enforced server-side:
+  <code>/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/</code>.
+  <code>null</code> means "use built-in fallback".
+</p>
+
+<h3>Feature flags</h3>
+<p>
+  All 14 flags are nullable booleans. <code>null</code> = "not configured yet"
+  — mobile should treat as <strong>off</strong>. The flags are properly cast to
+  PHP booleans (<code>protected $casts</code> on <code>Conference.php</code>),
+  so Flutter receives JSON <code>true / false / null</code>, never <code>0 / 1</code>.
+</p>
+
+<h3>Edge cases / gotchas</h3>
+<div class="danger">
+  <strong>JSON-object vs array contract.</strong> <code>feature_labels</code>,
+  <code>feature_icons</code> and <code>navigation</code> MUST always serialize
+  as JSON objects (<code>{}</code>). Backend has two safeguards:
+  <ol style="margin: 4px 0 0 0;">
+    <li><code>AdminConferenceController</code> validates with <code>$mapShapeRule</code> and rejects indexed arrays with 422.</li>
+    <li><code>AppConfigController</code> casts empties back to <code>(object)[]</code>.</li>
+  </ol>
+  Flutter must deserialize as <code>Map</code>. If you ever see <code>[]</code>, something bypassed the controller — please file a bug.
+</div>
+
+<h3>Recommended client flow</h3>
+<ol>
+  <li>On app start (cold) and on resume → call <code>/app-config/version</code>.</li>
+  <li>If <code>version</code> != cached → fetch <code>/app-config</code> and store both.</li>
+  <li>Drive every feature toggle and theme color off the cached payload — never hard-code.</li>
+  <li>Suggested polling cadence: app start + resume + every 30 min while foreground.</li>
+</ol>
+
+<h3>Code &amp; files</h3>
+<ul>
+  <li><code>app/Http/Controllers/AppConfigController.php</code> — public, cached.</li>
+  <li><code>app/Http/Controllers/AdminConferenceController.php</code> — singleton CRUD + image upload.</li>
+  <li><code>app/Models/Conference.php</code> — 70+ fillable columns, casts.</li>
+  <li>Migration: <code>2026_05_01_000001_create_conferences_table.php</code> (130 lines).</li>
+  <li><code>2026_05_16_000002_add_feature_delete_account_to_conferences_table.php</code> — added later.</li>
+  <li><code>tests/Feature/AppConfigTest.php</code> (287 lines) — verifies caching, busting, and the object-vs-array contract.</li>
+</ul>
+
+<h2 id="programs">9. F2 — Event days / programs <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/event-days/fetch</td><td>response wrapper key is <code>"programs"</code> (Flutter contract)</td></tr>
+  </tbody>
+</table>
+
+<h3>Response shape</h3>
+<pre>{
+  <span class="k">"programs"</span>: [
+    {
+      <span class="k">"id"</span>: <span class="s">"uuid"</span>,
+      <span class="k">"name"</span>: <span class="s">"Day 1 - Plenary"</span>,
+      <span class="k">"icon"</span>: <span class="s">"icon-key-or-url"</span>,
+      <span class="k">"date"</span>: <span class="s">"2026-06-10"</span>,
+      <span class="k">"labelEn"</span>: <span class="s">"Day 1"</span>,
+      <span class="k">"labelAr"</span>: <span class="s">"اليوم 1"</span>,
+      <span class="k">"createdAt"</span>: <span class="s">"..."</span>
+    }
+  ]
+}</pre>
+
+<p class="footnote">
+  Sort: <code>date IS NULL, date ASC, created_at ASC</code>. Days without a date appear last.
+  No pagination — Flutter loads all event days at once. Used as a category /
+  filter for sessions and workshops.
+</p>
+
+<h2 id="speakers">10. F3 — Speakers <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/speakers</td><td>all active speakers, no pagination</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/speakers/{id}</td><td>404 if not found or status ≠ active</td></tr>
+  </tbody>
+</table>
+
+<h3>List response</h3>
+<pre>{
+  <span class="k">"currentPage"</span>: 1,
+  <span class="k">"totalPages"</span>: 1,
+  <span class="k">"totalSpeakers"</span>: 42,
+  <span class="k">"speakers"</span>: [
+    {
+      <span class="k">"id"</span>: <span class="s">"uuid"</span>,
+      <span class="k">"name"</span>: <span class="s">"Localized name"</span>,
+      <span class="k">"subtitle"</span>: <span class="s">"Localized job title"</span>,
+      <span class="k">"company"</span>: <span class="s">"Localized company"</span>,    <span class="c">// new field</span>
+      <span class="k">"bio"</span>: <span class="s">"Localized bio"</span>,             <span class="c">// new field</span>
+      <span class="k">"country"</span>: <span class="s">"Localized country"</span>,     <span class="c">// new field</span>
+      <span class="k">"avatar"</span>: <span class="s">"https://.../speakers/photo/xxx.jpg"</span>,
+      <span class="k">"socialMedia"</span>: null,
+      <span class="k">"sessions"</span>: []     <span class="c">// only populated on detail with-relation</span>
+    }
+  ]
+}</pre>
+
+<h3>Detail wraps with <code>{ "speaker": ... }</code></h3>
+<pre>{ <span class="k">"speaker"</span>: { <span class="c">… same shape … </span> } }</pre>
+
+<p class="footnote">
+  New columns: <code>bio_en</code>, <code>bio_ar</code>, <code>country_en</code>,
+  <code>country_ar</code> (migration <code>2026_04_21_000004</code>),
+  <code>company_en</code>, <code>company_ar</code>
+  (migration <code>2026_04_22_000005</code>).
+</p>
+
+<h2 id="sessions">11. F4 — Sessions + favorites + feedback <span class="pill new">New</span></h2>
+
+<h3>Endpoints</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/sessions</td><td>filters: <code>?date</code>, <code>?speakerId</code>, <code>?programId</code>; <code>?limit=100&amp;page=1</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/sessions/search</td><td><code>?keyword=</code> matches <code>name_en/ar + description_en/ar</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/sessions/favorite</td><td>current guest's favorites</td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/sessions/favorite</td><td><code>{ sessionId: uuid, action: "add" | "remove" }</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/sessions/{id}</td><td>flat JSON (no wrapper)</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/sessions/{id}/feedback</td><td><code>{ data: feedback | null }</code></td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/sessions/{id}/feedback</td><td>write-once: 409 if already submitted</td></tr>
+  </tbody>
+</table>
+
+<h3>Detail shape (<code>SessionDetailResource</code>)</h3>
+<pre>{
+  <span class="k">"id"</span>, <span class="k">"name"</span>, <span class="k">"date"</span>, <span class="k">"duration"</span>, <span class="k">"address"</span>, <span class="k">"type"</span>, <span class="k">"description"</span>,
+  <span class="k">"program"</span>:    { id, name, icon } | null,
+  <span class="k">"speakers"</span>:   [ { id, name, subtitle, avatar } ],
+  <span class="k">"isFavorite"</span>: bool,
+  <span class="k">"hasSubmittedFeedback"</span>: bool,
+  <span class="k">"interestedUsers"</span>: { avatars: [up to 5 URLs], total: int },
+  <span class="k">"media"</span>:      [ { name, type, url } ]
+}</pre>
+
+<h3>Favorite POST</h3>
+<pre><span class="c"># add</span>
+POST /api/mobile/sessions/favorite
+{ <span class="k">"sessionId"</span>: <span class="s">"uuid"</span>, <span class="k">"action"</span>: <span class="s">"add"</span> }
+<span class="c"># → 200 { "message": "Session added to favorites" }</span>
+
+<span class="c"># remove (idempotent — detach() is silent if absent)</span>
+POST /api/mobile/sessions/favorite
+{ <span class="k">"sessionId"</span>: <span class="s">"uuid"</span>, <span class="k">"action"</span>: <span class="s">"remove"</span> }</pre>
+
+<h3>Feedback POST</h3>
+<pre>POST /api/mobile/sessions/{id}/feedback
+{
+  <span class="k">"first_name"</span>: <span class="s">"Jane"</span>,
+  <span class="k">"last_name"</span>:  <span class="s">"Doe"</span>,
+  <span class="k">"email"</span>:      <span class="s">"jane@example.com"</span>,
+  <span class="k">"feedback"</span>:   <span class="s">"Loved it!"</span>     <span class="c">// max 2000 chars</span>
+}
+
+<span class="c"># 201 success</span>
+{ <span class="k">"message"</span>: <span class="s">"Feedback submitted"</span>, <span class="k">"data"</span>: { … } }
+
+<span class="c"># 409 already submitted</span>
+{ <span class="k">"message"</span>: <span class="s">"Feedback already submitted"</span>,
+  <span class="k">"error"</span>: <span class="s">"feedback_already_submitted"</span> }</pre>
+
+<h3>Edge cases / gotchas</h3>
+<ul>
+  <li>Detail's <code>isFavorite</code> is computed from the loaded <code>interestedUsers</code> collection — if you query a session with a different relation set, the flag may be wrong. Always use the documented endpoint.</li>
+  <li><code>hasSubmittedFeedback</code> uses <code>withExists()</code> — it's accurate even if relation is not eager-loaded.</li>
+  <li>Search with empty <code>keyword</code> returns an empty list + zeros (not an error).</li>
+  <li>Filter params are independent and combine with AND.</li>
+</ul>
+
+<h2 id="workshops">12. F18 — Workshops (capacity-aware) + feedback <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/workshops</td><td>same filters as sessions</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/workshops/search</td><td><code>?keyword=</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/workshops/registered</td><td>guest's registered workshops</td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/workshops/{id}/register</td><td>capacity-aware, transactional</td></tr>
+    <tr><td class="method m-delete">DELETE</td><td class="path">/api/mobile/workshops/{id}/register</td><td>idempotent → 204</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/workshops/{id}</td><td>flat JSON</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/workshops/{id}/feedback</td><td>existing feedback</td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/workshops/{id}/feedback</td><td>write-once: 409 if duplicate</td></tr>
+  </tbody>
+</table>
+
+<h3>Detail shape (<code>WorkshopDetailResource</code>)</h3>
+<pre>{
+  <span class="k">"id"</span>, <span class="k">"name"</span>, <span class="k">"date"</span>, <span class="k">"duration"</span>, <span class="k">"address"</span>, <span class="k">"type"</span>, <span class="k">"description"</span>,
+  <span class="k">"capacity"</span>:        int,
+  <span class="k">"registeredCount"</span>: int,
+  <span class="k">"seatsRemaining"</span>:  int,
+  <span class="k">"isFull"</span>:          bool,
+  <span class="k">"isRegistered"</span>:    bool,
+  <span class="k">"hasSubmittedFeedback"</span>: bool,
+  <span class="k">"floorMapUrl"</span>: string | null,
+  <span class="k">"program"</span>: { id, name, icon } | null,
+  <span class="k">"speakers"</span>: [ { id, name, subtitle, avatar } ],
+  <span class="k">"registeredGuests"</span>: { avatars: [up to 5], total: int }
+}</pre>
+
+<h3>Register flow + responses</h3>
+<pre><span class="c"># request</span>
+POST /api/mobile/workshops/{id}/register
+
+<span class="c"># 200 newly registered</span>
+{ <span class="k">"message"</span>: <span class="s">"Registered successfully"</span>, <span class="k">"workshop"</span>: { …detail… } }
+
+<span class="c"># 200 idempotent re-register (already in)</span>
+{ <span class="k">"message"</span>: <span class="s">"Already registered"</span>, <span class="k">"workshop"</span>: { … } }
+
+<span class="c"># 409 capacity reached</span>
+{ <span class="k">"message"</span>: <span class="s">"Workshop is full"</span>, <span class="k">"error"</span>: <span class="s">"workshop_full"</span> }
+
+<span class="c"># 404 not found</span>
+{ <span class="k">"message"</span>: <span class="s">"Workshop not found"</span> }
+
+<span class="c"># 500 transaction failed (rare)</span>
+{ <span class="k">"message"</span>: <span class="s">"Registration failed"</span> }</pre>
+
+<div class="callout">
+  <strong>Race-safe registration.</strong> <code>MobileWorkshopController::register</code>
+  wraps the capacity check in <code>DB::transaction()</code> with
+  <code>Workshop::lockForUpdate()</code>. The mobile client does NOT need a
+  client-side seat guard — just handle the 409.
+</div>
+
+<h3>Cancel</h3>
+<pre>DELETE /api/mobile/workshops/{id}/register
+<span class="c"># 204 No Content (whether the registration existed or not)</span></pre>
+
+<p class="footnote">
+  Cancel uses a plain DELETE (no transaction) since the unique
+  <code>(workshop_id, guest_id)</code> constraint guarantees at most one row
+  per guest. Idempotent by design.
+</p>
+
+<h2 id="attendees">13. F10 — Attendee directory <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/attendees</td><td><code>?per_page=1000</code> default; <code>?search=</code> matches name (first+last) OR email</td></tr>
+  </tbody>
+</table>
+
+<h3>Response</h3>
+<pre>{
+  <span class="k">"attendees"</span>: [
+    { <span class="k">"id"</span>, <span class="k">"name"</span>, <span class="k">"email"</span>, <span class="k">"avatar"</span>, <span class="k">"job_title"</span>, <span class="k">"company"</span> }
+  ],
+  <span class="k">"currentPage"</span>: int,
+  <span class="k">"totalPages"</span>: int,
+  <span class="k">"totalItems"</span>: int
+}</pre>
+
+<p class="footnote">
+  Only guests with <code>guest_status.name_en</code> in (<code>accepted</code>,
+  <code>invited</code>) are exposed. Ordered by <code>created_at DESC</code>.
+  Default 1000 per page lets Flutter cache the entire directory client-side and
+  do its own filtering.
+</p>
+
+<h2 id="sponsors">14. F5b — Sponsors <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/sponsors</td><td>active sponsors, ordered by <code>label.order, sponsor.order, created_at</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Response</h3>
+<pre>{
+  <span class="k">"sponsors"</span>: [
+    {
+      <span class="k">"name"</span>:   <span class="s">"Localized name"</span>,
+      <span class="k">"icon"</span>:   <span class="s">"https://.../sponsors/logo/xxx.png"</span> | null,
+      <span class="k">"type"</span>:   <span class="s">"Strategic Partner"</span> | null,
+      <span class="k">"typeId"</span>: <span class="s">"sponsor-label-uuid"</span> | null
+    }
+  ]
+}</pre>
+
+<div class="callout">
+  <strong>Breaking from Version A</strong>: sponsors are no longer embedded
+  inside the conference / app-config payload. Mobile must drop any old
+  sponsors-from-config reads and switch to this endpoint.
+</div>
+
+<h2 id="publications">15. F13 — Publications <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/publications</td><td><strong>flat array</strong> (no envelope) — Flutter <code>MediaResponse</code> contract</td></tr>
+  </tbody>
+</table>
+
+<h3>Item shape (<code>PublicationResource</code>)</h3>
+<pre>[
+  {
+    <span class="k">"id"</span>:          <span class="s">"uuid"</span>,
+    <span class="k">"title"</span>:       <span class="s">"Localized title"</span>,
+    <span class="k">"description"</span>: <span class="s">"Localized description"</span>,
+    <span class="k">"fileUrl"</span>:     <span class="s">"https://.../publications/xxx.pdf"</span>,
+    <span class="k">"fileType"</span>:    <span class="s">"pdf"</span>,            <span class="c">// or docx, etc</span>
+    <span class="k">"order"</span>:       int,
+    <span class="k">"uploadedBy"</span>:  { id, name, email } | null,
+    <span class="k">"createdAt"</span>:   <span class="s">"..."</span>,
+    <span class="k">"updatedAt"</span>:   <span class="s">"..."</span>
+  }
+]</pre>
+
+<p class="footnote">Sort: <code>order ASC, created_at DESC</code> (matches speakers/sponsors).</p>
+
+<h2 id="media-center">16. F12 — Media Center <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/media-center</td><td><strong>grouped object</strong>, not a flat array</td></tr>
+  </tbody>
+</table>
+
+<h3>Response</h3>
+<pre>{
+  <span class="k">"videos"</span>: [
+    { <span class="k">"id"</span>, <span class="k">"title"</span>, <span class="k">"description"</span>, <span class="k">"url"</span>, <span class="k">"thumbnail"</span>, <span class="k">"sortOrder"</span>, … }
+  ],
+  <span class="k">"documents"</span>: [
+    { <span class="k">"id"</span>, <span class="k">"title"</span>, <span class="k">"description"</span>, <span class="k">"fileUrl"</span>, <span class="k">"fileType"</span>, <span class="k">"thumbnailUrl"</span>, <span class="k">"sortOrder"</span>,
+      <span class="k">"uploadedBy"</span>: { id, name, email } | null, … }
+  ],
+  <span class="k">"images"</span>: [
+    { <span class="k">"id"</span>, <span class="k">"title"</span>, <span class="k">"url"</span>, <span class="k">"sortOrder"</span>, … }
+  ]
+}</pre>
+
+<p class="footnote">
+  Each section sorted by <code>sort_order ASC, created_at DESC</code>.
+  Image admin upload dropped the dimension restriction (commit <code>8efbe6a</code>) —
+  any image (jpg / png / webp) is accepted.
+</p>
+
+<h2 id="qr">17. F14 — QR scanner → guest resolve <span class="pill new">New</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Body</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/qr</td><td><code>{ qrCode: string ≤ 255 }</code></td><td>resolves to a guest profile</td></tr>
+  </tbody>
+</table>
+
+<h3>Lookup priority</h3>
+<ol>
+  <li><strong>Badge <code>registration_number</code></strong> (most common — what the printed badge encodes).</li>
+  <li><strong>Sanctum personal access token</strong> — only matched when the token's <code>tokenable_type</code> is <code>Guest</code> (admin tokens are ignored).</li>
+</ol>
+
+<h3>Response</h3>
+<pre><span class="c"># 200</span>
+{
+  <span class="k">"user"</span>: {
+    <span class="k">"id"</span>, <span class="k">"name"</span>, <span class="k">"email"</span>, <span class="k">"phone"</span>, <span class="k">"avatar"</span>, <span class="k">"job_title"</span>,
+    <span class="k">"qr_code"</span>: <span class="s">"registration_number"</span>,
+    <span class="k">"company"</span>,
+    <span class="k">"role"</span>: <span class="s">"speakers"</span> | <span class="s">"attendee"</span> | …       <span class="c">// category.slug</span>
+  }
+}
+
+<span class="c"># 404</span>
+{ <span class="k">"message"</span>: <span class="s">"User not found"</span> }</pre>
+
+<h2 id="meeting-rooms">18. F9 — Meeting-room booking <span class="pill new">New</span></h2>
+
+<h3>Endpoints</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/rooms</td><td>3 variants — see below</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/rooms/bookings</td><td>slots where current guest is host OR in invited <code>guests</code> pivot</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/rooms/users</td><td><code>?name=&amp;page=&amp;limit=10</code> — guest search for invites</td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/rooms/book</td><td><code>{ roomId, slotId, guests?: uuid[] }</code> → 201 <code>MobileSlotResource</code></td></tr>
+    <tr><td class="method m-delete">DELETE</td><td class="path">/api/mobile/rooms/bookings/{slotId}</td><td>host OR invited guest may cancel; past blocked</td></tr>
+    <tr><td class="method m-patch">PATCH</td><td class="path">/api/mobile/rooms/bookings/{slotId}</td><td><strong>host-only</strong>; swap to another slot in same room + same date</td></tr>
+  </tbody>
+</table>
+
+<h3>List variants</h3>
+<ul>
+  <li><strong>No params</strong> → flat array of rooms with <em>all</em> slots, sorted by <code>order, name</code>.</li>
+  <li><strong><code>?date=YYYY-MM-DD</code></strong> → flat array of rooms that have that date in <code>available_dates</code>, slots filtered to that date only.</li>
+  <li><strong><code>?grouped=true</code></strong> → <code>[ { date, rooms: [...] } ]</code>, grouped by date, only rooms that have slots on each date.</li>
+</ul>
+
+<h3>Room visibility — IMPORTANT</h3>
+<div class="danger">
+  <strong><code>MeetingRoom::isGuestAllowed</code> defensive default.</strong>
+  An <em>empty</em> <code>allowedCategories</code> = <strong>nobody</strong>
+  allowed. Freshly created rooms are <strong>hidden</strong> until an admin
+  attaches at least one category. This is intentional but surprising — if
+  rooms don't appear for a guest, the most common cause is the admin forgot
+  to grant the category.
+</div>
+
+<h3>Slot booking — race safety</h3>
+<p>
+  <code>MobileRoomController::book</code> uses an atomic single-statement
+  UPDATE: <code>WHERE id = ? AND is_booked = false</code>. Whichever request
+  matches 1 row wins; the rest match 0 rows and get a 400. No transaction
+  needed; no deadlock risk.
+</p>
+
+<pre><span class="c"># 201 success</span>
+MobileSlotResource:
+{
+  <span class="k">"id"</span>, <span class="k">"roomId"</span>, <span class="k">"date"</span>: <span class="s">"2026-06-10"</span>, <span class="k">"startTime"</span>: <span class="s">"10:00"</span>, <span class="k">"endTime"</span>: <span class="s">"10:30"</span>,
+  <span class="k">"isBooked"</span>: true,
+  <span class="k">"guests"</span>: [ { id, name, email } ],   <span class="c">// invited people</span>
+  <span class="k">"createdAt"</span>, <span class="k">"updatedAt"</span>
+}
+
+<span class="c"># 400 errors</span>
+{ <span class="k">"error"</span>: <span class="s">"Missing required fields"</span> }
+{ <span class="k">"error"</span>: <span class="s">"Room not found or inactive"</span> }    <span class="c"># 404</span>
+{ <span class="k">"error"</span>: <span class="s">"Slot not found"</span> }                  <span class="c"># 404</span>
+{ <span class="k">"error"</span>: <span class="s">"Cannot book a past slot"</span> }
+{ <span class="k">"error"</span>: <span class="s">"Slot is already booked"</span> }</pre>
+
+<h3>Edit (PATCH) constraints</h3>
+<ul>
+  <li>Caller must be the <code>booked_by</code> host.</li>
+  <li>Current slot must not be in the past.</li>
+  <li>New slot must be in the <strong>same room</strong> AND <strong>same date</strong>.</li>
+  <li>New slot must be unbooked.</li>
+  <li>On success, invited <code>guests</code> are copied to the new slot.</li>
+</ul>
+
+<h3>Cancel (DELETE)</h3>
+<ul>
+  <li>Both host AND invited guests may cancel.</li>
+  <li>Past slots → 400.</li>
+  <li>FCM notification fires to all participants except the actor.</li>
+</ul>
+
+<h3>FCM payloads fired by this module <span class="pill push">FCM</span></h3>
+<table>
+  <thead><tr><th>Event</th><th>Recipient</th><th>Title</th><th>Body</th></tr></thead>
+  <tbody>
+    <tr><td>Book</td><td>host</td><td>Room Booking</td><td>"You have successfully booked {room} on {date}."</td></tr>
+    <tr><td>Book</td><td>invited guests</td><td>Room Booking</td><td>"{host} has booked {room} on {date} and added you as a guest."</td></tr>
+    <tr><td>Cancel</td><td>all participants except actor</td><td>Booking Cancelled</td><td>"{actor} has cancelled the booking for {room} on {date} at {time}"</td></tr>
+    <tr><td>Edit</td><td>host</td><td>Booking Updated</td><td>"Your booking for {room} has been moved from {old} to {new}."</td></tr>
+    <tr><td>Edit</td><td>invited guests</td><td>Booking Updated</td><td>"{host} has moved the booking for {room} from {old} to {new}."</td></tr>
+  </tbody>
+</table>
+
+<p class="footnote">All FCM sends are wrapped in <code>try/catch</code> + logged — a Firebase outage never blocks the booking write.</p>
+
+<h3>Code &amp; files</h3>
+<ul>
+  <li><code>app/Http/Controllers/MobileRoomController.php</code> (432 lines).</li>
+  <li><code>app/Models/MeetingRoom.php</code>, <code>MeetingRoomSlot.php</code>.</li>
+  <li>Migrations: <code>2026_05_09_000001…000004</code> (rooms, slots, slot_guests pivot, categories pivot).</li>
+  <li><code>tests/Feature/RoomBookingTest.php</code> (815 lines) — race conditions, past-slot rejection, edit/cancel matrix.</li>
+</ul>
+
+<h2 id="notifications">19. F6 — In-app notifications <span class="pill new">New</span> <span class="pill push">FCM</span></h2>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="method m-get">GET</td>
+      <td class="path">/api/mobile/notifications</td>
+      <td>
+        custom wrapper (NOT Laravel paginator):
+        <code>{ notifications, totalNotifications, totalPages, currentPage }</code>;
+        params: <code>pageNumber</code> (or <code>page</code>) + <code>pageSize</code> (default 20, max 100)
+      </td>
+    </tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/notifications/mark-read</td><td>side-effecting GET; body is the literal string <code>"OK"</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/notifications/unread-count</td><td>body is a plain integer (e.g. <code>5</code>)</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/notifications/clear</td><td>deletes this guest's recipient rows only</td></tr>
+  </tbody>
+</table>
+
+<h3>Item shape</h3>
+<pre>{
+  <span class="k">"id"</span>:        <span class="s">"app_notification-uuid"</span>,
+  <span class="k">"title"</span>:     <span class="s">"..."</span>,
+  <span class="k">"message"</span>:   <span class="s">"..."</span>,
+  <span class="k">"priority"</span>:  <span class="s">"Low"</span> | <span class="s">"Medium"</span> | <span class="s">"High"</span>,
+  <span class="k">"recipients"</span>: null,
+  <span class="k">"status"</span>:    <span class="s">"Sent"</span>,
+  <span class="k">"createdAt"</span>, <span class="k">"updatedAt"</span>,
+  <span class="k">"isRead"</span>:    bool        <span class="c">// from notification_recipients.read_at</span>
+}</pre>
+
+<h3>How fan-out works (server side)</h3>
+<ol>
+  <li>Admin POSTs <code>/api/admin/notifications</code> with <code>{ title, message, priority?, category_id? }</code>.</li>
+  <li>Server creates an <code>app_notifications</code> row and resolves target guests (Accepted/Invited, optionally narrowed by <code>category_id</code>).</li>
+  <li>It sends FCM to every device-token of those guests via <code>FirebaseNotificationService::sendToTokens</code> (chunked at 500 per FCM multicast).</li>
+  <li>It bulk-inserts <code>notification_recipients</code> rows (one per guest) in chunks of 1000.</li>
+  <li>Updates the notification with <code>status = Sent</code> and <code>sent_count</code>.</li>
+</ol>
+
+<div class="danger">
+  <strong>Mobile must NOT change the verbs.</strong> All four endpoints are GET
+  by design (matches Flutter's <code>GetRequestStrategy</code> which wraps
+  these calls and parses <code>"OK"</code> / integer responses literally). The
+  body of <code>mark-read</code> and <code>clear</code> is a literal string,
+  not JSON. <code>unread-count</code> body is a literal int.
+</div>
+
+<h3>FCM payload (Android channel id)</h3>
+<pre>{
+  <span class="k">"notification"</span>: { <span class="k">"title"</span>: …, <span class="k">"body"</span>: … },
+  <span class="k">"data"</span>:    { <span class="k">"notification_id"</span>: <span class="s">"&lt;uuid&gt;"</span> },
+  <span class="k">"android"</span>: { <span class="k">"priority"</span>: <span class="s">"high"</span>,
+              <span class="k">"notification"</span>: { <span class="k">"channel_id"</span>: <span class="s">"high_importance_channel"</span> } },
+  <span class="k">"apns"</span>:    { <span class="k">"headers"</span>: { <span class="s">"apns-priority"</span>: <span class="s">"10"</span> },
+              <span class="k">"payload"</span>: { <span class="k">"aps"</span>: { <span class="k">"sound"</span>: <span class="s">"default"</span>,
+                                          <span class="k">"content-available"</span>: 1 } } }
+}</pre>
+
+<div class="callout">
+  <strong>Android 8+ channel.</strong> Mobile must create an Android channel
+  with id <code>high_importance_channel</code> at app start (importance
+  <code>IMPORTANCE_HIGH</code>), otherwise notifications won't be visible.
+</div>
+
+<h2 id="chat">20. F7 / F8 — 1-on-1 Chat <span class="pill new">New</span> <span class="pill realtime">Reverb</span> <span class="pill push">FCM</span></h2>
+
+<h3>REST</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/chat/rooms</td><td>rooms ordered by last activity; default <code>limit=1000</code></td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/chat/rooms/{roomId}/messages</td><td>side-effect: marks unread messages received in this room as read</td></tr>
+    <tr><td class="method m-post">POST</td><td class="path">/api/mobile/chat/messages</td><td><code>{ participant_id: uuid, content: string ≤ 5000 }</code>; 201 if room auto-created, 200 if reused</td></tr>
+    <tr><td class="method m-get">GET</td><td class="path">/api/mobile/chat/unread-count</td><td>total unread across all rooms</td></tr>
+  </tbody>
+</table>
+
+<h3>Room identity</h3>
+<p>
+  Room IDs are <strong>deterministic</strong>:
+  <code>ChatRoom::generateRoomId($g1, $g2) = implode('_', sort([$g1, $g2]))</code>.
+  This makes <code>findOrCreateBetween</code> safe and eliminates duplicates.
+  The mobile client can locally precompute <code>room_id</code> for any pair if
+  needed.
+</p>
+
+<h3>Send message — response shapes</h3>
+<pre><span class="c"># request</span>
+POST /api/mobile/chat/messages
+{
+  <span class="k">"participant_id"</span>: <span class="s">"uuid-of-other-guest"</span>,
+  <span class="k">"content"</span>:        <span class="s">"Hello!"</span>      <span class="c">// 1..5000 chars</span>
+}
+
+<span class="c"># 201 (new room created on first message)</span>
+<span class="c"># 200 (existing room reused)</span>
+{
+  <span class="k">"success"</span>: true,
+  <span class="k">"data"</span>: {
+    <span class="k">"roomId"</span>: <span class="s">"&lt;g1&gt;_&lt;g2&gt;"</span>,
+    <span class="k">"message"</span>: {
+      <span class="k">"id"</span>:        <span class="s">"msg-uuid"</span>,
+      <span class="k">"content"</span>:   <span class="s">"Hello!"</span>,
+      <span class="k">"sender"</span>:    { id, name, avatar, role },
+      <span class="k">"timestamp"</span>: <span class="s">"2026-05-17T11:22:33+00:00"</span>,
+      <span class="k">"read"</span>:      false
+    }
+  }
+}
+
+<span class="c"># 422 validation</span>
+{ <span class="k">"success"</span>: false, <span class="k">"message"</span>: <span class="s">"The content field is required."</span> }
+
+<span class="c"># 422 self-message</span>
+{ <span class="k">"success"</span>: false, <span class="k">"message"</span>: <span class="s">"Cannot send message to yourself"</span> }
+
+<span class="c"># 404 participant invalid (deleted / not Accepted/Invited)</span>
+{ <span class="k">"success"</span>: false, <span class="k">"message"</span>: <span class="s">"Participant not found"</span> }</pre>
+
+<h3>List rooms</h3>
+<pre>{
+  <span class="k">"success"</span>: true,
+  <span class="k">"data"</span>: {
+    <span class="k">"rooms"</span>: [
+      {
+        <span class="k">"id"</span>:           <span class="s">"chat_rooms.id (uuid)"</span>,
+        <span class="k">"roomId"</span>:       <span class="s">"&lt;g1&gt;_&lt;g2&gt;"</span>,
+        <span class="k">"participants"</span>: [ { id, name, avatar, role } ],
+        <span class="k">"lastMessage"</span>:  { id, content, sender, timestamp, read } | null,
+        <span class="k">"updatedAt"</span>:    <span class="s">"..."</span>
+      }
+    ],
+    <span class="k">"pagination"</span>: {
+      <span class="k">"currentPage"</span>: 1, <span class="k">"totalPages"</span>: 1, <span class="k">"totalRooms"</span>: 0, <span class="k">"hasMore"</span>: false
+    }
+  }
+}</pre>
+
+<h3>Messages history (with read side-effect)</h3>
+<pre>GET /api/mobile/chat/rooms/{roomId}/messages?page=1&amp;limit=1000
+
+<span class="c"># 200</span>
+{
+  <span class="k">"success"</span>: true,
+  <span class="k">"data"</span>: {
+    <span class="k">"messages"</span>: [ { id, content, sender, timestamp, read } ],
+    <span class="k">"pagination"</span>: {
+      <span class="k">"currentPage"</span>: 1, <span class="k">"totalPages"</span>: 1,
+      <span class="k">"totalMessages"</span>: 12, <span class="k">"hasMore"</span>: false
+    }
+  }
+}
+
+<span class="c"># 404 not a participant of room (or room missing)</span>
+{ <span class="k">"success"</span>: false, <span class="k">"message"</span>: <span class="s">"Chat room not found or access denied"</span> }</pre>
+
+<h3>Reverb broadcast (real-time)</h3>
+<ul>
+  <li><strong>Channel</strong>: <code>private-chat.{room_id}</code> (Pusher-compatible private channel).</li>
+  <li><strong>Event name</strong>: <code>message.sent</code> (dotted — set via <code>broadcastAs()</code>).</li>
+  <li><strong>Payload</strong>: <code>{ roomId, message: ChatMessageResource }</code> — same shape as the send-response <code>message</code>.</li>
+  <li><strong>Echo suppression</strong>: sender does NOT receive their own broadcast (<code>broadcast(...)-&gt;toOthers()</code>).</li>
+</ul>
+
+<h4>Auth endpoint for the Pusher client</h4>
+<pre>POST /broadcasting/auth
+Authorization: Bearer &lt;sanctum-token&gt;
+Content-Type: application/x-www-form-urlencoded
+
+channel_name=private-chat.&lt;room_id&gt;&amp;socket_id=&lt;socket_id&gt;</pre>
+
+<blockquote>
+  <code>app/Providers/BroadcastServiceProvider.php</code> explicitly mounts
+  <code>Broadcast::routes(['middleware' =&gt; ['auth:sanctum']])</code> instead
+  of the default <code>web</code> middleware. This is required for Flutter,
+  which has no cookie jar.
+</blockquote>
+
+<h4>Channel authorization (server side)</h4>
+<pre>// routes/channels.php
+Broadcast::channel(<span class="s">'chat.{roomId}'</span>, function ($user, string $roomId) {
+    if (! $user instanceof Guest) return false;
+    return ChatRoom::where(<span class="s">'room_id'</span>, $roomId)
+        -&gt;whereHas(<span class="s">'participants'</span>, fn ($q) =&gt; $q-&gt;where(<span class="s">'guest_id'</span>, $user-&gt;id))
+        -&gt;exists();
+});</pre>
+
+<h3>FCM push on send</h3>
+<p>
+  After persisting the message, the controller fans it out to every
+  <code>DeviceToken</code> belonging to the recipient. FCM failure is
+  non-blocking — a Firebase outage never causes the message to be lost.
+</p>
+
+<h3>Mobile integration sketch (Flutter, pusher_channels_flutter)</h3>
+<pre>final pusher = PusherChannelsFlutter.getInstance();
+await pusher.init(
+  apiKey: REVERB_APP_KEY,
+  cluster: <span class="s">''</span>,
+  useTLS: true,
+  host: <span class="s">'pif-mobile-api.registration-panel.com'</span>,
+  wsPort: 443, wssPort: 443,
+  authEndpoint: <span class="s">'https://pif-mobile-api.registration-panel.com/broadcasting/auth'</span>,
+  onAuthorizer: (channel, socketId, _) async {
+    final res = await http.post(authUrl, headers: {
+      <span class="s">'Authorization'</span>: <span class="s">'Bearer $sanctumToken'</span>,
+    }, body: { <span class="s">'channel_name'</span>: channel, <span class="s">'socket_id'</span>: socketId });
+    return jsonDecode(res.body);
+  },
+  onEvent: (e) =&gt; addMessage(jsonDecode(e.data)),
+);
+await pusher.connect();
+await pusher.subscribe(channelName: <span class="s">'private-chat.$roomId'</span>);</pre>
+
+<h3>Edge cases / gotchas</h3>
+<ul>
+  <li>The sender does NOT receive their own broadcast — they got the message back from the HTTP response. UI must immediately add the message from the response.</li>
+  <li>Marking-as-read happens when <code>/messages</code> is fetched — it is NOT triggered by receiving a broadcast. If the user is sitting on the chat screen and a new message arrives via WSS, you must either refetch <code>/messages</code> or send a read receipt yourself (none built-in yet).</li>
+  <li>Channel authorization checks <code>chat.{roomId}</code> — note the channel name in the broadcast event is <code>private-chat.{roomId}</code>; Pusher's protocol strips the <code>private-</code> prefix when calling the channel auth callback. Don't worry — both Echo and pusher_channels_flutter handle this.</li>
+  <li>Reverb server must be running (<code>php artisan reverb:start</code>) — if it isn't, the HTTP send still succeeds but no WSS event is delivered. Mobile should treat REST as the source of truth and broadcast as an optimization.</li>
+</ul>
+
+<h2 id="schema">21. Database schema overview</h2>
+
+<p>39 new migrations. Grouped by feature for quick orientation:</p>
+
+<table>
+  <thead><tr><th>Group</th><th>Tables</th></tr></thead>
+  <tbody>
+    <tr><td>Identity (F1)</td><td><code>device_tokens</code>, <code>email_verifications</code> (+attempts column), <code>login_attempts</code>, <code>admins.otp_to_login</code></td></tr>
+    <tr><td>Programs (F2)</td><td><code>event_days</code></td></tr>
+    <tr><td>Speakers (F3)</td><td><code>speakers.bio_*</code>, <code>speakers.country_*</code>, <code>speakers.company_*</code></td></tr>
+    <tr><td>Sessions (F4)</td><td><code>sessions</code>, <code>session_speaker</code>, <code>session_interested_users</code>, <code>session_media</code>, <code>session_feedbacks</code></td></tr>
+    <tr><td>App config (F5)</td><td><code>conferences</code> (60+ cols), <code>conferences.feature_delete_account</code></td></tr>
+    <tr><td>Notifications (F6)</td><td><code>app_notifications</code>, <code>notification_recipients</code></td></tr>
+    <tr><td>Chat (F7/F8)</td><td><code>chat_rooms</code>, <code>chat_room_guest</code>, <code>chat_messages</code></td></tr>
+    <tr><td>Meeting rooms (F9)</td><td><code>meeting_rooms</code>, <code>meeting_room_slots</code>, <code>meeting_room_slot_guests</code>, <code>meeting_room_categories</code></td></tr>
+    <tr><td>Media center (F12)</td><td><code>media_center</code>, <code>media_videos</code>, <code>media_images</code></td></tr>
+    <tr><td>Publications (F13)</td><td><code>publications</code></td></tr>
+    <tr><td>Workshops (F18)</td><td><code>workshops</code>, <code>workshop_speaker</code>, <code>workshop_registrations</code>, <code>workshop_feedbacks</code></td></tr>
+    <tr><td>Account deletion (F21)</td><td><code>account_deletion_requests</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Key column / index notes</h3>
+<ul>
+  <li><strong>All PKs are UUID</strong> (string) — no auto-increment.</li>
+  <li><strong>FKs cascade-delete</strong> on guest deletion — so account-deletion cleanup is trivial (one DELETE on <code>guests</code>).</li>
+  <li><strong>Unique constraints</strong>: <code>device_tokens (guest_id, token)</code>, <code>workshop_registrations (workshop_id, guest_id)</code>, <code>session_interested_users (guest_id, session_id)</code>, <code>chat_rooms (room_id)</code>.</li>
+  <li><strong>Conference theme columns</strong> are <code>VARCHAR(9)</code> to fit <code>#RRGGBBAA</code>.</li>
+  <li><strong>JSON columns</strong>: <code>conferences.feature_labels / feature_icons / navigation</code>, <code>meeting_rooms.available_dates</code>.</li>
+</ul>
+
+<div class="callout">
+  <strong>Migration ordering quirk.</strong> Two migrations share the same date
+  <code>2026_05_08_000001</code> (<code>create_app_notifications_table</code>
+  and <code>create_session_feedbacks_table</code>), and similarly for
+  <code>000002</code>. They are independent (no FK between them) so ordering
+  doesn't matter, but be aware if you ever rebase or squash migrations.
+</div>
+
+<h2 id="env">22. Required environment variables <span class="pill changed">Config</span></h2>
+
+<table>
+  <thead><tr><th>Variable</th><th>Example / default</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>BROADCAST_DRIVER</code></td><td><code>reverb</code></td><td>was <code>log</code> — required for chat broadcasts</td></tr>
+    <tr><td><code>FIREBASE_CREDENTIALS</code></td><td>absolute path to service-account JSON</td><td>kreait/firebase auto-discovery</td></tr>
+    <tr><td><code>REVERB_APP_ID</code></td><td><code>dg-2026</code></td><td>server-side app id</td></tr>
+    <tr><td><code>REVERB_APP_KEY</code></td><td><code>dg-2026-key</code></td><td>public — shipped to Flutter</td></tr>
+    <tr><td><code>REVERB_APP_SECRET</code></td><td>(generate per env)</td><td>server-only</td></tr>
+    <tr><td><code>REVERB_HOST</code></td><td><code>pif-mobile-api.registration-panel.com</code></td><td>client-facing host (Nginx-terminated TLS)</td></tr>
+    <tr><td><code>REVERB_PORT</code></td><td><code>443</code></td><td>client-facing port</td></tr>
+    <tr><td><code>REVERB_SCHEME</code></td><td><code>https</code></td><td>https → useTLS=true</td></tr>
+    <tr><td><code>REVERB_SERVER_HOST</code></td><td><code>127.0.0.1</code></td><td>daemon binds to loopback only</td></tr>
+    <tr><td><code>REVERB_SERVER_PORT</code></td><td><code>8080</code></td><td>Nginx proxies in</td></tr>
+    <tr><td><code>MOBILE_DEMO_EMAIL</code></td><td>(blank in prod)</td><td>Apple Review bypass — guest must exist</td></tr>
+    <tr><td><code>MOBILE_DEMO_OTP</code></td><td>(blank in prod)</td><td>Apple Review bypass</td></tr>
+    <tr><td><code>MOBILE_REGISTER_URL</code></td><td>landing URL</td><td>target for <code>/identity/register</code></td></tr>
+    <tr><td><code>MOBILE_REGISTER_WITH_CODE_URL</code></td><td>landing URL</td><td>target for <code>/identity/register-with-code</code></td></tr>
+    <tr><td><code>MOBILE_OTP_EXPIRY_MINUTES</code></td><td><code>5</code></td><td>OTP TTL</td></tr>
+    <tr><td><code>MOBILE_OTP_MAX_ATTEMPTS</code></td><td><code>5</code></td><td>429 after threshold</td></tr>
+    <tr><td><code>MOBILE_TOKEN_EXPIRY_DAYS</code></td><td><code>30</code></td><td>per-token Sanctum expiry</td></tr>
+    <tr><td><code>PUBLIC_STORAGE_URL</code></td><td>https://…/storage</td><td>guest images (personal_image)</td></tr>
+    <tr><td><code>PUBLIC_STORAGE_URL2</code></td><td>https://…/storage</td><td>other assets (speakers, sessions, publications, etc.)</td></tr>
+  </tbody>
+</table>
+
+<h2 id="composer">23. Composer / infra dependencies <span class="pill changed">Infra</span></h2>
+
+<table>
+  <thead><tr><th>Package</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td><code>kreait/laravel-firebase: ^6.2</code></td><td>FCM multicast for chat &amp; room-booking &amp; notifications</td></tr>
+    <tr><td><code>laravel/reverb: ^1.10</code></td><td>WSS server for the chat broadcast channel</td></tr>
+    <tr><td><code>intervention/image: ^3.0</code></td><td>image processing / thumbnails (media center, conference assets)</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  Deployment (server team, not mobile): <code>composer install</code>,
+  <code>php artisan migrate</code>, <code>php artisan storage:link</code>,
+  <code>php artisan config:clear</code>, the Reverb daemon
+  (<code>php artisan reverb:start --host=127.0.0.1 --port=8080</code>) under
+  supervisor/systemd, and an Nginx <code>location /app/&lt;REVERB_APP_KEY&gt;</code>
+  proxy block to <code>127.0.0.1:8080</code> with WS upgrade headers.
+</div>
+
+<h2 id="conventions">24. Cross-cutting conventions <span class="pill changed">Contract</span></h2>
+
+<h3>Per-feature pagination contracts (don't unify on the client)</h3>
+<table>
+  <thead><tr><th>Feature</th><th>Wrapper</th></tr></thead>
+  <tbody>
+    <tr><td>Sessions / Workshops</td><td><code>{ &lt;items&gt;, pagination: { total, page, limit, totalPages } }</code></td></tr>
+    <tr><td>Chat (rooms &amp; messages)</td><td><code>{ success, data: { &lt;items&gt;, pagination: { currentPage, totalPages, total*, hasMore } } }</code></td></tr>
+    <tr><td>Notifications</td><td><code>{ notifications, totalNotifications, totalPages, currentPage }</code></td></tr>
+    <tr><td>Speakers</td><td><code>{ currentPage, totalPages, totalSpeakers, speakers }</code></td></tr>
+    <tr><td>Attendees</td><td><code>{ attendees, currentPage, totalPages, totalItems }</code></td></tr>
+    <tr><td>Publications</td><td>bare array</td></tr>
+    <tr><td>Media center</td><td><code>{ videos, documents, images }</code> grouped</td></tr>
+    <tr><td>Rooms list (no <code>?date</code>)</td><td>bare array</td></tr>
+    <tr><td>Sponsors</td><td><code>{ sponsors }</code></td></tr>
+    <tr><td>Event days</td><td><code>{ programs }</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Other conventions</h3>
+<ul>
+  <li><strong>Side-effecting GETs</strong> in F6 (<code>mark-read</code>, <code>clear</code>) are intentional. Do NOT refactor to PATCH/DELETE.</li>
+  <li><strong>Empty maps</strong> in app-config are encoded as <code>{}</code>, never <code>[]</code>.</li>
+  <li><strong>Storage URLs</strong> are absolute — never reconstruct from a filename.</li>
+  <li><strong>Localization fallback</strong>: <code>*_ar</code> falls back to <code>*_en</code> when blank.</li>
+  <li><strong>Sanctum token</strong> is per-token expiring, not session-based. Caught 401 → re-login (no refresh endpoint).</li>
+</ul>
+
+<h2 id="premerge">25. Pre-merge / pre-production checklist <span class="pill breaking">Critical</span></h2>
+
+<p><strong>Before merging <code>testing → main</code></strong>, walk through this list. Items checked under "Verified" are confirmed by feature tests; the rest require manual / smoke testing.</p>
+
+<h3>Infrastructure</h3>
+<ul class="check">
+  <li><strong>composer install</strong> on the deploy target — confirm <code>kreait/laravel-firebase</code>, <code>laravel/reverb</code>, <code>intervention/image</code> resolve cleanly.</li>
+  <li><strong>php artisan migrate</strong> dry-run on a prod-shape DB — 39 migrations should apply without errors. Two share dates (5_08_000001 / 000002) — check ordering didn't reverse on staging.</li>
+  <li><strong>php artisan storage:link</strong> — required so <code>PUBLIC_STORAGE_URL2</code> resolves to <code>public/storage</code>.</li>
+  <li><strong>php artisan config:clear &amp;&amp; cache:clear</strong> after deploy — old <code>app_config</code> cache must be busted.</li>
+  <li><strong>Reverb daemon</strong> running under supervisor/systemd, restarted on deploy. Check <code>ss -lntp | grep 8080</code> after deploy.</li>
+  <li><strong>Nginx</strong> has <code>location /app/&lt;REVERB_APP_KEY&gt; { proxy_pass http://127.0.0.1:8080; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }</code>.</li>
+  <li><strong>Firebase service account JSON</strong> deployed at <code>FIREBASE_CREDENTIALS</code> path, readable by the web user.</li>
+  <li><strong>Queue worker</strong> running (FCM sends are sync, but other Laravel features may queue mail/notifications).</li>
+</ul>
+
+<h3>Configuration</h3>
+<ul class="check">
+  <li><strong>All env vars</strong> from §22 present in prod <code>.env</code>.</li>
+  <li><strong><code>BROADCAST_DRIVER=reverb</code></strong> (was <code>log</code>).</li>
+  <li><strong><code>MOBILE_DEMO_EMAIL</code> / <code>MOBILE_DEMO_OTP</code></strong> — set to demo creds for App Review; cleared after approval (or document who clears them).</li>
+  <li><strong>Reverb keys</strong> regenerated for prod — DO NOT reuse Version A's HCI keys (per the comment in <code>.env.example</code>).</li>
+  <li><strong>CORS</strong> — verify the prod domain is in the <code>cors.php</code> allowed origins (Flutter usually doesn't need it but the admin web does).</li>
+</ul>
+
+<h3>Data prerequisites</h3>
+<ul class="check">
+  <li><strong>Conference row exists</strong> (otherwise <code>/app-config</code> returns the empty-config skeleton, which is fine but probably not what you want in prod).</li>
+  <li><strong>At least one EventDay</strong> — sessions/workshops without an event day are still valid but the UI may render oddly.</li>
+  <li><strong>Categories</strong> on meeting rooms — defensive default means empty <code>allowed_categories</code> hides the room. Verify each room has at least one category attached.</li>
+  <li><strong>Demo guest</strong> for App Review — must exist in prod DB with status Accepted/Invited and email matching <code>MOBILE_DEMO_EMAIL</code>.</li>
+</ul>
+
+<h3>Functional smoke (manual)</h3>
+<ul class="check">
+  <li><code>GET /api/app-config</code> returns full payload; theme colors are valid hex.</li>
+  <li><code>GET /api/app-config/version</code> changes after admin saves Conference.</li>
+  <li>Real OTP login end-to-end (not just demo).</li>
+  <li>Demo OTP login (<code>MOBILE_DEMO_EMAIL</code> / <code>MOBILE_DEMO_OTP</code>).</li>
+  <li>Push notification arrives on a real device after admin POSTs <code>/api/admin/notifications</code>.</li>
+  <li>Chat: send message between two devices → both REST 201 AND WSS broadcast arrive within ~500 ms.</li>
+  <li>Workshop register from two devices on a 1-seat workshop simultaneously → exactly one 200 + one 409.</li>
+  <li>Room booking: same simultaneous test → exactly one 201 + one 400 "Slot is already booked".</li>
+  <li>Account deletion: GET <code>/identity/delete-account</code> → tokens revoked on all devices; subsequent <code>check-email</code> returns "not registered".</li>
+  <li>QR scan with both a <code>registration_number</code> AND a Sanctum token format.</li>
+</ul>
+
+<h3>Risk &amp; rollback</h3>
+<ul class="check">
+  <li><strong>Migration rollback plan</strong> — <code>php artisan migrate:rollback --step=39</code> reverses everything from this pull. Test on staging first.</li>
+  <li><strong>Cache snapshot</strong> — clear <code>app_config</code> and <code>app_config_version</code> before AND after deploy (some users may have cached the empty-config version).</li>
+  <li><strong>Feature flags</strong> — keep <code>feature_chat</code>, <code>feature_room_booking</code>, <code>feature_notifications</code> OFF in app-config until ops confirms FCM and Reverb are healthy. Mobile clients respect these toggles.</li>
+  <li><strong>Sentry / logs</strong> — watch for FCM "InvalidArgument" errors (likely stale tokens — auto-pruned), Reverb 500s, and 422 spikes on chat (indicates Flutter sending wrong payload).</li>
+</ul>
+
+<h2 id="mobile-checklist">26. Mobile integration checklist (per feature)</h2>
+
+<h3>Login</h3>
+<ul class="check">
+  <li>After 200 from <code>/identity/verify-otp</code>: persist <code>token</code> (secure storage), hydrate user state.</li>
+  <li>POST <code>/identity/device-tokens</code> with current FCM token (after OS permission granted).</li>
+  <li>Connect Reverb (<code>connect()</code> + subscribe to needed channels).</li>
+  <li>Fetch <code>/app-config</code> if local version differs.</li>
+</ul>
+
+<h3>Logout</h3>
+<ul class="check">
+  <li>Call GET <code>/identity/logout</code> (revokes current Sanctum token).</li>
+  <li>Disconnect Reverb (<code>disconnect()</code> + clear subscriptions).</li>
+  <li>Clear secure storage (token, cached user).</li>
+  <li>Optionally keep <code>app_config</code> cached (it's public).</li>
+</ul>
+
+<h3>Push notifications</h3>
+<ul class="check">
+  <li>Android: create channel <code>high_importance_channel</code> at app start, importance <code>IMPORTANCE_HIGH</code>.</li>
+  <li>iOS: request <code>UNAuthorizationOptions.alert | .sound | .badge</code>.</li>
+  <li>Re-register device token on every FCM/APNs token refresh callback.</li>
+  <li>Parse incoming data payloads — chat messages include the message body in <code>notification</code>; room/notification pushes include domain ids in <code>data</code>.</li>
+</ul>
+
+<h3>App-config consumption</h3>
+<ul class="check">
+  <li>Poll <code>/app-config/version</code> at: app start, app resume, every 30 min while foreground.</li>
+  <li>Gate every feature screen behind <code>features.&lt;flag&gt;</code> (treat <code>null</code> as off).</li>
+  <li>Apply theme colors / fonts / logo from <code>theme.*</code>; fall back to built-ins when null.</li>
+  <li>Honour <code>features.delete_account</code> for the Settings entry.</li>
+</ul>
+
+<h3>Chat</h3>
+<ul class="check">
+  <li>Append message locally from POST response BEFORE the broadcast (sender's broadcast is suppressed).</li>
+  <li>On broadcast received, deduplicate against locally-added messages (compare <code>message.id</code>).</li>
+  <li>When user opens a room, call <code>/messages</code> — that endpoint also marks-as-read.</li>
+  <li>If WSS disconnects, fall back to short-interval polling of <code>/messages</code> until reconnected.</li>
+</ul>
+
+<h3>Workshops</h3>
+<ul class="check">
+  <li>Show "Full" state immediately when <code>isFull == true</code>; still allow tap → confirms 409 if state changed.</li>
+  <li>On 409, refresh detail; capacity may have just hit zero.</li>
+  <li>Confirmation modal for cancel (idempotent server-side but UX-wise a one-tap accident is annoying).</li>
+</ul>
+
+<h3>Meeting rooms</h3>
+<ul class="check">
+  <li>If room list is empty, surface "Not available for your category" message (not "no rooms exist") — admin may simply not have granted access.</li>
+  <li>Past-slot 400 → grey out past slots in the UI (client should know server time via <code>/health</code> if needed).</li>
+  <li>Edit is host-only; UI must hide the edit button for invited guests.</li>
+</ul>
+
+<h2 id="handover">27. Handover notes &amp; debugging tips</h2>
+
+<h3>Where to start debugging by symptom</h3>
+<table>
+  <thead><tr><th>Symptom</th><th>First check</th></tr></thead>
+  <tbody>
+    <tr><td>Mobile gets 401 on every request</td><td>Token TTL hit (<code>MOBILE_TOKEN_EXPIRY_DAYS</code>) — re-login. Or token is admin's (rejected by <code>auth.guest</code> with 403).</td></tr>
+    <tr><td>Mobile gets 403 instead of 401</td><td>Token belongs to an <code>Admin</code> not a <code>Guest</code>. Different user pool, same Sanctum.</td></tr>
+    <tr><td>App-config is empty {}</td><td>No <code>conferences</code> row exists yet, or cache holds old empty value. Admin save creates row + busts cache.</td></tr>
+    <tr><td>Theme not refreshing</td><td>Mobile is not polling <code>/app-config/version</code>, or local cache key mismatch. Check version returned matches what's stored.</td></tr>
+    <tr><td>Empty rooms list for a category</td><td>Admin forgot to attach the category to the room. <code>MeetingRoom::isGuestAllowed</code> defaults to false for empty <code>allowed_categories</code>.</td></tr>
+    <tr><td>FCM not arriving</td><td>(1) Device token not registered. (2) Android channel <code>high_importance_channel</code> missing. (3) Token unregistered upstream (auto-pruned). Check <code>laravel.log</code> for "FCM delivery failed" + "pruned_tokens".</td></tr>
+    <tr><td>Reverb broadcast not arriving</td><td>(1) Daemon down → <code>ss -lntp | grep 8080</code>. (2) Nginx WS upgrade headers missing. (3) Wrong channel name (must be <code>private-chat.{roomId}</code>). (4) Channel auth failing → check <code>POST /broadcasting/auth</code> response.</td></tr>
+    <tr><td>OTP arrives but verify says invalid</td><td>OTP expired (<code>MOBILE_OTP_EXPIRY_MINUTES</code>) or attempts exhausted. Triggering a new <code>check-email</code> resets <code>attempts</code>.</td></tr>
+    <tr><td>Workshop register always returns 409</td><td>Guest already registered (idempotent — same body but with "Already registered" message). Read the <code>message</code> field, not just the status code.</td></tr>
+    <tr><td>Chat send fails 422</td><td><code>participant_id</code> not a valid UUID, content empty/&gt;5000, or self-send. Validation message is in <code>message</code>.</td></tr>
+    <tr><td>Image URLs return 404</td><td><code>storage:link</code> not run, or <code>PUBLIC_STORAGE_URL2</code> mis-set, or the file wasn't actually uploaded (filename in DB but no file on disk).</td></tr>
+  </tbody>
+</table>
+
+<h3>Logging conventions</h3>
+<ul>
+  <li>FCM operations log at <code>info</code> on success, <code>warning</code> on per-token failure, <code>error</code> on chunk-throw. Filter: <code>rg "FCM" storage/logs/laravel.log</code>.</li>
+  <li>Reverb broadcast errors are visible in the daemon's own log (<code>storage/logs/reverb-*.log</code> depending on supervisor config).</li>
+  <li>Chat send errors log as <code>warning "Chat FCM push failed"</code> — push is best-effort and not a failure of the send itself.</li>
+</ul>
+
+<h3>Local development tips</h3>
+<ul>
+  <li>To test Reverb locally without TLS: set <code>REVERB_SCHEME=http</code> and <code>REVERB_PORT=8080</code>, run <code>php artisan reverb:start</code>, and point Flutter at <code>ws://localhost:8080/app/dg-2026-key</code>.</li>
+  <li>To test FCM without sending actual pushes: stub <code>FirebaseNotificationService</code> in the service container — most controllers receive it as a constructor-injected dependency.</li>
+  <li>OTPs in local can be inspected in <code>email_verifications.token</code> directly (no need for Mailtrap if you're just testing flow).</li>
+  <li>Use <code>tests/Feature/MobileAuthTest.php</code> as the canonical spec for the auth flow — every edge case is documented there.</li>
+</ul>
+
+<h3>Files / changes that surprised the reviewer</h3>
+<ul>
+  <li><strong><code>AppServiceProvider::boot</code></strong> overrides Sanctum's bearer-token extractor to accept lowercase / no-prefix tokens (Flutter quirk).</li>
+  <li><strong><code>BroadcastServiceProvider::boot</code></strong> remounts <code>Broadcast::routes</code> on sanctum middleware — the default uses <code>web</code> and silently 403s API clients.</li>
+  <li><strong><code>MobileRoomController::isSlotInPast</code></strong> uses <code>start_time</code> + slot date, not <code>end_time</code> — a slot that has started but not ended is still considered "past". UI should reflect this.</li>
+  <li><strong><code>MobileChatController::messages</code></strong> marks read as an aggregate update on the whole room — NOT bound to the returned page. Paginating backward through history will mark already-read messages as read again (no harm).</li>
+  <li><strong><code>MobileAuthController::checkEmail</code></strong> returns 200 success even if the guest doesn't actually receive the email — the OTP is upserted regardless. If email delivery fails (Mailtrap down etc.), Flutter sees success but no code arrives. Consider adding a "Resend OTP" CTA after 30 s.</li>
+</ul>
+
+<h2 id="discussion">28. Open items to discuss with mobile team</h2>
+
+<ol>
+  <li><strong>Reverb client</strong> — pin <code>pusher_channels_flutter</code> version, agree on single-connection lifecycle (connect after login, disconnect on logout / background timeout).</li>
+  <li><strong>FCM Android channel</strong> id is <code>high_importance_channel</code> (importance HIGH). Mobile must create it at app start — confirm done.</li>
+  <li><strong>Device-token lifecycle</strong> — confirm we POST <code>/identity/device-tokens</code> on: login, FCM refresh, OS permission grant. Stale tokens are auto-pruned server-side.</li>
+  <li><strong>Account-deletion UX</strong> — confirm gating on <code>features.delete_account</code> and that the confirmation copy uses "permanent / irreversible" wording (Apple requirement).</li>
+  <li><strong>App-config polling cadence</strong> — proposal: app start + on resume + every 30 min while foreground. Confirm acceptable.</li>
+  <li><strong>Workshop full UX</strong> — toast vs modal? Copy in EN/AR for <code>error: "workshop_full"</code>?</li>
+  <li><strong>Chat message ceiling</strong> — server enforces ≤ 5000 chars. Confirm client enforces with a visible counter.</li>
+  <li><strong>Past-slot guard copy</strong> — "Cannot book a past slot" / "Cannot delete past bookings". Confirm exact wording.</li>
+  <li><strong>Sponsors decoupling</strong> — mobile to drop any sponsors block read from app-config and switch to <code>/mobile/sponsors</code>.</li>
+  <li><strong>Demo account for App Review</strong> — agree on credential pair, seed in prod DB with right status.</li>
+  <li><strong>Migration window</strong> — 39 new migrations; agree whether mobile QA hits testing right after deploy or needs a staging snapshot first.</li>
+  <li><strong>Empty-rooms message</strong> — confirm copy for the "your category has no granted rooms" case (it's a likely happen-on-launch issue).</li>
+  <li><strong>OTP resend</strong> — server doesn't ship a dedicated resend endpoint. Mobile can call <code>/check-email</code> again to upsert a fresh OTP. Confirm UX (countdown timer, then "Resend").</li>
+  <li><strong>Token refresh strategy</strong> — there is none. On 401, route to OTP login. Confirm graceful logout-on-401 implemented globally.</li>
+  <li><strong>Read receipts in chat</strong> — currently read is set when GET /messages is called. Decide whether we need broadcast-driven read receipts in v1 or defer.</li>
+</ol>
+
+<p class="footnote">
+  Source diff: <code>git log cd2410b..6704047</code> on
+  <code>pif-directors-gathering-backend</code>. 181 files,
+  +16,743 / −34 lines. Open the corresponding HTML next to this PDF for
+  copy-pasteable curl snippets.
+</p>
+
+</body>
+</html>

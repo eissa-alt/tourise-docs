@@ -1,0 +1,18 @@
+# pif-directors-gathering-docs — ignore rules
+# (this docs/ folder is its own git repo, cloned in place inside the wrapper repo)
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Personal scratch — never share these
+scratch/
+*.local.md
+TODO.local.md
+
+# Throwaway build/scratch dirs that occasionally land in the wrapper
+temp/
