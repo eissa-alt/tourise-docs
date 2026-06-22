@@ -55,10 +55,15 @@
 > Mobile-contract PDF check: the contract is entirely **guest-based** (`/api/mobile/*`,
 > `GuestMobileResource` `role: speaker|attendee`); it never references admin `/get-profile` or `admins.type`.
 > → **dropping `admins.type` does NOT touch the mobile contract.** Remaining work, by risk:
-> - **Simple gates → `checkPermission`/`is_super`** (mechanical): `top-section`, `download-data`,
->   `custom-guests-export`, `export-data`, `invitations-form`, `invitations-listing`, `print-modal`,
->   `rg-integration-sections`, `admins-choose`, `guests-form-edit`; remove the `TypeGate` legacy `types`
->   fallback; remove `data/admins-types*` + `interfaces/admin.tsx` `type`; `hasAccess` util retirement.
+> - **Simple gates → `checkPermission`/`is_super`** — partially done 2026-06-22 (`alt-admin` `dev`
+>   `c945670`, gate-green): `print-modal`, `rg-integration-sections`, `admins-listing` (current-user
+>   super gates) → `user.role.is_super`; `invitations-form` + `invitations-listing` →
+>   `checkFeaturePermission('invitations')`. **Still pending (need a contract change / coverage check):**
+>   `top-section` + the generic export components (`download-data`/`export-data`/`custom-guests-export`
+>   filter by `access[]` arrays — need a `featureId`/`action` prop instead of `user.type`); the
+>   `TypeGate` legacy `types` fallback (removing it locks out any route not in `inferFeatureId` — verify
+>   full route coverage first); `admins-choose` (legacy `data/admins-types` model); `guests-form-edit`;
+>   remove `data/admins-types*` + `interfaces/admin.tsx` `type`; retire `hasAccess`.
 > - **Behavior-critical `switch(user.type)` form logic** (NOT mechanical — needs product mapping + QA):
 >   guest registration forms `guests/froms/**/one-step|fours-steps/step-1.tsx` (×4, incl. a special
 >   `'pif'` type) and see-more admin modals `by-admins/**/step-1.tsx` (×2) render different fields per
