@@ -30,8 +30,24 @@
 > **Track 1 (RBAC) executed 2026-06-22 — spine complete, gate-green, committed (local only):**
 > backend `4094a7f`; admin `4851887` + `932923b` + `3125b57`. `TypeGate` is now RBAC-aware (infers
 > feature from route → `checkFeaturePermission`; legacy `types` fallback for unmapped routes). All
-> additive (legacy `type` kept). **Pending in Track 1:** guests 4-listing consolidation, full sidebar
-> `access[]→featureId`, and a later cleanup migration to drop `type`.
+> additive (legacy `type` kept). **Pending in Track 1:** guests 4-listing consolidation and a later
+> cleanup migration to drop `type`.
+>
+> **Track 1 leftover done 2026-06-22 — sidebar `access[]→featureId`** (`alt-admin` `dev` `b252ba7`,
+> gate-green): each active sidebar link carries a catalog `featureId`; `sidebar-content` gates via
+> `checkFeaturePermission` (sub-menus keep only visible subLinks; the Mobile App section header shows
+> only when a following link is visible). All featureIds verified vs `AdminPermissions::CATALOG`;
+> `hasAccess` util retained for the non-sidebar `user.type` readers (removed by the type-drop).
+>
+> **Track 1 leftover — guests 4-listing consolidation: BLOCKED on a product decision (not mechanical).**
+> The 4 per-type listings (`guests-super` 1198 ln, `guests-guest` 981, `guests-badge` 783, `guests-view`
+> 617; ~3,579 total) already gate **row actions** via `checkActionPermission`, and `guests-super` is the
+> action **superset** (14 actions vs guest 8 / badge 3 / view 0). BUT their **columns + filters are not
+> permission-gated** — `guests-super` renders its full column/filter set unconditionally. Collapsing to
+> one listing therefore needs **per-role column/filter visibility rules**, which the catalog does NOT
+> define (catalog = actions only). Mechanical "use super for everyone" would over-expose columns/data to
+> lesser roles. Needs: (a) a decision on per-role column/filter visibility, (b) runtime QA per role.
+> Works correctly as-is today (page `TypeGate`-gated; each `user.type` gets its component).
 >
 > **Track 2 (UI refactor) partially executed 2026-06-22 — clean/low-risk sub-tracks done,
 > gate-green, committed (local only on `alt-admin` `dev`):**
