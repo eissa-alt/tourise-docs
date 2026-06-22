@@ -30,8 +30,8 @@
 > **Track 1 (RBAC) executed 2026-06-22 — spine complete, gate-green, committed (local only):**
 > backend `4094a7f`; admin `4851887` + `932923b` + `3125b57`. `TypeGate` is now RBAC-aware (infers
 > feature from route → `checkFeaturePermission`; legacy `types` fallback for unmapped routes). All
-> additive (legacy `type` kept). **Pending in Track 1:** guests 4-listing consolidation and a later
-> cleanup migration to drop `type`.
+> additive (legacy `type` kept). **Pending in Track 1:** the legacy `type` drop (sidebar featureId +
+> guests consolidation now done — see below).
 >
 > **Track 1 leftover done 2026-06-22 — sidebar `access[]→featureId`** (`alt-admin` `dev` `b252ba7`,
 > gate-green): each active sidebar link carries a catalog `featureId`; `sidebar-content` gates via
@@ -39,15 +39,34 @@
 > only when a following link is visible). All featureIds verified vs `AdminPermissions::CATALOG`;
 > `hasAccess` util retained for the non-sidebar `user.type` readers (removed by the type-drop).
 >
-> **Track 1 leftover — guests 4-listing consolidation: BLOCKED on a product decision (not mechanical).**
-> The 4 per-type listings (`guests-super` 1198 ln, `guests-guest` 981, `guests-badge` 783, `guests-view`
-> 617; ~3,579 total) already gate **row actions** via `checkActionPermission`, and `guests-super` is the
-> action **superset** (14 actions vs guest 8 / badge 3 / view 0). BUT their **columns + filters are not
-> permission-gated** — `guests-super` renders its full column/filter set unconditionally. Collapsing to
-> one listing therefore needs **per-role column/filter visibility rules**, which the catalog does NOT
-> define (catalog = actions only). Mechanical "use super for everyone" would over-expose columns/data to
-> lesser roles. Needs: (a) a decision on per-role column/filter visibility, (b) runtime QA per role.
-> Works correctly as-is today (page `TypeGate`-gated; each `user.type` gets its component).
+> **Track 1 leftover done 2026-06-22 — guests consolidation** (`alt-admin` `dev` `599827f`, gate-green;
+> net −4,667 ln): collapsed the 4 per-type listings (`guests-super/guest/view/badge`) + their 3 per-type
+> filter components into one permission-driven `guests-listing.tsx` rendered for every role behind the
+> existing `TypeGate` (route → `guests_listing`). Row actions were already `checkActionPermission`-gated;
+> converted the remaining `user.type` reads: New-Guest button → `user.role.is_super`; export visibility →
+> `checkPermission('guests_listing','export')`; printed column → `print`; collected/badge columns →
+> `collect`. **Decision taken (delegated):** went permission-driven rather than reproduce each type's
+> exact column/filter set — non-super roles now see the super filter set + base columns (incl.
+> **email/phone**, which have no catalog key). **HANDOFF QA per role** (guest/view/badge/invitation/
+> logistics): confirm columns/filters/actions/exports. If PII (email/phone) must be hidden from view-only
+> roles, add a catalog key (small follow-up).
+>
+> **Track 1 leftover — drop legacy `type`: mobile-SAFE but a large frontend surface (do supervised).**
+> Mobile-contract PDF check: the contract is entirely **guest-based** (`/api/mobile/*`,
+> `GuestMobileResource` `role: speaker|attendee`); it never references admin `/get-profile` or `admins.type`.
+> → **dropping `admins.type` does NOT touch the mobile contract.** Remaining work, by risk:
+> - **Simple gates → `checkPermission`/`is_super`** (mechanical): `top-section`, `download-data`,
+>   `custom-guests-export`, `export-data`, `invitations-form`, `invitations-listing`, `print-modal`,
+>   `rg-integration-sections`, `admins-choose`, `guests-form-edit`; remove the `TypeGate` legacy `types`
+>   fallback; remove `data/admins-types*` + `interfaces/admin.tsx` `type`; `hasAccess` util retirement.
+> - **Behavior-critical `switch(user.type)` form logic** (NOT mechanical — needs product mapping + QA):
+>   guest registration forms `guests/froms/**/one-step|fours-steps/step-1.tsx` (×4, incl. a special
+>   `'pif'` type) and see-more admin modals `by-admins/**/step-1.tsx` (×2) render different fields per
+>   admin type. `admins-listing` shows the admin **entity** `type` via `AdminBadges` → move to role
+>   display (`role_id` already exists from Track 1).
+> - **Backend** (mobile-safe per above): forward migration to drop `admins.type`; remove `type` from
+>   `AdminsController`/auth resources/`/get-profile`; gates (pint, `php artisan test`, composer audit,
+>   `routes/api.php` review). The `type→role` data migration already ran, so the column is now redundant.
 >
 > **Track 2 (UI refactor) partially executed 2026-06-22 — clean/low-risk sub-tracks done,
 > gate-green, committed (local only on `alt-admin` `dev`):**
