@@ -1,7 +1,17 @@
 # Admin RBAC + `getServerSideProps` Restructure Plan
 
-> **Status:** Track A ✅ executed · Track B 🅿️ planned. Design/decision record for two **related but
-> separable** admin migrations, mirroring `cyan-admin`:
+> **Status:** Track A ✅ executed · Track B ✅ executed (spine; guests consolidation pending). Design/decision
+> record for two **related but separable** admin migrations, mirroring `cyan-admin`:
+>
+> **Track B execution (2026-06-22):** backend RBAC committed `alt-static-basecode-backend` `dev` `4094a7f`
+> (roles table, `Role`, `AdminPermissions` catalog, `PermissionService`, `admin.can` middleware, additive
+> `role`+`permissions` on `/get-profile`, `type→role` data migration — applied to dev DB; gate green: Pint +
+> `php artisan test` 451 pass + composer audit). Frontend committed `alt-static-basecode-admin` `dev`
+> `4851887` (perm utils + admin interface), `932923b` (roles CRUD module + matrix builder + admins `role_id`
+> dropdown + Roles sidebar link), `3125b57` (RBAC-aware `TypeGate` across all ~100 pages via `inferFeatureId`).
+> All additive — legacy `type` retained. **Pending:** guests 4-listing consolidation; full sidebar
+> `access[]→featureId`; later cleanup migration to drop `type`. The `type→feature` migration map is a
+> documented best-effort — review before tightening route gating beyond roles/admins-management.
 > - **Track A — `getServerSideProps` (GSSP) restructure** (frontend-only, on alt's *existing* `type`
 >   model). **✅ DONE** — committed `48ea141` on `alt-static-basecode-admin` `dev` (132 files,
 >   type-check green). The client `TypeGate` it introduced is **transitional** and is replaced by

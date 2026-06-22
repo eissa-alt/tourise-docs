@@ -26,6 +26,12 @@
 > Track A (drop `getServerSideProps` → client `TypeGate`) is **already executed** — committed
 > `48ea141` on `alt-static-basecode-admin` `dev` (132 files, type-check green). `TypeGate` is a
 > **transitional** layer that Track 1 (RBAC) replaces with `checkFeaturePermission`.
+>
+> **Track 1 (RBAC) executed 2026-06-22 — spine complete, gate-green, committed (local only):**
+> backend `4094a7f`; admin `4851887` + `932923b` + `3125b57`. `TypeGate` is now RBAC-aware (infers
+> feature from route → `checkFeaturePermission`; legacy `types` fallback for unmapped routes). All
+> additive (legacy `type` kept). **Pending in Track 1:** guests 4-listing consolidation, full sidebar
+> `access[]→featureId`, and a later cleanup migration to drop `type`. **Next:** Track 2 (UI refactor).
 
 ---
 
