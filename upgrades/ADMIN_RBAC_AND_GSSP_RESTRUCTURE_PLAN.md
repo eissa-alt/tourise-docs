@@ -1,8 +1,15 @@
 # Admin RBAC + `getServerSideProps` Restructure Plan
 
-> **Status:** 🅿️ planned — no code written yet. This is the design/decision record for two **related but separable** admin migrations, mirroring `cyan-admin`:
-> - **Track A — `getServerSideProps` (GSSP) restructure** (frontend-only, achievable on alt's *existing* `type` model).
-> - **Track B — Admin roles/access RBAC** (multi-repo: backend-first + frontend roles module; touches the mobile contract).
+> **Status:** Track A ✅ executed · Track B 🅿️ planned. Design/decision record for two **related but
+> separable** admin migrations, mirroring `cyan-admin`:
+> - **Track A — `getServerSideProps` (GSSP) restructure** (frontend-only, on alt's *existing* `type`
+>   model). **✅ DONE** — committed `48ea141` on `alt-static-basecode-admin` `dev` (132 files,
+>   type-check green). The client `TypeGate` it introduced is **transitional** and is replaced by
+>   Track B's `checkFeaturePermission`.
+> - **Track B — Admin roles/access RBAC** (multi-repo: backend-first + frontend roles module; touches
+>   the mobile contract). **Greenlit** — now Track 1 of
+>   [CYAN_FEATURE_PARITY_MASTER_PLAN.md](CYAN_FEATURE_PARITY_MASTER_PLAN.md), which orchestrates it
+>   alongside the UI refactor, secondary-status removal, and SMTP-config tracks.
 >
 > **Scope:** `alt-static-basecode-admin` (+ `alt-static-basecode-backend` for Track B). The `-frontend`/`-landing` apps are out of scope.
 > **Reference implementation:** `cyan-basecode-repos/cyan-admin` (+ `cyan-backend`). Re-verify every count against the live repo before trusting a number.
