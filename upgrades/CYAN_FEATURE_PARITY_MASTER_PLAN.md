@@ -63,15 +63,28 @@
 >   `types.includes(user.type)` fallback was replaced with `user.role.is_super` (preserves `test-apis`,
 >   defaults future unmapped routes to super-only). The `types` prop stays on the props interface for
 >   call-site compatibility but is **no longer read**. Both gate-green.
-> - **Bucket A — shared `access[]` export/action contract (DECISION NEEDED, ~26 files, low behavioral
->   risk).** `download-data`/`export-data`/`custom-guests-export`/`admins-choose` call
->   `hasAccess(item.access, user.type)` (= `access.includes(user.type)`); `top-section` +
->   `guests-form-edit` use `allowedUserTypes.includes(user.type)`. ~22 listings build
->   `exportActionArray` with `access: string[]`. Clean fix (no dual path): replace
->   `ExportActionArrayType.access` with `featureId` + `action` and gate via `checkPermission(...)`.
->   Needs a per-export `featureId`/`action` mapping sign-off (some arrays distinguish super-only vs
->   super+invitation exports — can't collapse blindly). Then remove `data/admins-types*`,
->   `interfaces/admin.tsx` `type`, and retire `hasAccess`.
+> - **Bucket A — export/action contract → permissions. DONE 2026-06-22** (chosen path: extend the
+>   catalog). `alt-backend` `dev` `60cc378`: added `'export'` action to every export-bearing feature
+>   in `AdminPermissions::CATALOG` (invitations, categories, titles, positions, email_logs, automation,
+>   print_logs, bulk_print, speakers, sponsors, hotels, e_visa; guests_listing+scans already had it).
+>   Super resolves to the full catalog **dynamically** (`PermissionService::resolve`), so it gains
+>   export everywhere with **no re-seed**. `alt-admin` `dev` `f61b5f5`: `ExportActionArrayType.access`
+>   (admin types) → `featureId`+`action`; `download-data`/`export-data`/`custom-guests-export` gate via
+>   `checkPermission(featureId, action ?? 'export', user)`; ~18 listing call sites updated. `top-section`
+>   add/trash/custom → route-resolved `checkFeaturePermission` (module access; server `admin.can` still
+>   enforces the action). `guests-form-edit` → `checkFeaturePermission('guests_listing')`. `5a4bbf4`:
+>   `admins-listing` badge column now shows the **role** (not entity `type`), header `web:role`,
+>   block/unblock guards use `!admin.role?.is_super`. All gate-green (pint, RBAC tests, type-check,
+>   production build). **Handoff QA:** a *pre-existing* non-super role would need `export` re-granted to
+>   regain a per-module export (non-issue on fresh basecode — Super only).
+> - **STILL BLOCKING the `admins.type` column drop:**
+>   1. **admins create/edit/filter type→role cutover (feature work, NOT mechanical):** `admins-form.tsx`
+>      + `search-admins.tsx` still assign/query the admin **entity** `type` via `data/admins-types-select`.
+>      RBAC replacement = assign/filter by **role** (role_id already on the model). Backend
+>      `AdminWorkshopResource` + `AdminSessionsResource` also still emit `type`.
+>   2. **admins-choose + `data/admins-types`:** the legacy "pick an admin type to create" screen
+>      (`pages/[lang]/admins/_create.tsx`) is **orphaned** — live create flow is `create.tsx` →
+>      `AdminsForm`. Safe to delete once (1) lands.
 > - **Bucket B — behavior-critical `switch(user.type)` form logic** (NOT mechanical — needs product
 >   mapping + QA): guest registration forms `guests/froms/{default,pif}/**/{one-step,one-step-rsvp,
 >   fours-steps}/step-1.tsx` (×4, incl. a special `'pif'` type) and see-more admin modals
