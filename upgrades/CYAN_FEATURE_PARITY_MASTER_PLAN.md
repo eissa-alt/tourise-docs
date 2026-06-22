@@ -31,7 +31,33 @@
 > backend `4094a7f`; admin `4851887` + `932923b` + `3125b57`. `TypeGate` is now RBAC-aware (infers
 > feature from route → `checkFeaturePermission`; legacy `types` fallback for unmapped routes). All
 > additive (legacy `type` kept). **Pending in Track 1:** guests 4-listing consolidation, full sidebar
-> `access[]→featureId`, and a later cleanup migration to drop `type`. **Next:** Track 2 (UI refactor).
+> `access[]→featureId`, and a later cleanup migration to drop `type`.
+>
+> **Track 2 (UI refactor) partially executed 2026-06-22 — clean/low-risk sub-tracks done,
+> gate-green, committed (local only on `alt-admin` `dev`):**
+> - ✅ **ST1 — form primitives + tokens** (`b8e4596`): added `forms/ui-select/` (Headless Listbox),
+>   `forms/checkbox-dropdown.tsx`, `forms/custom-switch-input-boolean.tsx`; aligned `custom-input`
+>   + `.custom-input`/`.custom-input-sm` CSS to cyan. **No new deps, no new translation keys.**
+>   Primitives are **additive — not yet wired into call sites.**
+> - ✅ **ST2 — login + auth-wrapper** (`02a07a5`): cyan card layout, gradient bar, subtitle, re-enabled
+>   forgot-password link (route exists in alt); added `web:login_subtitle` (EN+AR).
+> - ✅ **ST6 — modals (safe subset)** (`c512e87`): slate backdrop; removed dead `print-modal copy.tsx`.
+>   `ModalBody` card restyle **deferred** — alt modals supply their own inner card today, so cyan's
+>   `bg-white border shadow-xl` would nest cards; do it with the listing-stack modal migration.
+>
+> **Track 2 NOT done (deliberately deferred — large / runtime-risky / judgment-heavy; need
+> supervision):**
+> - ⏭️ **ST5 — drop `react-select`:** react-select is fully encapsulated in the `forms/custom-select`
+>   wrapper (only 2 direct importers; **76** wrapper call sites). The single-select wrapper-swap to
+>   `ui-select` is trivial, **but 23 files use `isMulti`** and need migrating to `CheckboxDropdown`,
+>   which has a **different contract** (`string[]` vs react-select `{value,label}[]`) → per-site state
+>   changes + runtime QA (guest form steps highest-risk). A hybrid `isMulti` branch in the wrapper is
+>   a **forbidden dual code path** (CLAUDE.md #3), so this must be a full per-site migration.
+> - ⏭️ **ST3 — sidebar shell:** collapse/drawer mechanics are portable, but grouping is a design
+>   decision (plan says **don't** copy cyan's 4-group map verbatim — redesign for alt's module set).
+> - ⏭️ **ST4 — listing stack:** the multi-week long pole (~42 listings); prerequisite for Track 4 SMTP.
+>
+> **Next:** ST5 / ST3 / ST4 (each its own session). ST1's primitives are ready to consume.
 
 ---
 
