@@ -21,6 +21,7 @@ cluster — they reference each other by bare filename, so they live together he
 | [COUNTDOWN_HOOK_REPLACEMENT_PLAYBOOK.md](COUNTDOWN_HOOK_REPLACEMENT_PLAYBOOK.md) | reference (portable) | ♻️ drop `reactjs-countdown-hook` (React 16 peer-dep warning) → local `useTimer` hook. ✅ done on alt (fe `17f3451` · la `d4dbd74`); 🔶 not yet ported to cyan. |
 | [ADMIN_RBAC_AND_GSSP_RESTRUCTURE_PLAN.md](ADMIN_RBAC_AND_GSSP_RESTRUCTURE_PLAN.md) | open-work plan | ✅ Track A done (drop `getServerSideProps` → client `TypeGate`, alt-admin `48ea141`, 132 files); 🅿️ Track B (cyan-parity roles/permissions RBAC, backend-first, ⚠️ `/get-profile` mobile-contract) = Track 1 of the master plan below. |
 | [CYAN_FEATURE_PARITY_MASTER_PLAN.md](CYAN_FEATURE_PARITY_MASTER_PLAN.md) | open-work plan (orchestration) | 🅿️ planned — master sequencing for the cyan→alt feature/UI migration: **(1)** RBAC → **(2)** UI refactor (login/sidebar/listing-stack/forms/drop-react-select/modals) → **(3)** secondary-status removal → **(4)** DB-driven SMTP config. Decisions: RBAC-first, breaking mobile OK, no form-builder. No code yet. |
+| [BACKEND_ADMIN_TYPE_RBAC_CUTOVER_PLAN.md](BACKEND_ADMIN_TYPE_RBAC_CUTOVER_PLAN.md) | execution record | ✅ executed 2026-06-23 — **Track 1 complete.** ~20 backend `$user->type` authz checks (`GuestsController`/`Hotels`/`Cvent`) migrated to `PermissionService`, gate-identity → `hasFeature('gates')`, `admins.type` dropped. Gate-green, not pushed: `alt-backend` `38bacbc` · `alt-admin` `327e744` (+ Bucket B `25f4250`). |
 
 ## Where the actual work lives
 
