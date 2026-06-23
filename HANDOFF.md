@@ -3,19 +3,21 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-06-23 — Track 1 COMPLETE + Track 2 (UI refactor) ST5/ST3/ST4-foundation landed.
-Gate-green on `dev`, not pushed.**
+**2026-06-23 — Track 1 COMPLETE + Track 2 ST5/ST3/ST4-foundation + Track 3 COMPLETE
+(secondary-status removal). Gate-green on `dev`, not pushed.**
 
 Track 1 (RBAC / `user.type` drop) is complete: `user.type` is gone from admin + backend,
 `admins.type` dropped, all authz is role/permission driven via `App\Services\PermissionService`.
 Track 2 this session: dropped `react-select` (ST5), added the desktop-collapse + mobile-drawer
 sidebar shell (ST3), and ported the reusable listing stack as additive infra (ST4 foundation).
+Track 3: removed the alt-only secondary-status feature end-to-end (backend + admin).
 
 ## Current SHAs (committed on `dev`, not pushed)
 
-- `alt-admin` @ `e8031b3` (ST4 listing-stack port) — also `d3dc88f` (ST3 sidebar),
-  `c37103d` (ST5 react-select drop), `327e744` (T1 type-drop), `25f4250` (T1 Bucket B).
-- `alt-backend` @ `38bacbc` (backend type→RBAC cutover + drop migration).
+- `alt-admin` @ `5505155` (T3 secondary-status UI removal) — also `e8031b3` (ST4 listing-stack),
+  `d3dc88f` (ST3 sidebar), `c37103d` (ST5 react-select drop), `327e744` (T1 type-drop).
+- `alt-backend` @ `f6828ea` (T3 secondary-status removal + 3 drop migrations) — also `38bacbc`
+  (T1 type→RBAC cutover + drop migration).
 - `docs` (on `main`): cutover plan + master-plan status + README + this handoff.
 
 ## What landed this session
@@ -65,6 +67,29 @@ sidebar shell (ST3), and ported the reusable listing stack as additive infra (ST
 > ⚠️ Runtime-QA caveat: ST5 multi-select + the sidebar collapse/RTL flyouts compile + build green
 > but were not browser-tested this session (user away). Smoke-test guest-form multi-selects, the
 > admins guest-access multis, and the collapsed-sidebar submenu flyouts (LTR + RTL) before pushing.
+
+## Track 3 — secondary-status removal (COMPLETE, gate-green on `dev`)
+
+Removed the alt-only secondary-status participation feature end-to-end. Guest status is now driven
+solely by `guest_status_id` via the category `status_config` primary workflow (`status_config` JSON
+column kept; only the `secondary_status_id` keys stripped).
+
+- **Backend** (`f6828ea`): dropped `guests.secondary_status_id`, `admins.secondary_status_ids`,
+  `categories.has_secondary_participation`/`primary_status_field` (3 reversible forward migrations);
+  stripped secondary from Guest/Category/Admin models + helpers, GuestsController
+  (with/filter/access-filter/register/accept/reject), DashboardStatsController (access filter +
+  deleted `secondaryOverall`), AdminsController, AuthController@profile, Guests/Categories/Admins
+  resources, CategorySeeder, permission catalog (`dashboard.secondary_overall`).
+- **Admin** (`5505155`): categories-form (secondary switch + primary-status-field selector +
+  per-step secondary pickers), admins form/listing, guests listing + page + search filter +
+  fetch-data-url, see-more chip, dashboard SecondaryOverALL widget (deleted) + component-list,
+  `useGuestStatusesSelect`, interfaces, EN+AR translations.
+
+Decisions (fresh basecode, consistent with prior calls): `active_status_id` **aliased** to
+`guest_status_id` (not dropped); admins scoped **only** by secondary status lose access (accepted,
+no data migration); **mobile contract break accepted** per D2 — removed
+`GET /admin/dashboard/guests/secondary-status` and the secondary fields from the admin guests
+resource (these are admin-facing, not in the mobile guest surface).
 
 ## Next: Track 2 remaining
 

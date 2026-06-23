@@ -293,6 +293,18 @@ guests `filters-config-dialog`/`columns-config-dialog` (tied to cyan's forms + l
 
 ## TRACK 3 — Secondary-status removal
 
+> **✅ DONE 2026-06-23 — gate-green, committed on `dev` (not pushed).** `alt-backend` `f6828ea`,
+> `alt-admin` `5505155`. Removed end-to-end: dropped `guests.secondary_status_id`,
+> `admins.secondary_status_ids`, `categories.has_secondary_participation`/`primary_status_field`
+> (3 reversible forward migrations); `status_config` JSON kept, only `secondary_status_id` keys
+> stripped. Backend models/controllers/resources/seeder/permission-catalog + the
+> `GET /admin/dashboard/guests/secondary-status` route removed; admin forms/listings/see-more/
+> dashboard widget/interfaces/hook + EN+AR translations removed. Decisions (§3.4): keep primary
+> `status_config` workflow ✔; `active_status_id` **aliased** to `guest_status_id` (not dropped);
+> secondary-only-scoped admins lose access (accepted); **no data migration** (fresh basecode);
+> mobile-contract break accepted per D2. Gates: Pint `--dirty` clean, `php artisan test`
+> 452 pass / 3 pre-existing env failures; `yarn type-check` + `yarn production` green.
+
 **Goal:** remove the alt-only "secondary status" feature entirely (backend + admin). Breaking the
 mobile contract is acceptable (D2), but every touch point is flagged.
 
