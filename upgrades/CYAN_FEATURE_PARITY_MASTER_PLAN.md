@@ -121,19 +121,28 @@
 >   `ModalBody` card restyle **deferred** — alt modals supply their own inner card today, so cyan's
 >   `bg-white border shadow-xl` would nest cards; do it with the listing-stack modal migration.
 >
-> **Track 2 NOT done (deliberately deferred — large / runtime-risky / judgment-heavy; need
-> supervision):**
-> - ⏭️ **ST5 — drop `react-select`:** react-select is fully encapsulated in the `forms/custom-select`
->   wrapper (only 2 direct importers; **76** wrapper call sites). The single-select wrapper-swap to
->   `ui-select` is trivial, **but 23 files use `isMulti`** and need migrating to `CheckboxDropdown`,
->   which has a **different contract** (`string[]` vs react-select `{value,label}[]`) → per-site state
->   changes + runtime QA (guest form steps highest-risk). A hybrid `isMulti` branch in the wrapper is
->   a **forbidden dual code path** (CLAUDE.md #3), so this must be a full per-site migration.
-> - ⏭️ **ST3 — sidebar shell:** collapse/drawer mechanics are portable, but grouping is a design
->   decision (plan says **don't** copy cyan's 4-group map verbatim — redesign for alt's module set).
-> - ⏭️ **ST4 — listing stack:** the multi-week long pole (~42 listings); prerequisite for Track 4 SMTP.
+> **Track 2 landed 2026-06-23 (ST5, ST3, ST4-foundation — gate-green, committed local on
+> `alt-admin` `dev`):**
+> - ✅ **ST5 — drop `react-select`** (`c37103d`): `custom-select` wrapper re-exports the `ui-select`
+>   primitive for single-select; the 11 multi components (`*-select-multi` + `admins-select` dual)
+>   wrap `CheckboxDropdown` internally but keep their external `callBack(options[])` contract, so
+>   **consuming forms were untouched** (the feared per-site form churn was avoided by contract
+>   preservation). One bare `isMulti CustomSelect` (titles `allowed_genders`) converted. Removed
+>   `react-select` + `@types/react-select` + dead `custom-select copy.tsx` / `css/react-select.tsx`.
+> - ✅ **ST3 — sidebar shell** (`d3dc88f`): persisted desktop collapse (`w-60`↔`w-20`, icon-only,
+>   portaled `anchor` submenu flyouts) + mobile backdrop drawer w/ auto-close. **Accordion-group
+>   redesign deferred** (kept the existing flat `isSection` grouping — design decision, needs the user).
+> - ✅ **ST4 — listing stack FOUNDATION** (`e8031b3`): ported `interfaces/listing.ts`,
+>   `hooks/use-listing-state.ts`, `components/shared/listing/*`. **Additive, not wired** — the ~42
+>   listings are untouched. alt's `{data, meta}` API already matches the hook (verified vs `admins`).
 >
-> **Next:** ST5 / ST3 / ST4 (each its own session). ST1's primitives are ready to consume.
+> **Track 2 NOT done (remaining):**
+> - ⏭️ **ST4 per-listing migration:** the multi-week long pole — pilot on `admins`, then migrate the
+>   ~42 listings module-by-module. Prerequisite for Track 4 SMTP. Needs supervision + runtime QA.
+> - ⏭️ **ST3 accordion grouping:** collapsible section *groups* — a design decision, redesign w/ user.
+>
+> **Runtime-QA caveat:** ST5 multis + ST3 collapse/RTL flyouts compile + build green but were not
+> browser-tested (landed in an unsupervised session). Smoke-test before pushing.
 
 ---
 
