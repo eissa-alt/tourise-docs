@@ -77,14 +77,28 @@
 >   block/unblock guards use `!admin.role?.is_super`. All gate-green (pint, RBAC tests, type-check,
 >   production build). **Handoff QA:** a *pre-existing* non-super role would need `export` re-granted to
 >   regain a per-module export (non-issue on fresh basecode — Super only).
-> - **STILL BLOCKING the `admins.type` column drop:**
->   1. **admins create/edit/filter type→role cutover (feature work, NOT mechanical):** `admins-form.tsx`
->      + `search-admins.tsx` still assign/query the admin **entity** `type` via `data/admins-types-select`.
->      RBAC replacement = assign/filter by **role** (role_id already on the model). Backend
->      `AdminWorkshopResource` + `AdminSessionsResource` also still emit `type`.
->   2. **admins-choose + `data/admins-types`:** the legacy "pick an admin type to create" screen
->      (`pages/[lang]/admins/_create.tsx`) is **orphaned** — live create flow is `create.tsx` →
->      `AdminsForm`. Safe to delete once (1) lands.
+> - **admins type→role cutover — DONE 2026-06-22.** `alt-backend` `dev` `5e4786f`: `AdminsController@store`
+>   now `role_id required|exists:roles,id` + `type nullable` (index already filtered by `role_id`).
+>   `alt-admin` `dev` `740ed40`: `admins-form` dropped the legacy `type` select — the RBAC role select is
+>   now required (Controller + `validation:required`) and is the sole capability assignment; `search-admins`
+>   filters by role (`/roles/select`, query `type`→`role_id`). `d993de4`: deleted the orphaned legacy
+>   chooser chain — `pages/[lang]/admins/_create.tsx`, `admins-choose.tsx`, `data/admins-types*`, and
+>   **retired `utils/hasAccess.ts`** (its last reader). All gate-green (type-check + production build; pint +
+>   RBAC tests). A pre-existing, unrelated `QrScannerTest` avatar-URL failure was confirmed present before
+>   these changes.
+> - **`user.type` is now fully retired from the admin app EXCEPT Bucket B** (verified by grep — every other
+>   hit is a comment or an unrelated `.type`). Remaining live readers, all behavioral/`pif` form-shape:
+>   `guests/froms/{default/one-step, pif/one-step, pif/one-step-rsvp, pif/fours-steps}/step-1.tsx` (×4,
+>   `switch(user.type)` rendering different field sets per type) and the see-more panels
+>   `gusets-see-more-by-admin/by-admins/pif/{one-step,one-step-rsvp}/step-1.tsx` + `see-more-admin.tsx`.
+>   **PRODUCT DECISION NEEDED:** there is no RBAC signal for `pif` (the migration never mapped it) and no
+>   permission maps to "show the badge/guest field-set". Decide: (a) is `pif` still needed in this basecode
+>   or is it PIF-leftover to remove; (b) should the per-type field variants collapse to one form (driven by
+>   the guest's category/form_shape, not the admin) or map to roles.
+> - **`admins.type` column drop (final step, after Bucket B):** also requires
+>   `AdminsController@selectList` (gate-agents via `type='gate'` → role-based), `AdminWorkshopResource` +
+>   `AdminSessionsResource` + `AdminsResources` (still emit `type`), then the forward migration to drop the
+>   column. Check `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` (already confirmed admin-`type`-safe).
 > - **Bucket B — behavior-critical `switch(user.type)` form logic** (NOT mechanical — needs product
 >   mapping + QA): guest registration forms `guests/froms/{default,pif}/**/{one-step,one-step-rsvp,
 >   fours-steps}/step-1.tsx` (×4, incl. a special `'pif'` type) and see-more admin modals
