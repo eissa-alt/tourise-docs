@@ -75,14 +75,26 @@ ST3 sidebar accordion grouping (previously deferred), added the DB-driven SMTP c
   statuses) with a live count, password keep/modify radio cards, security (OTP) section, sticky footer.
   Kept alt's data model (manual password, string `otp_to_login`).
 
-> **Deferred (B) — admin email-invite / `password_mode` flow.** Cyan's create form also offers a
-> "send setup email" invite path (SMTP-gated) instead of a manual password. Porting it is a dedicated
-> task: it needs new `admins` columns (`password_mode`, `is_seeded`, `is_active`, `created_by`,
-> `last_login_at`), an `AdminInvite` model + table, EN/AR `emails.admin_invite` blade templates, a
-> frontend reset-password-by-token page, and a `resend-invite` / `toggle-status` route pair — plus live
-> SMTP to verify delivery. Alt already has `DynamicSmtpService` + `smtp-configs/check-default`, so the
-> mail plumbing exists; the rest does not. Left for a focused branch (touches `routes/api.php` — confirm
-> against the mobile PDF first, though these are admin-only routes).
+> **(B) admin email-invite / `password_mode` flow — DONE** (branch `feat/admin-invite-flow`, both
+> `alt-backend` + `alt-admin`, gate-green, NOT merged/pushed). Cyan's "send setup email" invite path is
+> now ported, adapted to alt's conventions rather than blindly copying cyan's extra columns:
+> - **Adapted (not ported):** alt keeps role-based `is_super` protection (no `is_seeded`), `status`
+>   string activation (no `is_active`), and gates resend via `email_verified_at` (no `last_login_at`).
+>   So the only new column is **`password_mode`** (`manual`|`invite`, default `manual`).
+> - **Backend:** migrations `2026_06_24_000001` (add `password_mode`) + `2026_06_24_000002` (create
+>   `admin_invites`); `AdminInvite` model; `AdminsController::store` branches manual vs invite (random
+>   placeholder hash + `sendInviteEmail`); new `AdminsController::resendInvite` (gated on
+>   `password_mode=invite` && not yet verified); `AuthController::resetpassword` implemented against
+>   `admin_invites` (sets password + `email_verified_at`, deletes token); EN/AR
+>   `emails/admin_invite/{en,ar}.blade.php`; routes `POST /admin/reset-password` (public) +
+>   `POST /admin/admins/{id}/resend-invite` (gated `admins_management,create`); `AdminsResources` now
+>   emits `password_mode` + derived `invite_pending`.
+> - **Admin FE:** create-form password-strategy radio (set now vs send setup email) with
+>   `smtp-configs/check-default` gating + "configure email" link; resend-invite row action on the
+>   listing; `reset-password/[token]` page wired to `POST /reset-password`; `password_mode`/
+>   `invite_pending` added to `AdminType`; EN+AR keys added (parity 1527=1527).
+> - **Still needs live SMTP to verify actual email delivery** (same constraint as the Track 4 smoke
+>   test). Mobile contract unaffected — the two new routes are admin-only.
 
 ## Gates
 
@@ -106,8 +118,9 @@ ST3 sidebar accordion grouping (previously deferred), added the DB-driven SMTP c
 - **Runtime / browser QA** — boot backend + admin (+ frontend/landing) and verify the above caveat list.
 - **Track 4 SMTP smoke test** — hit `sendTestEmail` with real creds; confirm `DynamicSmtpService` applies
   the active DB config.
-- **(Deferred B) admin email-invite / `password_mode` flow** — see the deferral callout above; pick up on
-  a dedicated branch when the invite UX is wanted.
+- **(B) admin email-invite / `password_mode` flow — DONE on `feat/admin-invite-flow`** (backend + admin).
+  Browser-test the invite create path + reset-by-token page, then verify real email delivery with live
+  SMTP. Merge the branch into `dev` once QA passes.
 - **Push `dev`** — all four repos are ahead with no upstream; set upstream + push once QA passes.
 
 > Pint note: the backend repo is not Pint-clean at baseline. Use `pint --dirty` (formats only changed
