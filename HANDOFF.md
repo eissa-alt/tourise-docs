@@ -24,7 +24,6 @@ ST3 sidebar accordion grouping (previously deferred), added the DB-driven SMTP c
   `c598fe0`/`b1442de`/`b3ec645`/`dd2d45b`/`e8031b3` (ST4 listing stack), `6b9c9d8` (P4 SMTP),
   `5505155` (T3 secondary-status), `d3dc88f` (ST3 shell).
 - `alt-frontend` @ `f32e1ae` (P5.trim — positions field/select + agenda header fetch dropped).
-- `alt-landing` @ `e6eb48a` (P5.trim — positions field/select + agenda refs dropped).
 - `docs` (on `main`) @ `343a415` + this handoff.
 
 ## What landed this session
@@ -49,8 +48,8 @@ ST3 sidebar accordion grouping (previously deferred), added the DB-driven SMTP c
   guest/category/invitation columns. **Standalone tables removed and the original create-migrations
   edited in place → requires `migrate:fresh` (no incremental drop migration).** Admin (`e3a0677`,
   157 files, −17.9k): module pages/components/interfaces/selects + feature-id wiring + EN/AR keys.
-  Frontend/landing: positions field + selects + interface + `/agenda` header fetch stripped from the
-  public registration + landing forms.
+  Frontend: positions field + selects + interface + `/agenda` header fetch stripped from the
+  public registration forms.
 - **DB reseeded**: `php artisan migrate:fresh --seed --force` — all migrations apply on a fresh schema,
   all seeders succeed.
 
@@ -100,7 +99,7 @@ ST3 sidebar accordion grouping (previously deferred), added the DB-driven SMTP c
 
 - Backend: `route:list` resolves (441 routes, no refs to deleted classes); `migrate:fresh --seed` clean;
   `pint --test` on the changed files = **passed**.
-- Admin / Frontend / Landing: `yarn type-check` green; `yarn production` green (run during the listing /
+- Admin / Frontend: `yarn type-check` green; `yarn production` green (run during the listing /
   removal work this session).
 - EN/AR translation parity intact (admin web.json: equal key counts, zero diff).
 - **Mobile contract unaffected** — none of the trimmed modules are in the mobile surface; no
@@ -115,7 +114,7 @@ ST3 sidebar accordion grouping (previously deferred), added the DB-driven SMTP c
 
 ## Next
 
-- **Runtime / browser QA** — boot backend + admin (+ frontend/landing) and verify the above caveat list.
+- **Runtime / browser QA** — boot backend + admin (+ frontend) and verify the above caveat list.
 - **Track 4 SMTP smoke test** — hit `sendTestEmail` with real creds; confirm `DynamicSmtpService` applies
   the active DB config.
 - **(B) admin email-invite / `password_mode` flow — DONE on `feat/admin-invite-flow`** (backend + admin).

@@ -1,7 +1,7 @@
 # alt-static-basecode-docs
 
 Single source of truth for the **ALT Static Basecode** platform docs. This `docs/` folder is its
-own git repo, cloned in place inside the `alt-static-basecode-repos` wrapper (the four sub-app
+own git repo, cloned in place inside the `alt-static-basecode-repos` wrapper (the three sub-app
 repos sit beside it). Only `CLAUDE.md` lives at the wrapper root; everything else is here.
 
 Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` /

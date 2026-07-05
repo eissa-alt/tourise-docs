@@ -5,7 +5,7 @@ Binding rules for any AI agent operating in this repo.
 ## Must do
 
 1. **Read the file you're about to change first.** Match its style and structure.
-2. **EN + AR translations in the same commit.** No hardcoded user-facing strings in any of the three Next apps (`-admin`, `-frontend`, `-landing`).
+2. **EN + AR translations in the same commit.** No hardcoded user-facing strings in either Next app (`-admin`, `-frontend`).
 3. **Preserve existing API response shapes.** This repo has an external mobile consumer — see `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before touching `routes/api.php` or `app/Http/Resources/*`.
 4. **Use `checkActionPermission()`** for action gating in the admin UI.
 5. **Email templates** follow the rules in `alt-static-basecode-backend/DARK_MODE_EMAIL_NOTES.md`.
@@ -19,7 +19,7 @@ Binding rules for any AI agent operating in this repo.
 1. **Do not touch `.env*` files** or the deploy key `alt-static-basecode.pem` (one level above the repos folder).
 2. **Do not bump framework versions** (Next, React, Laravel, PHP) without an explicit task and a dedicated branch. This project is still Next 12 / React 17.
 3. **Do not break the mobile API contract.** If a change is unavoidable, the `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.*` file gets a matching update in the same PR.
-4. **Do not delete or replace** `components/admin-modules/guests/froms/` (admin) or `components/join/forms/pif/` / `components/join/forms/clientA/` (frontend / landing). cyan-basecode retired that pattern — PIF has not.
+4. **Do not delete or replace** `components/admin-modules/guests/froms/` (admin) or `components/join/forms/pif/` / `components/join/forms/clientA/` (frontend). cyan-basecode retired that pattern — PIF has not.
 5. **Do not remove Sentry config files** in any of the three Next apps.
 6. **Do not introduce new dependencies** without justification.
 7. **Do not rename files, classes, or routes** unless required by the task.

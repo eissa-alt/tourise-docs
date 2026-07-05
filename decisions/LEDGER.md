@@ -17,3 +17,11 @@ OWASP-hardened). The frozen lineage record under `../upgrades/` documents what t
 
 - **What the baseline already includes:** [../upgrades/UPGRADE_SUMMARY.md](../upgrades/UPGRADE_SUMMARY.md)
 - **Why directors was the chosen baseline:** [../upgrades/BASELINE_DECISION.md](../upgrades/BASELINE_DECISION.md)
+
+## D2 — 2026-07-05 — dropped the `-landing` app
+
+The directors baseline carried a 4th sub-app, `alt-static-basecode-landing` (Next 15 marketing site).
+It is **not needed for this project** and has been dropped — `alt-static-basecode` is now a **three
+sub-app** baseline (`-backend`, `-admin`, `-frontend`) plus `docs/`. Current-state docs were updated to
+match; the frozen lineage under `../upgrades/` (and D1's clone-source SHAs) still mention `-landing` as
+an accurate record of the baseline it came from.

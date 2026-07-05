@@ -1,10 +1,10 @@
 # Architecture Notes — alt-static-basecode
 
-## Four-app split
+## App split
 
 ```
 …-frontend (public registration)  ─┐
-…-landing  (marketing)           ──┼──▶ …-backend (Laravel 12 API) ◀── …-admin (CMS)
+                                    ├──▶ …-backend (Laravel 12 API) ◀── …-admin (CMS)
 mobile     (external app)        ──┘            │
                                                 ▼
                                           MySQL / MariaDB
@@ -48,15 +48,15 @@ Model families (in addition to the standard guest/category/email/badge set):
 
 > Before changing `routes/api.php` or any mobile-touching endpoint, check `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` — those endpoints have an external consumer.
 
-## Three Next 15 apps (`-admin`, `-frontend`, `-landing`)
+## Two Next 15 apps (`-admin`, `-frontend`)
 
-Next 15 + React 18.3.1 + Tailwind v4 + Headless UI v2, **pages router**. Same internal folder convention in all three:
+Next 15 + React 18.3.1 + Tailwind v4 + Headless UI v2, **pages router**. Same internal folder convention in both:
 
 ```
 pages/
   [lang]/           EN/AR locale prefix
   _app.tsx _document.tsx _error.tsx
-apis/               axios callers (admin/frontend; landing rarely)
+apis/               axios callers (admin/frontend)
 auth/               guarded layouts / SSR helpers
 components/
   admin-modules/    (admin only) one folder per domain
@@ -81,7 +81,7 @@ Conference-platform domains: `agenda`, `conference`, `event-days`, `events`, `me
 Forms are organized by **project + flow** under `components/admin-modules/guests/froms/<project>/<flow>/`
 and registered in `data/form-shapes-config.tsx`. Reference: `alt-static-basecode-admin/FORM_RESTRUCTURE_GUIDE.md`.
 The same pattern lives mirrored under `components/join/forms/<project>/` in the public-facing
-`-frontend/` and `-landing/` apps.
+`-frontend/` app.
 
 > **Keep the form-shapes pattern.** cyan-basecode deleted it in favor of `DynamicFormRenderer`; this
 > baseline is **on the older pattern on purpose** (CLAUDE.md hard-rule #4). Do **not** port cyan's
@@ -116,19 +116,13 @@ Why `<img>` here and not `<Image />`:
 runtime-generated preview → plain `<img>` + the scoped `eslint-disable-next-line` with a `-- reason`.
 Do **not** "fix" the existing disabled `<img>` spots by converting them to `next/image`.
 
-## `-landing/` (the 4th app)
-
-Smaller than `-frontend/` — no `apis/`, no `interfaces/`. A mostly-static marketing site that still
-ships EN/AR translations. Its `pages/`/`components/` shape mirrors the frontend's home + share +
-speakers + registration-closed pages.
-
 ## Data flow for a new feature
 
 ```
 migration → model → (Form Request) → Controller → (Service) → API Resource → routes/api.php
          → apis/modules/<feature>  (admin and/or frontend)
          → components/admin-modules/<feature>/  (admin)
-         → pages/[lang]/<feature>/             (admin / frontend / landing)
+         → pages/[lang]/<feature>/             (admin / frontend)
          → translations/{en,ar}/<namespace>.json   (same commit)
          → docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.* if it affects the mobile contract
 ```

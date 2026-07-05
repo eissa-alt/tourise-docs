@@ -27,24 +27,22 @@ in `../upgrades/` (`UPGRADE_SUMMARY.md`, `BASELINE_DECISION.md`) documents exact
 
 ```
 alt-static-basecode-repos/
-├── alt-static-basecode-backend/     Laravel 12 API (PHP 8.2, Sanctum) — serves admin, frontend, landing, mobile
+├── alt-static-basecode-backend/     Laravel 12 API (PHP 8.2, Sanctum) — serves admin, frontend, mobile
 ├── alt-static-basecode-admin/       Next.js 15 + React 18 CMS (TS, Tailwind v4, pages router)
 ├── alt-static-basecode-frontend/    Next.js 15 + React 18 public registration site
-├── alt-static-basecode-landing/     Next.js 15 + React 18 marketing landing  ← the 4th sub-app
 └── docs/                            project docs (own sibling git repo: ai/ upgrades/ tasks/ decisions/ process/ mobile/)
 ```
 
-This layout has a **4th sub-app** (`-landing/`) — carried from the directors baseline, which was the
-only ALT repo with one.
+> The directors baseline carried a 4th `-landing/` marketing app; it was dropped from
+> `alt-static-basecode` (not needed here) — see [`../decisions/LEDGER.md`](../decisions/LEDGER.md) (D2).
 
 ## Purpose of each sub-app
 
 | Sub-app | Serves | Notes |
 |---|---|---|
-| `alt-static-basecode-backend` | REST API for admin, public site, landing, **and mobile** | ~69 models — see `ARCHITECTURE_NOTES.md` |
+| `alt-static-basecode-backend` | REST API for admin, public site, **and mobile** | ~69 models — see `ARCHITECTURE_NOTES.md` |
 | `alt-static-basecode-admin` | Admin CMS: guests, invitations, categories, emails, SMS, badges, exports, agenda, conferences, sessions, workshops, publications, media center, notifications, logs | pages router |
 | `alt-static-basecode-frontend` | Public registration + complete-data site (EN/AR) | |
-| `alt-static-basecode-landing` | Public marketing landing (EN/AR) | smaller; mostly static |
 
 ## Domain features that exist here
 

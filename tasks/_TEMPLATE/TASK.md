@@ -3,7 +3,7 @@
 - **Status:** `todo` | `in-progress` | `blocked` | `done` | `dropped`
 - **Opened:** YYYY-MM-DD
 - **Owner:** <name>
-- **Sub-app(s):** backend | admin | frontend | landing | docs
+- **Sub-app(s):** backend | admin | frontend | docs
 - **Branch(es):** `dev` (+ feature branch if any)
 
 ## Goal

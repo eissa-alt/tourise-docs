@@ -13,10 +13,10 @@ php artisan db:seed                                    # optional default data
 php artisan serve                                      # http://localhost:8000
 ```
 
-### Admin / Frontend / Landing
+### Admin / Frontend
 
 ```bash
-cd alt-static-basecode-admin       # or -frontend / -landing
+cd alt-static-basecode-admin       # or -frontend
 yarn install
 yarn local                              # dev server with .env.local
 yarn type-check                         # tsc only
@@ -38,12 +38,11 @@ Same as the other event-platform repos, with three extra considerations:
 7. **Route** — `routes/api.php`. If this endpoint is consumed by mobile, update `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.*` in the same PR.
 8. **Admin axios** — `alt-static-basecode-admin/apis/modules/<thing>/`.
 9. **Frontend axios** (if public-facing) — `alt-static-basecode-frontend/apis/modules/<thing>/`.
-10. **Landing wiring** (if it shows on the marketing site) — `alt-static-basecode-landing/components/<area>/…`.
-11. **Admin components + pages** — `components/admin-modules/<thing>/` + `pages/[lang]/<thing>/`.
-12. **Permissions** — `checkActionPermission()` + shared SSR guard.
-13. **Translations** — EN + AR keys in `translations/{en,ar}/web.json` (and namespaces as needed), **same commit.**
-14. **History log + automation hook** — emit a `HistoryLog`; if there's an event other parts should react to, wire a listener/automation.
-15. **Push notification?** — go through `AppNotification` + `NotificationRecipient` + `DeviceToken`. Don't call providers directly.
+10. **Admin components + pages** — `components/admin-modules/<thing>/` + `pages/[lang]/<thing>/`.
+11. **Permissions** — `checkActionPermission()` + shared SSR guard.
+12. **Translations** — EN + AR keys in `translations/{en,ar}/web.json` (and namespaces as needed), **same commit.**
+13. **History log + automation hook** — emit a `HistoryLog`; if there's an event other parts should react to, wire a listener/automation.
+14. **Push notification?** — go through `AppNotification` + `NotificationRecipient` + `DeviceToken`. Don't call providers directly.
 
 ## Common AI tasks
 
@@ -57,9 +56,8 @@ Same as the other event-platform repos, with three extra considerations:
 | Add a meeting-room slot | `MeetingRoom` + `MeetingRoomSlot` + `meeting-rooms/` admin page |
 | Add a push notification | `AppNotification` + `NotificationRecipient` + listener; respect `DeviceToken` |
 | Add an in-app chat feature | `ChatRoom` + `ChatMessage` |
-| Add a dynamic-form flow | `components/admin-modules/guests/froms/<project>/<flow>/` + `data/form-shapes-config.tsx` (admin); mirror in `-frontend/` and `-landing/` `components/join/forms/<project>/…` |
+| Add a dynamic-form flow | `components/admin-modules/guests/froms/<project>/<flow>/` + `data/form-shapes-config.tsx` (admin); mirror in `-frontend/` `components/join/forms/<project>/…` |
 | Tweak an email template | blade in `resources/views/emails/`; respect `DARK_MODE_EMAIL_NOTES.md` |
-| Edit landing copy | `alt-static-basecode-landing/pages/[lang]/…` + `translations/{en,ar}/web.json` (same commit) |
 
 ## Where docs live
 

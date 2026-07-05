@@ -21,30 +21,28 @@ How to get the project running on a machine — **two scenarios**:
 | Composer | 2.x |
 | MySQL | running locally (backend default `DB_CONNECTION=mysql`) |
 
-**Repos** (four separate git repos, cloned side-by-side under one parent folder — no monorepo):
+**Repos** (three separate git repos, cloned side-by-side under one parent folder — no monorepo):
 
 ```
 alt-static-basecode-repos/
-├── alt-static-basecode-backend/    # Laravel 12 API (serves admin, frontend, landing + mobile)
+├── alt-static-basecode-backend/    # Laravel 12 API (serves admin, frontend + mobile)
 ├── alt-static-basecode-admin/      # Next 15 CMS
-├── alt-static-basecode-frontend/   # Next 15 registration site
-└── alt-static-basecode-landing/    # Next 15 marketing landing
+└── alt-static-basecode-frontend/   # Next 15 registration site
 ```
 
 ---
 
 ## A. First-time setup (fresh machine / fresh clone)
 
-### 1. Clone the four repos side-by-side
+### 1. Clone the three repos side-by-side
 
 ```bash
 mkdir -p alt-static-basecode-repos && cd alt-static-basecode-repos
 git clone https://github.com/eissa-alt/alt-static-basecode-backend.git
 git clone https://github.com/eissa-alt/alt-static-basecode-admin.git
 git clone https://github.com/eissa-alt/alt-static-basecode-frontend.git
-git clone https://github.com/eissa-alt/alt-static-basecode-landing.git
 # default working branch is `dev`:
-for r in backend admin frontend landing; do (cd alt-static-basecode-$r && git checkout dev); done
+for r in backend admin frontend; do (cd alt-static-basecode-$r && git checkout dev); done
 ```
 
 ### 2. Backend — `alt-static-basecode-backend/`
@@ -63,10 +61,10 @@ php artisan serve                # http://127.0.0.1:8000
 
 > **`.env` secrets:** `.env` is gitignored. After `cp .env.example .env`, set your local `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD`, mail, Firebase (push), and any API keys — get real values from a teammate / the secrets store.
 
-### 3. Admin / Frontend / Landing (same steps, per app)
+### 3. Admin / Frontend (same steps, per app)
 
 ```bash
-cd alt-static-basecode-admin        # repeat for -frontend and -landing
+cd alt-static-basecode-admin        # repeat for -frontend
 yarn install
 # .env.local is gitignored and has NO committed example → get it from a teammate:
 #   place .env.local (and .env.production) in the app root before running.
@@ -100,10 +98,10 @@ php artisan optimize:clear   # clear stale config/route/view/compiled cache (Lar
 # php artisan migrate        # only if your DB is behind — no new migrations in the recent commits
 ```
 
-### Admin / Frontend / Landing (per app)
+### Admin / Frontend (per app)
 
 ```bash
-cd alt-static-basecode-admin        # repeat for -frontend and -landing
+cd alt-static-basecode-admin        # repeat for -frontend
 git pull origin dev
 rm -rf node_modules .next yarn.lock package-lock.json   # drop stale lock + old Babel/SWC + Tailwind-v3 build cache
 yarn install

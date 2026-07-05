@@ -2,11 +2,11 @@
 
 Short crib sheet. The actual codebase + `EMAIL_EDITOR_UPDATES.md` + `admin_ui_ux_refactor_plan.md` + `FORM_RESTRUCTURE_GUIDE.md` are the authoritative references for their topics.
 
-## Frontend (admin / frontend / landing — Next 12 + TS + Tailwind)
+## Frontend (admin / frontend — Next 12 + TS + Tailwind)
 
 - **Functional components only.** Hooks-based.
 - **Translations:** `useTranslate()` / `<Translate>` — every user-facing string. Keys in `translations/en/*.json` and `translations/ar/*.json`. EN + AR **same commit.**
-- **Pages stay thin.** Logic lives in `components/admin-modules/*` (admin) or feature components (frontend/landing), or in `hooks/`.
+- **Pages stay thin.** Logic lives in `components/admin-modules/*` (admin) or feature components (frontend), or in `hooks/`.
 - **API calls** use `Axios`; tokens via `cookie`. Group callers under `apis/modules/<feature>/`.
 - **Fetching pattern:** local `loading`, `hasError`, `setX` state. Reuse helpers like `fetch-data-url`.
 - **Naming**

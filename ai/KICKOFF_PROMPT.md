@@ -25,8 +25,7 @@ Step 1 — Read, in this order:
  11. docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.* (mobile API contract — critical)
 
 Step 2 — Inspect the repo structure. Spot-check at least:
-  - The four sub-app folders: pif-...-admin/, -frontend/, -backend/, -landing/
-    (PIF is the only project with a 4th app)
+  - The three sub-app folders: ...-admin/, -frontend/, -backend/
   - alt-static-basecode-backend/composer.json (Laravel + PHP versions)
   - alt-static-basecode-admin/package.json (Next + React versions — still 12 / 17)
   - alt-static-basecode-backend/routes/api.php
@@ -36,7 +35,6 @@ Step 2 — Inspect the repo structure. Spot-check at least:
   - One end-to-end feature slice (pick e.g. sessions or workshops)
   - The dynamic-form folders under
     alt-static-basecode-admin/components/admin-modules/guests/froms/
-  - alt-static-basecode-landing/ — note it's smaller (no apis/, no interfaces/)
 
 Step 3 — Reply with a concise warm-up report, in this exact structure
 (short bullets, no essays):

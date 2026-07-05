@@ -14,11 +14,11 @@ Read-first process doc for anyone (human or AI) doing real work in alt-static-ba
 | Setting up / running locally | [SETUP_AND_UPDATE.md](SETUP_AND_UPDATE.md) |
 | Cloning this baseline into a new project | [CLONE_CHECKLIST.md](CLONE_CHECKLIST.md) |
 
-## The four sub-apps
+## The three sub-apps
 
 Separate git repos mounted side by side, **no monorepo tooling**: `alt-static-basecode-backend`
-(Laravel 12), `-admin` (Next 15), `-frontend` (Next 15), `-landing` (Next 15). `docs/` (this repo)
-is a fifth, doc-only sibling.
+(Laravel 12), `-admin` (Next 15), `-frontend` (Next 15). `docs/` (this repo) is a fourth,
+doc-only sibling.
 
 ## Branching & commits
 
@@ -42,7 +42,7 @@ is a fifth, doc-only sibling.
 ## Quality gate (before any push)
 
 - **Backend:** `./vendor/bin/pint --test` + `php artisan test --filter <FeatureTest>`
-- **Admin / Frontend / Landing:** `yarn type-check` + `yarn production`
+- **Admin / Frontend:** `yarn type-check` + `yarn production`
 
 ## Definition of Done
 

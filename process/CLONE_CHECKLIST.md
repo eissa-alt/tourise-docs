@@ -37,7 +37,6 @@ The rename in Bucket 1 therefore **excludes `docs/upgrades/`** (and this checkli
   tracked and comes for free; `.env` and the `.env.example2` production template are gitignored and must be carried by hand)
 - `pif-directors-gathering-admin/` → **`.env.local`** · **`.env.production`**
 - `pif-directors-gathering-frontend/` → **`.env.local`** · **`.env.production`**
-- `pif-directors-gathering-landing/` → **`.env.local`** · **`.env.production`**
 
 **Handling once carried:** copy **verbatim** so the new apps run immediately, then re-point the
 directors values (API URLs, keys, DB creds, Vercel/deploy targets) to the new project by hand afterward.
@@ -47,8 +46,7 @@ These still hold directors' live secrets until you do — do not commit them and
 # sanity check after the sub-app copy — every line below must exist in the NEW project
 ls -la <new>-backend/.env <new>-backend/.env.example2 \
        <new>-admin/.env.local <new>-admin/.env.production \
-       <new>-frontend/.env.local <new>-frontend/.env.production \
-       <new>-landing/.env.local <new>-landing/.env.production
+       <new>-frontend/.env.local <new>-frontend/.env.production
 ```
 
 ---
@@ -56,7 +54,7 @@ ls -la <new>-backend/.env <new>-backend/.env.example2 \
 ## Bucket 1 — mechanical rename (scripted)
 
 The identity is consistent, so it's basically three tokens. The slug `pif-directors-gathering`
-also fixes `-backend` / `-admin` / `-frontend` / `-landing` / `-docs` and the remote URL in one pass.
+also fixes `-backend` / `-admin` / `-frontend` / `-docs` and the remote URL in one pass.
 
 ```bash
 # --- edit these four lines, then paste the whole block ---
@@ -111,7 +109,7 @@ These record directors' specific history; they're meaningless for the new projec
 - [ ] **Re-init each code sub-app's git** — fresh history, no directors upstream. Per the
   branch process, **make `main` first, then branch `dev` off it** (code works on `dev`):
   ```bash
-  for app in backend admin frontend landing; do
+  for app in backend admin frontend; do
     repo="<NEW_SLUG>-${app}"
     rm -rf "$repo/.git"
     git -C "$repo" init -b main          # 1. main branch first
@@ -156,9 +154,9 @@ Rename gets the strings right; it does **not** make these *true* for the new pro
   - `docs/ai/ARCHITECTURE_NOTES.md` — fix the app split; **remove the directors-only callout**
     ("don't port cyan's `DynamicFormRenderer` / older form-shapes pattern") unless it applies.
   - `docs/ai/CODEBASE_DEEP_DIVE.md` — directors-specific deep-dive + drift findings; regenerate or delete.
-- [ ] **Review `CLAUDE.md` project-specific rules** — e.g. "only project with a `-landing` app",
-  the form-shapes rule (#4), the four-app list. Keep the inherited guardrails (Sentry removed,
-  quality gate, commit format, no framework bumps).
+- [ ] **Review `CLAUDE.md` project-specific rules** — e.g. the form-shapes rule (#4) and the
+  sub-app list. Keep the inherited guardrails (Sentry removed, quality gate, commit format,
+  no framework bumps).
 - [ ] **Lighter touch (rename usually enough, skim once):** `docs/ai/CODING_STYLE.md`,
   `CURRENT_WORKFLOW.md`, `AI_RULES.md`, `KICKOFF_PROMPT.md`, `docs/process/*`,
   `docs/process/SETUP_AND_UPDATE.md` (confirm clone URLs + the prereqs/versions still hold).
@@ -175,7 +173,7 @@ git -C docs commit -m "chore: initialize <NEW_SLUG> docs from pif-directors-gath
 
 ## Done when
 
-- [ ] Sub-app env files carried over (Bucket 0.5): backend `.env` + `.env.example2`; admin/frontend/landing `.env.local` + `.env.production` — all present in the new project, none skipped
+- [ ] Sub-app env files carried over (Bucket 0.5): backend `.env` + `.env.example2`; admin/frontend `.env.local` + `.env.production` — all present in the new project, none skipped
 - [ ] Verify grep (Bucket 1) returns only this checklist
 - [ ] `docs/upgrades/` left untouched (lineage intact)
 - [ ] `docs/.git` re-inited + new remote; no `pif-directors-gathering-docs` remote left; docs on `main`
