@@ -50,11 +50,11 @@ This supersedes the earlier "no upstream / not pushed" state: `origin` is set on
   The pre-commit hook now enforces Prettier/ESLint autofix on every commit.
 - **Backend:** not re-run this pass (backend RSVP/email work landed separately). Run `pint --dirty --test`
   + `php artisan test` before the next backend push.
+- **SMTP smoke test: DONE** — invite + reset-password email delivery verified against the active DB SMTP
+  config (`DynamicSmtpService`). No longer outstanding.
 
 ## Next / outstanding
 
-- **SMTP smoke test** — send a real invite + reset-password email with live SMTP creds; confirm
-  `DynamicSmtpService` applies the active DB config. (Pending since the Track 4 / invite work — needs env.)
 - **Browser QA** — invite create path + reset-by-token page; plus the migrated listings + sidebar
   accordion (LTR/RTL) from the earlier P5.trim / cyan-parity session, which compiled green but were never
   browser-tested.
