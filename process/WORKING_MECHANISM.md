@@ -44,6 +44,11 @@ doc-only sibling.
 - **Backend:** `./vendor/bin/pint --test` + `php artisan test --filter <FeatureTest>`
 - **Admin / Frontend:** `yarn type-check` + `yarn production`
 
+> **Pre-commit hook (admin / frontend):** each Next app has a husky + `lint-staged` pre-commit hook
+> that runs `eslint --fix` / `prettier --write` on staged files — so formatting stays clean even for
+> AI-agent edits (which bypass the editor's format-on-save). It's set up automatically on `yarn install`
+> (`prepare: husky`). Run `yarn lint:fix` to fix a whole app manually.
+
 ## Definition of Done
 
 Code merged to `dev` · EN+AR translations same commit · quality gate green · `TASK.md` closed +
