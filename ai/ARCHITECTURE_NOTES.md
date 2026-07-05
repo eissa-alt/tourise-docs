@@ -87,6 +87,35 @@ The same pattern lives mirrored under `components/join/forms/<project>/` in the 
 > baseline is **on the older pattern on purpose** (CLAUDE.md hard-rule #4). Do **not** port cyan's
 > `DynamicFormRenderer` here without a dedicated, scoped task.
 
+### Images: plain `<img>` vs `next/image`
+
+Most images use `next/image` (`<Image />`) — **keep doing that** for static assets, remote CDN images,
+and anything with a known/stable URL. That's where the optimizer, lazy-loading, and `srcset` pay off.
+
+A handful of spots intentionally use a plain `<img>` and carry a scoped
+`// eslint-disable-next-line @next/next/no-img-element` (with a `-- reason`). These are **dynamic,
+client-only images** where `next/image` adds cost but no benefit:
+
+- **User-upload previews** — the avatar/photo the user just picked, rendered from a `base64` data-URL
+  or `blob:` object-URL (e.g. `personal_image_x`, `doc1_x`/`doc2_x` in `components/join/forms/**/step-*.tsx`).
+- **Client-generated social/share cards** — the poster image built in the browser
+  (`components/share/sharebtn-sections.tsx`, `components/success/sharebtn-sections.tsx`).
+
+Why `<img>` here and not `<Image />`:
+
+1. **No optimization possible.** The optimizer can't process `data:`/`blob:` sources, so you'd need
+   `unoptimized` — i.e. `<Image />` with none of its upside, just extra props.
+2. **Unknown dimensions.** These previews have no fixed width/height ahead of time; `<Image />` forces
+   `width`/`height` (or `fill` + a sized parent) and would introduce layout/CLS risk for no gain.
+3. **No remote-domain allowlist churn.** Avoids adding transient/user origins to `next.config` `images.remotePatterns`.
+4. **History:** an earlier Next 12 **standalone/static-export** build here could not build with `next/image`
+   in these spots; the code has used `<img>` for dynamic previews ever since. We're now on plain
+   `next build` (SSR on Vercel), but the reasoning above still holds independently.
+
+**Rule of thumb for agents:** static/remote/known-URL image → `next/image`. Dynamic `data:`/`blob:`/
+runtime-generated preview → plain `<img>` + the scoped `eslint-disable-next-line` with a `-- reason`.
+Do **not** "fix" the existing disabled `<img>` spots by converting them to `next/image`.
+
 ## `-landing/` (the 4th app)
 
 Smaller than `-frontend/` — no `apis/`, no `interfaces/`. A mostly-static marketing site that still
