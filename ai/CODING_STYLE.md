@@ -2,7 +2,7 @@
 
 Short crib sheet. The actual codebase + `EMAIL_EDITOR_UPDATES.md` + `admin_ui_ux_refactor_plan.md` + `FORM_RESTRUCTURE_GUIDE.md` are the authoritative references for their topics.
 
-## Frontend (admin / frontend — Next 12 + TS + Tailwind)
+## Frontend (admin / frontend — Next 15 + TS + Tailwind v4)
 
 - **Functional components only.** Hooks-based.
 - **Translations:** `useTranslate()` / `<Translate>` — every user-facing string. Keys in `translations/en/*.json` and `translations/ar/*.json`. EN + AR **same commit.**
@@ -20,7 +20,7 @@ Short crib sheet. The actual codebase + `EMAIL_EDITOR_UPDATES.md` + `admin_ui_ux
 - **Email editor:** the rich-text/block editor was iterated heavily — see `EMAIL_EDITOR_UPDATES.md` before touching.
 - **Admin UI/UX redesign in progress:** `admin_ui_ux_refactor_plan.md` + `advanced_admin_redesign_rollout_checklist.md` — follow the locked decisions there for new admin screens.
 
-## Backend (Laravel 11 + PHP 8.2)
+## Backend (Laravel 12 + PHP 8.2)
 
 - **Controllers** are thin. Validation with `Validator::make()` or Form Requests — match the surrounding file. Response shape `{ status, data, message? }`.
 - **API Resources** under `app/Http/Resources/`. Use `whenLoaded` for relations.
