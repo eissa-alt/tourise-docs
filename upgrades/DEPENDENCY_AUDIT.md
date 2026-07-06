@@ -93,6 +93,14 @@ Everything depcheck/the scan flagged was a **verified false-positive** (config /
 | `prettier` + eslint toolchain (×3) | KEEP | `.eslintrc` shorthand (`plugin:react/*`, `@typescript-eslint`, `prettier`); `prettier` script |
 | every `@types/*` | KEEP | base package is live-imported (e.g. `import mime from 'mime-types'`) |
 
+> **Addendum — 2026-07-06 (supersedes some verdicts above):** the tooling/hygiene + dead-code pass later
+> removed several of these once the code that referenced them was deleted. **No longer present** in
+> `-admin` / `-frontend`: **`@svgr/webpack`** (the `next.config.js` SVG loader + dead icon assets were
+> removed, so the KEEP rationale no longer holds), **`swiper`** (frontend — the swiper-backed sections
+> were dropped), and **`filepond-plugin-image-transform`**. Builds stay green. Treat the "KEEP" rows for
+> `@svgr/webpack` / `swiper` as historical (accurate at 2026-06-16, changed since). See `HANDOFF.md` →
+> "Dead-dependency / dead-code cleanup".
+
 ## Differ from cyan — packages cyan removed that **directors keeps** (it actually uses them)
 
 The user's explicit ask: *"report if any from [cyan's] 41 differ."* Cross-mapping cyan's 41 removals against directors, these are **present and live here** (cyan found them dead in cyan's codebase; directors genuinely uses them) → **all KEEP**:

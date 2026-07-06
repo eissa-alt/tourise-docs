@@ -25,3 +25,23 @@ It is **not needed for this project** and has been dropped — `alt-static-basec
 sub-app** baseline (`-backend`, `-admin`, `-frontend`) plus `docs/`. Current-state docs were updated to
 match; the frozen lineage under `../upgrades/` (and D1's clone-source SHAs) still mention `-landing` as
 an accurate record of the baseline it came from.
+
+## D3 — 2026-07-06 — unified admin forgot-password onto the invite reset-by-token flow
+
+Admin "forgot password" now reuses the **same token machinery as the admin invite** instead of the
+legacy `v2/password/forgot` guest endpoint. `AuthController::forgotPassword()` issues a one-per-email
+`AdminInvite` token, emails the shared `emails.admin_invite.{en,ar}` blade (different subject only) via
+a public `POST /admin/forgot-password`; the admin `forgot-password-form` posts `{ email, back_link }`
+there, landing the admin on the same `reset-password/[token]` page as invites. This brings alt to
+**cyan parity** on the reset flow, with **one deliberate deviation**: the endpoint is **enumeration-safe**
+— it always returns success and only sends mail if the admin exists (cyan validates `exists:admins,email`,
+which leaks account existence). The new route is **admin-only and additive**, so the mobile contract is
+unaffected. Backend `a8184ca` / admin `70e646c` (both merged via PR #1). Detail: `HANDOFF.md`.
+
+## D4 — 2026-07-06 — backend adopts the `dev` → PR → `main` workflow
+
+The backend repo historically committed straight to `main` (it had no `dev` branch, diverging from
+admin/frontend). It now uses **`dev`** as its working branch and merges to `main` via PR, matching the
+other two app repos and CLAUDE.md's "work on `dev`, never push to `main`" rule. This resolves the
+"backend branch convention" open item from the prior handoff. (`docs/` remains `main`-only — it is a
+docs-only sibling repo with no app build/branch flow.)
