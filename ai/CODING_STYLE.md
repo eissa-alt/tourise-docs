@@ -46,6 +46,9 @@ Short crib sheet. The actual codebase + `EMAIL_EDITOR_UPDATES.md` + `admin_ui_ux
 - Keep response shapes stable for endpoints with external consumers (mobile, integrations).
 
 **Don't**
+- Comment out dead code — delete it; git history is the archive. (Unused imports are
+  auto-removed by `eslint-plugin-unused-imports` on save/commit, but commented-out code
+  is invisible to lint and only a human deletes it.)
 - Add new dependencies without justification.
 - Rename files / classes / routes unless required.
 - Add `console.log` / `dd()` / `dump()` to committed code.
