@@ -45,3 +45,14 @@ admin/frontend). It now uses **`dev`** as its working branch and merges to `main
 other two app repos and CLAUDE.md's "work on `dev`, never push to `main`" rule. This resolves the
 "backend branch convention" open item from the prior handoff. (`docs/` remains `main`-only — it is a
 docs-only sibling repo with no app build/branch flow.)
+
+## D5 — 2026-07-06 — lucide-react is the single icon library (dropped @iconify/react + @heroicons/react)
+
+Both Next apps carried **two** icon libraries from the baseline (`@iconify/react` and
+`@heroicons/react`). They are now unified on **`lucide-react`** and both old deps have been removed
+from `package.json` + `yarn.lock`. The migration ran in two phases against a machine-verified
+heroicon/iconify → lucide name map (P1: iconify removal incl. the `bi:tiktok` inline-SVG replacement;
+P2: heroicons → lucide). All icon swaps are 1-for-1 (`className` sizing preserved), so this is a
+zero-behaviour-change refactor — no icon is used by the mobile contract (admin/frontend only). Gates
+green on both apps (`type-check` + `production`). Admin `de87b4b` (P2) / frontend `c74b82c` (P2),
+stacked on the P1 lucide commits. Detail: `HANDOFF.md`.
