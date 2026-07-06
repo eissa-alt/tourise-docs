@@ -34,6 +34,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 
 | # | Task | Status |
 |---|---|---|
-| _no tasks yet_ | — | — |
+| 001 | [boolean-db-cleanup](001-boolean-db-cleanup/TASK.md) | in-progress |
 
 _Add a row per task as you open it; newest at the bottom._

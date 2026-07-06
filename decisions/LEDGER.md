@@ -56,3 +56,19 @@ P2: heroicons → lucide). All icon swaps are 1-for-1 (`className` sizing preser
 zero-behaviour-change refactor — no icon is used by the mobile contract (admin/frontend only). Gates
 green on both apps (`type-check` + `production`). Admin `de87b4b` (P2) / frontend `c74b82c` (P2),
 stacked on the P1 lucide commits. Detail: `HANDOFF.md`.
+
+## D6 — 2026-07-06 — real booleans over string pseudo-booleans; `status` → `is_active`
+
+The baseline stored many flags as strings: `yes`/`null` and `yes`/`no` toggles (`is_saudi`,
+`with_share`, `prefilldata`, …) and 2-value `status` (`active`/`blocked`) columns. These are being
+converted to **real booleans**. Two tracks: **(A)** the `yes`/`no`/`null` + `with_`/`is_` flags —
+this mirrors the **cyan** reference, which already did and documented it
+(`115-cyan-basecode/.../docs_old/BOOLEAN_REFACTOR_*.md`); **(B)** a **new** conversion cyan never
+attempted — strictly 2-value `status` columns become **`is_active boolean default(true)`**.
+Multi-value process statuses (`app_notifications` Pending, `login_attempts` failed,
+`email_attachments`, `sms_templates` send-state, guest workflow `guest_status_id`, mobile guest
+`accepted`/`invited`) are **excluded**. Migrations are edited **in place** + `migrate:fresh` (no prod
+data). The `/api/mobile/*` contract is unaffected (storage/internal only; mobile already sends
+booleans and its speaker/sponsor resources don't expose `status`). Plan +
+detail: [../upgrades/BOOLEAN_REFACTOR_PLAN.md](../upgrades/BOOLEAN_REFACTOR_PLAN.md) /
+[../tasks/001-boolean-db-cleanup/TASK.md](../tasks/001-boolean-db-cleanup/TASK.md).

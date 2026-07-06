@@ -3,6 +3,38 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-06 (night) — Boolean DB cleanup + refactor, two tracks (ledger D6). Working-tree only on
+`dev` across all three app repos — NOT yet committed/pushed (awaiting review). Full plan +
+per-step log: `tasks/001-boolean-db-cleanup/TASK.md` + `upgrades/BOOLEAN_REFACTOR_PLAN.md`.**
+- **Track A** (mirrors cyan's documented refactor): pseudo-booleans (`yes`/`null`, `yes`/`no`,
+  `with_`/`is_`) → real `boolean`s. Migrations edited in place (`string(...)->nullable()` →
+  `boolean()->default(false)`) across guests flags, categories (`with_*` + notification fields),
+  badges, email configs/templates, automation setups, countries, titles, invitations, guest
+  logistics, gates, guest_sms; model `$casts` added; controllers/resources/blade `=== 'yes'` →
+  `$request->boolean()` / `=== true`; admin `CustomSwitchInput` → `CustomSwitchInputBoolean` +
+  boolean interfaces; frontend join-form radios (`is_saudi`, `require_*`, `valid_visa`) → booleans,
+  SSR `=== 'yes'` boundary drop. **Intentional string keeps** (cyan-aligned): CSV `Exports` yes/no,
+  input normalization, and the 3-state consent fields `display_photo_in_app` / `photo_consent` /
+  `will_attend` / `terms`.
+- **Track B** (net-new, beyond cyan): entity `status` (`active`/`blocked`) → `is_active boolean
+  default(true)` on ~16 tables (speakers, sponsors, speaker/sponsor labels, zones, areas, gates,
+  badges, categories, titles, admins, sms/email templates, invitations, guest_statuses, countries);
+  `$casts`/`$fillable`; ~18 controllers `where('status','active')` → `where('is_active',true)` +
+  `block()`/`activate()` setters (route names preserved); `Mobile{Speaker,Sponsor}Controller`
+  filters; notification senders. Admin: shared `Status` badge → `isActive:boolean`,
+  `status-types-select` → `true`/`false` options, all entity listings (`FilterFieldDef key:'is_active'`
+  → serializes to `?is_active=`), 8 status forms, `bulk-update-badges-modal`, ~12 interfaces.
+- **Excluded (multi-value / process statuses):** `app_notifications`, `login_attempts`,
+  `email_attachments`, sms send-state, guest-workflow `status`/`guest_status_id`, mobile guest
+  status, `users` (dead `UsersController`), automation `is_sent/is_delivered/is_open/is_clicked`.
+  `meeting_rooms` + `smtp_configs` were already boolean `is_active` by design (no change needed).
+- **Gates:** backend `pint --dirty` green, `migrate:fresh` clean, `php artisan test` **452 pass /
+  3 fail** — all 3 are **pre-existing, unrelated** (confirmed by re-running on a stashed clean tree):
+  `ExampleTest` GET `/` → 403, and two avatar tests that assume `display_photo_in_app` defaults to
+  `'yes'` (it's nullable, intentionally left a string). Admin + frontend `type-check` + `production`
+  **green**. **Mobile contract unchanged** — storage/internal only; no converted-entity `status`
+  is exposed in any mobile resource.
+
 **2026-07-06 (late pm, 2) — "Cheap cleanups" pass (admin + frontend), two separate commits each.
 (1) Deleted dead files: 28 unreferenced `interfaces/*.tsx` in admin (`f6cffae`) + 2 stale duplicate
 copies in frontend (`i18n/link copy.tsx`, `data/area-of-interset-generic-select_.tsx`, `864f7df`).
