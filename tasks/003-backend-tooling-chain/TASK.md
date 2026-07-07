@@ -70,6 +70,21 @@ Newest at the bottom. Date each entry.
 
 - 2026-07-07 — opened; plan reviewed + scoped (Larastan kept with ratchet, Rector dropped, hook
   hardened). Starting with W1.
+- 2026-07-07 — **W1 done + committed** (backend `96413df`). Added `pint.json` (laravel preset +
+  `no_unused_imports` + `ordered_imports`); one repo-wide Pint format = **172 files** (all cosmetic
+  fixers; **34** genuinely-unused imports removed). `pint --test` now **passes** (repo Pint-clean →
+  gate can flip off `--dirty`). `routes/api.php` untouched. `php artisan test` = 452 pass / 3 fail
+  (pre-existing). Actual churn was ~172 files, not the plan's estimated "300+".
+- 2026-07-07 — **W2 PARKED mid-step (uncommitted).** Installed `larastan/larastan ^3.10`
+  (`composer.json` dirty; `composer.lock` gitignored). Added `phpstan.neon` (currently level 4,
+  includes an **empty** `phpstan-baseline.neon` placeholder — real baseline NOT yet generated).
+  **Level decision on hold** — measured raw error counts first: **L0 = 125** (real structural:
+  undefined method/class/signature), **L1 = 1437**, **L2 = 1609**, **L3 = 1647**, **L4 = 1697**. The
+  L0→L1 jump is almost all Laravel dynamic-property / undefined-var noise. Open question: start the
+  ratchet at **L0** (125 real errors, genuinely shrinkable to zero then bump the level) vs the plan's
+  **L4** (1697-error baseline that realistically never shrinks). **Resume:** pick level → regenerate
+  `phpstan-baseline.neon` (`phpstan analyse --generate-baseline --memory-limit=1G`) → seed the ratchet
+  tracker → commit W2. Nothing broken in the meantime.
 
 ## Definition of Done
 
