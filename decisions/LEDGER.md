@@ -72,3 +72,21 @@ data). The `/api/mobile/*` contract is unaffected (storage/internal only; mobile
 booleans and its speaker/sponsor resources don't expose `status`). Plan +
 detail: [../upgrades/BOOLEAN_REFACTOR_PLAN.md](../upgrades/BOOLEAN_REFACTOR_PLAN.md) /
 [../tasks/001-boolean-db-cleanup/TASK.md](../tasks/001-boolean-db-cleanup/TASK.md).
+
+## D7 — 2026-07-07 — real date/time column types + cyan masked date input (no more Unix-string dates)
+
+Dates/times were stored as **Unix-epoch strings** (day-picker fields: `getUnixTime()` +
+`zonedTimeToUtc(…)/1000`) mixed with `Y-m-d H:i:s` datetime strings (`Carbon::now()` fields) in the
+**same** `string` columns. Converted to proper types: date-only → **`date`** (cast `date:Y-m-d`,
+API/forms `YYYY-MM-DD`), datetime → **`timestamp`** (cast `datetime`, ISO 8601 UTC), time-only kept
+as **`string(5)` `HH:mm`** (matches cyan `meeting_room_slots`). Columns edited **in place** +
+`migrate:fresh` (no prod data; same playbook as D6). FE/admin drop the react-day-picker modal for
+cyan's **Cleave masked inputs** (`masked-date/-time/-datetime-input.tsx` + shared `utils/date.ts`
+`formatDate`/`formatDateTime`); TZ conversion happens **at display** (`Asia/Riyadh`) so users outside
+KSA are handled correctly. **`custom-day-input.tsx` is kept** (unused, for future custom cases) and —
+revising the original plan — **`timezoneFix.ts` is kept too** because it is that component's only
+remaining dependency (matches cyan). Mobile contract unaffected: guest dates live only in **Admin**
+resources; the offline QR `check_in_time` write round-trips through the new `datetime` cast and
+`routes/api.php` is unchanged. Gates green: backend `pint --dirty --test` + `migrate:fresh` +
+`php artisan test`; both Next apps `type-check` + `production`. Detail:
+[../tasks/002-datetime-db-cleanup/TASK.md](../tasks/002-datetime-db-cleanup/TASK.md).

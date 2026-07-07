@@ -3,6 +3,31 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-07 — Date/time (timestamp) DB cleanup + refactor (ledger D7, task 002). Working-tree only
+on `dev` (backend + admin + frontend) and `main` (docs) — NOT yet committed/pushed (awaiting review).
+Full plan + per-step log: `tasks/002-datetime-db-cleanup/TASK.md`.**
+- **Backend:** date-only columns → real `date` (cast `date:Y-m-d`), datetime columns → `timestamp`
+  (cast `datetime`, ISO 8601 UTC), flight times → `string(5)` `HH:mm`. Migrations edited in place +
+  `migrate:fresh` (no prod data). Touched `guests` (+ `add_check_in_out_dates`), `invitation_emails`,
+  `guest_emails`, `guest_sms`, `automations`, `bulk_prints`, `badge_print_logs`, `history_logs`;
+  added casts to Guest/InvitationEmail/GuestEmail/BulkPrint/Automation/HistoryLog; printed-range
+  query → `whereBetween` w/ Carbon; 3 `GuestsExport*` binders now format Carbon values; removed 4 dead
+  unrouted debug methods from `OperationActionsController` (+ their commented routes).
+- **FE + admin:** dropped the react-day-picker modal for cyan's **Cleave masked inputs**. Added
+  `cleave.js` + `@types/cleave.js`, `components/shared/forms/masked-date-input.tsx` +
+  `masked-time-input.tsx`, and shared `utils/date.ts` (`formatDate` / `formatDateTime`). Every
+  `CustomDayInput` site → `MaskedDateInput` (`YYYY-MM-DD`); flight times → `MaskedTimeInput` (`HH:mm`,
+  fixes the admin field that still emitted `hh:mm AM`); all active `timeZoneFix()` display → the new
+  helpers. TZ conversion happens **at display** (`Asia/Riyadh`) so out-of-KSA users are correct.
+  `masked-datetime-input.tsx` deleted (no user-entered datetime in alt). **Kept** `custom-day-input.tsx`
+  (unused, for future) + therefore **kept** `timezoneFix.ts` (its only remaining consumer) — a
+  deliberate revision of the "delete timezoneFix" plan.
+- **Gates:** backend `pint --dirty --test` green, `migrate:fresh` clean, `php artisan test` 452 pass /
+  3 fail (same pre-existing ExampleTest 403 + 2 avatar failures — unrelated). Admin + frontend
+  `type-check` + `production` **green**. Mobile contract unaffected (guest dates only in Admin
+  resources; offline QR `check_in_time` round-trips via the `datetime` cast; `routes/api.php`
+  unchanged). No i18n keys moved.
+
 **2026-07-06 (night) — Boolean DB cleanup + refactor, two tracks (ledger D6). Working-tree only on
 `dev` across all three app repos — NOT yet committed/pushed (awaiting review). Full plan +
 per-step log: `tasks/001-boolean-db-cleanup/TASK.md` + `upgrades/BOOLEAN_REFACTOR_PLAN.md`.**
