@@ -160,12 +160,24 @@ Newest at the bottom.
   `table-see-more-invitation-modal.tsx` (`sent_at`), `logs/invitation-email-logs-listing.tsx` +
   `logs/guest-email-logs-listing.tsx` (`sent_at`), `bulk-print-listing.tsx`
   (`generated_at`/`last_download_at`), `automation-details.tsx` (`sent_at`). Admin `type-check` +
-  `production` re-run green. **Out of scope (left as-is):** the ~40 listing grids that
-  `format(new Date(created_at/updated_at), …)` — `created_at`/`updated_at` were **always** ISO
-  (Laravel default), so my column changes didn't regress them; converting all of them to Riyadh-pinned
-  display is a separate consistency pass. **Deleted** the dead `utils/parseDate.ts` from both apps
-  (0 imports; a Safari `new Date('Y-m-d H:i:s')` workaround made obsolete — datetimes now serialize
-  as ISO 8601 and date-only values parse via date-fns `parse()`, both Safari-safe).
+  `  production` re-run green. **Deleted** the dead `utils/parseDate.ts` from both apps (0 imports; a
+  Safari `new Date('Y-m-d H:i:s')` workaround made obsolete — datetimes now serialize as ISO 8601 and
+  date-only values parse via date-fns `parse()`, both Safari-safe).
+- 2026-07-07 — **Committed task 002 (pre-consistency-pass).** backend `86961dd`, admin `c6ee625`,
+  frontend `5f2c55a` (all on `dev`), docs `aeb4528` (`main`). Repo uses conventional-commit style
+  (matching task 001), not the `P<phase>` template. Nothing pushed.
+- 2026-07-07 — **created_at/timestamp display consistency pass (admin).** Switched **34 files** from
+  `format(new Date(x), 'dd/MM/yyyy HH:mm')` (which renders in the viewer's browser TZ) to the shared
+  `formatDateTime` (Asia/Riyadh) for real UTC Laravel timestamps: 31 listing grids' `created_at`
+  (export `value` + column `render`), plus `workshop-registrants` `registered_at`, `session-detail`
+  media `created_at`, and `see-more-guest-draft` `created_at`/`updated_at` (the latter drops seconds:
+  `HH:mm:ss` → `HH:mm`). Removed the now-unused `date-fns` `format` import in those files (kept in
+  `session-detail` for the agenda `date`). **Deliberately NOT changed:** agenda `date` fields
+  (`sessions`/`workshops` — `dateTime` columns entered as local wall-clock via `datetime-local` with
+  no TZ conversion, so pinning to Riyadh would shift the displayed time; agenda is a CLAUDE.md-flagged
+  sensitive area and needs its own timezone-semantics decision) and the `format(new Date(),
+  'dd_MM_yyyy_HH_mm')` **export-filename** timestamps (current time for a download name, not stored
+  data). Admin `type-check` + `production` green.
 
 ## Definition of Done
 
