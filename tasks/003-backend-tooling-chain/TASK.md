@@ -99,15 +99,32 @@ Newest at the bottom. Date each entry.
   `composer validate` valid · `composer lint` passed · `composer analyse` → **No errors** · full
   `composer qa` = lint+analyse green, test **452 pass / 3 fail** (documented pre-existing). Not yet
   committed at time of writing this line.
+- 2026-07-08 — **W5 (pre-commit hook) + W8 (install cleanup) DONE. W7 (VS Code) DROPPED → N/A.**
+  - **W5:** committed `.githooks/pre-commit` (POSIX sh) — runs Pint on staged `*.php`
+    (`git diff --cached --diff-filter=ACM`), re-stages, **graceful-skips (exit 0 + warning) if
+    `vendor/bin/pint` is absent** so a repo without `composer install` never blocks a commit.
+    Installed via `git config core.hooksPath .githooks`, auto-wired from composer `post-autoload-dump`
+    (guarded on `.git` existing). `.gitattributes`: `.githooks/pre-commit text eol=lf`; staged with
+    mode `100755`. **Verified all 3 paths:** formats+re-stages a bad file · no-op when nothing staged ·
+    graceful-skip when Pint hidden.
+  - **W8:** removed the stale `pestphp/pest-plugin` allow-plugin (Pest not installed) → `allow-plugins`
+    now empty. `composer validate --strict` → **valid** (no warnings). `composer audit` → **no
+    security advisories**; note: `niklasravnsborg/laravel-pdf` is flagged **abandoned** (informational,
+    not a vuln — it's a load-bearing prod dep for PDF/badge generation; left as-is, swap is out of scope).
+  - **W7 DROPPED (N/A):** `.vscode/` is **gitignored** (`.gitignore:/.vscode`) and untracked — editor
+    config can't be committed/shared without un-ignoring it, which is a deliberate repo convention +
+    a cross-repo policy call, not a tooling-task side effect. And W7's goal (save-format matches the
+    gate) is **already enforced by the W5 hook** regardless of editor settings. Local `.vscode/` edits
+    were reverted to original (php formatter stays intelephense). **[user-approved drop 2026-07-08]**
 
 ## Definition of Done
 
 - [ ] W1 `pint.json` + repo-wide Pint baseline (isolated commit); gate flipped to `pint --test`
 - [x] W2 Larastan (level 0) + baseline (124 err); `composer analyse` green; ratchet tracker seeded
-- [ ] W5 pre-commit hook installed + verified (graceful-skip tested); `.gitattributes` entry
+- [x] W5 pre-commit hook installed + verified (graceful-skip tested); `.gitattributes` entry
 - [x] W6 composer QA scripts; `composer qa` runs the full gate
-- [ ] W7 VS Code aligned to Pint; W8 install/deploy warnings cleaned (`composer validate --strict`)
-- [ ] Quality gate green (`pint --test` + `composer analyse` + `php artisan test`)
-- [ ] Mobile contract: n/a (tooling only; `routes/api.php` untouched) — confirm no diff
+- [x] W7 ~~VS Code aligned to Pint~~ → **N/A** (`.vscode/` gitignored; W5 hook enforces the gate) · W8 install/deploy warnings cleaned (`composer validate --strict` valid)
+- [x] Quality gate green (`pint --test` + `composer analyse` + `php artisan test` = 452/3 pre-existing)
+- [x] Mobile contract: n/a (tooling only; `routes/api.php` untouched)
 - [ ] Docs: this TASK.md → `done`; tasks index row; **LEDGER** entry (gate flip); HANDOFF refresh;
       `../../process/SETUP_AND_UPDATE.md` documents the hook install + `composer qa`
