@@ -195,6 +195,20 @@ Newest at the bottom.
   combined-filter search-count failure is a pre-existing isolation flake (passes solo; a
   serialization format cannot change a search count).
 
+- 2026-07-07 — **Bugbot self-review of the task-002 branch diff (3 repos) + fixes.** Backend
+  (agenda-date contract change): **no bugs**. Admin + frontend flagged the ported masked inputs.
+  Hardened both shared components in **both apps** (`masked-date-input.tsx`, `masked-time-input.tsx`):
+  switched to `useController` and made the form field always mirror what the user sees — a partial,
+  invalid, or out-of-bounds entry now commits `null` (so a stale/invalid value can never be submitted
+  and `required` still fires), while the typed text stays visible; a stored value that isn't a valid
+  date/`HH:mm` (e.g. a legacy Unix-epoch cookie) is dropped on hydrate. Added `HH 00–23 / mm 00–59`
+  range validation to the time mask (fixes `12:60` reaching the API) and a `maxDate`/`minDate` prop to
+  the date mask, wiring `maxDate={new Date()}` into `birth_date` in both step-2 forms (blocks future
+  birth dates — the guard lost when `CustomDayInput` was dropped). Both apps `type-check` +
+  `production` green. (Deliberately did **not** add a bespoke "invalid date" message — that would need
+  new EN+AR i18n keys; clearing the value routes invalid input through the existing required/validation
+  feedback instead.)
+
 ## Definition of Done
 
 - [x] Backend: columns converted + casts + queries/exports/resources/blade/seeders; `migrate:fresh`
