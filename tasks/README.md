@@ -37,6 +37,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 001 | [boolean-db-cleanup](001-boolean-db-cleanup/TASK.md) | in-progress |
 | 002 | [datetime-db-cleanup](002-datetime-db-cleanup/TASK.md) | done |
 | 003 | [backend-tooling-chain](003-backend-tooling-chain/TASK.md) | done |
-| 004 | [migration-squash](004-migration-squash/TASK.md) | in-progress |
+| 004 | [migration-squash](004-migration-squash/TASK.md) | dropped |
 
 _Add a row per task as you open it; newest at the bottom._

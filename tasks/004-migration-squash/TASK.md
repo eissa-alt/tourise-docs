@@ -1,10 +1,35 @@
 # Task 004 — Migration squash (full wholesale rewrite)
 
-- **Status:** `in-progress` (planning)
+- **Status:** `dropped` (2026-07-08 — see closing note)
 - **Opened:** 2026-07-08
+- **Closed:** 2026-07-08 (dropped)
 - **Owner:** AI agent
 - **Sub-app(s):** backend (+ docs)
 - **Branch(es):** `dev`
+
+> **CLOSING NOTE — DROPPED (user decision 2026-07-08).** The squash was attempted and works
+> *technically* (a DB-derived wholesale rewrite produced a **byte-identical schema** — empty
+> `before.schema`/`after.schema` fingerprint diff across 901 columns, all 83 FKs identical incl.
+> on-delete rules), but was abandoned as **not worth the risk/complexity for a cosmetic win** on a
+> schema that already works. Two approaches were tried:
+> 1. **Wholesale rewrite** (67 `create_` + one `_add_foreign_keys`, renamed `2024_01_01_NNN`): passed
+>    the schema-diff gate, but the user rejected the file renaming and the separate `_add_foreign_keys`
+>    migration.
+> 2. **Conservative fold** (merge pure-column alters into original create files, keep FK alters, keep
+>    original order): turned out genuinely intricate — multi-table migrations
+>    (`add_plus_x_guests_fields` touches guests+categories with FKs), net-out add/drop chains spanning
+>    the fold/keep boundary, and KEEP files mixing FK-adds with column-drops resist mechanical folding.
+> **Nothing committed to the backend; working tree clean (129 migrations intact).** All generator
+> artifacts stayed in scratchpad. Reusable if ever revived: the `information_schema` fingerprint gate
+> (`scratchpad/fingerprint.sh`) and the DB-derived generator both work.
+>
+> **⚠️ Real finding worth keeping (unrelated to the squash): `migrate:fresh --seed` is ALREADY BROKEN
+> on the current `dev`.** `TitleSeeder` inserts `null` into `titles.show_in_user_form` which is
+> `NOT NULL default 0` → `SQLSTATE 23000, column cannot be null`. Verified this fails **identically on
+> the committed 129 migrations** (not caused by any squash). Seeding gets through Country/Admin/
+> GuestStatus/Category, then dies at Title. Tasks 001/002 gates evidently ran `migrate:fresh` without
+> `--seed` (or a subset). **This is a genuine bug to fix separately** — likely TitleSeeder should pass
+> a bool for `show_in_user_form`, or the column should be nullable. Not fixed here.
 
 ## Goal
 
@@ -153,6 +178,16 @@ The #1 drift trap. Final create files must reflect NET shape:
 - 2026-07-08 — opened (planning). Verified counts (129→73 tables), captured schema fingerprint baseline,
   proved the mysqldump-free acceptance gate, locked FK strategy (separate `_add_foreign_keys`).
   Recon agent inventorying per-table alter map + FK hazards + seeder coupling.
+- 2026-07-08 — built DB-derived generator; wholesale rewrite (67 creates + `_add_foreign_keys`) **passed
+  the schema-diff gate** (empty diff, 83 FKs identical). Fixed 2 generator bugs en route: MariaDB quotes
+  string defaults (`'manual'`) → strip before re-quoting; single-column non-`id` PKs (email/phone) must
+  chain `->primary()`. **User rejected** the `2024_01_01_NNN` renaming + the separate FK file.
+- 2026-07-08 — pivoted to conservative fold (keep original order + names, no FK file). Classified 58
+  alters (≈42 fold / 16 keep-FK); traced net-out chains — found multi-table migrations + net-outs
+  spanning the fold/keep boundary make mechanical folding intricate. **Also discovered the pre-existing
+  TitleSeeder `--seed` bug** (see closing note).
+- 2026-07-08 — **DROPPED** (user). Not worth the risk for a cosmetic win on a working schema. Backend
+  restored to original 129 migrations; tree clean; nothing committed.
 
 ## Definition of Done
 
