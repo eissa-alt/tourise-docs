@@ -3,9 +3,15 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-07 — Date/time (timestamp) DB cleanup + refactor (ledger D7, task 002). Working-tree only
-on `dev` (backend + admin + frontend) and `main` (docs) — NOT yet committed/pushed (awaiting review).
-Full plan + per-step log: `tasks/002-datetime-db-cleanup/TASK.md`.**
+**2026-07-07 — Date/time (timestamp) DB cleanup + refactor (ledger D7, task 002). Committed on `dev`
+(backend `86961dd`, admin `c6ee625` + follow-up `f340a0e`, frontend `5f2c55a`) and `main` (docs
+`aeb4528` + `155d94b`) — NOT yet pushed (awaiting review). Full plan + per-step log:
+`tasks/002-datetime-db-cleanup/TASK.md`.**
+- **Display consistency pass (admin, `f340a0e`):** 34 views switched from `format(new Date(x))`
+  (viewer's browser TZ) → shared `formatDateTime` (`Asia/Riyadh`) for real UTC Laravel timestamps
+  (listing `created_at`, `registered_at`, session media `created_at`, guest-draft
+  `created_at`/`updated_at`). **Left on `format()` on purpose:** agenda `date` (`sessions`/`workshops`
+  wall-clock, needs its own TZ-semantics decision) + export-filename timestamps.
 - **Backend:** date-only columns → real `date` (cast `date:Y-m-d`), datetime columns → `timestamp`
   (cast `datetime`, ISO 8601 UTC), flight times → `string(5)` `HH:mm`. Migrations edited in place +
   `migrate:fresh` (no prod data). Touched `guests` (+ `add_check_in_out_dates`), `invitation_emails`,
