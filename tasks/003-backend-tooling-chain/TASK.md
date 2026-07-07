@@ -57,7 +57,7 @@ Full plan (reviewed + scoped): [`../../upgrades/BACKEND_TOOLING_CHAIN_PLAN.md`](
 
 | Date | Level | Baseline errors | Note |
 |---|---|---|---|
-| _(W2 lands)_ | 4 | _tbd_ | initial generated baseline |
+| _(W2 deferred)_ | _tbd_ | _tbd_ | re-add after the clone; measured L0=125 / L4=1697 raw (see log) — recommend starting at L0 |
 
 ## Known baseline facts (don't let W1/W2 get blamed for these)
 
@@ -75,21 +75,24 @@ Newest at the bottom. Date each entry.
   fixers; **34** genuinely-unused imports removed). `pint --test` now **passes** (repo Pint-clean →
   gate can flip off `--dirty`). `routes/api.php` untouched. `php artisan test` = 452 pass / 3 fail
   (pre-existing). Actual churn was ~172 files, not the plan's estimated "300+".
-- 2026-07-07 — **W2 PARKED mid-step (uncommitted).** Installed `larastan/larastan ^3.10`
-  (`composer.json` dirty; `composer.lock` gitignored). Added `phpstan.neon` (currently level 4,
-  includes an **empty** `phpstan-baseline.neon` placeholder — real baseline NOT yet generated).
-  **Level decision on hold** — measured raw error counts first: **L0 = 125** (real structural:
-  undefined method/class/signature), **L1 = 1437**, **L2 = 1609**, **L3 = 1647**, **L4 = 1697**. The
-  L0→L1 jump is almost all Laravel dynamic-property / undefined-var noise. Open question: start the
-  ratchet at **L0** (125 real errors, genuinely shrinkable to zero then bump the level) vs the plan's
-  **L4** (1697-error baseline that realistically never shrinks). **Resume:** pick level → regenerate
-  `phpstan-baseline.neon` (`phpstan analyse --generate-baseline --memory-limit=1G`) → seed the ratchet
-  tracker → commit W2. Nothing broken in the meantime.
+- 2026-07-07 — **W2 (Larastan) — DEFERRED to after the manual clone + backend deploy** (user
+  decision). Was parked mid-step; now fully **undone** (`composer remove --dev larastan/larastan`
+  + deleted `phpstan.neon` / `phpstan-baseline.neon`) so the backend tree is clean for the clone.
+  W1 (Pint, `96413df`) stays committed. **When re-added after the clone:** measured raw error counts
+  are worth reusing — **L0 = 125** (real structural: undefined method/class/signature), **L1 = 1437**,
+  **L2 = 1609**, **L3 = 1647**, **L4 = 1697**; the L0→L1 jump is almost all Laravel dynamic-property /
+  undefined-var noise. **Recommendation for the re-add:** start the ratchet at **L0** (125 real
+  errors, genuinely shrinkable to zero, then bump the level) rather than the plan's L4 (1697-error
+  baseline that never shrinks). Steps: `composer require --dev larastan/larastan` → `phpstan.neon`
+  at chosen level → `phpstan analyse --generate-baseline --memory-limit=1G` → seed the ratchet
+  tracker → commit.
+- 2026-07-07 — **Dep-free items W5–W8 not started** (pre-commit hook, composer QA scripts, VS Code →
+  Pint, install/deploy cleanup). Can be done independently of W2 / the clone whenever wanted.
 
 ## Definition of Done
 
 - [ ] W1 `pint.json` + repo-wide Pint baseline (isolated commit); gate flipped to `pint --test`
-- [ ] W2 Larastan level 4 + baseline; `composer analyse` green; ratchet tracker seeded
+- [ ] W2 Larastan + baseline; `composer analyse` green; ratchet tracker seeded — **DEFERRED to after the manual clone + backend deploy**
 - [ ] W5 pre-commit hook installed + verified (graceful-skip tested); `.gitattributes` entry
 - [ ] W6 composer QA scripts; `composer qa` runs the full gate
 - [ ] W7 VS Code aligned to Pint; W8 install/deploy warnings cleaned (`composer validate --strict`)
