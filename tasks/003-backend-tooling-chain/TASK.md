@@ -1,7 +1,8 @@
 # Task 003 — Backend tooling & code-quality chain
 
-- **Status:** `in-progress`
+- **Status:** `done`
 - **Opened:** 2026-07-07
+- **Closed:** 2026-07-08
 - **Owner:** AI agent
 - **Sub-app(s):** backend (+ docs)
 - **Branch(es):** `dev`
@@ -131,5 +132,6 @@ Newest at the bottom. Date each entry.
 - [x] W7 VS Code aligned to Pint — `.vscode/` un-ignored + committed (fixes inconsistency vs admin/FE), `[php]`→Pint · W8 install/deploy warnings cleaned (`composer validate --strict` valid)
 - [x] Quality gate green (`pint --test` + `composer analyse` + `php artisan test` = 452/3 pre-existing)
 - [x] Mobile contract: n/a (tooling only; `routes/api.php` untouched)
-- [ ] Docs: this TASK.md → `done`; tasks index row; **LEDGER** entry (gate flip); HANDOFF refresh;
-      `../../process/SETUP_AND_UPDATE.md` documents the hook install + `composer qa`
+- [x] Docs: this TASK.md → `done`; tasks index row (→ done); **LEDGER D10** (gate flip + chain);
+      HANDOFF refresh (session entry + Pint note); CLAUDE.md gate/hook lines; `../../process/
+      SETUP_AND_UPDATE.md` documents the hook install + `composer qa`

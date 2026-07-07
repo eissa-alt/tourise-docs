@@ -61,6 +61,14 @@ php artisan serve                # http://127.0.0.1:8000
 
 > **`.env` secrets:** `.env` is gitignored. After `cp .env.example .env`, set your local `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD`, mail, Firebase (push), and any API keys — get real values from a teammate / the secrets store.
 
+> **Quality gate + pre-commit hook (backend).** `composer install` auto-installs the Pint pre-commit
+> hook (via a `post-autoload-dump` script that sets `git config core.hooksPath .githooks`). From then on,
+> committing formats staged `*.php` with Pint automatically (it graceful-skips if Pint isn't installed).
+> The full gate before a push is **`composer qa`** = `pint --test` (`composer lint`) + `phpstan analyse`
+> (`composer analyse`) + `php artisan test`. The repo is Pint-clean (ledger D10), so use `pint --test`,
+> not the old `pint --dirty`. Larastan starts at **level 0** with a baseline in `phpstan-baseline.neon`
+> — see `tasks/003-backend-tooling-chain/TASK.md` for the ratchet plan.
+
 ### 3. Admin / Frontend (same steps, per app)
 
 ```bash
@@ -78,8 +86,8 @@ yarn local                               # dev server
 ```bash
 # in each JS app:
 yarn type-check && yarn production
-# backend:
-php artisan test
+# backend (full gate):
+composer qa            # = pint --test + phpstan analyse + php artisan test
 ```
 
 ---

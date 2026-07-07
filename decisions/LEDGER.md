@@ -126,3 +126,21 @@ CLAUDE.md's "no widening to `any`" rule and gives one canonical place to evolve 
 `@typescript-eslint/no-explicit-any` stays **off** globally (unchanged) — this was a targeted burn-down,
 not a rule flip. Commits: admin `5ceacc3`, frontend `8544c39` (both on `dev`, unpushed pending review).
 Gates green: `type-check` + lint 0 warnings, both apps.
+
+## D10 — 2026-07-08 — backend gate is `pint --test` (repo is Pint-clean); backend tooling chain adopted
+
+The backend was **not** Pint-clean at baseline, so the gate had been the workaround `pint --dirty`
+(format only changed files; a repo-wide run churned ~170+ unrelated files). Task 003 (backend tooling
+chain) closes that: an explicit **`pint.json`** (laravel preset + `no_unused_imports` + `ordered_imports`)
+plus **one repo-wide Pint baseline** (commit `96413df`, 172 files, formatting-only) made the repo
+Pint-clean. **Decision: the backend format gate is now the full `pint --test` (`composer lint`), not
+`pint --dirty`.** Alongside it the chain added: **Larastan** static analysis at **level 0** (`bb61db9`)
+with a generated baseline (124 real structural errors) and a **committed ratchet** (shrink to zero →
+bump the level toward 6; runs in `composer analyse`/`qa`, never in the hook); **composer QA scripts**
+(`lint`/`lint:fix`/`analyse`/`test`/`qa`); a **PHP-native pre-commit hook** (`.githooks/pre-commit`,
+`9741e90`) that runs Pint on staged `*.php` and graceful-skips if Pint is absent (parity with the
+admin/FE husky+lint-staged hook); and `.vscode/` **un-ignored + committed** with `[php]`→Pint
+(`de75eed`) — fixing an inconsistency where admin/FE tracked `.vscode/` but the backend gitignored it.
+Rector + CI were considered and left out (Rector = optional one-off in the cleanup plan; no repo has CI).
+**Going forward the backend quality gate is `composer qa` = `pint --test` + `phpstan analyse` +
+`php artisan test`.** Detail: [../tasks/003-backend-tooling-chain/TASK.md](../tasks/003-backend-tooling-chain/TASK.md).

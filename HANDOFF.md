@@ -3,6 +3,27 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-08 — Backend tooling & code-quality chain (task 003, ledger D10). All work items DONE;
+committed on `dev` — backend `96413df` (W1, already pushed) + `bb61db9` (W2+W6) + `9741e90` (W5+W8)
++ `de75eed` (W7); docs on `main`. Backend `dev` is 4 ahead of `origin/dev` (W1 pushed earlier). Plan:
+`upgrades/BACKEND_TOOLING_CHAIN_PLAN.md`; log: `tasks/003-backend-tooling-chain/TASK.md`.**
+- **What landed:** brings the backend's quality chain to parity with the Next-app pass. **W1** —
+  `pint.json` (laravel preset + `no_unused_imports` + `ordered_imports`) + one repo-wide Pint baseline
+  (172 files, formatting-only) → repo is now **Pint-clean**, gate flips `pint --dirty` → **`pint --test`**.
+  **W2** — **Larastan** static analysis at **level 0** + generated baseline (124 real structural
+  errors), with a committed **ratchet** (shrink → bump the level toward 6; runs in `composer analyse`/
+  `qa`, never the hook). Fixed 1 non-ignorable finding at source (`GuestOtpNotification::$locale`
+  redeclared a native type over Laravel's untyped parent). **W6** — composer scripts `lint`/`lint:fix`/
+  `analyse`/`test`/`qa` (one-command gate). **W5** — PHP-native `.githooks/pre-commit` runs Pint on
+  staged `*.php` + graceful-skips if Pint absent (parity with admin/FE husky+lint-staged), auto-installed
+  via `composer install`. **W7** — `.vscode/` **un-ignored + committed** with `[php]`→Pint (fixed an
+  inconsistency: admin/FE tracked `.vscode/`, backend gitignored it). **W8** — dropped stale
+  `pestphp/pest-plugin` allow-plugin; `composer validate --strict` valid; audit clean. **Rector + CI
+  left out** (out of scope). Not mobile-facing (`routes/api.php` untouched).
+- **Gates:** `composer qa` = `pint --test` green + `phpstan analyse` **No errors** (baseline-green) +
+  `php artisan test` **452 pass / 3 fail** (pre-existing, unrelated). **New backend gate going forward
+  is `composer qa`.**
+
 **2026-07-07 (later) — `catch (e: any)` → `unknown` cleanup, closing the "cheap cleanups" phase
 (ledger D9). Committed on `dev` (admin `5ceacc3`, frontend `8544c39`) — NOT yet pushed (part of the
 same review batch as task 002). All original audit sub-phases ("fix first", "cheap cleanups") are now
@@ -197,5 +218,8 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 - **Mobile team notice** — `docs/mobile/MOBILE_NOTICE_AGENDA_DATE_WALL_CLOCK.md` written; the mobile team
   still needs to be actually told + confirm receipt before the D8 change releases.
 
-> Pint note: the backend repo is not Pint-clean at baseline. Use `pint --dirty` (formats only changed
-> files); a repo-wide `pint` run churns 300+ unrelated files.
+> Pint note (updated 2026-07-08, ledger **D10**): the backend is now **Pint-clean** (task 003 added
+> `pint.json` + a repo-wide baseline, `96413df`). The gate is the **full `pint --test`** (`composer
+> lint`), no longer the old `pint --dirty` workaround. Full backend gate = **`composer qa`** (`pint
+> --test` + `phpstan analyse` + `php artisan test`). A `.githooks/pre-commit` hook also runs Pint on
+> staged PHP (installed via `composer install`).
