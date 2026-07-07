@@ -1,9 +1,24 @@
 # Backend Tooling & Code-Quality Chain — plan + execution
 
-> **Status:** 🅿️ **PLANNED — NOT reviewed, NO code written.** Drafted for a second AI agent to review.
+> **Status:** ✅ **REVIEWED & SCOPED (2026-07-07)** — ready to execute as `docs/tasks/003-backend-tooling-chain/`.
 > Brings `alt-static-basecode-backend`'s tooling/quality chain up to parity with the pass already done
 > on the two Next apps (ESLint 9 flat config, Prettier 3, husky + lint-staged, `type-check`,
 > 0-warning gate).
+>
+> **Review outcome (what changed from the first draft):**
+> - **W4 (Rector) — removed from this task.** It's a run-once behavior-changing rewriter, not a gate;
+>   W1 (`no_unused_imports`) + W2 (Larastan) cover the unused-import / dead-code asks. Moved to the
+>   cleanup plan as an optional one-off during Tasks 003/007. See
+>   [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md).
+> - **W2 (Larastan) — kept, WITH a ratchet commitment** (user decision 2026-07-07). Not a rubber-stamp
+>   baseline: raising the level / shrinking the baseline is an explicit tracked step (§1 W2), so the
+>   static-analysis bar actually rises over time. Runs in `composer analyse`/`qa`, **not** in the hook.
+> - **W5 (hook) — hardened:** must degrade gracefully if `vendor/bin/pint` is absent (no `composer
+>   install` yet), plus a `.gitattributes` entry for the hook's exec-bit + LF endings.
+> - **W9 (CI) — stays optional/out** (neither Next app has CI).
+> - **Gate flip needs a ledger entry:** switching `pint --dirty` → `pint --test` (via W1's clean
+>   baseline) overrides the documented `--dirty` workaround → record as a `LEDGER` decision, not just a
+>   HANDOFF line.
 >
 > **Why first:** do this **before** the heavy backend refactors in
 > [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md) (migration squash, base
@@ -72,6 +87,9 @@ repo-wide for free.
 ```
 `./vendor/bin/pint` → review diff is formatting-only → commit `P<phase>.<task> — chore: repo-wide Pint baseline`.
 **Timing.** **Land this FIRST**, before the migration-squash/refactor tasks, so they start from a clean tree.
+**Gate flip (LEDGER entry required).** This baseline lets the gate move from the `pint --dirty` workaround
+to a full **`pint --test`**. That reverses a documented convention (the HANDOFF "Pint note" + CLAUDE.md), so
+record it as a `../decisions/LEDGER.md` decision, not only a HANDOFF edit.
 **Risk.** Large diff (mitigated: isolated commit, formatting-only, `php artisan test` still green after).
 
 ### W2 — Static analysis: Larastan (PHPStan for Laravel) · M · low→med
@@ -88,10 +106,25 @@ parameters:
   paths: [ app ]
   # baseline swallows pre-existing errors so the gate is green from day 1:
 ```
-`vendor/bin/phpstan analyse --generate-baseline` → commit baseline. Then fix + shrink the baseline
-incrementally; raise `level` when clean. Add `composer analyse` script (W6).
-**Risk.** Level too high on day 1 = huge baseline → start at 4, ratchet. Firebase/Excel/PDF packages
-may need `ignoreErrors` stubs.
+`vendor/bin/phpstan analyse --generate-baseline` → commit baseline. Add `composer analyse` script (W6).
+**Runs in `composer analyse`/`qa` only — NOT in the pre-commit hook** (too slow for a per-commit gate).
+
+**Ratchet plan (COMMITTED — user decision 2026-07-07).** The baseline is green on day 1 by design, so
+without a ratchet Larastan only guards *new* code and the bar never rises. To make the ratchet real, it's
+a tracked step, not a vibe:
+- Record the **starting level (4)** and **baseline error count** in the task `TASK.md` when W2 lands.
+- Each subsequent backend-cleanup task (esp. 003/006/007) ends with a **"shrink the baseline"** step:
+  delete any now-fixed entries; if the baseline hits ~zero at the current level, **bump `level` +1** and
+  regenerate. Log the new level + count in `TASK.md` so progress is visible.
+- Target: reach **level 6** by the end of the cleanup phase; treat any *increase* in baseline size in a
+  PR as a red flag to review (new code should not add violations).
+
+**Setup notes (avoid day-1 stalls).** Larastan over a Laravel-12 app usually needs `bootstrapFiles` and a
+raised memory limit — expect `vendor/bin/phpstan analyse --memory-limit=1G` (or `parameters.tmpDir`) if it
+OOMs. Firebase/Excel/PDF and other magic-heavy packages may need `ignoreErrors` stubs.
+**Reproducibility caveat.** `composer.lock` is gitignored here, so the baseline is only reproducible if
+contributors resolve the same dev-dep versions — fine for a small team; note it in `TASK.md`.
+**Risk.** Level too high on day 1 = huge baseline → start at 4, ratchet per above.
 
 ### W3 — Unused imports & dead code · S · low
 **What.** Mostly **free from W1** (`no_unused_imports`). For dead *code* (unused private methods/vars,
@@ -99,16 +132,13 @@ unreachable branches), fold into W2 (PHPStan flags many) or the optional W4 Rect
 **Why.** The user explicitly wants unused-import removal (the `eslint-plugin-unused-imports` equivalent).
 **Risk.** Trivial once W1 lands.
 
-### W4 — Rector (OPTIONAL, run-once cleanups) · M · med
-**What.** `composer require --dev rector/rector` (+ optionally `driftingtoward/rector-laravel` for
-Laravel-specific rules). Configure conservative sets: `deadCode`, `codeQuality`, PHP 8.2 level,
-optionally Laravel rules. Use as a **one-time cleanup** (review every change), then either keep for
-future use or remove the dep.
-**Why.** Automates dead-code removal, early-return refactors, php-8.2 modernizations, and
-Laravel-idiom fixes at scale.
-**Recommendation.** **Optional / defer.** Powerful but noisy; W1 + W2 cover most of the user's asks.
-Only pull in if a big mechanical cleanup is wanted. Keep out of the pre-commit hook regardless.
-**Risk.** Aggressive rules can change behavior — review diffs carefully, run `php artisan test` after.
+### W4 — Rector · ❌ REMOVED from this task (moved to the cleanup plan)
+**Decision (2026-07-07).** Rector is a **run-once, behavior-changing rewriter**, not a quality *gate* —
+it doesn't belong in the tooling-chain task. W1's `no_unused_imports` + W2 (Larastan) already cover the
+stated asks (unused imports, dead-code visibility). If a big mechanical cleanup is wanted later, run Rector
+as an **optional one-off** during a cleanup task (003/007) with every diff reviewed and `php artisan test`
+after — tracked in [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md), not here.
+It is **never** in the pre-commit hook.
 
 ### W5 — Pre-commit hook (the "husky" ask, PHP-native) · S · low
 **What.** A git pre-commit hook that runs **Pint on staged `*.php`** (and optionally a fast Larastan on
@@ -123,8 +153,14 @@ Adding Node just for a hook is a smell + a new-dep-without-justification. Use a 
 - **(B) captainhook/captainhook** (`composer require --dev`) — nicer config (`captainhook.json`),
   auto-installs the hook; closest to lint-staged ergonomics. Costs one dev-dep.
 - **(C) literal husky** — **not recommended** (Node in a PHP repo).
-**Risk.** Hook must be fast (staged files only) and skippable in emergencies; document install in
-`../process/SETUP_AND_UPDATE.md`.
+**Robustness (added at review).** The committed hook (A) must not break a repo without `composer install`:
+- **Degrade gracefully** — if `./vendor/bin/pint` is missing, `echo` a warning and `exit 0` (skip), never
+  block the commit. Same for a fast-Larastan variant if one is ever added.
+- **`.gitattributes`** — add `.githooks/pre-commit text eol=lf` (and ensure the file is committed with the
+  exec bit, `git update-index --chmod=+x`) so the hook actually runs on macOS/Linux and has LF endings.
+- Fast (staged `*.php` only) and skippable in emergencies (`git commit --no-verify`, per policy only when
+  explicitly allowed). Document the install (`core.hooksPath`) in `../process/SETUP_AND_UPDATE.md`.
+**Risk.** Low, given the graceful-skip + exec-bit handling above.
 
 ### W6 — Composer QA scripts · S · low
 **What.** Add scripts so the gate is one command (parity with admin's `lint`/`type-check`):
@@ -179,13 +215,13 @@ W6 composer scripts  +  W8 install/deploy cleanup
    ▼
 W2 Larastan + baseline (level 4, ratchet)      ← the "type-check" equivalent
    ▼
-W5 pre-commit hook (Pint [+ fast PHPStan] on staged .php)
+W5 pre-commit hook (Pint on staged .php; graceful-skip if vendor absent)
    ▼
 W3 unused imports  (mostly done by W1; verify)
    ▼
-W4 Rector one-time cleanup   (OPTIONAL / defer)
-   ▼
-W9 CI                        (OPTIONAL)
+W9 CI                        (OPTIONAL — out for now)
+
+  (W4 Rector removed from this task → optional one-off in the cleanup plan.)
 ```
 
 **Per-commit gate (after this lands):** `composer qa` — i.e. `pint --test` (full, not `--dirty`) +
@@ -201,8 +237,8 @@ ExampleTest `/`→403 + 2 avatar tests); don't let W2/W1 get blamed for them.
 | Decision | Options | Recommendation |
 |---|---|---|
 | Pre-commit hook mechanism (the "husky" ask) | (A) zero-dep committed hook + `core.hooksPath` · (B) captainhook dev-dep · (C) husky/Node | **(A)** — no new dep, PHP-native; (B) if lint-staged-style ergonomics are wanted |
-| Larastan starting level | 0–9 | **4**, with a generated baseline; ratchet up as the baseline shrinks |
-| Rector (W4) | in / out | **Out for now** (optional one-time cleanup later) — W1+W2 cover the asks |
+| Larastan starting level | 0–9 | ✅ **4** + generated baseline, **with a committed ratchet** to level 6 over the cleanup phase (user decision 2026-07-07) |
+| Rector (W4) | in / out | ✅ **Removed from this task** → optional one-off in the cleanup plan |
 | CI (W9) | in / out | **Out for now** (optional) — local hook + `composer qa` first |
 | Hook scope | Pint only · Pint + PHPStan | **Pint only** in the hook (fast); run PHPStan in `composer qa`/CI |
 
