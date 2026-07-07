@@ -3,6 +3,21 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-07 (later) — `catch (e: any)` → `unknown` cleanup, closing the "cheap cleanups" phase
+(ledger D9). Committed on `dev` (admin `5ceacc3`, frontend `8544c39`) — NOT yet pushed (part of the
+same review batch as task 002). All original audit sub-phases ("fix first", "cheap cleanups") are now
+complete; "later/opportunistic" is parked — see `tasks/PHASE3_PARKED_TODO.md`.**
+- **What landed:** 94 `catch (error: any)` blocks across 82 files (68 admin + 14 frontend) → `catch
+  (error: unknown)`. New shared helper `utils/api-error.ts` (`getApiError(unknown) → typed axios
+  `ApiErrorResponse | undefined`) in both apps; response-reading catch bodies route through it, log-only
+  bodies just re-annotate to `unknown`. Behaviour unchanged (same branches/toasts/status checks). Casts
+  added only where an untyped value flows into a typed sink (RHF `setError`, `toast.error`). Gates green:
+  `type-check` + lint 0 warnings, both apps. Not mobile-facing.
+- **Also this session:** verified the other three "cheap cleanups" items were already done by a prior
+  agent (iconify→lucide, 28+2 dead files deleted, commented-`// console.*` swept) — all confirmed clean
+  against current code. Wrote **`docs/mobile/MOBILE_NOTICE_AGENDA_DATE_WALL_CLOCK.md`** — an actionable
+  notice for the mobile team about the D8 venue-local `date` change (must not TZ-convert agenda `date`).
+
 **2026-07-07 — Date/time (timestamp) DB cleanup + refactor (ledger D7, task 002). Committed on `dev`
 (backend `86961dd`, admin `c6ee625` + follow-up `f340a0e`, frontend `5f2c55a`) and `main` (docs
 `aeb4528` + `155d94b`) — NOT yet pushed (awaiting review). Full plan + per-step log:
@@ -174,9 +189,13 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 - **Merge `dev` → `main`** on admin + frontend when ready — the icon migration (P1+P2) **and** the cheap
   cleanups currently live only on `dev`; `main` is still at the PR #1 merge. (User asked to leave the PRs
   for now.)
-- **`catch (X: any)` → `unknown` cleanup** — remaining item from the "cheap cleanups" phase (~85 admin +
-  ~27 frontend sites). *Not* a blind find-replace: each `catch` body must be re-narrowed before use (e.g.
-  route axios errors through the existing error helper). Aligns with CLAUDE.md "no widening to `any`".
+- **`catch (X: any)` → `unknown`** — ✅ **DONE** (ledger D9, admin `5ceacc3` / frontend `8544c39`, on
+  `dev`). Closed the "cheap cleanups" phase.
+- **Phase 3 (later/opportunistic) — PARKED** by user, tracked in `tasks/PHASE3_PARKED_TODO.md`:
+  `utils/cont-list.ts` cross-repo drift (real: the two apps have different country lists),
+  `xlsx`/chart.js dynamic-import bundle wins, and `useFetch` adoption (5 sites vs ~64 hand-rolled).
+- **Mobile team notice** — `docs/mobile/MOBILE_NOTICE_AGENDA_DATE_WALL_CLOCK.md` written; the mobile team
+  still needs to be actually told + confirm receipt before the D8 change releases.
 
 > Pint note: the backend repo is not Pint-clean at baseline. Use `pint --dirty` (formats only changed
 > files); a repo-wide `pint` run churns 300+ unrelated files.

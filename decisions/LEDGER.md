@@ -112,3 +112,17 @@ change (flagged in `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.html` §24):
 `WorkshopFeedbackTest` green (the one combined-filter search failure is a pre-existing test-isolation
 flake, passes in isolation and cannot be affected by a serialization-format change). Detail:
 [../tasks/002-datetime-db-cleanup/TASK.md](../tasks/002-datetime-db-cleanup/TASK.md).
+
+## D9 — 2026-07-07 — caught errors are typed `unknown`, read via the `getApiError` helper
+
+Closes the "cheap cleanups" phase. Every `catch (error: any)` in both Next apps (94 blocks across 82
+files) was changed to `catch (error: unknown)`. Bodies that read the axios error now go through a new
+shared helper **`utils/api-error.ts`** — `getApiError(error: unknown): ApiErrorResponse | undefined`
+(returns `error.response` when `isAxiosError`, else `undefined`) — so `error?.response?.data?.*` reads
+become `getApiError(error)?.data?.*` with real types instead of `any`. Log-only bodies
+(`console.error(error)` / `throw error`) are simply re-annotated to `unknown`. This satisfies
+CLAUDE.md's "no widening to `any`" rule and gives one canonical place to evolve the API-error shape.
+**Going forward, new code must use `catch (error: unknown)` + `getApiError`, never `catch (e: any)`.**
+`@typescript-eslint/no-explicit-any` stays **off** globally (unchanged) — this was a targeted burn-down,
+not a rule flip. Commits: admin `5ceacc3`, frontend `8544c39` (both on `dev`, unpushed pending review).
+Gates green: `type-check` + lint 0 warnings, both apps.
