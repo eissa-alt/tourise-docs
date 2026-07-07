@@ -57,7 +57,7 @@ Full plan (reviewed + scoped): [`../../upgrades/BACKEND_TOOLING_CHAIN_PLAN.md`](
 
 | Date | Level | Baseline errors | Note |
 |---|---|---|---|
-| _(W2 deferred)_ | _tbd_ | _tbd_ | re-add after the clone; measured L0=125 / L4=1697 raw (see log) — recommend starting at L0 |
+| 2026-07-08 | 0 | 124 (71 grouped entries) | initial baseline post-clone; 1 non-ignorable error fixed at source, not baselined. Goal: shrink 124→0, then bump L0→L1→… |
 
 ## Known baseline facts (don't let W1/W2 get blamed for these)
 
@@ -88,13 +88,24 @@ Newest at the bottom. Date each entry.
   tracker → commit.
 - 2026-07-07 — **Dep-free items W5–W8 not started** (pre-commit hook, composer QA scripts, VS Code →
   Pint, install/deploy cleanup). Can be done independently of W2 / the clone whenever wanted.
+- 2026-07-08 — **W2 (Larastan) DONE + W6 (composer scripts) DONE — clone complete, re-added.**
+  Reinstalled `larastan/larastan ^3.10`; `phpstan.neon` at **level 0** (user-chosen ratchet start over
+  L4 — see level table). Generated `phpstan-baseline.neon` = **124 errors** (71 grouped entries).
+  **1 non-ignorable error fixed at source** (not baselined): `GuestOtpNotification::$locale` redeclared
+  `public string $locale` over Laravel's untyped parent `Notification::$locale` (`property.extraNativeType`)
+  → removed the redeclaration (property inherited; ctor still sets it, typed `string` at the boundary).
+  **W6:** added composer scripts `lint` (`pint --test`), `lint:fix` (`pint`), `analyse`
+  (`phpstan analyse --memory-limit=1G`), `test`, `qa` (`@lint`+`@analyse`+`@test`). Verified:
+  `composer validate` valid · `composer lint` passed · `composer analyse` → **No errors** · full
+  `composer qa` = lint+analyse green, test **452 pass / 3 fail** (documented pre-existing). Not yet
+  committed at time of writing this line.
 
 ## Definition of Done
 
 - [ ] W1 `pint.json` + repo-wide Pint baseline (isolated commit); gate flipped to `pint --test`
-- [ ] W2 Larastan + baseline; `composer analyse` green; ratchet tracker seeded — **DEFERRED to after the manual clone + backend deploy**
+- [x] W2 Larastan (level 0) + baseline (124 err); `composer analyse` green; ratchet tracker seeded
 - [ ] W5 pre-commit hook installed + verified (graceful-skip tested); `.gitattributes` entry
-- [ ] W6 composer QA scripts; `composer qa` runs the full gate
+- [x] W6 composer QA scripts; `composer qa` runs the full gate
 - [ ] W7 VS Code aligned to Pint; W8 install/deploy warnings cleaned (`composer validate --strict`)
 - [ ] Quality gate green (`pint --test` + `composer analyse` + `php artisan test`)
 - [ ] Mobile contract: n/a (tooling only; `routes/api.php` untouched) — confirm no diff
