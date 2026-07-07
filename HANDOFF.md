@@ -10,8 +10,14 @@
 - **Display consistency pass (admin, `f340a0e`):** 34 views switched from `format(new Date(x))`
   (viewer's browser TZ) → shared `formatDateTime` (`Asia/Riyadh`) for real UTC Laravel timestamps
   (listing `created_at`, `registered_at`, session media `created_at`, guest-draft
-  `created_at`/`updated_at`). **Left on `format()` on purpose:** agenda `date` (`sessions`/`workshops`
-  wall-clock, needs its own TZ-semantics decision) + export-filename timestamps.
+  `created_at`/`updated_at`). Export-filename timestamps left on `format()`.
+- **Agenda-date fix (ledger D8, MOBILE CONTRACT CHANGE):** session/workshop `date` was served as UTC
+  `…Z` but entered as naive `datetime-local`, so the admin edit form pre-fill shifted the time −3h on
+  every save. Switched all 9 `date` serializations (admin + mobile resources) from `->toISOString()`
+  to naive-local `->format('Y-m-d\TH:i:s')` (venue = Asia/Riyadh). No FE logic change (pre-fill +
+  `format(new Date())` display self-correct with a `Z`-less string). **Mobile must parse `date` as
+  wall-clock, NOT convert to device TZ** — flagged in `docs/mobile/…FOR_MOBILE.html` §24. Backend
+  `pint --dirty --test` green.
 - **Backend:** date-only columns → real `date` (cast `date:Y-m-d`), datetime columns → `timestamp`
   (cast `datetime`, ISO 8601 UTC), flight times → `string(5)` `HH:mm`. Migrations edited in place +
   `migrate:fresh` (no prod data). Touched `guests` (+ `add_check_in_out_dates`), `invitation_emails`,

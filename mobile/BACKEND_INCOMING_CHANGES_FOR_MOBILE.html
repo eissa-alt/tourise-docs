@@ -1460,6 +1460,7 @@ await pusher.subscribe(channelName: <span class="s">'private-chat.$roomId'</span
   <li><strong>Storage URLs</strong> are absolute — never reconstruct from a filename.</li>
   <li><strong>Localization fallback</strong>: <code>*_ar</code> falls back to <code>*_en</code> when blank.</li>
   <li><strong>Sanctum token</strong> is per-token expiring, not session-based. Caught 401 → re-login (no refresh endpoint).</li>
+  <li><strong>Session / Workshop <code>date</code> is venue-local (Asia/Riyadh)</strong> <span class="pill changed">Contract change 2026-07-07</span> — serialized as a naive <code>YYYY-MM-DDTHH:MM:SS</code> string with <em>no</em> <code>Z</code> / offset (previously UTC <code>…Z</code> via <code>toISOString()</code>). Parse it as a wall-clock time and display it as-is; do <strong>NOT</strong> convert to the device timezone (the value already <em>is</em> the event's local time). Affects <code>SessionList/Detail</code>, <code>FavoriteSession</code>, <code>Workshop List/Detail</code>, <code>RegisteredWorkshop</code>, and the nested sessions in <code>Speaker</code>. Audit fields (<code>createdAt</code>/<code>updatedAt</code>) and other timestamps are unchanged and remain UTC ISO 8601.</li>
 </ul>
 
 <h2 id="premerge">25. Pre-merge / pre-production checklist <span class="pill breaking">Critical</span></h2>

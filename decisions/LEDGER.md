@@ -90,3 +90,25 @@ resources; the offline QR `check_in_time` write round-trips through the new `dat
 `routes/api.php` is unchanged. Gates green: backend `pint --dirty --test` + `migrate:fresh` +
 `php artisan test`; both Next apps `type-check` + `production`. Detail:
 [../tasks/002-datetime-db-cleanup/TASK.md](../tasks/002-datetime-db-cleanup/TASK.md).
+
+## D8 — 2026-07-07 — agenda `date` is venue-local wall-clock (mobile contract change)
+
+Follow-on to D7. Session/Workshop `date` (a `dateTime` column, cast `datetime`) was serialized with
+`->toISOString()` (UTC `…Z`) while being **entered** via a native `datetime-local` (naive wall-clock,
+no TZ). Because the API emitted UTC, the admin edit form's `data.date.slice(0,16)` pre-filled the
+input with the **UTC** clock (`11:30` for a `14:30` Riyadh event), so opening a session/workshop and
+saving **silently shifted the time −3h** (the Riyadh offset). **Decision (mirrors cyan, which never
+UTC-converts these): treat agenda `date` as venue-local (Asia/Riyadh) wall-clock end-to-end.** All 9
+resources (`AdminSessionsResources`, `AdminWorkshopResource`, Mobile `SessionList/Detail`,
+`FavoriteSession`, `WorkshopList/Detail`, `RegisteredWorkshop`, nested in `SpeakerResource`) now emit
+`->format('Y-m-d\TH:i:s')` (naive, **no `Z`**). No FE code change needed: the admin `.slice(0,16)`
+pre-fill and `format(new Date(date))` display both become correct for every viewer (a `Z`-less string
+parses as local, and format renders in local — the shift cancels). The `datetime` cast + naive
+`datetime-local` submit already round-trip through the app's `Asia/Riyadh` timezone. **Mobile contract
+change (flagged in `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.html` §24):** mobile must parse
+`date` as wall-clock and NOT convert to the device timezone. Audit timestamps
+(`created_at`/`updated_at`, `check_in_time`, etc.) stay UTC ISO 8601 — only the scheduled agenda
+`date` is venue-local. Gates: backend `pint --dirty --test` passed; isolated `SessionsTest` /
+`WorkshopFeedbackTest` green (the one combined-filter search failure is a pre-existing test-isolation
+flake, passes in isolation and cannot be affected by a serialization-format change). Detail:
+[../tasks/002-datetime-db-cleanup/TASK.md](../tasks/002-datetime-db-cleanup/TASK.md).

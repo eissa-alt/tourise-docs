@@ -178,6 +178,22 @@ Newest at the bottom.
   sensitive area and needs its own timezone-semantics decision) and the `format(new Date(),
   'dd_MM_yyyy_HH_mm')` **export-filename** timestamps (current time for a download name, not stored
   data). Admin `type-check` + `production` green.
+- 2026-07-07 — **Resolved the deferred agenda-date timezone question → ledger D8 (mobile contract
+  change).** Investigation found a real bug beyond display: agenda `date` is served as UTC (`…Z`) but
+  entered via naive `datetime-local`, so the admin edit form's `.slice(0,16)` pre-fill showed the UTC
+  clock and **each edit-save shifted the time −3h**. Per the user's pick (Option A, mirroring cyan),
+  switched all **9** session/workshop `date` serializations from `->toISOString()` to naive-local
+  `->format('Y-m-d\TH:i:s')` (`AdminSessionsResources`, `AdminWorkshopResource`, Mobile
+  `SessionList/Detail`, `FavoriteSession`, `WorkshopList/Detail`, `RegisteredWorkshop`, nested in
+  `SpeakerResource`). Kept the `datetime` cast; app TZ `Asia/Riyadh` means the value is the venue
+  wall-clock. **No FE logic change** — the admin `.slice(0,16)` pre-fill and `format(new Date(date))`
+  display are both now correct for every viewer (a `Z`-less string parses+formats as local, so the
+  shift cancels); only refreshed two stale code comments. **Mobile contract change flagged** in
+  `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.html` §24 (parse `date` as wall-clock, do NOT
+  convert to device TZ). Gate: `pint --dirty --test` passed (Pint also tidied pre-existing style in
+  the 9 touched resources); isolated `SessionsTest`/`WorkshopFeedbackTest` green — the lone
+  combined-filter search-count failure is a pre-existing isolation flake (passes solo; a
+  serialization format cannot change a search count).
 
 ## Definition of Done
 
