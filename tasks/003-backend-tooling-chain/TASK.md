@@ -111,11 +111,16 @@ Newest at the bottom. Date each entry.
     now empty. `composer validate --strict` → **valid** (no warnings). `composer audit` → **no
     security advisories**; note: `niklasravnsborg/laravel-pdf` is flagged **abandoned** (informational,
     not a vuln — it's a load-bearing prod dep for PDF/badge generation; left as-is, swap is out of scope).
-  - **W7 DROPPED (N/A):** `.vscode/` is **gitignored** (`.gitignore:/.vscode`) and untracked — editor
-    config can't be committed/shared without un-ignoring it, which is a deliberate repo convention +
-    a cross-repo policy call, not a tooling-task side effect. And W7's goal (save-format matches the
-    gate) is **already enforced by the W5 hook** regardless of editor settings. Local `.vscode/` edits
-    were reverted to original (php formatter stays intelephense). **[user-approved drop 2026-07-08]**
+  - **W7 initially dropped, then RE-INSTATED + DONE** (`de75eed`). Drop was based on the backend
+    gitignoring `.vscode/` — but the user flagged an **inconsistency**: admin + frontend **commit**
+    their `.vscode/` (tracked); only the backend ignored it (a stray `/.vscode` inherited from the
+    Next-app template). So ignoring it was **not** a deliberate convention — the backend was the
+    outlier. **Fix (aligns all 3 repos):** removed `/.vscode` from backend `.gitignore` and committed
+    `.vscode/`. Also made the content backend-appropriate (it had been copied from a Next app):
+    `[php]` formatter intelephense → `open-southeners.laravel-pint` (matches the gate + W5 hook);
+    dropped the frontend-only `[js]/[ts]/[css]/[scss]` blocks + eslint code-action; `extensions.json`
+    pruned of tailwind/postcss/eslint/prettier/liveserver/auto-*-tag recs + added the Pint extension;
+    README install list updated. **[user-approved re-instate 2026-07-08]**
 
 ## Definition of Done
 
@@ -123,7 +128,7 @@ Newest at the bottom. Date each entry.
 - [x] W2 Larastan (level 0) + baseline (124 err); `composer analyse` green; ratchet tracker seeded
 - [x] W5 pre-commit hook installed + verified (graceful-skip tested); `.gitattributes` entry
 - [x] W6 composer QA scripts; `composer qa` runs the full gate
-- [x] W7 ~~VS Code aligned to Pint~~ → **N/A** (`.vscode/` gitignored; W5 hook enforces the gate) · W8 install/deploy warnings cleaned (`composer validate --strict` valid)
+- [x] W7 VS Code aligned to Pint — `.vscode/` un-ignored + committed (fixes inconsistency vs admin/FE), `[php]`→Pint · W8 install/deploy warnings cleaned (`composer validate --strict` valid)
 - [x] Quality gate green (`pint --test` + `composer analyse` + `php artisan test` = 452/3 pre-existing)
 - [x] Mobile contract: n/a (tooling only; `routes/api.php` untouched)
 - [ ] Docs: this TASK.md → `done`; tasks index row; **LEDGER** entry (gate flip); HANDOFF refresh;
