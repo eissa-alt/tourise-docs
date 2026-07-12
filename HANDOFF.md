@@ -3,6 +3,22 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-11 → 07-12 — Env-var / dead-code cleanup pass (admin + frontend). Committed on `dev`.
+Frontend is pushed and in sync with `origin/dev` (`64037eb`). Admin `dev` is 4 ahead of `origin/dev`
+(NOT yet pushed) — `f6bcf7b` → `a361586` → `37cf1a1` → `8345f19`.**
+- **Admin (4 unpushed commits):** retired baseline env vars that were config-noise, moving the values
+  to code constants. `f6bcf7b` drop `NEXT_PUBLIC_LISTING_PER_PAGE_LIMIT` from listing URLs
+  (`utils/fetch-data-url.ts`, print-logs). `a361586` move cookie-age env vars → code constants
+  (`auth/provider.tsx`, `i18n/provider.tsx`). `37cf1a1` retire `NEXT_PUBLIC_ENV` from 9 `data/*-select.tsx`
+  files (incl. `status-types-select`, `sidebar-links`). `8345f19` remove unused `callback_url` /
+  `back_link` from `guests` step-4 + `verify-email-form`. Pure config/dead-code hygiene, no behaviour
+  change.
+- **Frontend (pushed, `dev` @ `64037eb`):** `9a9a850` + `dedb4f6` clean up `utils/axios.ts` (drop unused
+  token header/variable). `e75c9bf` remove `@vercel/analytics` dep + imports (`package.json`, `_app.tsx`,
+  `yarn.lock`). `64037eb` untrack `.env.production` + add to `.gitignore`.
+- **Gates:** admin `yarn type-check` **clean** + `yarn production` **green** (verified 2026-07-12).
+  Not mobile-facing (`routes/api.php` untouched). **Admin still needs its 4 commits pushed to `origin/dev`.**
+
 **2026-07-08 — Backend tooling & code-quality chain (task 003, ledger D10). All work items DONE;
 committed on `dev` — backend `96413df` (W1, already pushed) + `bb61db9` (W2+W6) + `9741e90` (W5+W8)
 + `de75eed` (W7); docs on `main`. Backend `dev` is 4 ahead of `origin/dev` (W1 pushed earlier). Plan:
@@ -203,6 +219,8 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 
 ## Next / outstanding
 
+- **Push admin `dev`** — 4 unpushed env-var/dead-code cleanup commits (`f6bcf7b` → `8345f19`, 07-12);
+  gates green (`type-check` + `production`). Frontend + backend + docs are all in sync with `origin`.
 - **Browser QA** — forgot-password + invite create paths + reset-by-token page; plus the migrated
   listings + sidebar accordion (LTR/RTL) from the earlier P5.trim / cyan-parity session, which compiled
   green but were never browser-tested. **Add a visual pass on the migrated icons** (both apps) — the
