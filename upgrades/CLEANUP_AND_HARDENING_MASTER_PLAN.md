@@ -159,7 +159,12 @@ styles/3rd-party. SSR vs client base-URL split must be airtight.
 
 ### Task 005 — Private document storage + signed URLs (saudi P1) **+ extract shared UploadService** (Todo-2D) · Track B + A · backend (+ admin previews)
 
-- **⏸️ OPTIONAL / LATER (Track B — deferred).** Do not start until Track A is done + user greenlights.
+- **✅ DONE (code) 2026-07-12** — un-deferred by user (pre-launch, no clone has prod data). Executed as
+  `docs/tasks/006-private-document-storage/` (folder 006). Ledger **D14**. Gates green + runtime-verified;
+  **mobile-contract change** (avatar → signed URL) — mobile ack + real-env QA outstanding before `dev`→`main`.
+  NOTE: the bundled **UploadService extraction (Todo-2D)** was **not** done here — the scope was kept to the
+  private-storage security fix; 2D remains an open Track A item. History below kept as the plan of record.
+- ~~**⏸️ OPTIONAL / LATER (Track B — deferred).** Do not start until Track A is done + user greenlights.~~
   **Note:** the **UploadService extraction (Todo-2D) is a Track A item** bundled here only because P1
   touches every upload path. If Track B stays deferred, **2D can be split out and executed on its own**
   as part of Track A (see §2).

@@ -182,3 +182,31 @@ closing note); tasks 001/002 gates had run `migrate:fresh` **without** `--seed`,
 `migrate:fresh --seed` clean, all 8 seed-path seeders green, 12 titles seed (6 shown / 6 hidden / 0 null),
 Pint + Title tests pass. Backend `dev` `a6fe3d1`. Not mobile-facing (seed data only). No other seeder in
 the run path had the same null-into-bool pattern.
+
+## D14 — 2026-07-12 — sensitive registrant files are private + served via signed URLs (Saudi P1 backport)
+
+Registrant PII files — `guests.personal_image` (photos) and `guests.document_copy` (passport/ID copies)
+— were written to Laravel's **`public` disk** and handed out as **raw, unauthenticated, CDN-cacheable
+URLs** (`PUBLIC_STORAGE_URL/personal_image/…`), so anyone with or guessing a URL could fetch someone's
+passport. **Decision: adopt Saudi Forum 11's Point 1 — sensitive files live on a `private` disk
+(`storage/app/private`, never web-served) and are delivered only through short-lived signed URLs.**
+Un-defers the plan's Task 005 / Track B (user, 2026-07-12); done now because the basecode is pre-launch
+with no clone carrying prod data (squash/migration of live files would otherwise complicate it). What
+landed: `private` disk in `filesystems.php`; new `GuestDocumentController` (`signedUrl()` +
+signature-validated `stream()` with a `basename()` traversal guard, type allow-list, `Cache-Control:
+no-store`); a `signed`-middleware route `GET /api/files/guest-doc/{type}/{file}` (`guest.doc.stream`);
+uploads (incl. the **mobile self-service avatar** in `MobileAuthController`) repointed to `private`;
+admin resource URLs → signed (30-min TTL) and **mobile `avatar` → signed (24-h TTL)**; 16 server-side
+read-backs (badges/PDF/social-card/email-photo across 7 files) repointed from
+`base_path('public/storage/…')` to `Storage::disk('private')->path(…)`; an idempotent
+`guests:migrate-docs-to-private --dry-run` command (no-op on fresh clones, kept for clones with data +
+a CDN-purge reminder); 2 stale phpstan-baseline `env()` ignores removed. **Dual TTL by decision:** admin
+30 min vs mobile 24 h so app caches survive a session. **MOBILE CONTRACT CHANGE** — `avatar` is now a
+signed, expiring URL (same field/type, bounded lifetime); mobile must re-fetch after expiry, not build
+the URL itself → flagged in `docs/mobile/MOBILE_NOTICE_PRIVATE_AVATAR_SIGNED_URL.md`; **hold `dev`→`main`
+until mobile acks.** Public assets (sponsor/speaker/badge/media/publication/attachment images) stay
+public by design. Gates: `composer qa` green (`pint --test` + phpstan **No errors** + tests **452/3
+pre-existing** — the 2 avatar failures confirmed to fail on the clean parent too, so no regression);
+`migrate:fresh --seed` clean; runtime verified (private file streams 200 via valid signature, 403 on
+tamper/no-sig, 404 on traversal, 404 at the old public path). Detail:
+[../tasks/006-private-document-storage/TASK.md](../tasks/006-private-document-storage/TASK.md).

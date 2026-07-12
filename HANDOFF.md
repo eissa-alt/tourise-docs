@@ -3,6 +3,29 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-12 — Private document storage + signed URLs (Saudi P1 backport, task 006, ledger D14). Code
+DONE on backend `dev`, gates green, runtime-verified — NOT yet committed/pushed (working tree). MOBILE
+CONTRACT CHANGE — hold `dev`→`main` until mobile acks. Plan: `CLEANUP_AND_HARDENING_MASTER_PLAN.md` Task
+005 (Track B); log: `tasks/006-private-document-storage/TASK.md` (folder 006).**
+- **What & why:** registrant PII (`guests.personal_image` photos + `document_copy` passport/ID) was on
+  the **public** disk at raw unauthenticated CDN URLs — anyone with the URL fetched a passport. Now on a
+  **`private`** disk (`storage/app/private`, never web-served), served only via short-lived **signed
+  URLs** (`GuestDocumentController` + `signed`-middleware route `GET /api/files/guest-doc/{type}/{file}`).
+  Un-deferred pre-launch (no clone has prod data).
+- **Landed (backend, 13 files + 2 new):** private disk; serving controller (signedUrl + stream w/
+  basename traversal guard, allow-list, no-store); writes repointed incl. **mobile avatar upload**
+  (`MobileAuthController`); admin resource URLs → 30m signed, **mobile `avatar` → 24h signed**; **16
+  server-side read-backs** (badges/PDF/social-card/email-photo, 7 files) → `disk('private')->path()`;
+  idempotent `guests:migrate-docs-to-private --dry-run` command; 2 stale phpstan-baseline env ignores removed.
+- **Gates:** `composer qa` green (pint + phpstan No-errors + tests **452/3 pre-existing** — the 2 avatar
+  failures confirmed to fail on the clean parent too → no regression); `migrate:fresh --seed` clean.
+  **Runtime verified:** private file streams **200** on valid signature, **403** on tamper/no-sig, **404**
+  on traversal, **404** at the old public `/storage` path.
+- **MOBILE CONTRACT:** `avatar` is now a signed 24h-expiring URL (same field/type; mobile must re-fetch
+  after expiry, not build the URL). Flagged in `docs/mobile/MOBILE_NOTICE_PRIVATE_AVATAR_SIGNED_URL.md`.
+- **Outstanding:** commit + **mobile team ack** + real-env QA (admin preview render, heavy export/PDF/email
+  photo) before `dev`→`main`. NOTE: the plan's bundled UploadService extraction (Todo-2D) was NOT done.
+
 **2026-07-12 — Fixed `migrate:fresh --seed` (TitleSeeder null bug, ledger D13). Backend `dev` `a6fe3d1`,
 pushed.** 6 `TitleSeeder` rows passed `show_in_user_form => null` into a NOT-NULL `boolean default(false)`
 column → `SQLSTATE[23000]` crash mid-seed. Fixed the **seeder** (`null` → `false`; `null` meant "not
