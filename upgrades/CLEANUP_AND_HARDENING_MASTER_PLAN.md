@@ -111,7 +111,10 @@ migrations)."
 
 ### Task 004 — Admin auth hardening: HttpOnly token + Next BFF proxy + full CSP (saudi P2) · Track B · admin (+ minor backend verify)
 
-- **⏸️ OPTIONAL / LATER (Track B — deferred).** Do not start until Track A is done + user greenlights.
+- **✅ DONE (code) 2026-07-12** — un-deferred by user (pre-launch, no clone has prod data). Executed as
+  `docs/tasks/005-admin-httponly-token/` (folder 005; 004 = dropped squash). Ledger **D12**. Gates green +
+  runtime-verified; real-env browser QA outstanding before `dev`→`main`. History below kept as the plan of record.
+- ~~**⏸️ OPTIONAL / LATER (Track B — deferred).** Do not start until Track A is done + user greenlights.~~
 - **Effort:** L · **Mobile-contract risk:** NONE expected (admin-web only; mobile uses its own
   `MobileAuthController` token flow) — **verify** the mobile guest OTP/login path is untouched.
 - **Priority when scheduled:** HIGH value — closes XSS → account-takeover (admin currently stores a

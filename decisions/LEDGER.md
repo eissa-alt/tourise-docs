@@ -144,3 +144,27 @@ admin/FE husky+lint-staged hook); and `.vscode/` **un-ignored + committed** with
 Rector + CI were considered and left out (Rector = optional one-off in the cleanup plan; no repo has CI).
 **Going forward the backend quality gate is `composer qa` = `pint --test` + `phpstan analyse` +
 `php artisan test`.** Detail: [../tasks/003-backend-tooling-chain/TASK.md](../tasks/003-backend-tooling-chain/TASK.md).
+
+## D12 — 2026-07-12 — admin bearer token is HttpOnly via a Next BFF proxy (Saudi P2 backport)
+
+The admin stored its Sanctum bearer in a **JS-readable** `token` cookie (read by `cookie.get('token')`
+across ~136 client sites), so any XSS in the admin could exfiltrate it → full account takeover. The
+Phase-1 fix (`af2298b`, `secure`+`sameSite:'lax'`) hardened transport/CSRF but **could not** close the
+XSS-read vector — `httpOnly` can only be set server-side. **Decision: adopt Saudi Forum 11's Point 2 —
+the token lives ONLY in an HttpOnly cookie set by a Next.js BFF proxy; the browser never handles it.**
+Un-defers Task 004 from Track B of `CLEANUP_AND_HARDENING_MASTER_PLAN.md` (user, 2026-07-12) — done now
+because the basecode is **pre-launch with no clone carrying prod data**, so the large 135-file codemod is
+cheap to bake into every future clone. What landed: `utils/{auth-cookies.ts,server/proxy.ts}` +
+`pages/api/{proxy/[...path],auth/{login,login-confirmation,logout}}.ts`; isomorphic `utils/axios.ts`
+(browser→`/api/proxy`, SSR→direct Laravel); `auth/provider.tsx`+`withAuth.tsx`+login/verify forms moved
+onto a JS-readable **flag cookie** (`alt_admin_auth`) + an `authenticated` marker; a codemod removing all
+dead `cookie.get('token')` reads (136) and `Authorization: Bearer` headers (261); and a **full CSP** in
+`next.config.js` adapted to alt (env-derived origins, reCAPTCHA only — **no iconify** per D5, no Maps/Fonts,
+`blob:` for print-js, `'unsafe-eval'` dev-only). Cookie is `HttpOnly; SameSite=Strict; Secure(prod);
+Max-Age=6h`. **Not mobile-facing** — admin-web only, `routes/api.php` untouched, mobile keeps its own
+`MobileAuthController` flow. Gates green (`type-check` + `production`); BFF behavior verified at runtime
+(login strips token + sets HttpOnly cookie, proxy injects Bearer from the cookie, logout clears both, OTP
++ streaming + CSP header all confirmed). **Real-env browser QA (live backend login, reCAPTCHA, heavy
+export through the proxy) is still outstanding before `dev`→`main`** — Saudi hotfix-reverted their P2 once
+over the streaming/CSP edges. Detail: [../tasks/005-admin-httponly-token/TASK.md](../tasks/005-admin-httponly-token/TASK.md)
+(folder `005`; implements the plan's "Task 004 / Track B").

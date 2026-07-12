@@ -38,5 +38,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 002 | [datetime-db-cleanup](002-datetime-db-cleanup/TASK.md) | done |
 | 003 | [backend-tooling-chain](003-backend-tooling-chain/TASK.md) | done |
 | 004 | [migration-squash](004-migration-squash/TASK.md) | dropped |
+| 005 | [admin-httponly-token](005-admin-httponly-token/TASK.md) | done (code) — QA pending |
 
 _Add a row per task as you open it; newest at the bottom._

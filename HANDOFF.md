@@ -3,6 +3,28 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-12 — Admin HttpOnly token + Next BFF proxy + full CSP (Saudi P2 backport, task 005, ledger
+D12). Code DONE on `dev`, gates green, runtime-verified — NOT yet committed/pushed (working tree).
+Real-env browser QA still outstanding before merge. Plan: `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md`
+Task 004 (Track B); log: `tasks/005-admin-httponly-token/TASK.md` (folder 005 — 004 is the dropped squash).**
+- **What & why:** the admin bearer was a JS-readable cookie (XSS → account takeover). The Phase-1 fix
+  (`af2298b`, secure+sameSite) couldn't close the XSS-read vector — only `httpOnly` can, and only a server
+  can set it. So the token now lives ONLY in an **HttpOnly cookie** written by a **Next BFF proxy**; the
+  browser never handles it. Un-deferred from Track B now because the basecode is **pre-launch (no clone has
+  prod data)**, so the 135-file codemod is cheap to bake into every clone.
+- **Landed (admin only, 144 files, net −399 lines):** new `utils/{auth-cookies,server/proxy}.ts` +
+  `pages/api/{proxy/[...path],auth/{login,login-confirmation,logout}}.ts`; isomorphic `utils/axios.ts`
+  (browser→`/api/proxy`, SSR→direct); provider/withAuth/login+verify onto a JS-readable flag cookie
+  (`alt_admin_auth`) + `authenticated` marker; codemod removing 136 dead `cookie.get('token')` reads + 261
+  `Authorization: Bearer` headers (proxy injects auth server-side now); **full CSP** in `next.config.js`
+  adapted to alt (env origins, reCAPTCHA only, **no iconify** per D5, `'unsafe-eval'` dev-only).
+- **Gates:** `yarn type-check` + `yarn production` **green**. **Runtime verified** against a stub upstream
+  on `next dev`: login strips token + sets `HttpOnly; SameSite=Strict; Max-Age=6h` cookie, proxy injects
+  `Bearer` from the cookie, logout clears both, OTP + multipart streaming + CSP header all confirmed.
+- **Mobile:** untouched — admin-web only, `routes/api.php` unchanged.
+- **Outstanding:** commit (4 commits) + **real-env browser QA** (live backend login, reCAPTCHA, heaviest
+  export/upload through the proxy) before `dev`→`main`. Saudi hotfix-reverted their P2 once over these edges.
+
 **2026-07-11 → 07-12 — Env-var / dead-code cleanup pass (admin + frontend). Committed on `dev`.
 Frontend is pushed and in sync with `origin/dev` (`64037eb`). Admin `dev` is 4 ahead of `origin/dev`
 (NOT yet pushed) — `f6bcf7b` → `a361586` → `37cf1a1` → `8345f19`.**
