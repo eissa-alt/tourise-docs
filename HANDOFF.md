@@ -3,10 +3,18 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-12 — Fixed `migrate:fresh --seed` (TitleSeeder null bug, ledger D13). Backend `dev` `a6fe3d1`,
+pushed.** 6 `TitleSeeder` rows passed `show_in_user_form => null` into a NOT-NULL `boolean default(false)`
+column → `SQLSTATE[23000]` crash mid-seed. Fixed the **seeder** (`null` → `false`; `null` meant "not
+shown"), not the schema. This was the pre-existing bug the dropped migration-squash recon flagged. Verified:
+full `migrate:fresh --seed` clean, 8 seeders green, 12 titles (6 shown / 6 hidden), Pint + Title tests pass.
+Not mobile-facing.
+
 **2026-07-12 — Admin HttpOnly token + Next BFF proxy + full CSP (Saudi P2 backport, task 005, ledger
-D12). Code DONE on `dev`, gates green, runtime-verified — NOT yet committed/pushed (working tree).
-Real-env browser QA still outstanding before merge. Plan: `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md`
-Task 004 (Track B); log: `tasks/005-admin-httponly-token/TASK.md` (folder 005 — 004 is the dropped squash).**
+D12). Code DONE, gates green, runtime-verified — committed + pushed (admin `dev` 4 commits
+`d95a2e5`→`b006123`; docs `main` `2939d0b`). Real-env browser QA still outstanding before `dev`→`main`.
+Plan: `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md` Task 004 (Track B); log:
+`tasks/005-admin-httponly-token/TASK.md` (folder 005 — 004 is the dropped squash).**
 - **What & why:** the admin bearer was a JS-readable cookie (XSS → account takeover). The Phase-1 fix
   (`af2298b`, secure+sameSite) couldn't close the XSS-read vector — only `httpOnly` can, and only a server
   can set it. So the token now lives ONLY in an **HttpOnly cookie** written by a **Next BFF proxy**; the

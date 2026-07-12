@@ -168,3 +168,17 @@ Max-Age=6h`. **Not mobile-facing** — admin-web only, `routes/api.php` untouche
 export through the proxy) is still outstanding before `dev`→`main`** — Saudi hotfix-reverted their P2 once
 over the streaming/CSP edges. Detail: [../tasks/005-admin-httponly-token/TASK.md](../tasks/005-admin-httponly-token/TASK.md)
 (folder `005`; implements the plan's "Task 004 / Track B").
+
+## D13 — 2026-07-12 — fix TitleSeeder null → `migrate:fresh --seed` restored
+
+`php artisan migrate:fresh --seed` was **broken on `dev`**: 6 `TitleSeeder` rows passed
+`show_in_user_form => null`, but that column is a NOT NULL `boolean default(false)` (D6 boolean refactor)
+and is cast to boolean on the model — so the insert threw `SQLSTATE[23000] Column 'show_in_user_form'
+cannot be null` and seeding died at Title (Country/Admin/GuestStatus/Category ran first). This was the
+pre-existing bug the dropped migration-squash recon surfaced (see `tasks/004-migration-squash/TASK.md`
+closing note); tasks 001/002 gates had run `migrate:fresh` **without** `--seed`, so it went unnoticed.
+**Decision: fix the seeder, not the schema** — `null` meant "not shown", which for a NOT-NULL boolean is
+`false`; the column + cast are correct as designed. Changed the 6 `null` → `false`. Verified: full
+`migrate:fresh --seed` clean, all 8 seed-path seeders green, 12 titles seed (6 shown / 6 hidden / 0 null),
+Pint + Title tests pass. Backend `dev` `a6fe3d1`. Not mobile-facing (seed data only). No other seeder in
+the run path had the same null-into-bool pattern.
