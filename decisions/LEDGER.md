@@ -229,3 +229,34 @@ collapse and was fully reverted before redoing it surgically (token + one adjace
 `type-check` + `production` green on both apps. Not backend/mobile-facing. **Visual EN/AR QA still pending**
 (soft red ring on invalid inputs; RTL spacing on checkboxes/radios/back+share buttons/toolbars) — the one
 thing automation can't confirm.
+
+## D16 — 2026-07-13 — consolidate storage-URL env vars to a single source of truth
+
+Collapsed the redundant/inconsistent storage-URL env vars across all three apps onto **framework-native
+hosts**. Plan + full detail: [../upgrades/STORAGE_URL_CONSOLIDATION_PLAN.md](../upgrades/STORAGE_URL_CONSOLIDATION_PLAN.md).
+Pre-launch (no prod data / CDN cache / shipped mobile), so the aggressive path — drop vars, change values,
+no byte-identical-URL guarantee needed — was fine; the emitted URLs came out identical anyway.
+
+**End state:** backend keeps **zero** `PUBLIC_STORAGE_URL*` vars (public URLs via
+`Storage::disk('public')->url()` → `config/filesystems` → `APP_URL.'/storage'`); admin keeps **one**
+(`NEXT_PUBLIC_STORAGE_URL` = storage **root**) + `utils/storage.ts` deriving `/uploads`, `/attachments`,
+`/{module}` paths; frontend keeps **zero** (its var was comment-only dead). Sensitive registrant files stay
+on the private disk + signed `*_url` (D14) — never rebuilt from an env var.
+
+**Landed (on `dev`, unpushed):** FE `89c1ce3`; admin `b5bb5b2`→`9137fd9`→`fd628cd` (+ tracked `.env.example`);
+backend `58ca08c` (new public `social_card_image_url`) + `5cebb86` (46 `env('PUBLIC_STORAGE_URL2')` sites /
+28 files, incl. 7 mobile resources, → `Storage::disk('public')->url()`; self-healing sites →
+`rtrim(...url(''),'/')`; phpstan baseline pruned 45→18 env ignores, masking nothing). Byte-identical output
+verified via tinker (bare + leading-slash) → **mobile contract unchanged, no ack needed.**
+
+**Fixed en route:** the `social_card` see-more URL had a wrong path (`/social_card` vs `/uploads/social_card`)
+— now correct from the API. `visa_copy`/`issued_visa` confirmed **dead** (no column; upload allow-lists
+`document_copy` only) so no URL added. **Deliberately deferred (separate correctness item, not env-var work):**
+guest `custom-file-input{,-3}.tsx` still rebuild a public `/storage/uploads/{field}/` URL for files that now
+live on the **private** disk (the `/upload` endpoints return `data` only) — likely a broken preview; fix by
+returning a signed `url` from those endpoints. Tracked in the plan's follow-up.
+
+**Gates:** FE + admin `type-check` + `production` green; backend `composer qa` green (`pint --test` + phpstan
+**No errors** + tests **452 pass / 3 fail** — the same pre-existing ExampleTest-403 + 2 avatar failures,
+confirmed identical on the stashed parent → no regression) + `migrate:fresh --seed` clean. **User owns the
+gitignored `.env` edits** (drop the retired vars; retarget `NEXT_PUBLIC_STORAGE_URL` to the root).

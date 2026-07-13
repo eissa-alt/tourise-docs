@@ -191,4 +191,20 @@ unreachable. The 1 admin var it references is kept anyway (pinned by the live gu
 4. **Docs** — set this doc's status to done; note SHAs; promote durable choice to `../decisions/LEDGER.md`;
    refresh `../HANDOFF.md`.
 
-**Status:** planning complete — execution not started.
+**Status:** ✅ **DONE** (2026-07-13, ledger D16). All 4 phases executed, gates green, on `dev` (unpushed).
+
+- **Phase 1 — frontend** `89c1ce3`: scrubbed 3 dead commented `NEXT_PUBLIC_STORAGE_URL` refs. `type-check` + `production` green.
+- **Phase 2 — admin** `b5bb5b2` (2a: `utils/storage.ts` + 4 file-inputs) → `9137fd9` (2b: see-more/attachments, drop dead fallbacks) → `fd628cd` (2c: tracked `.env.example`). Backend dep `58ca08c` (2b: new public `social_card_image_url`). `type-check` + `production` green.
+- **Phase 3 — backend** `5cebb86`: 46 `env('PUBLIC_STORAGE_URL2')` sites across 28 files → `Storage::disk('public')->url()` (byte-identical, verified via tinker incl. 7 mobile resources); self-healing sites → `rtrim(...url(''),'/')`; phpstan baseline pruned (27 obsolete env ignores, masks nothing). `composer qa` green + `migrate:fresh --seed` clean.
+
+**Bugs found & fixed along the way (audit paid off):**
+- `social_card` see-more fallback pointed at a **wrong path** (`/social_card` vs `/uploads/social_card`) — now correct via the API `social_card_image_url`.
+- `visa_copy` / `issued_visa` are **fully dead** (no DB column; `uploadDocument` allow-lists `document_copy` only) — their see-more sites are unreachable; no URL added.
+- The guest `/upload` + `/upload-document` endpoints write to the **private** disk and return no `url`, so the admin `custom-file-input{,-3}.tsx` `uploadUrl()` rebuild points at a private path (latent — a separate correctness item, NOT this env-var work; flagged below).
+
+**User `.env` edits (gitignored — done by user, not committed):**
+- admin `.env.local`: `NEXT_PUBLIC_STORAGE_URL` value `…/storage/uploads` → `…/storage`; **delete** `NEXT_PUBLIC_STORAGE_URL2` + `NEXT_PUBLIC_STORAGE_URL_ATTACHMENTS`.
+- frontend `.env.local`: **delete** `NEXT_PUBLIC_STORAGE_URL`.
+- backend `.env`: **delete** `PUBLIC_STORAGE_URL` + `PUBLIC_STORAGE_URL2`.
+
+**Follow-up (out of this plan):** the guest file-input preview (`custom-file-input.tsx` / `-3.tsx`) rebuilds a public `/storage/uploads/{field}/` URL for a file that now lives on the private disk — likely a broken preview, same class as §4a. Trace at runtime; fix by returning a signed `url` from the guest upload endpoints (they currently return `data` only, see backend `efcc027`).

@@ -3,6 +3,29 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-13 — Storage-URL env-var consolidation DONE (all 4 phases, ledger D16). On `dev` across FE +
+admin + backend, gates green — NOT pushed. Plan: `upgrades/STORAGE_URL_CONSOLIDATION_PLAN.md` (status =
+DONE). Mobile contract UNCHANGED (byte-identical URLs, tinker-verified) → no ack needed.**
+- **Backend now keeps ZERO `PUBLIC_STORAGE_URL*` vars**, admin keeps ONE (`NEXT_PUBLIC_STORAGE_URL` =
+  storage root + `utils/storage.ts`), frontend ZERO. Commits: FE `89c1ce3`; admin `b5bb5b2`→`9137fd9`→
+  `fd628cd`; backend `58ca08c` (new public `social_card_image_url`) + `5cebb86` (46 `env('PUBLIC_STORAGE_URL2')`
+  sites / 28 files incl. 7 mobile resources → `Storage::disk('public')->url()`; phpstan baseline pruned
+  45→18 env ignores, masking nothing). Also earlier `efcc027` (dead `// 'url' =>` comment cleanup).
+- **Gates:** FE+admin `type-check`+`production` green; backend `composer qa` green (pint + phpstan **No
+  errors** + **452 pass/3 fail** pre-existing, confirmed identical on stashed parent) + `migrate:fresh
+  --seed` clean.
+- **Bugs fixed en route:** `social_card` see-more URL had a wrong path (`/social_card` vs
+  `/uploads/social_card`) — now from the API; `visa_copy`/`issued_visa` confirmed dead (no column) so no URL
+  added. **Deferred correctness item:** guest `custom-file-input{,-3}.tsx` still rebuild a *public* URL for
+  now-*private*-disk files (the `/upload` endpoints return `data` only) — likely broken preview; fix = return
+  a signed `url` from those endpoints. Tracked in the plan follow-up.
+- **⚠️ USER TODO — gitignored `.env` edits (agent can't touch):** admin `.env.local` retarget
+  `NEXT_PUBLIC_STORAGE_URL` `…/storage/uploads`→`…/storage` + delete `NEXT_PUBLIC_STORAGE_URL2` +
+  `NEXT_PUBLIC_STORAGE_URL_ATTACHMENTS`; frontend `.env.local` delete `NEXT_PUBLIC_STORAGE_URL`; backend
+  `.env` delete `PUBLIC_STORAGE_URL` + `PUBLIC_STORAGE_URL2`. **App will emit broken URLs until admin
+  `.env.local` is retargeted** (the code now appends `/uploads` to the root, so a `…/storage/uploads` value
+  double-suffixes).
+
 **2026-07-13 — Two Tailwind v4 regression fixes (Saudi `FIX_TAILWIND_V4_REGRESSIONS.md`, ledger D15).
 Committed on `dev`, gates green — NOT pushed. className-only, no logic/backend/mobile impact.**
 - **Fix 1 — error focus-ring → `/50`** (v4 dropped `ring-opacity-*`): admin `5d99b43` (11 files) + frontend
