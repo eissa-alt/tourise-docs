@@ -152,14 +152,31 @@ keeps exactly 1 var — it's structurally required by the private-disk sites, no
 **Verdict:** don't chase 0 admin vars. Take the public-side fallback cleanup opportunistically *if* doing the
 component pass anyway; the private-side sites pin the count at **1 admin var** no matter what.
 
-### 4a. Open item to verify (possible pre-existing bug, out of this plan's scope)
+### 4a. `see-more-guest-draft` — TRACED: dead/stub feature, no live 404 (2026-07-13)
 
 `see-more-guest-draft.tsx:214` renders `<img src={`${NEXT_PUBLIC_STORAGE_URL}/personal_image/${draft.personal_image}`} />`
-with **no `_url` fallback**. `personal_image` now lives on the **private** disk, which is never web-served —
-so this public `/storage/personal_image/...` path may already 404. The draft data comes from a *dynamic*
-endpoint (`/${moduleName}/${itemId}`), so whether it's actually broken depends on which resource backs that
-module and whether it exposes a signed `personal_image_url`. **Trace at runtime before touching** — this is a
-correctness question separate from the env-var consolidation.
+with **no `_url` fallback** and `personal_image` now on the private disk — so at first glance a 404 risk.
+**Traced end-to-end: the whole feature is a stub, so the `<img>` is never reached.**
+
+- Admin: `guest-drafts-listing.tsx:195` sets `moduleName: 'guest-drafts'` → the modal fetches
+  `GET /guest-drafts/{itemId}` (`see-more-guest-draft.tsx:69`).
+- Backend: **no `guest-drafts` route, controller, or resource exists.** Confirmed 3 ways — no string in
+  `routes/api.php`, no `*Draft*` controller, and live `php artisan route:list` (329 routes) has **zero** draft
+  entries. The fetch 404s in `useEffect` → modal shows its error state → line 214 never renders.
+
+So this is **not a live bug** — it's a UI stub (listing page + modal) wired to a backend endpoint that was
+never built. Matches "not really used; may enable later."
+
+**When re-enabling this feature (checklist, NOT part of this plan):**
+1. Build the backend `guest-drafts` route + controller + `GuestDraftResource`.
+2. In that resource expose `personal_image` as a **signed** URL via `GuestDocumentController::signedUrl(...)`
+   — same pattern as `GuestsResources.php:76` — because the file is private.
+3. Change `see-more-guest-draft.tsx:214` to consume the signed `draft.personal_image_url`, **not** the
+   `${NEXT_PUBLIC_STORAGE_URL}/personal_image/...` rebuild (that line was written for the old public-disk
+   world and is wrong on both counts now: endpoint absent + file private).
+
+**Consequence for THIS plan:** line 214 needs no special handling during the env-var consolidation — it's
+unreachable. The 1 admin var it references is kept anyway (pinned by the live guest file-input sites, §4).
 
 ---
 
