@@ -89,7 +89,7 @@ Two sites already self-heal via `env('PUBLIC_STORAGE_URL2', url('/storage'))` (`
 ### Admin (`.env.local`, 3 vars)
 | Var | Used by |
 |---|---|
-| `NEXT_PUBLIC_STORAGE_URL` (`…/uploads`) | `next.config.js` CSP (only `.origin`); `custom-file-input{,-3}.tsx` (`/${inputName}/`); guest see-more modals (`/personal_image/`, `/document_copy/`, `/visa_copy/`, `/issued_visa/`, `/social_card/`) **as fallback behind task-006 signed `*_url`** |
+| `NEXT_PUBLIC_STORAGE_URL` (`…/uploads`) | `next.config.js` CSP (only `.origin`); `custom-file-input{,-3}.tsx` (`/${inputName}/`) — **LIVE path**, the guest `/upload` endpoints return no public `url` (private disk, §4); most guest see-more modals (`see-more-admin.tsx`, `by-admins/*/step-*.tsx`) use it **as fallback behind task-006 signed `*_url`** — but `see-more-guest-draft.tsx:214` has **no `_url` fallback** (see §4a, possible pre-existing 404) |
 | `NEXT_PUBLIC_STORAGE_URL2` (`…/storage`) | `custom-file-input-poster-simple.tsx`, `custom-file-input-bg.tsx` (`/${moduleName}/${inputName}/`) |
 | `NEXT_PUBLIC_STORAGE_URL_ATTACHMENTS` (`…/attachments`) | `custom-attachments-input.tsx` |
 
@@ -118,12 +118,48 @@ Two sites already self-heal via `env('PUBLIC_STORAGE_URL2', url('/storage'))` (`
 
 ---
 
-## 4. Stretch (optional, decide at execution)
+## 4. Stretch (0 admin vars) — PARTIALLY BLOCKED (verified 2026-07-13)
 
-Admin previews could drop the storage var **entirely (0 vars)**: the upload endpoints already return a full
-`url` (post-`ff97c7b`), and API resources already return full `*_url` fields — so the file-input components
-could consume those directly instead of rebuilding `{base}/{module}/{field}/{file}`. Bigger component
-refactor; primary plan keeps 1 admin var for a smaller, safer diff.
+The original stretch idea was "drop the admin storage var entirely — every upload endpoint returns a full
+`url`, so the file-input components consume that directly." **That premise is only half true**, verified
+against the controllers. It splits cleanly by disk:
+
+**Public-disk uploads → 0-var-ready.** The *module* upload controllers return a live `'url' => $url`
+(a real public `/storage` URL):
+- `BadgesController`, `CategoriesController` (share posters), `SpeakersController`, `SponsorsController`,
+  `EmailsTemplatesController`, `EmailsConfigsController`, `EmailsAttachmentsController` — all
+  `Storage::disk('public')`.
+- Consumers: `custom-file-input-poster-simple.tsx`, `custom-file-input-bg.tsx` (both already
+  `response.data.url || <rebuild>`), `custom-attachments-input.tsx` (`item.url || <rebuild>`). These can drop
+  the env-var rebuild half and rely on the live `url` — **the `STORAGE_URL2` + `_ATTACHMENTS` vars go away
+  regardless (that's the primary plan); the stretch only removes their dead `||` fallbacks.**
+
+**Private-disk (guest PII) uploads → NOT 0-var-ready, and the rebuild is LIVE, not dead.** The guest
+endpoints `POST /upload`, `/upload-document` (+ their `*Admin` variants) write to `Storage::disk('private')`
+(`personal_image`, `document_copy`, `visa_copy` — task-006/D14). A private file has **no public URL**, so
+these endpoints return `data` (filename) **only** — the `'url'` key is not just commented, it's *impossible*
+to fill with a public URL. Therefore in `custom-file-input.tsx` / `custom-file-input-3.tsx` the
+`${NEXT_PUBLIC_STORAGE_URL}/${inputName}/...` branch is **the live path**, not a fallback — dropping the var
+there would break the guest upload preview. These sites keep the 1 admin var. (This is why the primary plan
+keeps exactly 1 var — it's structurally required by the private-disk sites, not just "safer".)
+
+> **Correction to an earlier framing:** the guest upload comments `// 'url' => $image/$url,` were removed as
+> dead code (backend `efcc027`) — but the reason is *private disk → no public URL*, not "almost-ready to
+> uncomment." Re-enabling them is impossible for private files. The stale duplicate public-disk `return`
+> blocks in `BadgesController`/`CategoriesController` were removed in the same commit (those *are* public;
+> the live return right below already emits `'url' => $url`).
+
+**Verdict:** don't chase 0 admin vars. Take the public-side fallback cleanup opportunistically *if* doing the
+component pass anyway; the private-side sites pin the count at **1 admin var** no matter what.
+
+### 4a. Open item to verify (possible pre-existing bug, out of this plan's scope)
+
+`see-more-guest-draft.tsx:214` renders `<img src={`${NEXT_PUBLIC_STORAGE_URL}/personal_image/${draft.personal_image}`} />`
+with **no `_url` fallback**. `personal_image` now lives on the **private** disk, which is never web-served —
+so this public `/storage/personal_image/...` path may already 404. The draft data comes from a *dynamic*
+endpoint (`/${moduleName}/${itemId}`), so whether it's actually broken depends on which resource backs that
+module and whether it exposes a signed `personal_image_url`. **Trace at runtime before touching** — this is a
+correctness question separate from the env-var consolidation.
 
 ---
 
