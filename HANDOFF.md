@@ -3,6 +3,16 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-13 — Two Tailwind v4 regression fixes (Saudi `FIX_TAILWIND_V4_REGRESSIONS.md`, ledger D15).
+Committed on `dev`, gates green — NOT pushed. className-only, no logic/backend/mobile impact.**
+- **Fix 1 — error focus-ring → `/50`** (v4 dropped `ring-opacity-*`): admin `5d99b43` (11 files) + frontend
+  `052f16f` (5). **Fix 2 — drop `rtl:space-x-reverse`** (v4 `space-x-*` is now RTL-aware → the class
+  double-flips): admin `aadadf8` (124 occ/69 files) + frontend `721d458` (25 occ/9). Four separate commits.
+- **Gates:** `type-check` + `production` green on both apps. **Visual EN/AR QA pending** (soft red ring on
+  invalid inputs; RTL spacing on checkboxes/radios/back+share buttons/toolbars).
+- Note: an early scripted Fix-2 attempt corrupted indentation (global whitespace collapse); fully reverted
+  and redone surgically. Final diffs are proportionate (one line per token).
+
 **2026-07-12 — Private document storage + signed URLs (Saudi P1 backport, task 006, ledger D14). Code
 DONE on backend `dev`, gates green, runtime-verified — NOT yet committed/pushed (working tree). MOBILE
 CONTRACT CHANGE — hold `dev`→`main` until mobile acks. Plan: `CLEANUP_AND_HARDENING_MASTER_PLAN.md` Task

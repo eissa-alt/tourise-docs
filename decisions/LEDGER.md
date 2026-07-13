@@ -210,3 +210,22 @@ pre-existing** — the 2 avatar failures confirmed to fail on the clean parent t
 `migrate:fresh --seed` clean; runtime verified (private file streams 200 via valid signature, 403 on
 tamper/no-sig, 404 on traversal, 404 at the old public path). Detail:
 [../tasks/006-private-document-storage/TASK.md](../tasks/006-private-document-storage/TASK.md).
+
+## D15 — 2026-07-13 — fix two Tailwind v4 regressions (error focus-ring + rtl:space-x-reverse)
+
+Backport of Saudi Forum 11's `docs/upgrades/FIX_TAILWIND_V4_REGRESSIONS.md` — two v4-upgrade regressions
+that alt's own v3→v4 pass missed (alt did the *normal* focus-ring restore, ledger D-era `TAILWIND_V4_CLEANUP_PLAN`,
+but not these). Both className-only, no logic change. **Fix 1 — error focus-ring → `/50`:** v4 dropped
+`ring-opacity-*`/`--tw-ring-opacity`, so a bare `focus:ring-red-500` / `focus-within:ring-error` on
+error-state inputs rendered at full opacity (harsh solid ring) vs the soft `/50` normal ring. Carried the
+opacity on the color class (`…/50`) — admin 11 files (commit `5d99b43`), frontend 5 files (`052f16f`).
+Decorative rings that already had `/50` (e.g. the PIF step-2 Trash2 button) intentionally left alone.
+**Fix 2 — drop `rtl:space-x-reverse`:** v4 rewrote `space-x-*` to logical properties
+(`margin-inline-start/end`) that already flip under `dir="rtl"`, so `rtl:space-x-reverse` now *double*-flips
+— RTL horizontal spacing landed on the wrong side. Deleted it everywhere (nothing replaces it) — admin 124
+occ / 69 files (`aadadf8`), frontend 25 occ / 9 files (`721d458`). **Method note:** the removal is a
+className-only token delete; an early scripted attempt corrupted indentation via a global whitespace
+collapse and was fully reverted before redoing it surgically (token + one adjacent space only). Gates:
+`type-check` + `production` green on both apps. Not backend/mobile-facing. **Visual EN/AR QA still pending**
+(soft red ring on invalid inputs; RTL spacing on checkboxes/radios/back+share buttons/toolbars) — the one
+thing automation can't confirm.
