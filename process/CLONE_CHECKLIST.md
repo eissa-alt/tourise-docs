@@ -33,8 +33,8 @@ The rename in Bucket 1 therefore **excludes `docs/upgrades/`** (and this checkli
 
 **Do NOT skip these when copying the sub-apps into the new project:**
 
-- `pif-directors-gathering-backend/` → **`.env`** · **`.env.example2`** (the `.env.example` template is
-  tracked and comes for free; `.env` and the `.env.example2` production template are gitignored and must be carried by hand)
+- `pif-directors-gathering-backend/` → **`.env`** (the `.env.example` + `.env.example_prod` templates are
+  tracked and come for free; only `.env` itself is gitignored and must be carried by hand)
 - `pif-directors-gathering-admin/` → **`.env.local`** · **`.env.production`**
 - `pif-directors-gathering-frontend/` → **`.env.local`** · **`.env.production`**
 
@@ -44,7 +44,7 @@ These still hold directors' live secrets until you do — do not commit them and
 
 ```bash
 # sanity check after the sub-app copy — every line below must exist in the NEW project
-ls -la <new>-backend/.env <new>-backend/.env.example2 \
+ls -la <new>-backend/.env \
        <new>-admin/.env.local <new>-admin/.env.production \
        <new>-frontend/.env.local <new>-frontend/.env.production
 ```
@@ -173,7 +173,7 @@ git -C docs commit -m "chore: initialize <NEW_SLUG> docs from pif-directors-gath
 
 ## Done when
 
-- [ ] Sub-app env files carried over (Bucket 0.5): backend `.env` + `.env.example2`; admin/frontend `.env.local` + `.env.production` — all present in the new project, none skipped
+- [ ] Sub-app env files carried over (Bucket 0.5): backend `.env` (the `.env.example*` templates are tracked); admin/frontend `.env.local` + `.env.production` — all present in the new project, none skipped
 - [ ] Verify grep (Bucket 1) returns only this checklist
 - [ ] `docs/upgrades/` left untouched (lineage intact)
 - [ ] `docs/.git` re-inited + new remote; no `pif-directors-gathering-docs` remote left; docs on `main`
