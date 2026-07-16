@@ -260,3 +260,80 @@ returning a signed `url` from those endpoints. Tracked in the plan's follow-up.
 **No errors** + tests **452 pass / 3 fail** — the same pre-existing ExampleTest-403 + 2 avatar failures,
 confirmed identical on the stashed parent → no regression) + `migrate:fresh --seed` clean. **User owns the
 gitignored `.env` edits** (drop the retired vars; retarget `NEXT_PUBLIC_STORAGE_URL` to the root).
+
+> **Addendum 2026-07-17 — three corrections to the above. All pushed now (the "unpushed" note is stale).**
+>
+> 1. **The refactor missed the Blade email templates.** `5cebb86` swept `app/` only, so **22
+>    `env('PUBLIC_STORAGE_URL2')` refs across 8 email views survived** (`otp/{en,ar}`,
+>    `notify_guest/{en,ar}`, `password_reset/{en,ar}`, `partials/{header,footer}-poster`). When the var was
+>    then dropped from `.env` (`4dfdca9`), `env()` returned null and **every email poster URL rendered as
+>    `nullemails-config/…` — broken banners in all outgoing mail**. Repointed to
+>    `\Storage::disk('public')->url()` in **`a9a1ed4`**; byte-identical, views compile (`view:cache`).
+>    Lesson: sweep `resources/` as well as `app/` when retiring an env var.
+> 2. **"Zero refs" only became true later.** `c1606a5` removed the last dead commented
+>    `PUBLIC_STORAGE_URL` handlers from `GuestsExportView`. Verified zero across
+>    `app/ config/ routes/ resources/ database/`.
+> 3. **"`visa_copy`/`issued_visa` confirmed dead" is superseded by D18** — they were never dead, just
+>    unfinished. They now have columns and full persistence.
+
+## D17 — 2026-07-17 — one tracked env template per app: `.env.example_prod`
+
+Unified how env templates are named, tracked and shaped across all three apps, so a clone gets a complete,
+accurate template for free instead of hand-carrying files.
+
+**Convention:** each app tracks **`.env.example_prod`** — a production-shaped template holding only
+**live** vars, placeholder values, **no secrets**. `.env` / `.env.local` / `.env.production` stay gitignored
+and are carried/created per environment (DevOps creates `.env.production` on deploy; its absence is why
+`yarn production` can't run locally — expected, not a fault).
+
+- **Backend:** `.env.example2` → **`.env.example_prod`** (`c7dd2ee`), retired `PUBLIC_STORAGE_URL*` +
+  `APP_DEBUG=false` (`4dfdca9`). `.env.example` stays the Laravel-stock file. **Audited all 60 vars against
+  Laravel 12.62: nothing unsupported.** Note the app deliberately runs on the **old** var names
+  (`CACHE_DRIVER`, `BROADCAST_DRIVER`) because `config/` still reads those — do **not** "modernise" to L12's
+  `CACHE_STORE`/`BROADCAST_CONNECTION` without changing `config/` too, or they'll be silently ignored.
+- **Admin:** `.env.example` → **`.env.example_prod`** (`a5e83e6`), `NEXT_PUBLIC_ENV` moved to the top
+  (`e79e537`), structure unified with `.env.local` (`6f5ecdc`, `0dcf74a`). Down to the 6 live vars.
+- **Frontend:** had **no** tracked template at all — added one (`27bad95`, `a22bd5b`) documenting the 5 live
+  vars.
+- **Cookie-age vars → code constants** (frontend parity with admin `a361586`): `NEXT_PUBLIC_LANG_COOKIES_AGE`
+  (`7248f39`), `NEXT_PUBLIC_{,REMEMBER_}TOKEN_COOKIES_AGE` (`b5df5d3`, doc comment `220e65e`). Identical in
+  every environment, so they're `LANG_COOKIE_AGE_DAYS=30` / `TOKEN_COOKIE_AGE_DAYS=1` /
+  `REMEMBER_TOKEN_COOKIE_AGE_DAYS=7` in code now, not env.
+- **`CLONE_CHECKLIST` corrected** (docs `2b118d5`): it claimed the prod template was gitignored and must be
+  carried by hand — it's tracked (placeholders only), so only `.env` itself is carried.
+
+**Known gap (accepted):** frontend `_app`/`_document` read `NEXT_PUBLIC_GTM`, but the old env files set
+`NEXT_PUBLIC_GOOGLE_TAG_MANAGER` — a name mismatch, so **GTM has been dormant, never firing**. The template
+now documents the correct name; wiring it up (or removing the GTM blocks) is a separate task.
+
+## D18 — 2026-07-17 — guest document + day fields are first-class in the basecode
+
+Three guest fields had UI but no working data layer. Completed all of them rather than leave half-built
+features that fail silently or 500.
+
+- **`visa_copy` / `issued_visa` (`00fe02a` → `4883f9d`):** the public join form has `visa_copy`; the **admin
+  guest create/edit forms have both** as real uploads. But `/upload-document` allow-listed only
+  `document_copy` (→ **422 "failed to verify path name"**), and there was **no column, no `$fillable`, no
+  save** — an uploaded visa hit the private disk and was then **silently dropped**. Widened both allow-lists
+  + `GuestDocumentController::TYPES`, added the columns (mirroring `document_copy`), wired `store()` /
+  `storeGuest()` / `updateGuest()`, and emit signed `*_url` (private disk, D14).
+- **`days` (`ef218f6`):** was a **phantom** — `$fillable` + an index() `JSON_CONTAINS(days,…)` filter + an
+  export column + a dashboard breakdown, but **no clone except `98-pif-2026` ever added the column**.
+  `GET /admin/guests?days=X` returned **500** (`Unknown column 'days'`). `DashboardStats`/`GuestsExportView`
+  were already guarded (`Schema::hasColumn` / ternary) — which is what revealed the field was *intentionally
+  opt-in per clone*. **Decision: ship the column in the basecode** (`json` nullable, mirroring pif-2026's
+  migration) so every clone gets it. **Still has no writer** — all 3 write sites stay commented and no UI
+  submits it, so it reads NULL until a clone wires them up.
+- **`json_decode(null)` guards (`ef218f6`):** `days` **and** `interests` were unguarded → a PHP 8.2
+  deprecation on *every* guest response. The migration alone does **not** fix this — the deprecation fires on
+  the null **value**, not the missing column, and both fields are nullable. Guarded with the ternary already
+  used in `GuestsExportView:92`; output unchanged.
+- **Factories repaired (`9042919`):** `Guest::factory()` threw `Unknown column 'status'` — it still set the
+  free-text `status` column retired in the guest-status refactor (now the `guest_status_id` FK). Nothing
+  caught it because the feedback tests use `Guest::create()` directly. Also wired
+  `category_id => Category::factory()` (**new `CategoryFactory`**) since `category_id` is NOT NULL and always
+  was — so the factory could never stand alone despite three sibling factories declaring
+  `'guest_id' => Guest::factory()`.
+
+**Gates (all):** `pint` + phpstan **No errors** + `migrate:fresh --seed` clean + tests **452 pass / 3 fail**
+(same pre-existing ExampleTest-403 + 2 avatar). **Not mobile-facing** — `routes/api.php` untouched.
