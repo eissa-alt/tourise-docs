@@ -40,5 +40,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 004 | [migration-squash](004-migration-squash/TASK.md) | dropped |
 | 005 | [admin-httponly-token](005-admin-httponly-token/TASK.md) | done (code) — QA pending |
 | 006 | [private-document-storage](006-private-document-storage/TASK.md) | done (code) — mobile ack + QA pending |
+| 007 | [rsvp-decline-not-interested](007-rsvp-decline-not-interested/TASK.md) | done (code) — QA pending |
 
 _Add a row per task as you open it; newest at the bottom._
