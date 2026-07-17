@@ -41,5 +41,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 005 | [admin-httponly-token](005-admin-httponly-token/TASK.md) | done (code) — QA pending |
 | 006 | [private-document-storage](006-private-document-storage/TASK.md) | done (code) — mobile ack + QA pending |
 | 007 | [rsvp-decline-not-interested](007-rsvp-decline-not-interested/TASK.md) | done (code) — QA pending |
+| 008 | [guest-drafts-port](008-guest-drafts-port/TASK.md) | todo — plan ready (port backend from deve-go `60fe949`) |
+| 009 | [usefetch-adoption](009-usefetch-adoption/TASK.md) | todo — standing convention (opportunistic, no sweep) |
 
 _Add a row per task as you open it; newest at the bottom._
