@@ -32,13 +32,12 @@ the two country lists are out of sync, which is a latent data bug, not just cosm
   (`components/admin-modules/dashbaord/charts.tsx`, imported by the dashboard root). Wrap the chart
   components in `next/dynamic` with `{ ssr: false }` so chart.js loads only when the dashboard renders.
 
-## 3. `useFetch` adoption (opportunistic, do NOT sweep)
+## 3. `useFetch` adoption (opportunistic, do NOT sweep) — **moved to `tasks/009-usefetch-adoption/`**
 
-Admin has a shared `hooks/useFetch.ts` but only **5** call sites, while **~64** files still hand-roll
-the `loading` / `hasError` / `Axios.get`-in-`useEffect` pattern. The audit's own guidance: migrate the
-single-GET-then-render cases onto `useFetch` **opportunistically when you're already editing that file**,
-highest-traffic screens first. Leave paginated screens on `use-listing-state` and multi-request forms
-alone. Not a batch job.
+Promoted out of this parked bucket into its own standing-convention task on 2026-07-18. See
+[`tasks/009-usefetch-adoption/TASK.md`](009-usefetch-adoption/TASK.md) for the rule, the candidate
+checklist, and the known `refetch` gap. The convention note now also lives at the top of
+`admin/hooks/useFetch.ts` where devs see it.
 
 ---
 

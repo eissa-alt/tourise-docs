@@ -3,6 +3,24 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-18 (session 2) — Four-step guest-draft `invitation_token` gap closed + task board tidied.**
+- **invitation_token (task 008 follow-up, DONE + PUSHED):** the pif **four-step** form now forwards the
+  invitation token into its OTP request, so abandoned four-step registrations capture `invitation_token`
+  like one-step forms already did. Frontend `98cb380` — 2 files: `renderFormSteps.tsx` (the
+  `personal-info-1` branch was the only one dropping `token`) + `pif/fours-steps/step-1.tsx` (prop +
+  `formData.invitation_token`). Gates green (`type-check` + full `next build`). Closes the last known
+  limitation from task 008 (D19). Backend already accepted the field — no backend/mobile change.
+- **Task board:** **005** (admin HttpOnly) + **006** (private doc storage) marked **`done`** — code
+  shipped + pushed on `dev`; the `dev`→`main` merge is **deferred to the user's own repo check**. ⚠️ 006
+  still needs **mobile-team ack** (avatar → 24h signed URL) before that merge.
+- **009 (useFetch) is now a live standing convention** (not a batch): setup done — convention JSDoc atop
+  `admin/hooks/useFetch.ts`; `PHASE3_PARKED_TODO` item 3 retired → task 009. Adopt opportunistically when
+  already editing a fetch-once file; extend the hook with `refetch()` on first real need.
+- **004** migration-squash is being **re-planned separately** (user + another agent); **001** boolean
+  cleanup parked for a later check.
+- ⏳ **Uncommitted (awaiting user review):** the doc updates above + the `useFetch.ts` convention note are
+  edited but **not yet committed** (admin + docs repos).
+
 **2026-07-18 — Guest-drafts feature shipped (D19). Abandoned-registration capture, ported from deve-go
 `60fe949`; the admin UI existed across clones but its backend was never built. PUSHED, in-browser QA'd,
 all app repos in sync. Task: `tasks/008-guest-drafts-port/TASK.md`.**

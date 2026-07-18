@@ -46,13 +46,15 @@ count creeps up over time without a dedicated sweep.
 
 ## Todo
 
-- [ ] Add a one-line convention note where devs see it (top of `hooks/useFetch.ts` or
-      `docs/ai/CODING_STYLE.md`): "fetch-once GET widgets → `useFetch`; listings → `use-listing-state`;
-      don't batch-migrate."
+- [x] Add a one-line convention note where devs see it — done 2026-07-18: JSDoc at the top of
+      `admin/hooks/useFetch.ts`.
 - [ ] (Ongoing) When editing a hand-rolled fetch-once file, convert it in the same change.
 - [ ] (On first need) Extend `useFetch` with `refetch()`; document the new shape.
-- [ ] Remove the `useFetch` line from `PHASE3_PARKED_TODO.md` (superseded by this task).
+- [x] Remove the `useFetch` line from `PHASE3_PARKED_TODO.md` — done 2026-07-18 (item 3 now points here).
 
 ## Log
 
 - 2026-07-17 — split out of task-008 so 008 can focus solely on the guest-drafts port.
+- 2026-07-18 — one-time setup done: convention note added atop `admin/hooks/useFetch.ts`;
+  `PHASE3_PARKED_TODO.md` item 3 retired → points here. Task is now a live standing convention
+  (adopt opportunistically; extend with `refetch()` on first real need).

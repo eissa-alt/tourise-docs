@@ -1,6 +1,6 @@
 # Task 006 — Private document storage + signed URLs (Saudi P1 backport)
 
-- **Status:** `done` (code) — awaiting review/push
+- **Status:** `done` — code shipped + pushed on `dev`; `dev`→`main` merge deferred (user will merge after a repo check, 2026-07-18). ⚠️ **Mobile contract change** (avatar → 24h signed URL) — still needs mobile-team ack before the `dev`→`main` merge.
 - **Opened:** 2026-07-12
 - **Owner:** AI agent
 - **Sub-app(s):** backend (+ admin previews consume the new URLs; mobile avatar contract change)

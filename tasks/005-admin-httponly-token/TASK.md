@@ -4,7 +4,7 @@
 > **plan's "Task 004 (Track B)"** in `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md` — the plan's internal
 > numbering ≠ the `docs/tasks/` folder numbering.
 
-- **Status:** `done` (code) — awaiting review/push
+- **Status:** `done` — code shipped + pushed on `dev`; `dev`→`main` merge deferred (user will merge after a repo check, 2026-07-18).
 - **Opened:** 2026-07-12
 - **Owner:** AI agent
 - **Sub-app(s):** admin (backend + mobile untouched)
