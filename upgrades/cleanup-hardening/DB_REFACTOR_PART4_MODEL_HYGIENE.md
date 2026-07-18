@@ -57,6 +57,16 @@ type change (fold into Part 2, **no ad-hoc migration**).
   backing table and no references.
 - `EmailContent` is already slated in [DB Part 1 §7](DB_REFACTOR_PART1_REMOVALS.md); Part 4 does the
   complete sweep for any others.
+- **Dead "email workflows" slice (found in [Part 3 re-scan](DB_REFACTOR_PART3_RESCAN.md)).** A whole
+  vertical is dead/broken — the `EmailWorkflow` model does **not exist** yet is imported/used, and no
+  `email_workflows` / `email_cats_workflows_templates` tables exist, so its routes fatal on any call.
+  Remove together: model `EmailCatsWorkflowsTemplate` (orphan, no table); controllers
+  `EmailsWorkflowController` + `EmailsLinkWithCategoriesController`; resources `EmailsWorkflowResources` +
+  `EmailsCatsWorkflowsResources`; the 3 admin routes (`GET /admin/email-workflows`,
+  `GET`+`PUT /admin/emails-link-with-categories`) and their two `use` imports in `routes/api.php`; the
+  stale commented `use App\Models\EmailCatsWorkflowsTemplate;` in `CategoriesController`. Admin-only, not
+  in the mobile contract — but it **touches `routes/api.php`**, so get user sign-off first.
+  **✅ Done 2026-07-19** — see the "Run result" section below.
 
 ## Validation / gates
 
@@ -78,3 +88,62 @@ type change (fold into Part 2, **no ad-hoc migration**).
   verifies coverage.
 - **JSON column changes fold into Part 2** — keep the "no ad-hoc migrations" rule intact.
 - Keep `$fillable` tight — it is now also the filter/sort allow-list under 007.
+
+---
+
+## Run result — 2026-07-19
+
+Reflection audit over all **56 models** (script introspects each model vs the live folded schema:
+`$fillable` ↔ columns both ways, `$casts` vs column type). **Boolean-cast coverage is complete** — zero
+missing `'boolean'` casts across the 101 `tinyint(1)` columns, confirming the
+[Boolean Refactor Plan](BOOLEAN_REFACTOR_PLAN.md) already ran. Findings were small.
+
+### Done now (behavior-neutral hygiene)
+
+- **`Guest.$fillable`** — dropped 3 stale entries with no backing column (Part 1 net-out leftovers):
+  `employee_id_number`, `org_size`, `industry_other`.
+- **`EmailTemplate.$fillable`** — fixed typo `'bc'` → `'cc'` (the real column is `cc`, already assigned
+  directly by `EmailsTemplatesController`; `'bc'` was a phantom).
+- **`BadgePrintLog`** — modernized legacy `protected $dates = [...]` → `$casts` with
+  `'attempted_at' => 'datetime'` (behavior-identical; `created_at`/`updated_at` cast by default).
+
+### Deferred to 007 (lockstep — response/behavior-affecting, NOT safe as a bare cast add)
+
+These columns are the right type but code hand-rolls their (de)serialization, so adding a cast in
+isolation would double-encode/decode or change response shape. Do the cast **and** the call-site cleanup
+together under 007's delta tracking:
+
+- **JSON `array` casts:** `Category.status_config`, `Category.notification_settings`, `Guest.days` — each
+  is `json_encode`d on write / `json_decode`d on read across `CategoriesController`, `GuestsController`,
+  `AuthController`, exports, and resources (incl. **mobile-facing `GuestsResources`** and
+  `GuestDraftResource`). Adding `'array'` requires removing every manual encode/decode in the same pass.
+- **Datetime casts:** `EmailConfig.event_start_time`, `EmailConfig.event_end_time` (`dateTime` columns) —
+  returned raw by `EmailConfigResources` and formatted in `EmailVariableResolver`; a cast changes the
+  serialized format, so update those sites in lockstep.
+
+### Done (user-approved 2026-07-19) — dead "email workflows" slice removed
+
+Whole broken slice deleted together (touched `routes/api.php`, admin-only, not in mobile contract):
+controllers `EmailsWorkflowController` + `EmailsLinkWithCategoriesController`; resources
+`EmailsWorkflowResources` + `EmailsCatsWorkflowsResources` + orphan `EmailsWorkflowSelectResources`;
+model `EmailCatsWorkflowsTemplate`; the 3 admin routes + their 2 `use` imports; the stale commented
+imports in `CategoriesController` + `GuestsController`; and the 3 now-obsolete `EmailWorkflow`
+entries in `phpstan-baseline.neon`.
+
+### Done (user-approved 2026-07-19) — `titles.match_api_data` dropped
+
+Dead column (every read/write was commented out). Folded the drop into `create_titles` (no ad-hoc
+migration) and removed the commented refs in `Title`, `TitlesController`, `TitlesResources`, and
+`TitleSeeder` (×12). Schema diff vs the Part-2 baseline = exactly this one column removed.
+
+### Noted, not acted on
+
+- **Guarded-by-design** (correctly absent from `$fillable`): `Admin`/`User` `email_verified_at` +
+  `remember_token`.
+
+### Gate
+
+- `php artisan migrate:fresh --seed` clean; `pint --test` + `phpstan analyse` green on touched models.
+- `php artisan test` → **452 passed**, 3 failures (the same pre-existing avatar-URL / ExampleTest-403
+  failures carried since before this work — unrelated).
+- `git diff routes/api.php` **empty**.

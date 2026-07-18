@@ -37,10 +37,15 @@ re-scans once more to close out.
 5. **Foreign keys.** Part 1's [safe table reordering](DB_REFACTOR_PART1_REMOVALS.md) already put the five
    lookups (`guest_statuses`, `areas`, `roles`, `speaker_labels`, `sponsor_labels`) ahead of their
    dependents, so their FKs (`guest_status_id` ×3, `area_id` ×2, `admins.role_id`, `speaker_label_id`,
-   `sponsor_label_id`) now **inline** as `foreignId()->constrained()` in the folded `create_`. The one
-   unavoidable **cycle — `admins` ↔ `gates`** — keeps `gates.related_agent` inline and defers
-   `admins.gate_id` to a final `…_add_foreign_keys.php`. Also watch pivots / polymorphic /
-   self-referencing tables (e.g. `session_interested_users`, badge↔category many-to-many).
+   `sponsor_label_id`) now **inline** as `foreignId()->constrained()` in the folded `create_`. A small set
+   of FKs still can't inline and are deferred to the trailing
+   `2026_07_18_000002_add_deferred_foreign_keys.php` — **3 in total (execution result):**
+   the `admins` ↔ `gates` **cycle** (`admins.gate_id` deferred, `gates.area_id` inline), plus two
+   backward refs where the referenced table is created later — `categories.e_badge_email` and
+   `categories.missing_data_email` → `email_templates`. For each deferred FK the column is defined as a
+   plain UUID in the `create_` with a pre-named `…_foreign` index so the trailing migration reuses it and
+   `SHOW CREATE TABLE` stays byte-identical. Also watch pivots / polymorphic / self-referencing tables
+   (e.g. `session_interested_users`, badge↔category many-to-many).
 6. **Do NOT fold framework-default tables** — keep as their own standard migrations: `users`,
    `password_resets`, `failed_jobs`, `personal_access_tokens`, `jobs`, `sessions`.
    (`session_interested_users` is a **domain** table → *do* fold.)
