@@ -337,3 +337,42 @@ features that fail silently or 500.
 
 **Gates (all):** `pint` + phpstan **No errors** + `migrate:fresh --seed` clean + tests **452 pass / 3 fail**
 (same pre-existing ExampleTest-403 + 2 avatar). **Not mobile-facing** — `routes/api.php` untouched.
+
+## D19 — 2026-07-18 — guest-drafts: capture abandoned registrations (own RBAC feature)
+
+The admin carried a `guest-drafts` UI across clones but its **backend was never built** (no clone had it —
+verified against pif-directors-gathering, gfeai-v2, etc.), so all three screens 404'd. Ported the complete
+backend from **deve-go `60fe949`** (`draft-guests` branch) and finished the UI. Task + file-by-file port:
+[../tasks/008-guest-drafts-port/TASK.md](../tasks/008-guest-drafts-port/TASK.md).
+
+**What it is:** a registrant who fills step 1 and requests an OTP but never completes is upserted into a new
+`guest_drafts` table (keyed by email); the draft is **deleted on successful registration**. So the table is,
+by definition, everyone who started and didn't finish — a follow-up/lead-recovery list plus drop-off
+diagnostics (OTP sent/verified/attempts, email vs phone). New: migration, `GuestDraft`, `GuestDraftResource`,
+`GuestDraftsController` (index/show/export), `GuestDraftsExport`. Capture hooks are **additive** in
+`AuthController` (`saveGuestDraft()` in email/phone `Verification`; mark-verified in the `Confirmation`s) +
+`GuestsController::store()` (delete on complete). `guest_drafts` is a **self-contained new table** — it does
+not touch the `guests` schema, so blast radius on existing behaviour is nil.
+
+**Durable decisions:**
+1. **Build, not remove.** Real purpose + a complete, safe-to-port reference. (The earlier "guest-drafts is a
+   dead stub" note in the storage plan §4a is superseded.)
+2. **Dedicated `guest_drafts` RBAC permission** (`view`/`export`/`see_more`) in
+   `app/Support/AdminPermissions.php`, **enforced on the 3 routes via `admin.can`** — so this PII (people who
+   never finished) is grantable independently of `guests_listing`. Note this is *stricter* than
+   `guests_listing`, whose routes have no `admin.can` gating (frontend-only) — a deliberate deviation.
+3. **`personal_image` served as a signed URL** (private disk, D14), not deve-go's public rebuild.
+4. **Capture more than the reference did.** deve-go dropped several step-1 fields. Here the frontend OTP
+   payload (`VerifyEmailForm.formData`) also sends **gender/title_id/personal_image**, and the backend
+   additionally captures **`category`** (frontend sends the slug → resolved to `category_id`) and
+   **`invitation_token`**. Employee-ID + Days rows were removed from the see-more modal (never populated).
+
+**Known limitation:** the pif **four-step** form has no invitation-token prop, so its drafts don't capture
+`invitation_token` (one-step forms do). Separate wiring if needed.
+
+**Landed (pushed):** backend `7a96707`, admin `270a60d`, frontend `a8a94ec`. Admin listing already used the
+modern `ListingFilters` stack, so deve-go's separate `search-guest-drafts.tsx` was **not** ported.
+
+**Gates:** pint + phpstan **No errors** + `migrate:fresh --seed` clean + tests **452/3** pre-existing; admin +
+frontend `type-check` + build green. In-browser QA confirmed capture (incl. signed photo, category via slug,
+invitation token) and delete-on-completion. **Not mobile-facing.**

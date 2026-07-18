@@ -3,6 +3,21 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-18 — Guest-drafts feature shipped (D19). Abandoned-registration capture, ported from deve-go
+`60fe949`; the admin UI existed across clones but its backend was never built. PUSHED, in-browser QA'd,
+all app repos in sync. Task: `tasks/008-guest-drafts-port/TASK.md`.**
+- **What:** a registrant who requests an OTP but never finishes is upserted into a new self-contained
+  `guest_drafts` table (keyed by email), deleted on completion → a follow-up/drop-off list for the event
+  team. Backend `7a96707`, admin `270a60d`, frontend `a8a94ec`.
+- **Dedicated `guest_drafts` RBAC permission** (view/export/see_more), **route-enforced via `admin.can`** —
+  grantable independently of `guests_listing` (and stricter than it — a deliberate deviation, since
+  `guests_listing` routes have no `admin.can` gating). Shows as its own row in the roles editor.
+- **Captures** gender/title/personal_image (frontend OTP payload now sends them), `category` (slug →
+  `category_id`), and `invitation_token`; `personal_image` served as a **signed** URL (D14). Employee-ID +
+  Days dropped from the see-more modal.
+- **Known limitation:** the pif four-step form has no invitation-token prop → its drafts don't capture
+  `invitation_token` (one-step forms do). **task 009** (useFetch adoption) remains the next parked item.
+
 **2026-07-17 — Env templates unified (D17) + guest document/day fields completed (D18). All PUSHED; all
 four repos clean and in sync with `origin`. Gates green throughout.**
 - **D17 — one tracked `.env.example_prod` per app.** Backend `.env.example2`→`.env.example_prod`

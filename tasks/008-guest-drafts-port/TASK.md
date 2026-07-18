@@ -1,6 +1,7 @@
 # Task 008 — Port the `guest-drafts` feature (backend) from deve-go
 
-- **Status:** `todo` (plan approved; port not started)
+- **Status:** `done (code)` — shipped on `dev`, gates green, QA'd in-browser. Ledger **D19**.
+  Backend `7a96707` · admin `270a60d` · frontend `a8a94ec`.
 - **Opened:** 2026-07-17
 - **Owner:** AI agent
 - **Sub-app(s):** backend (build) + admin (finish the UI) — **not** frontend, **not** mobile
@@ -108,10 +109,20 @@ and records. Blast radius on what already works is minimal.
 - 2026-07-17 — opened as a generic "frontend follow-ups" doc; refocused solely on the guest-drafts port
   after locating the full reference impl in deve-go `60fe949`. Safety analysis done (see above). The
   `useFetch` item split out to **task 009**.
+- 2026-07-18 — **shipped + QA'd.** Ported backend (`7a96707`), finished admin UI (`270a60d`), enriched the
+  frontend OTP payload (`a8a94ec`). Two decisions beyond the plan, both made with the user during QA:
+  (1) a **dedicated `guest_drafts` RBAC permission** (view/export/see_more) enforced on the routes via
+  `admin.can`, not the reused `guests_listing`; (2) **capture more than the reference did** —
+  gender/title/personal_image (frontend now sends them), `category` (slug → `category_id`) and
+  `invitation_token`; dropped the Employee-ID + Days modal rows. In-browser QA confirmed all fields
+  populate and the draft is deleted on completion. Promoted to ledger **D19**.
+  **Known limitation:** the pif four-step form has no invitation-token prop, so its drafts don't capture
+  `invitation_token` (separate wiring if ever needed).
 
 ## Decisions
 
-- **Build, not remove** (2026-07-17) — the feature has a real purpose (abandoned-registration recovery +
-  drop-off diagnostics) and a complete, safe-to-port reference. Durable once shipped → promote to
-  `../../decisions/LEDGER.md`.
+- **Build, not remove** (2026-07-17) — promoted to **D19**.
+- **Dedicated `guest_drafts` permission** (2026-07-18) — its own RBAC feature, route-enforced. Promoted to
+  **D19**.
+- **`personal_image` served as a signed URL** (D14), not deve-go's public rebuild.
 - **`personal_image` served as a signed URL** here (not deve-go's public rebuild), per D14.
