@@ -17,10 +17,12 @@ never as a batch migration**. Split out of the original task-008 (now guest-draf
 - **Hook:** `admin/hooks/useFetch.ts` — `useFetch<T>(url)` → `{ data, loading, error }`. Fetches once on
   mount (and when `url` changes), `Accept: application/json`, unmount-guarded. **No `refetch`, no manual
   trigger, no extra deps.**
-- **Adopters: 5**, all on the dashboard (`over-all`, `charts`, `other-status`, `categories-status`,
-  `Invitations-categories-status`).
-- **Hand-rolled: ~74 files** carry `useState(loading)` + `Axios.get` in `useEffect` (the 2026-07-07
-  audit counted ~64).
+- **Adopters: 15** (was 5). The 5 dashboard widgets (`over-all`, `charts`, `other-status`,
+  `categories-status`, `Invitations-categories-status`) + 10 converted 2026-07-18: `profile-details`
+  and 9 option selects (`admins`, `areas`, `badges-select-multi`, `categories-select-multi`,
+  `countries`, `email-template-invitations`, `guest-statuses`, `sms-template`, `titles-select-all`).
+- **Hand-rolled: ~64 files** carry `useState(loading)` + `Axios.get` in `useEffect` (was ~74; 10
+  converted on 2026-07-18).
 
 ## The rule (do NOT batch-migrate)
 
@@ -58,3 +60,8 @@ count creeps up over time without a dedicated sweep.
 - 2026-07-18 — one-time setup done: convention note added atop `admin/hooks/useFetch.ts`;
   `PHASE3_PARKED_TODO.md` item 3 retired → points here. Task is now a live standing convention
   (adopt opportunistically; extend with `refetch()` on first real need).
+- 2026-07-18 — first opportunistic batch: converted 10 fetch-once components (admin `1144582`,
+  net −192 ln) — `profile-details` + 9 selects. Adopters 5 → 15. Gates green (type-check + `next
+  build`). En route: fixed a latent `Item.slug`-required bug (masked by `useState<any>`) in the
+  email-template + sms-template selects → made optional. Skipped `badges-select` (`[lang, role]` dep)
+  and `categories-select` (post-fetch filter) as non-clean swaps.
