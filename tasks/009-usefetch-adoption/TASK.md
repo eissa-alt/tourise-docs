@@ -17,12 +17,19 @@ never as a batch migration**. Split out of the original task-008 (now guest-draf
 - **Hook:** `admin/hooks/useFetch.ts` — `useFetch<T>(url)` → `{ data, loading, error }`. Fetches once on
   mount (and when `url` changes), `Accept: application/json`, unmount-guarded. **No `refetch`, no manual
   trigger, no extra deps.**
-- **Adopters: 15** (was 5). The 5 dashboard widgets (`over-all`, `charts`, `other-status`,
-  `categories-status`, `Invitations-categories-status`) + 10 converted 2026-07-18: `profile-details`
-  and 9 option selects (`admins`, `areas`, `badges-select-multi`, `categories-select-multi`,
-  `countries`, `email-template-invitations`, `guest-statuses`, `sms-template`, `titles-select-all`).
-- **Hand-rolled: ~64 files** carry `useState(loading)` + `Axios.get` in `useEffect` (was ~74; 10
+- **Adopters: 17** (was 5). The 5 dashboard widgets (`over-all`, `charts`, `other-status`,
+  `categories-status`, `Invitations-categories-status`) + 12 converted 2026-07-18: `profile-details`,
+  9 option selects (`admins`, `areas`, `badges-select-multi`, `categories-select-multi`, `countries`,
+  `email-template-invitations`, `guest-statuses`, `sms-template`, `titles-select-all`), plus
+  `guests-choose` and `custom-attachments-input`.
+- **Hand-rolled: ~62 files** carry `useState(loading)` + `Axios.get` in `useEffect` (was ~74; 12
   converted on 2026-07-18).
+- **The remaining easy wins are exhausted.** A candidate sweep of the single-GET/no-write/no-listing/
+  no-form files found the rest need capabilities `useFetch` lacks: the see-more modals
+  (`table-see-more-invitation-modal`, `see-more-guest-draft`, `see-more-admin`) fetch **only on open**;
+  `workshop-detail` guards against an unhydrated `router.query.id`. All need an **`enabled` flag** —
+  see the gap note below. `header` dispatches to auth context (not a render widget). Further adoption
+  should wait until the hook is extended, or happen truly opportunistically.
 
 ## The rule (do NOT batch-migrate)
 
@@ -65,3 +72,8 @@ count creeps up over time without a dedicated sweep.
   build`). En route: fixed a latent `Item.slug`-required bug (masked by `useState<any>`) in the
   email-template + sms-template selects → made optional. Skipped `badges-select` (`[lang, role]` dep)
   and `categories-select` (post-fetch filter) as non-clean swaps.
+- 2026-07-18 — second batch: `guests-choose` + `custom-attachments-input` (admin `dc07c0c`). Adopters
+  15 → 17. Gates green. A full candidate sweep confirmed the remaining hand-rolled files need an
+  `enabled` flag (on-open modals, unhydrated route ids) or aren't widgets — the mechanical wins are
+  now exhausted. Next real move on this task = extend `useFetch` with `enabled` (its own task), not
+  more conversions.
