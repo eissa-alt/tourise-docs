@@ -5,7 +5,7 @@
 - **Owner:** AI agent
 - **Sub-app(s):** backend (+ admin previews consume the new URLs; mobile avatar contract change)
 - **Branch(es):** `dev`
-- **Source:** Saudi Forum 11 security **Point 1** (`114-saudi-11/.../docs/security/port-review-jul-2026/POINT_1_PRIVATE_DOCUMENT_STORAGE_PLAN.md`). Plan slot: `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md` **Task 005 (Track B)**, un-deferred by user 2026-07-12 (pre-launch; no clone carries prod data). Follows task 005 (P2 admin HttpOnly).
+- **Source:** Saudi Forum 11 security **Point 1** (`114-saudi-11/.../docs/security/port-review-jul-2026/POINT_1_PRIVATE_DOCUMENT_STORAGE_PLAN.md`). Plan slot: `upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md` **Task 005 (Track B)**, un-deferred by user 2026-07-12 (pre-launch; no clone carries prod data). Follows task 005 (P2 admin HttpOnly).
 
 ## Goal
 

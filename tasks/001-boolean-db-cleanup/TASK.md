@@ -16,7 +16,7 @@ Two tracks:
 - **Track B** — a **new** conversion cyan never attempted: 2-value `status` (`active`/`blocked`)
   columns → `is_active boolean default(true)`.
 
-See the full plan: [../../upgrades/BOOLEAN_REFACTOR_PLAN.md](../../upgrades/BOOLEAN_REFACTOR_PLAN.md).
+See the full plan: [../../upgrades/cleanup-hardening/BOOLEAN_REFACTOR_PLAN.md](../../upgrades/cleanup-hardening/BOOLEAN_REFACTOR_PLAN.md).
 
 ## Scope
 

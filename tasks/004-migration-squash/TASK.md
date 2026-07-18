@@ -38,7 +38,7 @@ Collapse the accumulated migration history (**129 files = 71 `create_` + 58 alte
 already-committed boolean + datetime refactors, tasks 001/002). Fewer files, no "add column later"
 archaeology. Plus one final `_add_foreign_keys` migration holding all FK constraints.
 
-Full plan: [`../../upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md`](../../upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md) (Task 003 there = this task).
+Full plan: [`../../upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md`](../../upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md) (Task 003 there = this task).
 
 ## Why now (time-sensitive)
 

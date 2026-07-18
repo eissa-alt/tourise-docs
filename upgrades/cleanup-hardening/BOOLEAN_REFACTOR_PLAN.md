@@ -3,10 +3,15 @@
 Store real booleans instead of string pseudo-booleans across backend + admin + frontend.
 Adapted from the **cyan** reference (which completed this and documented it in
 `115-cyan-basecode/cyan-basecode-repos/docs_old/BOOLEAN_REFACTOR_*.md`), remapped to our current
-migration set. See task log: [../tasks/001-boolean-db-cleanup/TASK.md](../tasks/001-boolean-db-cleanup/TASK.md).
+migration set. See task log: [../../tasks/001-boolean-db-cleanup/TASK.md](../../tasks/001-boolean-db-cleanup/TASK.md).
 
 **Approach:** edit the original `create_*` (and the few `add_*`/`modify_*`) migrations in place —
 no new migrations — then `php artisan migrate:fresh`. This baseline carries no prod data.
+
+> **Cast ownership.** This plan **owns the boolean-cast conversion**. The later
+> [DB Refactor Part 4 — Model Hygiene](DB_REFACTOR_PART4_MODEL_HYGIENE.md) only *verifies* boolean-cast
+> coverage and handles the *non-boolean* casts (datetime/array/json). Don't double-implement booleans
+> across the two.
 
 ---
 
@@ -136,7 +141,7 @@ None — confirmed zero `active`/`blocked` entity-status reads.
 
 `/api/mobile/*` request/response JSON is **unaffected**: mobile speaker/sponsor resources don't
 expose `status`; mobile already sends real booleans. This refactor only changes storage + internal
-queries. Re-read `../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before touching any resource a
+queries. Re-read `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before touching any resource a
 mobile endpoint returns, and update `Mobile*Controller` queries in the same pass.
 
 ## Order & gates

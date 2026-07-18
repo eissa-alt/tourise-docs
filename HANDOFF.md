@@ -130,7 +130,7 @@ Not mobile-facing.
 **2026-07-12 — Admin HttpOnly token + Next BFF proxy + full CSP (Saudi P2 backport, task 005, ledger
 D12). Code DONE, gates green, runtime-verified — committed + pushed (admin `dev` 4 commits
 `d95a2e5`→`b006123`; docs `main` `2939d0b`). Real-env browser QA still outstanding before `dev`→`main`.
-Plan: `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md` Task 004 (Track B); log:
+Plan: `upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md` Task 004 (Track B); log:
 `tasks/005-admin-httponly-token/TASK.md` (folder 005 — 004 is the dropped squash).**
 - **What & why:** the admin bearer was a JS-readable cookie (XSS → account takeover). The Phase-1 fix
   (`af2298b`, secure+sameSite) couldn't close the XSS-read vector — only `httpOnly` can, and only a server
@@ -241,7 +241,7 @@ complete; "later/opportunistic" is parked — see `tasks/PHASE3_PARKED_TODO.md`.
 
 **2026-07-06 (night) — Boolean DB cleanup + refactor, two tracks (ledger D6). Working-tree only on
 `dev` across all three app repos — NOT yet committed/pushed (awaiting review). Full plan +
-per-step log: `tasks/001-boolean-db-cleanup/TASK.md` + `upgrades/BOOLEAN_REFACTOR_PLAN.md`.**
+per-step log: `tasks/001-boolean-db-cleanup/TASK.md` + `upgrades/cleanup-hardening/BOOLEAN_REFACTOR_PLAN.md`.**
 - **Track A** (mirrors cyan's documented refactor): pseudo-booleans (`yes`/`null`, `yes`/`no`,
   `with_`/`is_`) → real `boolean`s. Migrations edited in place (`string(...)->nullable()` →
   `boolean()->default(false)`) across guests flags, categories (`with_*` + notification fields),

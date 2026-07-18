@@ -16,10 +16,10 @@
 > - saudi-11: `/Users/admin/Projects/ALT/114-saudi-11/saudi-forum-11-repo/{saudi-forum-11-backend,-admin,-frontend}`
 >   + its security docs at `…/saudi-forum-11-repo/docs/security/`.
 >
-> **Hard guardrails (from `../../CLAUDE.md` + `../ai/AI_RULES.md`):** EN+AR translations same commit ·
+> **Hard guardrails (from `../../../CLAUDE.md` + `../../ai/AI_RULES.md`):** EN+AR translations same commit ·
 > no new deps without justification · no framework bumps · no widening TS to `any` · no
 > `console.log`/`dd()`/`dump()` · **`routes/api.php` is the mobile contract — check
-> `../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before touching endpoints or resource shapes** ·
+> `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before touching endpoints or resource shapes** ·
 > do **not** port cyan's `DynamicFormRenderer` / form-builder (CLAUDE.md #4) · Sentry stays removed.
 
 ---
@@ -206,7 +206,7 @@ each, speakers/sponsors/attachments 3× each.
 
 **Gate.** `pint --dirty --test` · `php artisan test` (note pre-existing failures) · `migrate:fresh --seed` ·
 **`git diff routes/api.php` reviewed vs mobile contract** — signed-URL doc must be flagged in
-`../mobile/*` · admin previews render · a private file is **not** reachable at a plain `/storage/…` URL.
+`../../mobile/*` · admin previews render · a private file is **not** reachable at a plain `/storage/…` URL.
 
 **Risks.** Signed-URL TTL vs long admin sessions/exports; CDN caching of old public URLs (purge runbook);
 mobile consumers (the contract change); making sure no public asset accidentally moves to `private`.
@@ -261,7 +261,7 @@ same reason.
 **Approach (per module).** Snapshot the endpoint's current JSON → refactor to the trait → **diff the JSON
 is identical** → gate → commit. Prioritize **admin-only** controllers first (no mobile risk); do
 **mobile-facing** controllers (`Mobile*`, `AuthController`, guest register/accept/reject) last, only after
-confirming the shape against `../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf`.
+confirming the shape against `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf`.
 
 **Gate (per PR).** Endpoint JSON byte-identical (or documented + mobile-flagged) · `pint --dirty --test` ·
 `php artisan test` · `git diff routes/api.php` empty.
@@ -329,7 +329,7 @@ incremental, gated per module.
 | — | Response envelope: keep `status: 'success'/'failed'` as the stable key (add `success`/`message` additively)? | 006/007 | Yes — backward-compatible with current admin/frontend/mobile parsing |
 | — | If Track B stays deferred, split **Todo-2D (UploadService)** into a standalone Track A task? | 005/2D | Split it out only if the shared-upload cleanup is wanted before P1 is greenlit |
 | ⏸️ | *(deferred with Track B)* Which files are "sensitive → private disk" vs stay public | 005 | Only registrant PII (passport/ID/photo) → private; public assets stay public |
-| ⏸️ | *(deferred with Track B)* Accept the P1 **mobile-contract change** (signed URLs) | 005 | Confirm with mobile owner; flag in `../mobile/*` before shipping |
+| ⏸️ | *(deferred with Track B)* Accept the P1 **mobile-contract change** (signed URLs) | 005 | Confirm with mobile owner; flag in `../../mobile/*` before shipping |
 | ⏸️ | *(deferred with Track B)* Signed-URL TTL vs long admin export sessions | 005 | Match saudi's default; lengthen only if exports time out |
 
 ---
@@ -343,18 +343,18 @@ incremental, gated per module.
   EN+AR translations in the **same** commit · EN+AR visual QA.
 - **Commits:** branch off `dev`; `P<phase>.<task> — <short imperative>`; manifests only
   (`composer.lock`/`yarn.lock` gitignored); no `console.log`/`dd()`/`dump()`.
-- **Docs:** this plan + per-task `TASK.md` on `main`; promote durable decisions to `../decisions/LEDGER.md`.
+- **Docs:** this plan + per-task `TASK.md` on `main`; promote durable decisions to `../../decisions/LEDGER.md`.
 
 ---
 
 ## 5. Cross-references
 
-- [CYAN_FEATURE_PARITY_MASTER_PLAN.md](CYAN_FEATURE_PARITY_MASTER_PLAN.md) — RBAC/UI/SMTP tracks (RBAC done).
-- [CYAN_BASECODE_MIGRATION_PLAYBOOK.md](CYAN_BASECODE_MIGRATION_PLAYBOOK.md) — house style for cyan replays.
-- [../decisions/LEDGER.md](../decisions/LEDGER.md) — D1…D8; add **D9** (migration squash) here.
-- [../tasks/README.md](../tasks/README.md) — open `003`…`008` folders from `_TEMPLATE` as each starts.
-- [../HANDOFF.md](../HANDOFF.md) — current session state.
-- Mobile contract: [../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf](../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf).
+- [CYAN_FEATURE_PARITY_MASTER_PLAN.md](../CYAN_FEATURE_PARITY_MASTER_PLAN.md) — RBAC/UI/SMTP tracks (RBAC done).
+- [CYAN_BASECODE_MIGRATION_PLAYBOOK.md](../CYAN_BASECODE_MIGRATION_PLAYBOOK.md) — house style for cyan replays.
+- [../../decisions/LEDGER.md](../../decisions/LEDGER.md) — D1…D8; add **D9** (migration squash) here.
+- [../../tasks/README.md](../../tasks/README.md) — open `003`…`008` folders from `_TEMPLATE` as each starts.
+- [../../HANDOFF.md](../../HANDOFF.md) — current session state.
+- Mobile contract: [../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf](../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf).
 - saudi-11 security checklists (P1/P2): `114-saudi-11/saudi-forum-11-repo/docs/security/port-review-jul-2026/`.
 
 ## 6. Exploration provenance (2026-07-07, read-only)

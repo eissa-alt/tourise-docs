@@ -70,7 +70,7 @@ Multi-value process statuses (`app_notifications` Pending, `login_attempts` fail
 `accepted`/`invited`) are **excluded**. Migrations are edited **in place** + `migrate:fresh` (no prod
 data). The `/api/mobile/*` contract is unaffected (storage/internal only; mobile already sends
 booleans and its speaker/sponsor resources don't expose `status`). Plan +
-detail: [../upgrades/BOOLEAN_REFACTOR_PLAN.md](../upgrades/BOOLEAN_REFACTOR_PLAN.md) /
+detail: [../upgrades/cleanup-hardening/BOOLEAN_REFACTOR_PLAN.md](../upgrades/cleanup-hardening/BOOLEAN_REFACTOR_PLAN.md) /
 [../tasks/001-boolean-db-cleanup/TASK.md](../tasks/001-boolean-db-cleanup/TASK.md).
 
 ## D7 — 2026-07-07 — real date/time column types + cyan masked date input (no more Unix-string dates)

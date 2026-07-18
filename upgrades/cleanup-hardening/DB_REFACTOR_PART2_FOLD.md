@@ -13,6 +13,12 @@ now-empty follow-ups — we do not regenerate the schema from scratch.
 `guest_utms`, the edgex fields, and the landing layer — so the fold operates on a smaller set and the
 per-table fold map (below) is built against the **post-removal** tree, not today's.
 
+**Followed by [Part 3 — Post-Fold Re-scan](DB_REFACTOR_PART3_RESCAN.md)** (confirm the folded set is
+clean), then [Part 4 — Model Hygiene](DB_REFACTOR_PART4_MODEL_HYGIENE.md). Any column *type* change model
+hygiene turns up (e.g. a column that should be JSON) **folds into the `create_` here** — Part 4 does not
+spawn ad-hoc migrations. Part 4 then reconciles `$casts`/`$fillable` against this final schema; Part 5
+re-scans once more to close out.
+
 ---
 
 ## The formula (per table)
@@ -28,10 +34,13 @@ per-table fold map (below) is built against the **post-removal** tree, not today
    FK conversions) — the `create` must show the final FK column, and the old string column must be gone.
 4. **Multi-table `modify_*` files.** A single `modify_*` migration that touches N tables gets split: its
    changes fold into each of the N `create_` files, then the `modify_*` file is deleted.
-5. **Foreign keys.** Prefer keeping inline `foreignId()->constrained()` where dependency order allows;
-   for cycles / pivots / self-references, collect FKs into a final `…_add_foreign_keys.php`. Watch
-   pivots / polymorphic / self-referencing tables (e.g. `session_interested_users`,
-   badge↔category many-to-many).
+5. **Foreign keys.** Part 1's [safe table reordering](DB_REFACTOR_PART1_REMOVALS.md) already put the five
+   lookups (`guest_statuses`, `areas`, `roles`, `speaker_labels`, `sponsor_labels`) ahead of their
+   dependents, so their FKs (`guest_status_id` ×3, `area_id` ×2, `admins.role_id`, `speaker_label_id`,
+   `sponsor_label_id`) now **inline** as `foreignId()->constrained()` in the folded `create_`. The one
+   unavoidable **cycle — `admins` ↔ `gates`** — keeps `gates.related_agent` inline and defers
+   `admins.gate_id` to a final `…_add_foreign_keys.php`. Also watch pivots / polymorphic /
+   self-referencing tables (e.g. `session_interested_users`, badge↔category many-to-many).
 6. **Do NOT fold framework-default tables** — keep as their own standard migrations: `users`,
    `password_resets`, `failed_jobs`, `personal_access_tokens`, `jobs`, `sessions`.
    (`session_interested_users` is a **domain** table → *do* fold.)
@@ -44,7 +53,7 @@ per-table fold map (below) is built against the **post-removal** tree, not today
   match post-001/002 (boolean/datetime refactors). If a cast doesn't match a folded final type, fix the
   cast, but no behavioral change.
 - **Mobile contract unaffected** — a fold changes migration files only. Re-read
-  `../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` only as a sanity check; expect zero endpoint/JSON
+  `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` only as a sanity check; expect zero endpoint/JSON
   change.
 - Do not re-introduce anything Part 1 removed.
 

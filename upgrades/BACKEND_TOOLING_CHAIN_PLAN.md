@@ -9,7 +9,7 @@
 > - **W4 (Rector) — removed from this task.** It's a run-once behavior-changing rewriter, not a gate;
 >   W1 (`no_unused_imports`) + W2 (Larastan) cover the unused-import / dead-code asks. Moved to the
 >   cleanup plan as an optional one-off during Tasks 003/007. See
->   [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md).
+>   [CLEANUP_AND_HARDENING_MASTER_PLAN.md](cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md).
 > - **W2 (Larastan) — kept, WITH a ratchet commitment** (user decision 2026-07-07). Not a rubber-stamp
 >   baseline: raising the level / shrinking the baseline is an explicit tracked step (§1 W2), so the
 >   static-analysis bar actually rises over time. Runs in `composer analyse`/`qa`, **not** in the hook.
@@ -21,7 +21,7 @@
 >   HANDOFF line.
 >
 > **Why first:** do this **before** the heavy backend refactors in
-> [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md) (migration squash, base
+> [CLEANUP_AND_HARDENING_MASTER_PLAN.md](cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md) (migration squash, base
 > controller, response unification). A clean, enforced gate up front means every refactor commit lands
 > pre-formatted + statically checked instead of dragging formatting churn through feature diffs.
 >
@@ -137,7 +137,7 @@ unreachable branches), fold into W2 (PHPStan flags many) or the optional W4 Rect
 it doesn't belong in the tooling-chain task. W1's `no_unused_imports` + W2 (Larastan) already cover the
 stated asks (unused imports, dead-code visibility). If a big mechanical cleanup is wanted later, run Rector
 as an **optional one-off** during a cleanup task (003/007) with every diff reviewed and `php artisan test`
-after — tracked in [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md), not here.
+after — tracked in [CLEANUP_AND_HARDENING_MASTER_PLAN.md](cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md), not here.
 It is **never** in the pre-commit hook.
 
 ### W5 — Pre-commit hook (the "husky" ask, PHP-native) · S · low
@@ -245,7 +245,7 @@ ExampleTest `/`→403 + 2 avatar tests); don't let W2/W1 get blamed for them.
 ---
 
 ## 4. Cross-references
-- [CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md) — the refactor tasks this
+- [CLEANUP_AND_HARDENING_MASTER_PLAN.md](cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md) — the refactor tasks this
   precedes (migration squash, base controller, response unification). **Open this tooling task as the
   next `docs/tasks/NNN` folder, ahead of that plan's Track A.**
 - [DEPENDENCY_HYGIENE_PLAYBOOK.md](DEPENDENCY_HYGIENE_PLAYBOOK.md) — dependency-audit house style.

@@ -1,7 +1,7 @@
 # Task 005 — Admin HttpOnly token + Next BFF proxy + full CSP (Saudi P2 backport)
 
 > Folder number is **005** (004 is taken by the dropped migration-squash). This implements the
-> **plan's "Task 004 (Track B)"** in `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md` — the plan's internal
+> **plan's "Task 004 (Track B)"** in `upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md` — the plan's internal
 > numbering ≠ the `docs/tasks/` folder numbering.
 
 - **Status:** `done` — code shipped + pushed on `dev`; `dev`→`main` merge deferred (user will merge after a repo check, 2026-07-18).
@@ -9,7 +9,7 @@
 - **Owner:** AI agent
 - **Sub-app(s):** admin (backend + mobile untouched)
 - **Branch(es):** `dev`
-- **Source:** Saudi Forum 11 security **Point 2** (`114-saudi-11/.../docs/security/port-review-jul-2026/POINT_2_ADMIN_TOKEN_HTTPONLY_PLAN.md`). Plan slot: `upgrades/CLEANUP_AND_HARDENING_MASTER_PLAN.md` **Task 004 (Track B)**, un-deferred by user 2026-07-12 (pre-launch: no clone carries prod data yet).
+- **Source:** Saudi Forum 11 security **Point 2** (`114-saudi-11/.../docs/security/port-review-jul-2026/POINT_2_ADMIN_TOKEN_HTTPONLY_PLAN.md`). Plan slot: `upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md` **Task 004 (Track B)**, un-deferred by user 2026-07-12 (pre-launch: no clone carries prod data yet).
 
 ## Goal
 

@@ -32,7 +32,7 @@ not just the column.
    it), so our diff is attributable. This wipes the dev DB (including any guest-draft you were testing).
 2. **`routes/api.php` changes are admin/web-only.** Part 1 removes `GET /landing-page`, the public
    `GET /speakers`, and the `/admin/zones*` + `/admin/bulk-print*` groups. **No mobile-facing endpoint
-   is touched.** Re-read `../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` and confirm the mobile
+   is touched.** Re-read `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` and confirm the mobile
    block in `routes/api.php` is byte-identical after the change.
 3. **EN + AR translation keys removed in the same commit.** No exceptions.
 4. **Three-repo coordination.** Several items span backend + admin + frontend; keep the removal atomic
@@ -122,6 +122,30 @@ tables are KEPT** (mobile-facing / low-cost admin categorization).
 
 ---
 
+## Safe table reordering (FK-ordering prep for Part 2)
+
+Reorder (rename the timestamp prefix of) these `create_` migrations so each referenced **lookup** table
+is created **before** its dependents. This lets Part 2 inline `foreignId()->constrained()` instead of
+deferring the constraint, collapsing ~7 late `change_*`/`add_*` FK migrations. All five are pure lookups
+with **no outgoing FK**, so moving them earlier cannot create a new violation.
+
+| Move this `create_` earlier | To before | Unlocks inlining of |
+|---|---|---|
+| `guest_statuses` (`2025_12_03_141742`) | `categories` (`2023_03_17`), `guests` (`2023_08_19`), `automation_setups` (`2024_05_17`) | `guest_status_id` FK on 3 tables (via 3 `change_*` migrations) |
+| `areas` (`2025_12_21_103859`) | `admins` (`2023_03_17`), `gates` (`2025_08_22`) | `area_id` FK on admins + gates |
+| `roles` (`2026_06_22_000001`) | `admins` (`2023_03_17`) | `admins.role_id` FK |
+| `speaker_labels` (`2025_11_09_183410`) | `speakers` (`2025_11_09_183408`) | `speakers.speaker_label_id` FK |
+| `sponsor_labels` (`2025_11_20_135241`) | `sponsors` (`2025_11_09_183409`) | `sponsors.sponsor_label_id` FK |
+
+**Cannot reorder — genuine cycle:** `admins` ↔ `gates` (`create_gates` references `admins.related_agent`
+while `admins.gate_id` references `gates`). Keep `gates.related_agent` inline (gates after admins) and let
+**Part 2** add `admins.gate_id`'s constraint in the final `…_add_foreign_keys` step. Flag, don't reorder.
+
+**Notes.** Reordering is timestamp-prefix renames only — schema-neutral on `migrate:fresh` (no prod data);
+Part 2's empty-SQL-diff gate still proves zero drift. Do it **after** the removals above (fewer files to
+shuffle — `zones`/`bulk_prints`/`guest_utms` are already gone). `speaker_labels`/`sponsor_labels` are
+**kept** (§3), so their reorder is in scope. This is prep only — the actual FK inlining lands in Part 2.
+
 ## Handled by Part 2 (net-out columns — "never create", not removed here)
 
 These were added then later dropped; the fold simply never creates them (their `add_*` and `drop_*`
@@ -145,4 +169,5 @@ files both disappear). Listed here for traceability only — **do not** write se
    `AdminPermissions`), then `migrate:fresh --seed`.
 3. Admin removals per item (pages → components → interfaces → data → roles/permissions → translations).
 4. Frontend/translation removals.
-5. Gates (§6 above). Then proceed to Part 2.
+5. Safe table reordering (rename the 5 lookup `create_` prefixes; leave the `admins`↔`gates` cycle).
+6. Gates (§6 above) + confirm `migrate:fresh --seed` still green after the reorder. Then proceed to Part 2.

@@ -1,9 +1,12 @@
 # Base API Controller + Response/Listing Traits — Plan (Task 006)
 
 Introduce a shared `BaseApiController` + `ApiResponse` / `AppliesListingFilters` traits so controllers
-stop hand-rolling responses and listing logic. **Additive only** — port the scaffolding and wire **one
-pilot** controller to prove byte-compatibility; the other controllers are migrated later in **Task 007**
-([CLEANUP_AND_HARDENING_MASTER_PLAN.md](CLEANUP_AND_HARDENING_MASTER_PLAN.md), Todo-2B → 2C).
+stop hand-rolling responses and listing logic. **006 is additive scaffolding only** — port the traits and
+wire **one admin-only pilot** to prove the envelope, non-breaking. The full roll-out — which
+**restructures all controllers and deliberately accepts mobile response-shape changes** (mobile team
+adapts later) — is **Task 007**, see
+[CONTROLLER_REFACTOR_PLAN.md](CONTROLLER_REFACTOR_PLAN.md). Do not conflate the two: 006's guardrails
+below are scoped to the 006 pilot, not the 007 program.
 
 **Locked formula (agreed):**
 1. **Trait source:** author **lean alt-native** traits from the documented signatures, matching cyan's
@@ -28,10 +31,14 @@ pilot** controller to prove byte-compatibility; the other controllers are migrat
 - **Listing/filtering is hand-rolled** per controller: `->paginate($perPage)` + inline `where` / `like`
   filters, no shared resolver.
 
-## The guardrail (why cyan-full is safe here)
+## The guardrail (why cyan-full is safe for the 006 pilot)
 
-alt's clients (admin, frontend, mobile) already parse `status: 'success'|'failed'` and `data`. The fuller
-envelope is adopted **only as a superset**:
+> Scope note: this guardrail governs the **006 pilot** (admin-only, non-breaking). The wider **Task 007**
+> program does *not* promise byte-identity — it restructures all controllers and accepts mobile shape
+> changes (documented in a delta doc). See [CONTROLLER_REFACTOR_PLAN.md](CONTROLLER_REFACTOR_PLAN.md).
+
+alt's clients (admin, frontend, mobile) already parse `status: 'success'|'failed'` and `data`. For the
+pilot the fuller envelope is adopted **only as a superset**:
 
 - `apiSuccess()` → `{ success: true, status: 'success', message, data, meta? }` — `status` + `data` stay
   byte-identical to today; `success`/`message` are additive; **`meta` keeps the exact pagination shape**
@@ -86,9 +93,11 @@ frontend change.
 
 ## Mobile contract
 
-**No impact** — `TitlesController` is admin-only and the shape stays a superset. Re-read
-`../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` only as a sanity check. Mobile-facing controllers are
-explicitly deferred to Task 007, migrated last and JSON-diffed per endpoint.
+**No impact from 006** — `TitlesController` is admin-only and the shape stays a superset. Re-read
+`../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` only as a sanity check. Mobile-facing controllers are
+handled in **Task 007**, which **restructures all endpoints onto this envelope and accepts mobile
+response-shape changes** — the mobile team adapts later from the per-endpoint delta doc 007 produces.
+(006 itself does not touch any mobile endpoint.)
 
 ## Risks / notes
 
@@ -96,7 +105,7 @@ explicitly deferred to Task 007, migrated last and JSON-diffed per endpoint.
   (none known), stop and flag.
 - **`meta` shape** — the pagination `meta` from `->additional()` must be reproduced exactly by
   `apiSuccess`'s `$meta`; verify against the current Laravel paginator output.
-- **Scope creep** — resist migrating a second controller "while we're here"; that is Task 007, which is
-  incremental and per-module JSON-diffed. After DB Part 1 the 007 target count drops by the 3 deleted
-  controllers.
+- **Scope creep** — resist migrating a second controller "while we're here"; that is Task 007
+  (restructure-all, one controller/module per PR, admin+frontend updated in lockstep, mobile deltas
+  logged). After DB Part 1 the 007 target count drops by the 3 deleted controllers.
 - **Gate wording** — use `pint --test` (repo is Pint-clean, ledger D10), not the older `pint --dirty`.
