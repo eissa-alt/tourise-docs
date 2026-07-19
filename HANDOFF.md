@@ -412,9 +412,11 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
   for now.)
 - **`catch (X: any)` → `unknown`** — ✅ **DONE** (ledger D9, admin `5ceacc3` / frontend `8544c39`, on
   `dev`). Closed the "cheap cleanups" phase.
-- **Phase 3 (later/opportunistic) — PARKED** by user, tracked in `tasks/PHASE3_PARKED_TODO.md`:
-  `utils/cont-list.ts` cross-repo drift (real: the two apps have different country lists),
-  `xlsx`/chart.js dynamic-import bundle wins, and `useFetch` adoption (5 sites vs ~64 hand-rolled).
+- **Phase 3 (later/opportunistic) — ✅ CLOSED 2026-07-19** (re-checked against code): `cont-list.ts`
+  drift reconciled (now byte-identical admin↔frontend), `xlsx` now `await import()`, chart.js widgets all
+  `next/dynamic({ ssr:false })` + `ChartCanvas` runtime-imports `chart.js/auto`, and `useFetch` adoption
+  promoted to task 009 (closed). Only the *optional* drift-check script remains unbuilt. See
+  `tasks/PHASE3_PARKED_TODO.md`.
 - **Mobile team notice** — `docs/mobile/MOBILE_NOTICE_AGENDA_DATE_WALL_CLOCK.md` written; the mobile team
   still needs to be actually told + confirm receipt before the D8 change releases.
 

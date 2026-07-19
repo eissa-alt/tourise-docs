@@ -1,36 +1,34 @@
-# Phase 3 — parked "later / opportunistic" cleanups
+# Phase 3 — parked "later / opportunistic" cleanups — ✅ CLOSED 2026-07-19
 
 **Parked:** 2026-07-07 (user chose to park these and move on to new work).
+**Closed:** 2026-07-19 — re-checked against the code; items 1 + 2 are **done** (landed via later
+sessions, not tracked here at the time), item 3 was promoted to task 009 and closed. Nothing left in
+this bucket except the *optional* drift-check script (see item 1). File kept for the record.
 **Source:** the admin+frontend code-quality audit whose "fix first" and "cheap cleanups" phases are
-now complete (see `HANDOFF.md`, ledger **D5/D9**). This file holds the third bucket — flagged, not
-scheduled. Pick up any item independently when it becomes convenient; none is urgent.
+now complete (see `HANDOFF.md`, ledger **D5/D9**).
 
 ---
 
-## 1. Cross-repo drift check — `utils/cont-list.ts` (has a real bug behind it)
+## 1. Cross-repo drift check — `utils/cont-list.ts` — ✅ DONE (core), optional script not built
 
 The admin and frontend apps keep ~26 byte-identical "plumbing" files in sync **by hand-copying**, so
-they silently drift. As of 2026-07-07, `utils/cont-list.ts` **already differs** between the two apps —
-the two country lists are out of sync, which is a latent data bug, not just cosmetic.
+they silently drift. As of 2026-07-07, `utils/cont-list.ts` differed between the two apps — a latent
+data bug.
 
-- **Do first:** reconcile `utils/cont-list.ts` between admin and frontend (decide the canonical list,
-  make both identical) in one paired change.
-- **Then (optional):** add a read-only drift-check script (plain bash `diff`/`cmp` over an explicit
-  file list of the ~26 should-be-identical files) so future drift is caught. No monorepo, no tooling —
-  just a script. The audit also found ~8 more files that differ by only 2–8 lines (accidental drift)
-  worth folding into the same list.
+- **Do first — ✅ DONE:** `utils/cont-list.ts` is now **byte-identical** between admin and frontend
+  (verified 2026-07-19 with `diff` — clean). The country-list drift is reconciled.
+- **Then (optional) — not done:** the read-only drift-check bash script (`diff`/`cmp` over the ~26
+  should-be-identical files) was never built. Still optional; pick up only if drift recurs.
 
-## 2. Bundle-size wins — dynamic imports (perf only, no correctness issue)
+## 2. Bundle-size wins — dynamic imports — ✅ DONE
 
-- **`xlsx`** (~400 KB, SheetJS) is **statically** imported at
-  `alt-static-basecode-admin/components/shared/forms/custom-file-input-2/custom-excel-import.tsx:10`,
-  which pulls it into the invitations create/edit page bundles even though it only runs after a user
-  picks an Excel file. Convert to a dynamic `await import('xlsx')` inside the file-change handler, or
-  `next/dynamic` the component. (Mirrors the existing dynamic pattern used for print-js / the email
-  editor.)
-- **chart.js + chartjs-plugin-datalabels** load eagerly on the dashboard
-  (`components/admin-modules/dashbaord/charts.tsx`, imported by the dashboard root). Wrap the chart
-  components in `next/dynamic` with `{ ssr: false }` so chart.js loads only when the dashboard renders.
+- **`xlsx`** (~400 KB, SheetJS) is now **dynamically** imported — `await import('xlsx')` inside the
+  file-change handler at `custom-excel-import.tsx` (~line 109), so it stays out of the invitations
+  create/edit page bundles until a user actually picks a file.
+- **chart.js + chartjs-plugin-datalabels** no longer load eagerly. All five dashboard widgets are
+  wrapped in `next/dynamic` with `{ ssr: false }` (`components/admin-modules/dashbaord/index.tsx`), and
+  `ChartCanvas.tsx` does `await import('chart.js/auto')` + the datalabels plugin at runtime — chart.js
+  is fully out of the dashboard's initial bundle.
 
 ## 3. `useFetch` adoption (opportunistic, do NOT sweep) — **moved to `tasks/009-usefetch-adoption/`**
 
