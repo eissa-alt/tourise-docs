@@ -1,93 +1,120 @@
-# Task 010 — api.php cleanup & route organization
+# Task 010 — api.php cleanup, route organization & RESTful rename
 
 - **Status:** `todo`
 - **Opened:** 2026-07-19
 - **Owner:** —
-- **Sub-app(s):** backend (+ admin verification for Tier 3)
-- **Branch(es):** `dev` (+ feature branch recommended for Tier 3)
+- **Sub-app(s):** backend + admin + frontend (+ mobile if a consumed URI changes)
+- **Branch(es):** `dev` (feature branch strongly recommended — this is a cross-repo cutover)
 
 ## Goal
 
-Bring `alt-static-basecode-backend/routes/api.php` up to the cyan-basecode standard: remove dead
-code + duplicate registrations, organize the flat admin block into `Route::prefix()->group()` blocks,
-add `->whereUuid('id')` constraints, and roll out per-feature `admin.can:` RBAC gating. Today our file
-is **966 lines** of mostly-flat, largely-ungated routes; cyan's is **559 lines**, fully grouped and
-gated. The mobile section and the ported admin-modules section are already clean — this task targets
-the legacy admin block (roughly lines 176–672).
+Bring `alt-static-basecode-backend/routes/api.php` up to the cyan-basecode standard: remove dead code +
+duplicate registrations, organize into `Route::prefix()->group()` blocks, **rename the legacy admin
+endpoints to cyan's RESTful shape**, add `->whereUuid('id')` constraints, and roll out per-feature
+`admin.can:` RBAC gating. Today our file is **966 lines** of mostly-flat, ungated, non-RESTful routes;
+cyan's is **559 lines**, grouped + gated + RESTful. The renamed URIs are a **hard cutover** — admin API
+client + frontend callers (and mobile, only if a consumed URI changes) are updated in lockstep.
 
 ## Reference
 
 - Cyan baseline: `/Users/admin/Projects/ALT/115-cyan-basecode/cyan-basecode-repos/cyan-backend/routes/api.php`
-  — the target shape (prefix+`admin.can:` groups, `whereUuid`, no dupes, no dead code, tidy lookups block).
+  — the target shape (prefix + `admin.can:` groups, `whereUuid`, RESTful verbs, no dupes, no dead code).
 - Ours: `alt-static-basecode-backend/routes/api.php`.
+- **`admin.can` exists here** → `app/Http/Kernel.php`: `'admin.can' => EnsureAdminPermission::class`
+  (also `auth.admin` / `auth.guest`). Both `admin.can:feature` and `admin.can:feature,action` forms are
+  already used. Feature keys live in `RolesController::catalog` / `app/Support/AdminPermissions.php`.
 - **`routes/api.php` is also the mobile contract** — see `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf`
-  and `../../mobile/RESPONSE_SHAPE_DELTAS.md`. **Do not change any `mobile/*` URI.**
+  and `../../mobile/RESPONSE_SHAPE_DELTAS.md`. The `mobile/*` section is already RESTful; only touch a
+  `mobile/*` URI if it is genuinely being renamed, and document it as a delta if so.
 
 ## Scope
 
-- **In:** the legacy admin protected block (`~176–672`) + the two public/sensitive blocks' dead comments.
-  Cleanup, reorganization, `whereUuid`, and `admin.can:` gating.
+- **In:** the legacy admin protected block (`~176–672`). Cleanup, reorg, **RESTful renaming**, verb
+  consolidation (`block`+`activate` → `toggle-status`, replacing outright), `whereUuid`, and `admin.can:`
+  gating — plus the matching admin/frontend/mobile client updates for every renamed URI.
 - **Out (explicitly NOT this task):**
-  - Renaming non-RESTful admin paths to cyan's RESTful shape (`/admin/guests-new` → `/admin/guests`,
-    `/admin/guests-update/{id}`, `-select` suffixes, etc.). That breaks the admin frontend for no
-    functional gain — kept as a **deliberate deviation**.
-  - Any `mobile/*` route (URIs are the mobile contract; that section is already clean).
-  - Controller response-body changes (that was the response-unification work, ledger D22).
+  - Controller response-body changes (that was response-unification, ledger D22).
+  - Renaming `mobile/*` URIs unless a specific endpoint is deliberately reshaped (avoid; it's the mobile
+    contract). Any that do change get a row in `../../mobile/RESPONSE_SHAPE_DELTAS.md` (or a new delta).
 
-## Todo (ordered safest-first)
+## Cutover decisions (from user notes, 2026-07-19)
 
-### Tier 0 — pure cleanup (zero contract change)
+1. **Rename admin paths to cyan's RESTful shape** — `POST /admin/guests-new` → `POST /admin/guests`,
+   `PUT /admin/guests-update/{id}` → `PUT /admin/guests/{id}`, `/admin/x-select` → `/admin/x/select`,
+   etc. **Hard cutover, no alias/back-compat window** — admin + frontend updated in the same change.
+2. **Replace `block/{id}` + `activate/{id}` with a single `PATCH /{id}/toggle-status`** outright (do
+   NOT keep the legacy pair). Requires adding `toggleStatus()` to controllers that only have
+   `block()`/`activate()` and repointing the admin UI's block/activate buttons.
+3. **`whereUuid('id')`** on every UUID route param, done as part of the reshape.
+4. **`admin.can:<feature>`** gating on every admin group, mirroring cyan.
+
+## Todo (ordered)
+
+### Tier 0 — pure cleanup (backend only, zero contract change)
 - [ ] Delete dead commented-out routes (e.g. `~93, 150, 159–163, 173, 201, 340–348, 356–366, 453, 471–472, 487, 505, 635–638`).
 - [ ] Remove exact duplicate registrations: gates `store` (269–270), titles `store` (322–323),
       email-templates `store` (373–374), badges `store` (546–547), emails-config `show` (351/353),
       print-logs pair (533–534 vs 670–671).
-- [ ] Strip `// todo move it`, `// ???`, `// todo: move ?` and similar noise comments.
+- [ ] Strip `// todo move it`, `// ???`, `// todo: move ?` noise comments.
 
-### Tier 1 — dead-endpoint removal (grep admin + mobile usage first, then drop route + orphaned controller method)
-- [ ] Legacy `guests-status-*` block (455–461): `guestStatusOverAll/Categories/Badges/Other`,
-      `getGuestChartData`, `printedCategoriesByDaysStatus`. **Confirmed not referenced in admin** (the
-      dashboard uses `DashboardStatsController`), and includes the malformed paths
-      `guests-status-catagories` (typo) and `guests-status-other␣␣` (trailing spaces). Remove block + methods.
-- [ ] Verify-then-remove other likely-dead endpoints: `send-sms/{id}` (cyan already deleted `sendSMS`
-      as dead legacy), `print-test`, `send-e-badge-test`, `export-test`, `accept-with-days`.
+### Tier 1 — dead-endpoint removal (grep admin + mobile first, then drop route + orphaned method)
+- [ ] Legacy `guests-status-*` block (455–461) — **confirmed unused in admin** (dashboard uses
+      `DashboardStatsController`); includes malformed `guests-status-catagories` (typo) and
+      `guests-status-other␣␣` (trailing spaces). Remove block + `GuestsController` methods.
+- [ ] Verify-then-remove other likely-dead: `send-sms/{id}` (cyan deleted `sendSMS` as dead),
+      `print-test`, `send-e-badge-test`, `export-test`, `accept-with-days`.
 
-### Tier 2 — organization (no URI change — final paths stay byte-identical)
-- [ ] Fold flat `/admin/<resource>/...` routes into `Route::prefix('admin/<resource>')->group()` blocks
-      mirroring cyan's layout. Verify with a before/after `php artisan route:list` diff — the route
-      table must be identical except ordering.
-- [ ] Within each group, order static routes before `/{id}` wildcards (avoid wildcard collisions).
+### Tier 2 — reorg + RESTful rename + whereUuid (BACKEND) — produces the rename map
+- [ ] Fold flat `/admin/<resource>/...` routes into `Route::prefix('admin/<resource>')->group()` blocks.
+- [ ] Rename to RESTful shape (item 1 above); static routes ordered before `/{id}` wildcards.
+- [ ] Consolidate `block`+`activate` → `PATCH /{id}/toggle-status` (item 2) — add `toggleStatus()` where
+      missing, delete `block()`/`activate()` route entries (keep or remove the methods per controller).
+- [ ] Add `->whereUuid('id')` to all UUID params.
+- [ ] **Deliverable: an old→new rename map** (table of every changed method+URI) — drives Tier 3 and
+      becomes a mobile delta if any `mobile/*` URI changed.
 
-### Tier 3 — hardening (behavior change — needs admin-frontend verification; land last)
-- [ ] Add `->whereUuid('id')` (and `whereUuid` on other UUID params) to `{id}` routes, cyan parity.
-- [ ] Roll out `admin.can:<feature>` middleware to the ungated admin block, mirroring cyan's per-feature
-      gating. Cross-check every feature against `RolesController::catalog` (permission-catalog) + the
-      admin frontend's permission checks so no in-use admin loses access. Biggest/riskiest item.
+### Tier 3 — cross-repo lockstep update (ADMIN + FRONTEND + mobile-if-touched)
+- [ ] Update the admin API client / all callers to the new URIs (grep the admin repo for each old path).
+- [ ] Repoint admin block/activate UI → `toggle-status`.
+- [ ] Update frontend callers if any hit a renamed public/admin URI.
+- [ ] Mobile: only if a consumed URI changed — update the Flutter client + add a `RESPONSE_SHAPE_DELTAS`
+      (or new notice) row. Expected minimal (mobile section is already RESTful).
+
+### Tier 4 — RBAC hardening (behavior change — verify against role matrix; land last)
+- [ ] Roll out `admin.can:<feature>` middleware to every admin group, cross-checked against
+      `RolesController::catalog` + the admin frontend permission checks so no in-use admin loses access.
 
 ## Verification gates
 
-- After **every** tier: `php artisan route:list` diff (Tier 0–2 must be URI-identical bar ordering),
-  `pint --test`, `phpstan analyse`, `php artisan test`.
-- `git diff` on the `mobile/*` and `Route::middleware('signed')` sections must be **empty**.
-- Tier 3: manual admin smoke test per gated feature (or confirm against the role matrix + frontend).
+- **Tier 0–1:** `php artisan route:list` diff should show only removals; `pint --test` + `phpstan` + `php artisan test`.
+- **Tier 2+ (URIs change intentionally):** the route:list diff is NO LONGER an identity check — instead
+  verify every removed old URI has a corresponding new URI in the **rename map**, and that no caller
+  still references an old path (grep admin + frontend + mobile repos = clean).
+- `pint --test` + `phpstan analyse` + `php artisan test` green after each tier; admin/frontend
+  `yarn type-check` + `yarn production` green after Tier 3.
+- Manual smoke test per renamed feature + per gated feature (Tier 4).
 
 ## Log
 
-- 2026-07-19 — opened. Compared our `api.php` (966 lines, flat/ungated legacy admin block) against
-  cyan (559 lines, fully grouped + `admin.can:` gated + `whereUuid`). Confirmed the `guests-status-*`
-  block is dead (no admin references). Scope set to **all tiers** per user. Not yet started.
+- 2026-07-19 — opened. Compared our `api.php` (966 lines, flat/ungated/non-RESTful legacy admin block)
+  against cyan (559 lines, grouped + `admin.can:` + `whereUuid` + RESTful). Confirmed `guests-status-*`
+  is dead and that `admin.can`/`EnsureAdminPermission` already exists here.
+- 2026-07-19 — scope expanded per user notes: RESTful **renaming is now IN scope** (hard cutover across
+  admin + frontend + mobile-if-touched), and `block`/`activate` are **replaced** by `toggle-status`
+  outright. Reversed the earlier "keep URIs frozen" / "no rename" decisions.
 
 ## Decisions
 
-- **Keep non-RESTful admin path names** (`/admin/guests-new`, `/admin/guests-update/{id}`, `-select`
-  suffixes) — renaming to cyan's RESTful shape would break the admin frontend contract for no
-  functional gain. Deliberate deviation from cyan.
-- **`mobile/*` URIs are frozen** — the mobile contract; only the legacy admin block is in scope.
+- **RESTful rename is a hard cutover** — no alias/back-compat window; backend + admin (+ frontend/mobile
+  as needed) change together. (Reverses the 2026-07-19 initial "out of scope" note.)
+- **`block`/`activate` → single `toggle-status`, replaced outright** (not kept as legacy routes).
+- **`mobile/*` stays RESTful and mostly frozen** — only reshape a mobile URI deliberately, with a delta.
 
 ## Definition of Done
 
-- [ ] Code merged to `dev` (backend; admin only if a gating change needs a matching frontend tweak)
-- [ ] EN + AR translations in the same commit (if any user-facing strings — unlikely for routes)
-- [ ] Quality gate green (backend `pint --test` + `phpstan analyse` + `php artisan test`)
-- [ ] `php artisan route:list` diff reviewed; `mobile/*` + `signed` sections unchanged
-- [ ] Docs updated (this TASK.md → `done`; README index row; ledger entry if RBAC gating lands)
-- [ ] Mobile contract re-checked (`../../mobile/`) — expected no-op
+- [ ] Backend merged to `dev`; admin + frontend callers updated in the same cutover (mobile if touched)
+- [ ] Rename map (old→new) recorded; grep of all repos shows zero references to old paths
+- [ ] EN + AR translations in the same commit (if any user-facing strings change)
+- [ ] Backend `pint --test` + `phpstan analyse` + `php artisan test` green; admin/frontend `yarn type-check` + `yarn production` green
+- [ ] Mobile contract re-checked (`../../mobile/`); any changed `mobile/*` URI documented as a delta
+- [ ] Docs updated (this TASK.md → `done`; README index row; ledger entry for the rename cutover + RBAC gating)

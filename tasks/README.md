@@ -43,6 +43,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 007 | [rsvp-decline-not-interested](007-rsvp-decline-not-interested/TASK.md) | done (code) — QA pending |
 | 008 | [guest-drafts-port](008-guest-drafts-port/TASK.md) | done (code) — QA'd; ledger D19 |
 | 009 | [usefetch-adoption](009-usefetch-adoption/TASK.md) | done — standing convention (closed 2026-07-19) |
-| 010 | [api-routes-cleanup](010-api-routes-cleanup/TASK.md) | todo — cleanup + reorg + whereUuid + RBAC gating (all tiers) |
+| 010 | [api-routes-cleanup](010-api-routes-cleanup/TASK.md) | todo — cleanup + reorg + RESTful rename (cross-repo cutover) + whereUuid + RBAC gating |
 
 _Add a row per task as you open it; newest at the bottom._
