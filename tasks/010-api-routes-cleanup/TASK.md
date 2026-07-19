@@ -57,12 +57,24 @@ client + frontend callers (and mobile, only if a consumed URI changes) are updat
       print-logs pair (533–534 vs 670–671).
 - [ ] Strip `// todo move it`, `// ???`, `// todo: move ?` noise comments.
 
-### Tier 1 — dead-endpoint removal (grep admin + mobile first, then drop route + orphaned method)
-- [ ] Legacy `guests-status-*` block (455–461) — **confirmed unused in admin** (dashboard uses
-      `DashboardStatsController`); includes malformed `guests-status-catagories` (typo) and
-      `guests-status-other␣␣` (trailing spaces). Remove block + `GuestsController` methods.
-- [ ] Verify-then-remove other likely-dead: `send-sms/{id}` (cyan deleted `sendSMS` as dead),
-      `print-test`, `send-e-badge-test`, `export-test`, `accept-with-days`.
+### Tier 1 — dead-link audit (BIDIRECTIONAL) + dead-endpoint removal
+
+Build one **route inventory** first (`php artisan route:list --json`), then reconcile it against callers
+in **all** repos. Three checks, both directions:
+
+- [ ] **(a) Orphaned backend routes** — endpoint registered but no admin/frontend/mobile caller. Grep each
+      path across admin + frontend (+ mobile if present) → candidates for removal.
+- [ ] **(b) Route → missing controller method** — a `Route::…([X::class, 'foo'])` where `X::foo()` doesn't
+      exist. `route:list` loads fine but the endpoint 500s. Scan every action in `api.php` against its
+      controller (given how much dup/typo cruft exists, expect a few).
+- [ ] **(c) Client → server dead links (404s)** — an admin/frontend/mobile API call whose path matches NO
+      registered route (incl. the typo paths like `guests-status-other␣␣`). These are already-broken links;
+      list them and decide fix-or-delete. **This check is re-run after the Tier 2 rename** (the rename is the
+      main way a live call becomes a dead link).
+- [ ] Then remove confirmed dead endpoints — starting with the legacy `guests-status-*` block (455–461,
+      **confirmed unused in admin**; includes the typo/trailing-space paths) + `GuestsController` methods,
+      and verify-then-remove `send-sms/{id}` (cyan deleted `sendSMS` as dead), `print-test`,
+      `send-e-badge-test`, `export-test`, `accept-with-days`.
 
 ### Tier 2 — reorg + RESTful rename + whereUuid (BACKEND) — produces the rename map
 - [ ] Fold flat `/admin/<resource>/...` routes into `Route::prefix('admin/<resource>')->group()` blocks.
@@ -90,6 +102,9 @@ client + frontend callers (and mobile, only if a consumed URI changes) are updat
 - **Tier 2+ (URIs change intentionally):** the route:list diff is NO LONGER an identity check — instead
   verify every removed old URI has a corresponding new URI in the **rename map**, and that no caller
   still references an old path (grep admin + frontend + mobile repos = clean).
+- **Dead-link gate (both directions, run at start AND after the rename):** (a) no orphaned routes left
+  unaccounted for, (b) every `api.php` action resolves to a real controller method, (c) zero client calls
+  point to a non-existent route. Check (c) is the one that catches a missed caller during the cutover.
 - `pint --test` + `phpstan analyse` + `php artisan test` green after each tier; admin/frontend
   `yarn type-check` + `yarn production` green after Tier 3.
 - Manual smoke test per renamed feature + per gated feature (Tier 4).
@@ -102,6 +117,8 @@ client + frontend callers (and mobile, only if a consumed URI changes) are updat
 - 2026-07-19 — scope expanded per user notes: RESTful **renaming is now IN scope** (hard cutover across
   admin + frontend + mobile-if-touched), and `block`/`activate` are **replaced** by `toggle-status`
   outright. Reversed the earlier "keep URIs frozen" / "no rename" decisions.
+- 2026-07-19 — added an explicit **bidirectional dead-link audit** to Tier 1 (orphaned routes,
+  route→missing-method, client→404 links) + a dead-link verification gate, re-run after the rename.
 
 ## Decisions
 
