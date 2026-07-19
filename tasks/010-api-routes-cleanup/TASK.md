@@ -119,6 +119,11 @@ in **all** repos. Three checks, both directions:
   outright. Reversed the earlier "keep URIs frozen" / "no rename" decisions.
 - 2026-07-19 — added an explicit **bidirectional dead-link audit** to Tier 1 (orphaned routes,
   route→missing-method, client→404 links) + a dead-link verification gate, re-run after the rename.
+- 2026-07-19 — **Tier 0+1 executed** (backend `4cf7036`). Dead-link audit found 7 route→missing-method
+  bugs + confirmed the `guests-status-*`/`guests-chart`/etc. block dead (0 callers, no tests). Removed
+  dead comments, dup registrations, and dead endpoints; deleted 7 orphaned `GuestsController` methods.
+  Route count 418→400; pint+phpstan clean; tests 457/3 pre-existing. **Tier 2/3 paused** — drafted
+  `RENAME_MAP.md` (proposed URIs + open naming decisions) for review before the cross-repo cutover.
 
 ## Decisions
 
