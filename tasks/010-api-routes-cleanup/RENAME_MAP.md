@@ -146,3 +146,24 @@ Shared admin plumbing touched: 13 listing components (own `${verb}`/`${variant}`
 `{id}/toggle-status`), `table-actions-modal.tsx` (block/activate → toggle-status, invite →
 `{id}/invite`), and the two invitation see-more/add-info modals (hardcoded to
 `invitations/{id}/details`, since they built URLs from a fake `moduleName: 'invitation-details'`).
+
+---
+
+## G. FREEZE LIFTED 2026-07-19 by Task 011 (scan-into-admin) — see ledger D23
+
+The §D.2 / §F "scanner/agent app is out of scope, FREEZE its URIs" decision was **superseded** the
+same day: [Task 011](../011-scan-into-admin/TASK.md) pulled scanning **into** the admin app, so the
+scanner is no longer an un-updatable out-of-repo client. The frozen agent/scan surface was therefore
+**un-frozen and modernized**, not kept:
+
+- **All the frozen gate-agent/scan URIs** (`gates-select`, `gates-show/{id}`, `setup-gate/{id}`,
+  `gates-start-scanning/{id}`, `gates-pause-scanning/{id}`, `/admin/gates-scan/{id}`,
+  `/admin/gates-search-guests-by-name`, `/admin/gates-upload-scan-image/{scanId}`,
+  `/admin/gates-update-scan-guest/{scanId}`) → renamed into a **`/admin/gate-scan` group** behind
+  `admin.can:scanning` (`gates`, `gates/{id}`, `gates/{id}/setup|start|pause|scan`, `search-guests`,
+  `scans/{id}/image`, `scans/{id}/guest`).
+- **The 4 non-`/admin` twins + `AuthController@loginAgent`** → **deleted** (standalone client retired).
+- **Offline sync** (`guest-data-offline`, `guest-data-sync`, `guests-printed-since`, `guests/attend`)
+  → **kept**, now behind `admin.can:scanning`.
+- **`guests/validate-check-in/{regNumber}`** → **deleted** (handler already removed in Tier 0; no callers).
+- **Bulk-image** (`guests-upload-zip`, `match-guests-images`) → still untouched (not part of Task 011).

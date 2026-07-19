@@ -427,3 +427,49 @@ session; **mobile (Tier C)** completes it — all `mobile/*` controllers migrate
 **Gates:** pint + phpstan **No errors**; tests **457/3** (the 3 are pre-existing D14 signed-avatar/env failures,
 not from this work). Backend feature tests updated in lockstep with each controller. **Remaining:** mobile-team
 ack of the deltas, then backend `dev` → `main`.
+
+## D23 — 2026-07-19 — gate scanning is a first-party admin feature (standalone "agent admin" retired; new `scanning` RBAC feature)
+
+On-site gate scanning was an **out-of-repo standalone web client** (the "agent admin"), reached via a
+separate `loginAgent` and dual-prefix (`/admin/*` **and** no-`/admin`) scan endpoints that Task 010 had
+frozen. `108-tasama` and `112-pif-partners-forum-demo` had already pulled the scanner **into** their admin
+CMS keyed off an `admins.type='gate'` column — but ALT dropped `type` in favour of RBAC, so it was the
+deliberate outlier with no in-admin scanner. **Decision: port scanning into the ALT admin as a first-party,
+RBAC-gated feature and retire the standalone client + its shims.** Task + phase-by-phase detail:
+[../tasks/011-scan-into-admin/TASK.md](../tasks/011-scan-into-admin/TASK.md).
+
+**Durable decisions:**
+1. **New `scanning` RBAC feature** (`['view']`) in `app/Support/AdminPermissions.php`, **distinct from
+   `gates`/`areas`/`scans`.** `gates`/`areas`/`scans` = *manage/report* gates in the CMS; `scanning` =
+   *operate* a gate (the live scan UI). A "gate agent" is just a role granting `scanning` (usually nothing
+   else) — **no `type` column, no separate login**. They log in normally and the dashboard shows the scanner
+   because `checkFeaturePermission('scanning', user)` is true.
+2. **Data scope is enforced server-side** (closes the 108/112 gap where any token scanned any gate).
+   `GatesController::deniesGateScope()` gates `showAgentSide`/`setup`/`start`/`pause`/`scan`: the target gate
+   must match `admin.gate_id` (once bound by `setup`) and/or fall inside `admin.area_id`; **super-admin
+   short-circuits**.
+3. **Endpoints modernized + un-frozen** into a `/admin/gate-scan` group behind `admin.can:scanning`
+   (`gates`, `gates/{id}`, `gates/{id}/setup|start|pause|scan`, `search-guests`, `scans/{id}/image`,
+   `scans/{id}/guest`). The retained offline-sync endpoints (`attend`, `guest-data-offline`,
+   `guest-data-sync`, `guests-printed-since`) moved behind the same feature. **Dropped:**
+   `AuthController@loginAgent` + route, the four no-`/admin` scan aliases, and the dangling
+   `validate-check-in/{regNumber}` route (handler gone since Task 010, no callers). This **lifts Task 010's
+   RENAME_MAP §F freeze.**
+4. **Camera lib swapped, dep count flat.** 108/112's `react-web-qr-reader` (unmaintained, React 16/17) →
+   **`html5-qrcode`** (maintained, framework-agnostic, dynamic-imported so it never runs server-side); also
+   dropped `react-lottie` (their scan-pulse dep) for a CSS pulse — net new deps ≈ 0.
+5. **Recovery flow completed.** 108/112 only uploaded a badge photo for an unrecognised QR; ALT's
+   `wrong-qr-recovery-modal` also **searches by name and links the guest to the orphan scan**
+   (`search-guests` → `scans/{id}/guest`).
+6. **Not mobile-facing.** The scanner is the web iPad client, not the Flutter app; the retired/renamed URIs
+   were confirmed absent from the mobile contract, so `routes/api.php`'s mobile surface is intact.
+
+**Deferred (still open):** the recommended `scans.gate_id` FK — the port ships on the existing `gate_name`
+string link (`Gate::scopeWithUniqueCount`); and **live browser-QA + the RBAC/scope manual matrix** (needs a
+running stack + camera), validated so far only by feature tests + type-check/build.
+
+**Landed (on `dev`):** backend `211e17d` (scanning feature + endpoints + `GateScanTest`) → `cd66c21`
+(`admins/select` filters by `scanning`); admin `1c87ff0` (gate-scan UI port + nav + `/scans` icon +
+`type=gate` cleanup + EN/AR). **Gates:** backend `composer qa` green (pint + phpstan + tests incl.
+`GateScanTest`); admin `yarn type-check` + `next build` green (`yarn production` needs the gitignored
+`.env.production`).

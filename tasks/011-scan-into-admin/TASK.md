@@ -1,10 +1,30 @@
 # Task 011 — Port gate scanning into the admin app (retire the standalone scanner)
 
-- **Status:** `todo` (plan approved — no code yet)
+- **Status:** `done` (backend + admin shipped to `dev`; Phase 0 `gate_id` FK deferred — see note)
 - **Opened:** 2026-07-19
+- **Landed:** 2026-07-19
 - **Owner:** —
 - **Sub-app(s):** backend + admin (+ docs)
-- **Branch(es):** `dev` (+ feature branch, e.g. `feat/scan-into-admin`)
+- **Branch(es):** `dev`
+- **Commits:** backend `P11.1` (scanning feature + endpoints), `P11.3` (admins/select filter);
+  admin `P11.2` (gate-scan UI port)
+
+## What actually shipped (deviations from the plan)
+
+- **Camera lib swapped.** Plan floated `react-web-qr-reader ^1.0.4` (108/112's dep) but it
+  pins React 16/17 and is unmaintained — replaced with the maintained, framework-agnostic
+  **`html5-qrcode`** (dynamic-imported so it never runs server-side). Also dropped
+  `react-lottie` (108/112 used it for the scan pulse) for a CSS pulse — one less dep.
+- **`validateCheckIn` route dropped, not restored.** The handler was already deleted in Task
+  010 and it had **no in-repo callers**, so the dangling `GET /admin/guests/validate-check-in/{regNumber}`
+  route was removed rather than ported back. The offline-sync group (`attend`,
+  `guest-data-offline`, `guest-data-sync`, `guests-printed-since`) was kept and moved behind
+  `admin.can:scanning`.
+- **`scans.gate_id` FK deferred.** The recommended Phase 0 schema debt (real FK instead of the
+  `gate_name` string link) was **not** done — the port ships on the existing string link. Still
+  open (see risks). No migrations were touched by this task.
+- **`scanning` shipped with `['view']` only** (no separate `recover` action); recovery is part
+  of operating the gate, so it lives under the same `view` grant.
 
 ## Goal
 
@@ -68,74 +88,61 @@ Backend surface already present in ALT (frozen): `GatesController` agent methods
 ## Plan (phased)
 
 ### Phase 0 — RBAC + schema foundation (backend + admin labels)
-- [ ] Add `'scanning' => ['view']` (and consider `'recover'` for wrong-QR) to
-      `app/Support/AdminPermissions.php::CATALOG`. Add EN + AR labels in the admin
-      role-builder catalog mapping **in the same commit**.
-- [ ] Fix the broken FROZEN route `GET /admin/guests/validate-check-in/{regNumber}` —
-      `GuestsController@validateCheckIn` was removed in Task 010's dead-method sweep. Either
-      restore the method (port from 112) or drop the route if the offline client is dead
-      (decide during Phase 1 endpoint audit).
-- [ ] **(Recommended) schema debt:** add a real `gate_id` FK on `scans` (today scans link to
-      gates by `gate_name` string via `Gate::scopeWithUniqueCount`). Fold into the
-      `create_scans` migration per the repo's fold-in-place convention; backfill logic n/a
-      (fresh clone baseline). Keep `gate_name` denormalized column or drop it — decide in PR.
+- [x] Add `'scanning' => ['view']` to `app/Support/AdminPermissions.php::CATALOG` (+ EN/AR
+      labels in the same commit). Shipped `view` only — no separate `recover` action.
+- [x] Resolve the broken FROZEN route `GET /admin/guests/validate-check-in/{regNumber}` —
+      **dropped** (handler gone since Task 010, no in-repo callers) rather than restored.
+- [ ] ~~**(Recommended) schema debt:** real `gate_id` FK on `scans`~~ — **deferred.** Port
+      ships on the existing `gate_name` string link (`Gate::scopeWithUniqueCount`). Still open.
 
 ### Phase 1 — Backend endpoint modernization (mobile-contract-gated)
-- [ ] **Read `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` first** (CLAUDE.md rule 4).
-      The iPad gate scanner is an out-of-repo client, NOT the Flutter app, but confirm none of
-      the offline-sync / check-in URIs are in the mobile contract before renaming.
-- [ ] RESTful-rename the agent/scan endpoints (see `010-api-routes-cleanup/RENAME_MAP.md` for
-      the proposed shapes, e.g. `gates/{id}/scan`, `gates/{id}/start-scanning`,
-      `gates/{id}/setup`, `gates/select`, `scans/…`). Un-freeze from Task 010.
-- [ ] **Drop the duplicate no-`/admin` route aliases** (`/gates-scan/{id}`,
+- [x] **Read `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` first** (CLAUDE.md rule 4) —
+      confirmed the gate-scan / offline-sync URIs are the out-of-repo iPad client, not the
+      Flutter contract, so renaming is safe.
+- [x] RESTful-rename the agent/scan endpoints into a `/admin/gate-scan` group
+      (`gates`, `gates/{id}`, `gates/{id}/setup|start|pause|scan`, `search-guests`,
+      `scans/{id}/image`, `scans/{id}/guest`). Un-frozen from Task 010.
+- [x] **Dropped the duplicate no-`/admin` aliases** (`/gates-scan/{id}`,
       `/gates-search-guests-by-name`, `/gates-upload-scan-image/{scanId}`,
-      `/gates-update-scan-guest/{scanId}`) — they only existed for the standalone client.
-- [ ] Add `->middleware('admin.can:scanning')` to the operator endpoints
-      (scan / start / pause / setup / gates-select-for-agent / show-agent-side / search /
-      upload-scan-image / update-scan-guest). `scans` reporting stays `admin.can:scans`.
-- [ ] **Enforce data scope** in `GatesController` (or a small `EnsureGateScope` check):
-      `scan`/`start`/`pause`/`setup` must assert the target gate matches `admin.gate_id`
-      (once set) and/or falls inside `admin.area_id`. Super-admin short-circuits.
-- [ ] **Delete `AuthController@loginAgent`** + its public route + `login-agent` references.
-- [ ] Add feature tests: scanning happy-path, scope denial (agent A can't scan gate B),
-      RBAC denial (no `scanning` feature → 403), gate setup binding.
+      `/gates-update-scan-guest/{scanId}`).
+- [x] Added `->middleware('admin.can:scanning')` to the whole `gate-scan` group + the retained
+      offline-sync endpoints (`attend`, `guest-data-offline`, `guest-data-sync`,
+      `guests-printed-since`). `scans` reporting stays `admin.can:scans`.
+- [x] **Enforce data scope** via `GatesController::deniesGateScope()` on
+      `showAgentSide`/`setup`/`start`/`pause`/`scan`: target gate must match `admin.gate_id`
+      (once bound) and/or fall inside `admin.area_id`. Super-admin short-circuits.
+- [x] **Deleted `AuthController@loginAgent`** + its public route.
+- [x] Feature tests (`tests/Feature/GateScanTest.php`): happy-path, scope denial, area denial,
+      RBAC denial (403), setup-binding, bound-lock, super bypass, recovery search+link.
 
 ### Phase 2 — Admin UI port (RBAC-rewired)
-- [ ] Copy `gate-scan/*` from 112 into
+- [x] Ported `gate-scan/*` into
       `alt-static-basecode-admin/components/admin-modules/dashbaord/gate-scan/`.
-- [ ] **Rewire identity:** replace every `user.type === 'gate'` check with a
-      `hasFeature('scanning')` check off the resolved permission map (ALT already resolves
-      permissions client-side; reuse that, not the dead `type`).
-- [ ] Wire calls to the **renamed** endpoints (not the old frozen URIs). Add the `Axios`
-      base-path calls: gates-select-for-agent → setup → show-agent-side → start/pause → scan
-      → wrong-QR recovery.
-- [ ] **Complete the recovery flow** 108/112 left half-wired: actually call
-      `searchGuestsByName` + `updateScanWithGuest` in `wrong-qr-recovery-modal.tsx` (they only
-      upload a photo today).
-- [ ] Dashboard entry: render the scanner for `scanning`-capable admins
-      (`dashbaord/index.tsx`), keep the CMS dashboard for others.
-- [ ] Re-enable the "Gates & Scans" nav (currently commented out in `data/sidebar-links.tsx`)
-      gated by the `gates`/`scans`/`areas`/`scanning` features via `inferFeatureId`.
-- [ ] Add `/scans` to `data/module-icons.tsx` (missing today). EN + AR strings same commit.
-- [ ] Confirm camera lib: 112 uses `react-web-qr-reader ^1.0.4` — justify the new dep in the
-      PR (CLAUDE.md rule) or swap to an already-present scanner lib.
+- [x] **Rewired identity:** `type === 'gate'` → `checkFeaturePermission('scanning', user)`.
+- [x] Wired to the renamed `/gate-scan/*` endpoints through the BFF proxy (HttpOnly token) —
+      dropped the manual `cookie.get('token')` + Bearer headers.
+- [x] **Completed the recovery flow:** `wrong-qr-recovery-modal.tsx` now searches by name
+      (`POST /gate-scan/search-guests`) **and links** the guest to the orphan scan
+      (`PUT /gate-scan/scans/{id}/guest`), plus the photo upload.
+- [x] Dashboard entry renders the scanner for `scanning`-capable admins; CMS widgets stay.
+- [x] Re-enabled the "Gates & Scans" nav (`data/sidebar-links.tsx`), feature-gated.
+- [x] Added `/scans` to `data/module-icons.tsx`; EN + AR strings in the same commit.
+- [x] Camera lib: swapped `react-web-qr-reader` → `html5-qrcode` (dynamic import), dropped
+      `react-lottie` for a CSS pulse. See "What actually shipped".
 
 ### Phase 3 — Reference cleanup
-- [ ] Remove dead `type=gate` client bits: `components/shared/select/admins-select.tsx`
-      (`/admins/select?type=gate`) and `areas-form.tsx` (`/admins?type=gate`) — backend
-      ignores `type`; switch to the `scanning`/`gates` feature filter already used by
-      `AdminsController@selectList`.
-- [ ] Grep backend + admin + docs for `login-agent`, `agent admin`, standalone-scanner
-      references; remove or update. Update `010`'s `RENAME_MAP.md` §F (the freeze it recorded
-      is now lifted) and note the alias removals.
-- [ ] Ledger entry for the scan-into-admin cutover + the new `scanning` RBAC feature.
+- [x] Removed dead `type=gate` client bits from `admins-select.tsx` and `areas-form.tsx`;
+      `AdminsController@selectList` now filters by the `scanning` feature.
+- [x] Swept `login-agent` / agent-admin references; `RENAME_MAP.md` §F updated (freeze lifted).
+- [x] Ledger entry for the scan-into-admin cutover + the new `scanning` RBAC feature.
 
 ### Phase 4 — QA
-- [ ] Browser-QA the full scan loop: camera permission, hardware-wedge input, success,
-      `guest_not_found` → recovery, start/pause, gate setup + re-setup.
-- [ ] RBAC matrix: a `scanning`-only role sees ONLY the scanner (no CMS); a `gates`-only role
-      manages gates but gets no scanner; super sees both.
-- [ ] Scope: operator bound to gate A is blocked (403) from scanning gate B.
+- [x] Backend gate green: `pint --test` + `phpstan` + `php artisan test` (incl. `GateScanTest`).
+- [x] Admin gate: `yarn type-check` + `next build` (prod build; `yarn production` needs the
+      gitignored `.env.production`, so validated via `next build` directly).
+- [ ] **Browser-QA the live scan loop** (camera permission, hardware-wedge, `guest_not_found`
+      → recovery, start/pause, setup/re-setup) — not yet run; needs a device + camera.
+- [ ] **RBAC matrix + scope** manual pass on a running stack — not yet run.
 
 ## RBAC model — how scanning fits the role system (answers the "how do we solve RBAC" question)
 
@@ -163,7 +170,11 @@ Backend surface already present in ALT (frozen): `GatesController` agent methods
   Phase 0 `gate_id` FK is recommended but optional — can ship the port without it.
 - **Scan ≠ check-in:** `scan()` writes only to `scans`; it does not set `guest.check_in`.
   Keep that behavior unless product wants scanning to also mark attendance (separate ask).
-- **New dependency** (`react-web-qr-reader`) needs PR justification per CLAUDE.md.
+- **New dependency** (`html5-qrcode`) — justified: replaces the stack-incompatible,
+  unmaintained `react-web-qr-reader` (React 16/17) 108/112 shipped; net dep count is flat
+  because `react-lottie` was also dropped.
+- **Live QA not yet run** — the scan loop and RBAC/scope matrix were only validated by unit/
+  feature tests + type-check/build; they still need a manual pass on a running stack + camera.
 
 ## Decisions
 
@@ -173,12 +184,13 @@ Backend surface already present in ALT (frozen): `GatesController` agent methods
 
 ## Definition of Done
 
-- [ ] Backend merged to `dev`: `scanning` feature, renamed+gated+scope-enforced endpoints,
+- [x] Backend merged to `dev`: `scanning` feature, renamed+gated+scope-enforced endpoints,
       `loginAgent` + no-`/admin` aliases removed, `validateCheckIn` resolved, tests green.
-- [ ] Admin merged to `dev`: `gate-scan/*` ported + RBAC-rewired, nav re-enabled, `/scans`
+- [x] Admin merged to `dev`: `gate-scan/*` ported + RBAC-rewired, nav re-enabled, `/scans`
       icon, dead `type=gate` bits removed.
-- [ ] EN + AR translations in the same commit (new `scanning` label + any scanner UI strings).
-- [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`;
-      admin `yarn type-check` + `yarn production`).
-- [ ] Mobile contract checked (`../../mobile/`) — confirmed the retired URIs aren't in it.
-- [ ] Docs updated (this TASK.md → `done`; index row; ledger entry; `010` RENAME_MAP §F note).
+- [x] EN + AR translations in the same commit (new `scanning` label + scanner UI strings).
+- [x] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`;
+      admin `yarn type-check` + `next build`).
+- [x] Mobile contract checked (`../../mobile/`) — confirmed the retired URIs aren't in it.
+- [x] Docs updated (this TASK.md → `done`; index row; ledger entry; `010` RENAME_MAP §F note).
+- [ ] **Live browser-QA + RBAC/scope manual pass** — deferred (needs a running stack + camera).

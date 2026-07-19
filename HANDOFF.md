@@ -3,6 +3,32 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-19 — Task 011 (scan-into-admin) code COMPLETE on backend + admin `dev` (ledger D23). Gate
+scanning is now a first-party, RBAC-gated admin feature; the standalone "agent admin" scanner is retired.**
+- **What:** ported the on-site scanner into the admin dashboard (from 108/112) and wired it onto ALT's RBAC
+  — no `admins.type='gate'`, no separate agent login. New **`scanning`** catalog feature (`['view']`,
+  distinct from `gates`/`areas`/`scans`); the dashboard shows the scanner when
+  `checkFeaturePermission('scanning', user)` is true.
+- **Backend `211e17d`→`cd66c21`:** new `/admin/gate-scan` group behind `admin.can:scanning`; server-side
+  **data-scope enforcement** (`GatesController::deniesGateScope()` — bound `gate_id` and/or `area_id`, super
+  short-circuits); dropped `loginAgent` + route + the 4 no-`/admin` scan aliases + the dangling
+  `validate-check-in` route; offline-sync endpoints kept but re-gated; `admins/select` now filters by
+  `scanning`; `tests/Feature/GateScanTest.php` (happy-path, RBAC 403, area/bind scope denial, super bypass,
+  recovery search+link).
+- **Admin `1c87ff0`:** `components/admin-modules/dashbaord/gate-scan/*` (setup / current-gate / camera +
+  hardware-wedge modes / wrong-QR recovery), wired to the renamed endpoints **through the BFF proxy**
+  (HttpOnly token, no manual Bearer). Camera lib **`react-web-qr-reader` → `html5-qrcode`** (maintained,
+  dynamic-imported); dropped `react-lottie` for a CSS pulse (net deps ≈ 0). Recovery now **searches by name
+  and links the guest to the orphan scan** (108/112 only uploaded a photo). Re-enabled "Gates & Scans" nav,
+  added `/scans` icon, removed dead `type=gate` bits. EN + AR in the same commit.
+- **Lifts Task 010's RENAME_MAP §F freeze** — recorded in a new §G there.
+- **Deferred / open:** the `scans.gate_id` FK (still on the `gate_name` string link); and **live browser-QA +
+  the RBAC/scope manual matrix** (needs a running stack + camera) — validated so far by feature tests +
+  type-check/build only.
+- **Gates:** backend `composer qa` green (pint + phpstan + tests incl. `GateScanTest`); admin `yarn
+  type-check` + `next build` green (`yarn production` needs the gitignored `.env.production`). **Not
+  mobile-facing** (`routes/api.php` mobile surface intact). Committed on `dev`, unpushed pending review.
+
 **2026-07-19 — Task 007 (API response unification) COMPLETE on backend `dev` (ledger D22). All controllers
 now return the standard `ApiResponse` envelope; mobile (Tier C) deltas documented + IMPLEMENTED.**
 - **What:** admin (Tier A/B) landed earlier this session; this pass finished **mobile (Tier C)** — every
