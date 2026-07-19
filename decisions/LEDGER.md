@@ -401,3 +401,29 @@ var in either `.env.example_prod` or `.env.local`; nothing to remove. **Frontend
 clone just drops in its `GTM-XXXX`. The old `NEXT_PUBLIC_GOOGLE_TAG_MANAGER` name mismatch that made it
 dormant is already gone. No code/env changes were required — this entry records the decision and the
 verified state.
+
+## D22 — 2026-07-19 — Task 007: API response unification onto the standard envelope
+
+Every API controller now returns the standard envelope from the 006 `ApiResponse` trait
+(`{ success, status, message, data, meta? }` / `{ success:false, status:'failed', message, data, errors? }`),
+via `BaseApiController::apiSuccess`/`apiError`. Rolled out in tiers: **admin (Tier A/B)** landed earlier this
+session; **mobile (Tier C)** completes it — all `mobile/*` controllers migrated (`MobileAuth`, `MobileEventDay`,
+`MobileSpeaker`, `MobileSponsor`, `MobileAttendee`, `MobileSession`(+`Feedback`), `MobileWorkshop`(+`Feedback`),
+`MobilePublication`, `MobileMediaCenter`, `MobileQr`, `MobileRoom`, `MobileNotification`, `MobileChat`).
+
+**Durable decisions:**
+1. **Mobile break is accepted + documented.** Payloads that were flat/scalar/root-level now live under `data`.
+   The per-endpoint delta is [../mobile/RESPONSE_SHAPE_DELTAS.md](../mobile/RESPONSE_SHAPE_DELTAS.md) (flipped to
+   **IMPLEMENTED**), the "adapt later" artifact required by the Task 007 formula.
+2. **`AppConfigController` left unwrapped** (`/app-config`, `/app-config/version`) — config documents the Flutter
+   client deserializes wholesale, wrapping adds churn with no unification value. Flagged in delta §18.
+3. **`status` keeps legacy values** (`"success"`/`"failed"` or the endpoint's existing custom value) so any
+   superset reader survives; `success`+`message` are additive on every response.
+4. **`routes/api.php` unchanged** — body refactor only, so the route contract (also the mobile contract) is intact.
+5. Two listing-only controllers (`GuestEmailLogsController`, `InvitationEmailLogsController`) keep extending
+   `Controller` to avoid a `private applyFilters()` collision with `BaseApiController`; they carry the full
+   envelope via `->additional([...])` instead.
+
+**Gates:** pint + phpstan **No errors**; tests **457/3** (the 3 are pre-existing D14 signed-avatar/env failures,
+not from this work). Backend feature tests updated in lockstep with each controller. **Remaining:** mobile-team
+ack of the deltas, then backend `dev` → `main`.

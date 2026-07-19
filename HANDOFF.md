@@ -3,6 +3,23 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-19 — Task 007 (API response unification) COMPLETE on backend `dev` (ledger D22). All controllers
+now return the standard `ApiResponse` envelope; mobile (Tier C) deltas documented + IMPLEMENTED.**
+- **What:** admin (Tier A/B) landed earlier this session; this pass finished **mobile (Tier C)** — every
+  `mobile/*` controller migrated to `BaseApiController` + `apiSuccess`/`apiError` (`MobileAuth`,
+  `MobileEventDay`, `MobileSpeaker`, `MobileSponsor`, `MobileAttendee`, `MobileSession`(+`Feedback`),
+  `MobileWorkshop`(+`Feedback`), `MobilePublication`, `MobileMediaCenter`, `MobileQr`, `MobileRoom`,
+  `MobileNotification`, `MobileChat`). Payloads now live under `data`; `success`+`status`+`message` added.
+- **`AppConfigController` intentionally left unwrapped** (config documents, not resources — delta §18).
+- **Mobile break is documented:** `docs/mobile/RESPONSE_SHAPE_DELTAS.md` flipped **PLANNED → IMPLEMENTED**,
+  per-endpoint. This is the "adapt later" artifact — the mobile team adapts the Flutter client against it.
+- **`routes/api.php` unchanged** (body refactor only). Backend feature tests updated in lockstep.
+- **Gates:** pint + phpstan **No errors**; tests **457 pass / 3 fail** (the 3 are pre-existing D14
+  signed-avatar/env failures, not from this work).
+- ⏳ **Blocked — mobile ack:** backend `dev` → `main` now waits on the mobile team acknowledging **both** the
+  D14 avatar signed-URL change **and** these D22 envelope deltas. User will bring the mobile repo into the
+  parent project folder soon and update the Flutter client directly.
+
 **2026-07-18 (session 2) — Four-step guest-draft `invitation_token` gap closed + task board tidied.**
 - **invitation_token (task 008 follow-up, DONE + PUSHED):** the pif **four-step** form now forwards the
   invitation token into its OTP request, so abandoned four-step registrations capture `invitation_token`
@@ -372,9 +389,11 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 > Any "NOT pushed / not yet committed" wording in the dated entries above is point-in-time history, not
 > current state.
 
-- **Blocked — mobile ack:** backend `dev` → `main` is held until the mobile team acknowledges the D14
-  contract change (`avatar` is now a signed, 24h-expiring URL — mobile must re-fetch, not rebuild it).
-  Notice: `docs/mobile/MOBILE_NOTICE_PRIVATE_AVATAR_SIGNED_URL.md`.
+- **Blocked — mobile ack:** backend `dev` → `main` is held until the mobile team acknowledges **both**:
+  (1) the **D14** contract change (`avatar` is now a signed, 24h-expiring URL — mobile must re-fetch, not
+  rebuild it; notice `docs/mobile/MOBILE_NOTICE_PRIVATE_AVATAR_SIGNED_URL.md`), and (2) the **D22** Task 007
+  envelope deltas (every `mobile/*` payload now under `data`; `docs/mobile/RESPONSE_SHAPE_DELTAS.md`,
+  IMPLEMENTED). User will bring the mobile repo into the parent folder and update the Flutter client directly.
 - **Browser QA — visa upload (new):** `visa_copy`/`issued_visa` now persist end-to-end (D18) but have only
   been verified via tinker + signed-URL checks. Worth a real run: DB + local storage were wiped clean on
   07-16, so it's a clean slate.

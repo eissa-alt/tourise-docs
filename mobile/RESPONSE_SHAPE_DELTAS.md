@@ -4,9 +4,9 @@
 **Severity:** Breaking response-shape change (payload moves under `data`; control fields added)
 **Affects:** The Flutter app — **every** `mobile/*` endpoint plus `/app-config`.
 **Reference:** [`../upgrades/cleanup-hardening/CONTROLLER_REFACTOR_PLAN.md`](../upgrades/cleanup-hardening/CONTROLLER_REFACTOR_PLAN.md), [`../upgrades/cleanup-hardening/BASE_API_CONTROLLER_PLAN.md`](../upgrades/cleanup-hardening/BASE_API_CONTROLLER_PLAN.md), `BACKEND_INCOMING_CHANGES_FOR_MOBILE.html`
-**Status:** **PLANNED — not yet implemented.** No `mobile/*` controller has been migrated. This doc is the hand-off the mobile team consumes *before* the backend change ships. The admin surface (Tier A/B) is already migrated; mobile (Tier C) is intentionally deferred ("adapt later").
+**Status:** **IMPLEMENTED (backend `dev`) — 2026-07-19.** Every `mobile/*` controller below is migrated to the standard envelope and its feature tests updated (`composer qa` green apart from 3 pre-existing D14 signed-avatar/env failures). `/app-config` is intentionally left unwrapped (§18). This doc is the hand-off the mobile team consumes to adapt the Flutter client; the change is live on backend `dev` awaiting the mobile ack before `dev` → `main`.
 
-> This is the "adapt later" artifact required by the locked Task 007 formula (point 2): *breaking the mobile contract is accepted, but a per-endpoint delta is generated so the mobile team can adapt.* Nothing here is live yet — treat it as the spec for the upcoming mobile-facing PRs.
+> This is the "adapt later" artifact required by the locked Task 007 formula (point 2): *breaking the mobile contract is accepted, but a per-endpoint delta is generated so the mobile team can adapt.* The rows below now describe the shipped `dev` behaviour, not a future spec.
 
 ---
 
@@ -189,8 +189,15 @@ Everything else already has an object wrapper, so the app "only" needs to reach 
 
 ## 21. Migration bookkeeping
 
-- Per the plan, each `mobile/*` controller migrates in its **own PR**; append/verify the matching row(s)
-  here as each ships, and flip this doc's **Status** once the mobile-facing PRs land.
-- Backend feature tests (`MobileAuthTest`, `SessionsTest`, `NotificationTest`, `RoomBookingTest`, etc.)
-  assert the current shapes and **must be updated in the same PR** as each controller.
-- `routes/api.php` must not change (`git diff` empty) — body refactor only.
+- **Done on backend `dev`:** all rows above are implemented. Controllers migrated: `MobileAuthController`,
+  `MobileEventDayController`, `MobileSpeakerController`, `MobileSponsorController`, `MobileAttendeeController`,
+  `MobileSessionController`, `MobileSessionFeedbackController`, `MobileWorkshopController`,
+  `MobileWorkshopFeedbackController`, `MobilePublicationController`, `MobileMediaCenterController`,
+  `MobileQrController`, `MobileRoomController`, `MobileNotificationController`, `MobileChatController`.
+  `AppConfigController` intentionally left unwrapped (§18).
+- Backend feature tests (`MobileAuthTest`, `SessionsTest`, `NotificationTest`, `RoomBookingTest`,
+  `ChatTest`, `SpeakersTest`, `AttendeeTest`, `ConferenceTest`, `PublicationsTest`, `QrScannerTest`,
+  `MediaCenterTest`, `SessionFeedbackTest`, `WorkshopFeedbackTest`, etc.) were updated in lockstep.
+- `routes/api.php` did not change (`git diff` empty) — body refactor only.
+- **Remaining:** mobile-team acknowledgment of these deltas, then backend `dev` → `main`. When the mobile
+  repo is brought into the parent project folder, the Flutter client is updated directly against this doc.
