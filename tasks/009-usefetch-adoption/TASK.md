@@ -1,6 +1,8 @@
 # Task 009 — `useFetch` adoption (opportunistic, NOT a sweep)
 
-- **Status:** `todo` (standing convention — no milestone)
+- **Status:** ✅ `done` (closed 2026-07-19 by user) — clean-candidate set fully converted (14/14, 19
+  adopters); remaining files need the `useFetch` `enabled`/`refetch` extension, tracked separately.
+  Opportunistic adoption of new fetch-once screens continues naturally, but the task is closed.
 - **Opened:** 2026-07-17
 - **Owner:** AI agent
 - **Sub-app(s):** admin
@@ -81,3 +83,6 @@ count creeps up over time without a dedicated sweep.
   `role` dep — the URL never used it) + `categories-select` (post-fetch visibility/category_ids filter
   moved to render). Adopters 17 → 19; **clean-candidate set now 14/14**. Gates green. Nothing mechanical
   remains — the only lever left is the `useFetch` `enabled`-flag extension.
+- 2026-07-19 — **task closed by user.** All clean candidates converted; further adoption is
+  opportunistic and any deeper reach needs the `enabled`/`refetch` hook extension (its own task if/when
+  needed). Removed from the active planning queue.

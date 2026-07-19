@@ -13,9 +13,10 @@
 - **Task board:** **005** (admin HttpOnly) + **006** (private doc storage) marked **`done`** — code
   shipped + pushed on `dev`; the `dev`→`main` merge is **deferred to the user's own repo check**. ⚠️ 006
   still needs **mobile-team ack** (avatar → 24h signed URL) before that merge.
-- **009 (useFetch) is now a live standing convention** (not a batch): setup done — convention JSDoc atop
-  `admin/hooks/useFetch.ts`; `PHASE3_PARKED_TODO` item 3 retired → task 009. Adopt opportunistically when
-  already editing a fetch-once file; extend the hook with `refetch()` on first real need.
+- **009 (useFetch) — ✅ CLOSED 2026-07-19 (by user).** Clean-candidate set fully converted (14/14, 19
+  adopters); convention JSDoc lives atop `admin/hooks/useFetch.ts`. Further reach needs the
+  `enabled`/`refetch` hook extension (its own task if/when needed); new fetch-once screens adopt it
+  opportunistically. Removed from the active planning queue.
 - **004** migration-squash is being **re-planned separately** (user + another agent); **001** boolean
   cleanup parked for a later check.
 - ⏳ **Uncommitted (awaiting user review):** the doc updates above + the `useFetch.ts` convention note are
