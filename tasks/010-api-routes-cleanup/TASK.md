@@ -154,6 +154,11 @@ in **all** repos. Three checks, both directions:
   resolves (395), pint/phpstan clean, tests 457/3 pre-existing (172 gating-403s → 3; the 3 — `ExampleTest`
   `/`, `Attendee`/`Qr` avatar signed-URL — also fail on a clean tree). Backend-only; admin already gates
   UI via the resolved permission map, so no client change.
+- 2026-07-19 — **Ops/queue dead endpoints removed.** Deleted the 5 zero-caller Tier-4-flagged endpoints
+  (`get-emails-list`, `get-some-data`, `queue/{start,stop,status}`) + both now-fully-dead controllers
+  (`OperationActionsController`, `QueueController`) and their imports. Route count 395→390; no dangling
+  refs; pint/phpstan clean. (Admin `test-api-listing.tsx` left as-is — its `/get-emails-list` ref is
+  commented-out dead code in an inert dev harness.)
 
 ## Decisions
 
