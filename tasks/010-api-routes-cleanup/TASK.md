@@ -93,7 +93,7 @@ in **all** repos. Three checks, both directions:
       (or new notice) row. Expected minimal (mobile section is already RESTful).
 
 ### Tier 4 — RBAC hardening (behavior change — verify against role matrix; land last)
-- [ ] Roll out `admin.can:<feature>` middleware to every admin group, cross-checked against
+- [x] Roll out `admin.can:<feature>` middleware to every admin group, cross-checked against
       `RolesController::catalog` + the admin frontend permission checks so no in-use admin loses access.
 
 ## Verification gates
@@ -136,6 +136,24 @@ in **all** repos. Three checks, both directions:
   `-select`/rename call sites repointed. Frontend: public `countries/select` + `titles/select/{cat}`.
   Gates: backend route-diff = intended-only, all routes resolve, pint/phpstan clean, tests 457/3;
   admin + frontend `yarn type-check` clean; dead-link grep = 0 real calls. See `RENAME_MAP.md` §F.
+- 2026-07-19 — **Tier 4 executed (RBAC gating, backend-only, uncommitted).** Added `admin.can:<feature>`
+  to every admin route group, cross-checked against `AdminPermissions::CATALOG` +
+  `EnsureAdminPermission`/`PermissionService` (Super-Admin short-circuits, deny-by-default). Pattern:
+  group-level feature perm as baseline + per-action (`create`/`update`/`delete`/`export` + guest
+  row-actions `accept`/`hold`/`reject`/`verify`/`send_e_badge`/`print`/etc.) on writes; dashboard gated
+  **per-widget** (`overall`/`categories_status`/`guest_chart`/`gates`/`invitations_categories_status`).
+  **Left ungated on purpose:** all `-select`/`select-all` + `categories/slug` (feed cross-module
+  dropdowns / guest forms — gating them would 403 admins working in a *different* feature); the FROZEN
+  gate agent/scanning + guest offline/scanner endpoints (new gate feature/logic coming separately);
+  `operations`/`queue` ops endpoints; `account-deletion-requests` (auth.admin only). Feature-mapping
+  calls: social-media-links(-per-temp) → `emails_templates`; history-logs → `guests_listing,see_more`.
+  **Ops/queue dead-candidates** (0 live callers, flagged for later removal): `POST /admin/get-emails-list`
+  (only a commented line in admin `test-apis`), `POST /admin/get-some-data`, `POST /admin/queue/{start,stop}`,
+  `GET /admin/queue/status`. Test fixtures: the 14 pre-RBAC admin feature tests created a role-less admin
+  (→ now 403); attached a `firstOrCreate(is_super)` Super-Admin role in each `setUp`. Gates: route:list
+  resolves (395), pint/phpstan clean, tests 457/3 pre-existing (172 gating-403s → 3; the 3 — `ExampleTest`
+  `/`, `Attendee`/`Qr` avatar signed-URL — also fail on a clean tree). Backend-only; admin already gates
+  UI via the resolved permission map, so no client change.
 
 ## Decisions
 
