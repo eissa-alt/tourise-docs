@@ -403,6 +403,10 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 - **GTM decided (D21):** kept in **frontend** (`_app`/`_document` read `NEXT_PUBLIC_GTM`; the var ships in
   `.env.local` + `.env.example_prod`, empty = disabled until a clone sets `GTM-XXXX`). **Not in admin** —
   no code, no env var; nothing to remove.
+- **Task 010 — api.php cleanup & route organization (NEW, todo):** our `routes/api.php` is 966 lines of
+  mostly-flat, largely-ungated legacy admin routes vs cyan's 559-line grouped + `admin.can:`-gated +
+  `whereUuid` shape. Tiered plan (cleanup → dead-code → reorg → `whereUuid` + RBAC gating), all tiers in
+  scope. `mobile/*` URIs frozen (contract). See `tasks/010-api-routes-cleanup/TASK.md`.
 - **Browser QA** — forgot-password + invite create paths + reset-by-token page; plus the migrated
   listings + sidebar accordion (LTR/RTL) from the earlier P5.trim / cyan-parity session, which compiled
   green but were never browser-tested. **Add a visual pass on the migrated icons** (both apps) — the
