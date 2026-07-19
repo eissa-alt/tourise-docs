@@ -268,20 +268,25 @@ confirming the shape against `../../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.p
 
 ---
 
-### Task 008 — Hygiene grab-bag: routes polish (2A) + tailwind verify (2B/tw) + `osv-scanner` audit workflow · Track A/B · low priority
+### Task 008 — Hygiene grab-bag: routes polish (2A) + tailwind verify (2B/tw) + `osv-scanner` audit workflow · Track A/B · low priority · ⏸️ DEFERRED 2026-07-19
 
 - **Effort:** S · **Mobile-contract risk:** NONE (routes stay byte-stable).
+- **Decision (2026-07-19):** 2A and 2B are **skipped** — 2A is already satisfied by the Task 010
+  `routes/api.php` rewrite (prefix groups, ordering, dead-line + ops/queue removal all landed), and 2B is
+  a no-op (alt is on v4 with the ring/opacity fixes already merged — ledger D15, UPGRADE_SUMMARY W1A/W1B).
+  The `osv-scanner` audit is **not skipped but re-homed**: it's a point-in-time scan, so it's folded into
+  the `dev`→`main` **pre-merge gate** rather than run standalone now.
 
 Three small, independent items — bundle or split as convenient:
-- **Routes hygiene (Todo-2A, mostly done):** remove dead commented lines (e.g. the empty
-  `Route::middleware("localization")->group(function () {});` at ~L181), tidy grouping/ordering. **Keep
-  routes byte-stable for mobile** — cosmetic only.
-- **Tailwind verify (Todo-2B/tw):** alt is already v4; confirm parity with saudi/cyan v4 config
-  (`@config` bridge, `focus:ring-3` restores, `*-opacity-*` → `/modifier` all zero). Likely a no-op +
-  a note.
-- **`osv-scanner` audit workflow (added — not on the original list):** saudi documents that `yarn audit`
-  is broken on Next 15 with gitignored lockfiles; a fresh-install + `osv-scanner` pass is the authoritative
-  dependency check. Cheap, real. Ref: saudi `docs/security/part-2-may-2026/`.
+- **Routes hygiene (Todo-2A) — ✅ done via Task 010.** Dead commented lines / grouping / ordering all
+  handled by the Tier 0–4 rewrite; nothing left to polish. Routes stay byte-stable for mobile.
+- **Tailwind verify (Todo-2B/tw) — ✅ no-op.** alt is already v4 with parity to saudi/cyan
+  (`@config` bridge, `focus:ring-3` restores, `*-opacity-*` → `/modifier` zero). Verified by the earlier
+  v4 migration + W1 ring cleanup; no code change needed.
+- **`osv-scanner` audit workflow — ⏭️ moved to the `dev`→`main` pre-merge gate.** saudi documents that
+  `yarn audit` is broken on Next 15 with gitignored lockfiles; a fresh-install + `osv-scanner` pass is the
+  authoritative dependency check. Run it at merge time (per app) so the result is fresh, not stale.
+  Ref: saudi `docs/security/part-2-may-2026/`.
 
 ---
 
