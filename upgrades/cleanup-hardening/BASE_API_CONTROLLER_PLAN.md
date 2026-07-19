@@ -67,11 +67,17 @@ frontend change.
 ## Implementation plan
 
 1. **`Concerns/ApiResponse` trait** (alt-native, cyan method names):
-   - `apiSuccess($data = null, string $message = '', array $meta = [], int $status = 200)` →
+   - `apiSuccess($data = null, string $message = 'success', array $meta = [], int $status = 200, string $legacyStatus = 'success')` →
      `{ success: true, status: 'success', message, data, meta? }` (omit `meta` when empty).
-   - `apiError(string $message = '', array $errors = [], int $status = 400)` →
-     `{ success: false, status: 'failed', message, error: $message, data: null, errors? }`.
+   - `apiError(string $message = 'failed', $errors = null, int $status = 400, string $legacyStatus = 'failed')` →
+     `{ success: false, status: 'failed', message, error: $message, data: $errors ?? $message, errors? }`.
    - Keep the `status:'success'|'failed'` string and `data` key exactly.
+   - **Correction (execution):** the original sketch above had `apiError` set `data: null`. That would
+     **break** alt's byte-compat — alt's legacy error responses carry their payload *in* `data`
+     (e.g. `{ status:'failed', data:'title not found' }`, `data: $validator->errors()`). So the shipped
+     trait mirrors **cyan's** semantics — `data => $errors ?? $message` — which reproduces the legacy
+     `data` exactly (pass `null` for message-only errors, the errors bag for validation). Method names/
+     signatures otherwise match cyan verbatim (kept `$legacyStatus` for flexibility).
 2. **`Concerns/AppliesListingFilters` trait** (alt-native, cyan method names): `resolvePerPage`,
    `resolveSort`, `applyExactFilters`, `applySearchFilter`, `applyLikeFilters`, `applyToggleFilters` —
    thin wrappers over the query builder mirroring the current inline patterns (no behavior change).
@@ -109,3 +115,54 @@ response-shape changes** — the mobile team adapts later from the per-endpoint 
   (restructure-all, one controller/module per PR, admin+frontend updated in lockstep, mobile deltas
   logged). After DB Part 1 the 007 target count drops by the 3 deleted controllers.
 - **Gate wording** — use `pint --test` (repo is Pint-clean, ledger D10), not the older `pint --dirty`.
+
+---
+
+## Run result — 2026-07-19  ✅ 006 complete (pilot verified byte-compatible)
+
+**Shipped (scaffolding + 1 pilot, zero route changes):**
+
+- **`app/Http/Controllers/Concerns/ApiResponse.php`** — `apiSuccess()` / `apiError()`, cyan semantics
+  (see the corrected signatures above). Strict superset of `{ status, data }`.
+- **`app/Http/Controllers/Concerns/AppliesListingFilters.php`** — `resolvePerPage`, `resolveSort`,
+  `applyExactFilters`, `applySearchFilter`, `applyLikeFilters`, `applyToggleFilters`.
+- **`app/Http/Controllers/BaseApiController.php`** — `use`s both traits + opt-in cast-driven
+  `applyFilters()` / `applySorting()`. Extends the vanilla `Controller`; controllers may extend it or use
+  the traits directly.
+- **Pilot `TitlesController`** now `extends BaseApiController`; every hand-rolled `response([...])` →
+  `apiSuccess`/`apiError`; `index()` + `selectList()`/`selectALlList()` collections carry the envelope via
+  `->additional(['success'=>true,'status'=>'success','message'=>'success'])`.
+
+**Decision — listings keep `->additional()`, not `apiSuccess()`.** A paginated
+`ResourceCollection` emits Laravel's exact `data`/`links`/`meta` wrapping; reproducing that by hand
+through `apiSuccess($meta)` would risk drift. So listing endpoints keep the ResourceCollection and just
+**add** the envelope keys in `->additional()` (byte-identical `data`/`links`/`meta`, additive
+`success`/`message`). `apiSuccess`/`apiError` are for the non-collection (model / message) returns. This
+is also how cyan coexists.
+
+**Byte-compat proof (before/after snapshot of live JSON, legacy keys compared):**
+
+| case | code | legacy `status`/`data`/`meta`/`links` | added |
+| --- | --- | --- | --- |
+| `index` (list+meta) | 200 | **identical** | `success`, `message` |
+| `show` 200 | 200 | **identical** (`data` = same title fields) | `success`, `status`, `message` |
+| `show` 404 | 404 | **identical** (`data:'title not found'`) | `success`, `message`, `error` |
+
+- **`show` 200 gains a top-level `status:'success'`** — it was previously the lone *envelope-less*
+  success (`{data}` only); the rewire brings it in line with every other endpoint. Additive, non-breaking
+  (admin reads `data`).
+
+**Intentional, defensive listing standardizations (no response-shape change, identical for normal
+inputs):** `resolvePerPage` caps `per_page` at 100 and also accepts `perPage`; `resolveSort` also accepts
+`sortBy`/`sortDir` aliases. Edge-only divergences (per-page >100, non-`asc`/`desc` direction string,
+non-boolean `is_active` value) clamp rather than pass through — acceptable for the listing contract.
+
+**Admin compatibility confirmed:** `titles-listing.tsx` consumes `/titles` via `useListingState`, which
+reads `response.data?.data` + `response.data?.meta` (loose, ignores extra keys) — the envelope is
+transparent.
+
+**Gate:** `pint --test` + `phpstan analyse` **clean**; `php artisan test` → **452 passed**, same **3
+pre-existing** failures (avatar-URL + `ExampleTest` 403, unrelated); `git diff routes/api.php` **empty**.
+
+→ **Envelope + traits proven.** Ready for **Task 007** to roll the pattern across controllers (which
+*does* accept mobile shape changes, per-endpoint delta doc).
