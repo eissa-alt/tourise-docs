@@ -96,13 +96,14 @@ sms-templates. (SMTP-configs already uses `toggle-active`/`make-default` — lea
 
 ---
 
-## D. Open naming decisions (need your call before I execute)
+## D. Naming decisions — RESOLVED 2026-07-19
 
-1. **Gates action verbs** — `gates/{id}/agent-view` vs `gates/{id}/show-agent`? and
-   `gates/scans/{scanId}/image` vs `gates/{scanId}/upload-scan-image`? (I proposed the cleaner forms.)
-2. **Scanner/agent app** — are the non-`/admin` `gates-*` agent routes in scope? If that client can't be
-   updated in lockstep, we keep those 4 URIs frozen and only rename the `/admin` ones.
-3. **`/admin/upload` + `/admin/upload-document`** (guest admin uploads) → fold under `/guests/`? (proposed yes.)
+1. **Gates action verbs** → **clean nested forms**: `gates/{id}/agent-view`,
+   `gates/scans/{scanId}/image`, `gates/scans/{scanId}/guest`.
+2. **Scanner/agent app** → **FREEZE** the 4 non-`/admin` `gates-*` agent URIs (`gates-scan/{id}`,
+   `gates-search-guests-by-name`, `gates-upload-scan-image/{scanId}`, `gates-update-scan-guest/{scanId}`).
+   Rename only the `/admin/gates-*` twins. The scanner client is out of scope for this cutover.
+3. **Guest admin uploads** → **fold** under `/guests/`: `/admin/guests/upload` + `/admin/guests/upload-document`.
 
 ## E. Execution order once approved
 1. Backend: rewrite `routes/api.php` admin block into `prefix()->group()` + new URIs + `whereUuid` + `toggle-status` (add `toggleStatus()` to controllers lacking it; remove `block`/`activate` where consolidated).
@@ -111,3 +112,37 @@ sms-templates. (SMTP-configs already uses `toggle-active`/`make-default` — lea
 4. Frontend: update any renamed public/admin call.
 5. Gates: backend + phpstan + tests; admin/frontend type-check + build. Dead-link gate (grep old paths = 0).
 6. Tier 4 (separate): `admin.can:` gating rollout.
+
+---
+
+## F. EXECUTED 2026-07-19 (Tier 2 + Tier 3) — uncommitted, pending review
+
+**Scope correction during execution:** the guiding rule became *"rename only endpoints the
+admin app actually calls, so the caller moves in lockstep."* A grep of the admin repo showed
+several endpoints have **zero admin callers** — they belong to the out-of-scope scanner/agent
+client. Those were **FROZEN** (kept at their original URIs) rather than renamed, to avoid
+breaking a client we can't update:
+
+- **Gate agent/scanning (all):** `gates-select`, `gates-show/{id}`, `setup-gate/{id}`,
+  `gates-start-scanning/{id}`, `gates-pause-scanning/{id}`, `/admin/gates-scan/{id}`,
+  `/admin/gates-search-guests-by-name`, `/admin/gates-upload-scan-image/{scanId}`,
+  `/admin/gates-update-scan-guest/{scanId}` (plus the 4 non-`/admin` twins, already frozen).
+  Only gate **CRUD** (`index`/`store`/`show`/`update`) + `toggle-status` were renamed — the admin
+  app uses those.
+- **Offline sync (scanner):** `guest-data-offline`, `guest-data-sync`, `guests-printed-since`,
+  `guests/validate-check-in/{regNumber}`, `guests/attend`.
+- **Bulk-image (no caller found):** `guests-upload-zip`, `match-guests-images`.
+
+Everything else renamed as mapped. Net route count 404 → 390 (block+activate pairs → single
+toggle-status). Category updates changed **POST → PATCH** (`guests/{id}/category`,
+`invitations/{id}/category`, `invitations/{id}/category-bulk`).
+
+**Backend gate:** route:list before/after diff = intended renames only; every route resolves to
+an existing method; `pint --test` clean; `phpstan` clean; tests 457 pass / 3 pre-existing fails.
+**Admin gate:** `yarn type-check` clean; dead-link grep = 0 real calls (only dead comments left).
+**Frontend gate:** `yarn type-check` clean; public `countries/select` + `titles/select/{cat}` repointed.
+
+Shared admin plumbing touched: 13 listing components (own `${verb}`/`${variant}` patch →
+`{id}/toggle-status`), `table-actions-modal.tsx` (block/activate → toggle-status, invite →
+`{id}/invite`), and the two invitation see-more/add-info modals (hardcoded to
+`invitations/{id}/details`, since they built URLs from a fake `moduleName: 'invitation-details'`).

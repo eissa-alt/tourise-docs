@@ -124,6 +124,18 @@ in **all** repos. Three checks, both directions:
   dead comments, dup registrations, and dead endpoints; deleted 7 orphaned `GuestsController` methods.
   Route count 418→400; pint+phpstan clean; tests 457/3 pre-existing. **Tier 2/3 paused** — drafted
   `RENAME_MAP.md` (proposed URIs + open naming decisions) for review before the cross-repo cutover.
+- 2026-07-19 — **Tier 2+3 executed (uncommitted, pending review).** Backend: added `toggleStatus()`
+  to the 14 controllers that only had `block`/`activate`; rewrote the protected admin block of
+  `routes/api.php` into `prefix()->group()` + new URIs + `whereUuid('id')` + `{id}/toggle-status`.
+  **Scope correction:** endpoints with **zero admin callers** (all gate agent/scanning, `gates-select`,
+  offline-sync `guest-data-*`/`printed-since`/`validate-check-in`/`attend`, and bulk-image
+  `upload-zip`/`match-guests-images`) were **FROZEN** at their original URIs — they belong to the
+  out-of-scope scanner client. Only endpoints the admin app actually calls were renamed, and those
+  callers were moved in lockstep. Category updates went POST→PATCH. Route count 404→390.
+  Admin: 13 listing toggles + shared `table-actions-modal` + 2 invitation see-more modals + all
+  `-select`/rename call sites repointed. Frontend: public `countries/select` + `titles/select/{cat}`.
+  Gates: backend route-diff = intended-only, all routes resolve, pint/phpstan clean, tests 457/3;
+  admin + frontend `yarn type-check` clean; dead-link grep = 0 real calls. See `RENAME_MAP.md` §F.
 
 ## Decisions
 
