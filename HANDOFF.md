@@ -27,7 +27,12 @@ scanning is now a first-party, RBAC-gated admin feature; the standalone "agent a
   type-check/build only.
 - **Gates:** backend `composer qa` green (pint + phpstan + tests incl. `GateScanTest`); admin `yarn
   type-check` + `next build` green (`yarn production` needs the gitignored `.env.production`). **Not
-  mobile-facing** (`routes/api.php` mobile surface intact). Committed on `dev`, unpushed pending review.
+  mobile-facing** (`routes/api.php` mobile surface intact). **PUSHED** — backend `origin/dev` `cd66c21`,
+  admin `origin/dev` `1c87ff0`, docs `origin/main` `eafc056`.
+- **Queue parked (user, 2026-07-20):** the remaining "done (code) — QA pending" items (011 live
+  browser-QA, 005 HttpOnly, 006 private docs, 007 RSVP), the deferred `scans.gate_id` FK debt, task 001
+  boolean-cleanup, and the mobile-ack chase are all **intentionally set aside** — user is starting a new
+  type of task. Pick these back up later.
 
 **2026-07-19 — Task 007 (API response unification) COMPLETE on backend `dev` (ledger D22). All controllers
 now return the standard `ApiResponse` envelope; mobile (Tier C) deltas documented + IMPLEMENTED.**
