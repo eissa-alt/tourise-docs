@@ -62,8 +62,9 @@ four repos clean and in sync with `origin`. Gates green throughout.**
 - **⚠️ Regression caught + fixed:** D16's sweep missed the **Blade email templates** — 22 refs, so every
   email poster rendered `nullemails-config/…` once the var was dropped. Fixed `a9a1ed4`. See the D16
   addendum.
-- **Known gap (accepted):** frontend GTM is **dormant** — code reads `NEXT_PUBLIC_GTM`, old env set
-  `NEXT_PUBLIC_GOOGLE_TAG_MANAGER`. Template documents the right name; wiring/removal is a separate task.
+- **Resolved (D21):** frontend GTM is kept and correctly wired — code reads `NEXT_PUBLIC_GTM`, and the var
+  ships in `.env.local` + `.env.example_prod` (empty = disabled until a clone sets `GTM-XXXX`). Admin uses
+  no GTM at all.
 
 **2026-07-13 — Storage-URL env-var consolidation DONE (all 4 phases, ledger D16 + its 2026-07-17
 addendum). Pushed. Plan: `upgrades/STORAGE_URL_CONSOLIDATION_PLAN.md` (status = DONE). Mobile contract
@@ -377,10 +378,12 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 - **Browser QA — visa upload (new):** `visa_copy`/`issued_visa` now persist end-to-end (D18) but have only
   been verified via tinker + signed-URL checks. Worth a real run: DB + local storage were wiped clean on
   07-16, so it's a clean slate.
-- **`days` has no writer (D18):** the column now ships, but all 3 write sites in `GuestsController` stay
-  commented and no UI submits it — it reads NULL until a clone wires them up.
-- **GTM is dormant (D17):** frontend `_app`/`_document` read `NEXT_PUBLIC_GTM`; the old env files set
-  `NEXT_PUBLIC_GOOGLE_TAG_MANAGER`. Either wire the correct name or strip the GTM blocks.
+- **`days` column removed (D20):** the phantom `guests.days` (no writer, read-only consumers, dead in the
+  `122-gfeai-v2` clone too — superseded there by `forum_days`) was dropped fully across all three repos.
+  Supersedes D18's ship-it call.
+- **GTM decided (D21):** kept in **frontend** (`_app`/`_document` read `NEXT_PUBLIC_GTM`; the var ships in
+  `.env.local` + `.env.example_prod`, empty = disabled until a clone sets `GTM-XXXX`). **Not in admin** —
+  no code, no env var; nothing to remove.
 - **Browser QA** — forgot-password + invite create paths + reset-by-token page; plus the migrated
   listings + sidebar accordion (LTR/RTL) from the earlier P5.trim / cyan-parity session, which compiled
   green but were never browser-tested. **Add a visual pass on the migrated icons** (both apps) — the

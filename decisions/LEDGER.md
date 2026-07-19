@@ -376,3 +376,28 @@ modern `ListingFilters` stack, so deve-go's separate `search-guest-drafts.tsx` w
 **Gates:** pint + phpstan **No errors** + `migrate:fresh --seed` clean + tests **452/3** pre-existing; admin +
 frontend `type-check` + build green. In-browser QA confirmed capture (incl. signed photo, category via slug,
 invitation token) and delete-on-completion. **Not mobile-facing.**
+
+## D20 — 2026-07-19 — dropped the dead `days` guest column (supersedes D18's ship-it call)
+
+D18 shipped `guests.days` on the theory a clone would wire the writer. A re-audit this session confirmed
+it stayed a **phantom**: no writer anywhere (the registration store and every `Guest::create`/`update`
+omit it; the 3 write sites remained commented), with read-only consumers only — the admin
+`JSON_CONTAINS(days,…)` filter, the dashboard "by days" stats, the export column, and the admin resource
+— all against an always-NULL column. Cross-checked the sibling clone **`122-gfeai-v2`**: same dead column
+there too, populated only by a demo seeder and **superseded by a new `forum_days` field**, so `days`
+carries no live meaning in the lineage. **Decision: remove it fully** — column + `$fillable` + filter +
+stats + export cell/heading + resource field + the commented writes — lockstep across all three repos,
+including the orphaned `days` / `days_want_to_attend` / `day1-3` translations (EN+AR). **Kept:** the live
+`guest_drafts.days`, the `event_days` module, and the frontend countdown `days` label (a timer string,
+unrelated). Backend `4899cfd`, admin `c4f86c5`, frontend `e2da469`. Gates: pint + phpstan **No errors** +
+`migrate:fresh --seed` clean + tests **457/3** pre-existing; admin + frontend `type-check` green.
+
+## D21 — 2026-07-19 — GTM: keep in frontend (correctly wired), never in admin
+
+Closes the D17 "GTM dormant" gap. **Admin: no GTM at all** — verified zero component code and no GTM env
+var in either `.env.example_prod` or `.env.local`; nothing to remove. **Frontend: keep it** — `pages/_app`
++ `_document` read `NEXT_PUBLIC_GTM` (via `@next/third-parties/google`), and that variable now ships in
+**both** the tracked `.env.example_prod` and the local `.env.local`, **empty by default (disabled)** so a
+clone just drops in its `GTM-XXXX`. The old `NEXT_PUBLIC_GOOGLE_TAG_MANAGER` name mismatch that made it
+dormant is already gone. No code/env changes were required — this entry records the decision and the
+verified state.
