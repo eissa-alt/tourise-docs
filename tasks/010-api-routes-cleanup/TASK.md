@@ -1,7 +1,8 @@
 # Task 010 — api.php cleanup, route organization & RESTful rename
 
-- **Status:** `todo`
+- **Status:** `done` — full cutover shipped (Tiers 0–4) + closed out 2026-07-20; ledger D24
 - **Opened:** 2026-07-19
+- **Closed:** 2026-07-20
 - **Owner:** —
 - **Sub-app(s):** backend + admin + frontend (+ mobile if a consumed URI changes)
 - **Branch(es):** `dev` (feature branch strongly recommended — this is a cross-repo cutover)
@@ -51,46 +52,46 @@ client + frontend callers (and mobile, only if a consumed URI changes) are updat
 ## Todo (ordered)
 
 ### Tier 0 — pure cleanup (backend only, zero contract change)
-- [ ] Delete dead commented-out routes (e.g. `~93, 150, 159–163, 173, 201, 340–348, 356–366, 453, 471–472, 487, 505, 635–638`).
-- [ ] Remove exact duplicate registrations: gates `store` (269–270), titles `store` (322–323),
+- [x] Delete dead commented-out routes (e.g. `~93, 150, 159–163, 173, 201, 340–348, 356–366, 453, 471–472, 487, 505, 635–638`).
+- [x] Remove exact duplicate registrations: gates `store` (269–270), titles `store` (322–323),
       email-templates `store` (373–374), badges `store` (546–547), emails-config `show` (351/353),
       print-logs pair (533–534 vs 670–671).
-- [ ] Strip `// todo move it`, `// ???`, `// todo: move ?` noise comments.
+- [x] Strip `// todo move it`, `// ???`, `// todo: move ?` noise comments.
 
 ### Tier 1 — dead-link audit (BIDIRECTIONAL) + dead-endpoint removal
 
 Build one **route inventory** first (`php artisan route:list --json`), then reconcile it against callers
 in **all** repos. Three checks, both directions:
 
-- [ ] **(a) Orphaned backend routes** — endpoint registered but no admin/frontend/mobile caller. Grep each
+- [x] **(a) Orphaned backend routes** — endpoint registered but no admin/frontend/mobile caller. Grep each
       path across admin + frontend (+ mobile if present) → candidates for removal.
-- [ ] **(b) Route → missing controller method** — a `Route::…([X::class, 'foo'])` where `X::foo()` doesn't
+- [x] **(b) Route → missing controller method** — a `Route::…([X::class, 'foo'])` where `X::foo()` doesn't
       exist. `route:list` loads fine but the endpoint 500s. Scan every action in `api.php` against its
       controller (given how much dup/typo cruft exists, expect a few).
-- [ ] **(c) Client → server dead links (404s)** — an admin/frontend/mobile API call whose path matches NO
+- [x] **(c) Client → server dead links (404s)** — an admin/frontend/mobile API call whose path matches NO
       registered route (incl. the typo paths like `guests-status-other␣␣`). These are already-broken links;
       list them and decide fix-or-delete. **This check is re-run after the Tier 2 rename** (the rename is the
       main way a live call becomes a dead link).
-- [ ] Then remove confirmed dead endpoints — starting with the legacy `guests-status-*` block (455–461,
+- [x] Then remove confirmed dead endpoints — starting with the legacy `guests-status-*` block (455–461,
       **confirmed unused in admin**; includes the typo/trailing-space paths) + `GuestsController` methods,
       and verify-then-remove `send-sms/{id}` (cyan deleted `sendSMS` as dead), `print-test`,
       `send-e-badge-test`, `export-test`, `accept-with-days`.
 
 ### Tier 2 — reorg + RESTful rename + whereUuid (BACKEND) — produces the rename map
-- [ ] Fold flat `/admin/<resource>/...` routes into `Route::prefix('admin/<resource>')->group()` blocks.
-- [ ] Rename to RESTful shape (item 1 above); static routes ordered before `/{id}` wildcards.
-- [ ] Consolidate `block`+`activate` → `PATCH /{id}/toggle-status` (item 2) — add `toggleStatus()` where
+- [x] Fold flat `/admin/<resource>/...` routes into `Route::prefix('admin/<resource>')->group()` blocks.
+- [x] Rename to RESTful shape (item 1 above); static routes ordered before `/{id}` wildcards.
+- [x] Consolidate `block`+`activate` → `PATCH /{id}/toggle-status` (item 2) — add `toggleStatus()` where
       missing, delete `block()`/`activate()` route entries (keep or remove the methods per controller).
-- [ ] Add `->whereUuid('id')` to all UUID params.
-- [ ] **Deliverable: an old→new rename map** (table of every changed method+URI) — drives Tier 3 and
-      becomes a mobile delta if any `mobile/*` URI changed.
+- [x] Add `->whereUuid('id')` to all UUID params.
+- [x] **Deliverable: an old→new rename map** (table of every changed method+URI) — drives Tier 3 and
+      becomes a mobile delta if any `mobile/*` URI changed. → `RENAME_MAP.md`.
 
 ### Tier 3 — cross-repo lockstep update (ADMIN + FRONTEND + mobile-if-touched)
-- [ ] Update the admin API client / all callers to the new URIs (grep the admin repo for each old path).
-- [ ] Repoint admin block/activate UI → `toggle-status`.
-- [ ] Update frontend callers if any hit a renamed public/admin URI.
-- [ ] Mobile: only if a consumed URI changed — update the Flutter client + add a `RESPONSE_SHAPE_DELTAS`
-      (or new notice) row. Expected minimal (mobile section is already RESTful).
+- [x] Update the admin API client / all callers to the new URIs (grep the admin repo for each old path).
+- [x] Repoint admin block/activate UI → `toggle-status`.
+- [x] Update frontend callers if any hit a renamed public/admin URI (`countries/select` + `titles/select/{cat}`).
+- [x] Mobile: only if a consumed URI changed — update the Flutter client + add a `RESPONSE_SHAPE_DELTAS`
+      (or new notice) row. **N/A — no `mobile/*` URI changed.**
 
 ### Tier 4 — RBAC hardening (behavior change — verify against role matrix; land last)
 - [x] Roll out `admin.can:<feature>` middleware to every admin group, cross-checked against
@@ -159,6 +160,17 @@ in **all** repos. Three checks, both directions:
   (`OperationActionsController`, `QueueController`) and their imports. Route count 395→390; no dangling
   refs; pint/phpstan clean. (Admin `test-api-listing.tsx` left as-is — its `/get-emails-list` ref is
   commented-out dead code in an inert dev harness.)
+- 2026-07-20 — **CLOSED (ledger D24).** Reconciled state: Tiers 0–4 were in fact all committed + pushed
+  (backend `4cf7036`/`c5a3a31`/`9328d65`/`68723ee`, admin `e36b384`, frontend `53d42e0`) — the earlier
+  "uncommitted, pending review" log notes were stale; Task 011 already built on top. Re-verified the
+  committed baseline: backend `composer qa` green (pint + phpstan No-errors + tests 465/3 pre-existing).
+  **Final leftover handled:** the last two non-RESTful, ungated, zero-caller endpoints
+  `POST /admin/guests-upload-zip` + `POST /admin/match-guests-images` were folded into the guests group as
+  `POST /admin/guests/upload-zip` + `/match-images` behind `admin.can:guests_listing,edit` (route count
+  384, unchanged — pure rename; no in-repo/mobile caller to move). The four offline-sync endpoints
+  (`attend`, `guest-data-offline`, `guest-data-sync`, `guests-printed-since`) were **left at their URIs**
+  per the deliberate Task 011 (D23) decision, behind `admin.can:scanning`. Dead-link grep across all repos
+  for every old path = 0 code references. Mobile contract re-checked: `mobile/*` untouched, no delta.
 
 ## Decisions
 
@@ -169,9 +181,10 @@ in **all** repos. Three checks, both directions:
 
 ## Definition of Done
 
-- [ ] Backend merged to `dev`; admin + frontend callers updated in the same cutover (mobile if touched)
-- [ ] Rename map (old→new) recorded; grep of all repos shows zero references to old paths
-- [ ] EN + AR translations in the same commit (if any user-facing strings change)
-- [ ] Backend `pint --test` + `phpstan analyse` + `php artisan test` green; admin/frontend `yarn type-check` + `yarn production` green
-- [ ] Mobile contract re-checked (`../../mobile/`); any changed `mobile/*` URI documented as a delta
-- [ ] Docs updated (this TASK.md → `done`; README index row; ledger entry for the rename cutover + RBAC gating)
+- [x] Backend merged to `dev`; admin + frontend callers updated in the same cutover (mobile if touched)
+- [x] Rename map (old→new) recorded; grep of all repos shows zero references to old paths
+- [x] EN + AR translations in the same commit (if any user-facing strings change) — N/A, no user-facing strings changed
+- [x] Backend `pint --test` + `phpstan analyse` + `php artisan test` green; admin/frontend `yarn type-check` green (`yarn production` needs the gitignored `.env.production`)
+- [x] Mobile contract re-checked (`../../mobile/`); any changed `mobile/*` URI documented as a delta — no `mobile/*` URI changed
+- [x] Docs updated (this TASK.md → `done`; README index row; ledger entry for the rename cutover + RBAC gating → D24)
+- [ ] **Manual smoke test** per renamed feature + per gated feature (needs a running stack + role matrix) — deferred to the browser-QA pass

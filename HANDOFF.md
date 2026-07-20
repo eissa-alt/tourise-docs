@@ -3,6 +3,24 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-20 — Task 010 (api.php cleanup/reorg/RESTful rename) CLOSED (ledger D24). ⚠️ Backend
+`routes/api.php` + docs edits are UNCOMMITTED working-tree changes — not yet committed/pushed.**
+- **Reconciliation:** Tiers 0–4 were already committed + pushed earlier (backend `4cf7036`→`c5a3a31`→
+  `9328d65`→`68723ee`, admin `e36b384`, frontend `53d42e0`) and Task 011 built on top. The "uncommitted,
+  pending review" notes in the old task log were **stale** — the cutover had shipped. Re-verified the
+  committed baseline green: backend `composer qa` (pint + phpstan No-errors + tests 465/3 pre-existing).
+- **Final leftover folded in (this session, uncommitted):** the last two non-RESTful, ungated, zero-caller
+  endpoints `POST /admin/guests-upload-zip` + `POST /admin/match-guests-images` → renamed into the guests
+  group as `POST /admin/guests/upload-zip` + `/match-images` behind `admin.can:guests_listing,edit`. Pure
+  rename (route count stayed 384); no in-repo or mobile caller to move; controller methods unchanged.
+- **Left as-is:** the four offline-sync endpoints (`attend`, `guest-data-offline`, `guest-data-sync`,
+  `guests-printed-since`) stay at their `/admin/*` URIs behind `admin.can:scanning` — the deliberate Task
+  011 (D23) decision, not re-litigated.
+- **Gates:** backend `composer qa` green (465/3 pre-existing); dead-link grep across all repos for every old
+  path = 0 code references; `mobile/*` untouched → no mobile delta. **Still open:** manual browser smoke
+  test per renamed/gated feature (needs a running stack + role matrix). **Needs commit + push** (backend +
+  docs).
+
 **2026-07-19 — Task 011 (scan-into-admin) code COMPLETE on backend + admin `dev` (ledger D23). Gate
 scanning is now a first-party, RBAC-gated admin feature; the standalone "agent admin" scanner is retired.**
 - **What:** ported the on-site scanner into the admin dashboard (from 108/112) and wired it onto ALT's RBAC

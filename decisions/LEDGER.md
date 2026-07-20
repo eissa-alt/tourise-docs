@@ -473,3 +473,45 @@ running stack + camera), validated so far only by feature tests + type-check/bui
 `type=gate` cleanup + EN/AR). **Gates:** backend `composer qa` green (pint + phpstan + tests incl.
 `GateScanTest`); admin `yarn type-check` + `next build` green (`yarn production` needs the gitignored
 `.env.production`).
+
+## D24 — 2026-07-20 — `routes/api.php` brought to the cyan RESTful standard (grouped + `admin.can:` gated + `whereUuid` + `toggle-status`)
+
+The legacy admin surface of `routes/api.php` was 966 lines of mostly-flat, ungated, non-RESTful routes
+(vs cyan's 559-line grouped/gated/RESTful shape). Task 010 rewrote it as a **hard cutover** — no
+alias/back-compat window; backend + admin + frontend callers moved together. Task + rename map:
+[../tasks/010-api-routes-cleanup/TASK.md](../tasks/010-api-routes-cleanup/TASK.md) +
+[../tasks/010-api-routes-cleanup/RENAME_MAP.md](../tasks/010-api-routes-cleanup/RENAME_MAP.md).
+
+**Durable decisions:**
+1. **Every admin resource folded into a `Route::prefix('admin/<res>')->group()` block**, static routes
+   before `/{id}` wildcards, `->whereUuid('id')` on every UUID param.
+2. **RESTful rename is a hard cutover** — `/x-select` → `/x/select`, `/guests-new` → `POST /guests`,
+   `/guests-update/{id}` → `PUT /guests/{id}`, `/invitations-list/{id}` → `/invitations/{id}/list`, etc.
+   Category updates went `POST` → `PATCH`. Admin API client + frontend public `countries/select` +
+   `titles/select/{cat}` repointed in lockstep.
+3. **`block/{id}` + `activate/{id}` replaced by a single `PATCH /{id}/toggle-status`** outright (no legacy
+   pair kept); `toggleStatus()` added to the 14 controllers that only had `block`/`activate`.
+4. **`admin.can:<feature>` gating on every admin group**, cross-checked against `AdminPermissions::CATALOG`
+   (Super-Admin short-circuits, deny-by-default); per-action perms on writes; dashboard gated per-widget.
+   **Left ungated on purpose:** all `-select`/`select-all` + `categories/slug` (feed cross-module dropdowns
+   / guest forms — gating them would 403 an admin working in a *different* feature).
+5. **Dead code removed:** dead comments, duplicate registrations, 7 orphaned `GuestsController` methods,
+   the dead `guests-status-*` block, and 5 zero-caller ops/queue endpoints (+ `OperationActionsController`,
+   `QueueController`).
+6. **`mobile/*` is untouched** — the mobile contract (also `routes/api.php`) is intact; no `mobile/*` URI
+   changed, so no `RESPONSE_SHAPE_DELTAS` row was needed. (The scanner/agent surface was frozen by Task 010
+   then un-frozen + modernized by Task 011 / D23.)
+7. **Final close-out (2026-07-20):** the last two non-RESTful, ungated, zero-caller leftovers —
+   `POST /admin/guests-upload-zip` + `POST /admin/match-guests-images` (bulk guest-image upload/match) —
+   were folded into the guests group as `POST /admin/guests/upload-zip` + `POST /admin/guests/match-images`
+   behind `admin.can:guests_listing,edit`. The four offline-sync endpoints (`attend`, `guest-data-offline`,
+   `guest-data-sync`, `guests-printed-since`) were **left at their URIs** — a deliberate Task 011 decision
+   (D23), kept behind `admin.can:scanning`.
+
+**Landed (on `dev`):** backend `4cf7036` (Tier 0+1 dead-code/endpoint cleanup) → `c5a3a31` (Tier 2 RESTful
+cutover + prefix groups + `whereUuid` + `toggle-status`) → `9328d65` (Tier 4 `admin.can` gating) → `68723ee`
+(dead ops/queue removal); admin `e36b384` (API client repoint + `toggle-status`); frontend `53d42e0`
+(public `countries/select` + `titles/select`). **Route count 418 → 384.** **Gates:** backend `composer qa`
+green (pint + phpstan **No errors** + tests **465/3** — the 3 are the pre-existing `ExampleTest` `/`→403 +
+two avatar signed-URL fails, not from this work); admin + frontend `yarn type-check` green. **Remaining:**
+manual smoke test per renamed/gated feature (needs a running stack + role matrix).

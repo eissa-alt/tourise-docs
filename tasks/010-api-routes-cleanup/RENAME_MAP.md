@@ -1,8 +1,9 @@
 # Task 010 — RESTful rename map (Tier 2/3 cutover)
 
-**Status:** PROPOSED — awaiting review before execution. Tier 0+1 (dead-code cleanup) already landed
-(backend `4cf7036`). This map drives the **hard cutover**: backend `routes/api.php` + admin API client
-(+ frontend/mobile if a consumed URI changes) move together.
+**Status:** EXECUTED + CLOSED 2026-07-20 (ledger D24). The full cutover shipped across backend/admin/frontend
+(see §F, §G, §H below); Task 011 then un-froze + modernized the scanner surface (§G). This map is the
+historical record of the hard cutover — backend `routes/api.php` + admin API client + frontend all moved
+together.
 
 All paths below are under the `api/admin/` prefix unless noted. `{id}` gains `->whereUuid('id')`.
 
@@ -167,3 +168,25 @@ scanner is no longer an un-updatable out-of-repo client. The frozen agent/scan s
   → **kept**, now behind `admin.can:scanning`.
 - **`guests/validate-check-in/{regNumber}`** → **deleted** (handler already removed in Tier 0; no callers).
 - **Bulk-image** (`guests-upload-zip`, `match-guests-images`) → still untouched (not part of Task 011).
+
+---
+
+## H. FINAL CLOSE-OUT 2026-07-20 (ledger D24)
+
+The two remaining bulk-image endpoints from §F/§G — non-RESTful, ungated, and with **zero callers** in any
+repo (and not part of the mobile contract, being `/admin/*`) — were the last open Task 010 item. They were
+folded into the guests group to match everything else:
+
+| Old | New | Gate |
+|---|---|---|
+| `POST /admin/guests-upload-zip` | `POST /admin/guests/upload-zip` | `admin.can:guests_listing,edit` |
+| `POST /admin/match-guests-images` | `POST /admin/guests/match-images` | `admin.can:guests_listing,edit` |
+
+Pure rename (route count stayed 384) — no in-repo or mobile caller to move; controller methods unchanged.
+
+The four **offline-sync** endpoints (`attend`, `guest-data-offline`, `guest-data-sync`,
+`guests-printed-since`) were **left at their existing `/admin/*` URIs** behind `admin.can:scanning` — a
+deliberate Task 011 (§G / D23) decision, not re-litigated here.
+
+Verified: backend `composer qa` green (pint + phpstan No-errors + tests 465/3 pre-existing); dead-link grep
+across all repos for every old path = 0 code references; `mobile/*` untouched → no delta. Task closed.
