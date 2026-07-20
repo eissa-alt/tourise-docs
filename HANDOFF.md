@@ -3,6 +3,25 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-20 — Task 012 (LinkedIn automatic "Share on LinkedIn") code COMPLETE across backend + admin +
+frontend `dev` (ledger D25). ⚠️ All three apps + docs are UNCOMMITTED working-tree changes.**
+- **What:** completed the `automatic` half of the per-category social share the admin form already
+  advertised. Per-category LinkedIn app creds (`linkedin_client_id`/`linkedin_client_secret`, additive
+  migration `2026_07_20_000001`) → `LinkedInController` (auth-url / call-back / post, cyan's Pint/phpstan-clean
+  version, v2 consumer Share surface) → 3 **public** routes → guest OAuth flow on the success page that posts
+  the generated social card. ALT keeps its **blade** social card (cyan's layout-designer Tier B was out of
+  scope). Best-of-both port (cyan P37.4 + hci) adapted to ALT conventions.
+- **Touched:** backend `LinkedInController` + migration + `Category` + `CategoriesController`
+  (`getVisibility` now returns `share_type`; `update()` + `CategoriesResources` round-trip the creds) +
+  new `config('app.frontend_url')` (phpstan: no `env()` in a controller) + `routes/api.php`; admin
+  `categories-form.tsx` (creds inputs when `share_type=automatic`) + `interfaces/category.tsx` + EN/AR
+  `web.json` (incl. `share_manual_hint`/`share_automatic_hint`); frontend new `linkedin-redirect.tsx` +
+  `success/sharebtn-sections.tsx` (automatic OAuth flow, ALT-native lucide/toast/getApiError) +
+  `success-sections.tsx` + `join/[category]/success.tsx` (thread `share_type`+`category_slug`).
+- **Gates:** backend `composer qa` green (pint + phpstan No errors + tests 465/3 pre-existing); admin +
+  frontend `yarn type-check` + eslint green; `mobile/*` untouched. **Still open:** manual QA needs a real
+  LinkedIn "Share on LinkedIn" app + `PUBLIC_FRONTEND_URL` set + a running stack. **Needs commit + push.**
+
 **2026-07-20 — Task 010 (api.php cleanup/reorg/RESTful rename) CLOSED (ledger D24). ⚠️ Backend
 `routes/api.php` + docs edits are UNCOMMITTED working-tree changes — not yet committed/pushed.**
 - **Reconciliation:** Tiers 0–4 were already committed + pushed earlier (backend `4cf7036`→`c5a3a31`→

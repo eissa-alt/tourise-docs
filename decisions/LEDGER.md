@@ -515,3 +515,42 @@ cutover + prefix groups + `whereUuid` + `toggle-status`) → `9328d65` (Tier 4 `
 green (pint + phpstan **No errors** + tests **465/3** — the 3 are the pre-existing `ExampleTest` `/`→403 +
 two avatar signed-URL fails, not from this work); admin + frontend `yarn type-check` green. **Remaining:**
 manual smoke test per renamed/gated feature (needs a running stack + role matrix).
+
+## D25 — 2026-07-20 — LinkedIn **automatic** "Share on LinkedIn" completed for the per-category social share
+
+ALT already shipped the **manual** half of the category social-share feature (`with_share`,
+`share_poster{,_ar}`, `share_type` = `manual|automatic`, `share_text_{en,ar}`, blade social card, admin form
+section, bulk-update modal), but the **`automatic`** path the admin form advertised was never wired. Task 012
+completed it, ported **best-of-both** from cyan (P37.4) + hci and adapted to ALT conventions. Task:
+[../tasks/012-linkedin-auto-post/TASK.md](../tasks/012-linkedin-auto-post/TASK.md).
+
+**Durable decisions:**
+1. **Scope = Tier A only** (LinkedIn auto-post). ALT keeps its **blade** social card; cyan's Social Card
+   **Layout Designer** / JSON document-rendering engine (Tier B) was explicitly **out of scope**.
+2. **Per-category LinkedIn app credentials** — two nullable columns `linkedin_client_id` /
+   `linkedin_client_secret` on `categories` (additive migration `2026_07_20_000001`), only consulted when
+   `share_type = automatic`; unset → the OAuth endpoints 422. Creds round-trip through `update()`
+   `$request->only()` + `CategoriesResources` (the gap cyan had). Not added to `bulkUpdateSocialMedia` — an
+   app id/secret is inherently per-category, set individually in the form.
+3. **LinkedIn API surface stays on v2** (`/v2/ugcPosts`, `/v2/assets?action=registerUpload`, `/v2/userinfo`,
+   header `X-Restli-Protocol-Version: 2.0.0`) — the current documented surface for the **consumer**
+   "Share on LinkedIn" product (`w_member_social`). The `/rest/*` Posts API needs a Marketing product and
+   would 403 here; **do not "modernise" to `/rest/*`.**
+4. **The three OAuth routes are public** (guest-facing, no admin/guest auth), in the public/localization
+   group: `GET /linkedin/auth-url`, `GET /linkedin/call-back`, `POST /linkedin/post`. `getVisibility()` now
+   also returns `share_type` so the public success page knows manual vs automatic.
+5. **Frontend URL read via `config('app.frontend_url')`, not `env()`** — new config key mirroring
+   `PUBLIC_FRONTEND_URL`, added so `LinkedInController` satisfies larastan `noEnvCallsOutsideOfConfig`
+   (the pervasive legacy `env('PUBLIC_FRONTEND_URL')` calls elsewhere stay baselined; new code uses config).
+6. **Frontend kept ALT-native** — the ported share component uses lucide `Share2`, `getApiError`, and
+   `react-hot-toast` (not cyan's iconify / `ThreeDotsWave`). New `pages/[lang]/linkedin-redirect.tsx` OAuth
+   landing page; `share_type` + `category_slug` thread `success.tsx` → `success-sections.tsx` →
+   `sharebtn-sections.tsx`.
+7. **`mobile/*` untouched** — new routes are public web only; no mobile contract delta.
+
+**Landed (working tree, on `dev`):** backend — migration + `LinkedInController` + `Category` fillable +
+`CategoriesController` (`getVisibility`+`update`) + `CategoriesResources` + `config/app.php` + `routes/api.php`;
+admin — `categories-form.tsx` + `interfaces/category.tsx` + EN/AR `web.json`; frontend — `linkedin-redirect.tsx`
++ `success/sharebtn-sections.tsx` + `success/success-sections.tsx` + `join/[category]/success.tsx`. **Gates:**
+backend `composer qa` green (pint + phpstan **No errors** + tests **465/3** pre-existing); admin + frontend
+`yarn type-check` + eslint green. **Remaining:** manual QA with a real LinkedIn Share app + running stack.

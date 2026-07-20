@@ -45,5 +45,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 009 | [usefetch-adoption](009-usefetch-adoption/TASK.md) | done — standing convention (closed 2026-07-19) |
 | 010 | [api-routes-cleanup](010-api-routes-cleanup/TASK.md) | done — cleanup + reorg + RESTful rename (cross-repo cutover) + whereUuid + RBAC gating (Tiers 0–4); closed + bulk-image leftovers folded in 2026-07-20, ledger D24 |
 | 011 | [scan-into-admin](011-scan-into-admin/TASK.md) | done (code) — gate scanning ported into admin, standalone scanner retired, new `scanning` RBAC feature; live browser-QA pending |
+| 012 | [linkedin-auto-post](012-linkedin-auto-post/TASK.md) | done (code) — per-category LinkedIn automatic "Share on LinkedIn" completed (backend + admin + frontend); ledger D25; LinkedIn-app + browser QA pending |
 
 _Add a row per task as you open it; newest at the bottom._
