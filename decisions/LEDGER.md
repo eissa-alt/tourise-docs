@@ -666,3 +666,42 @@ resend snapshot + `Category`/`GuestSMS` fillable + `CategoriesController` valida
 + two category pickers + `interfaces/category` + EN/AR. **Gates:** pint + phpstan clean; admin `yarn
 type-check` + eslint green. **Remaining:** manual QA with a real active provider (dev now sends via the
 active-default, not FGC).
+
+## D29 — 2026-07-20 — SMS flow parity: accept/reject + automations + invitations now text (mirrors the email flows)
+
+Before this, email fired on register-complete / accept / reject / automations / invitations, but SMS only
+fired on register-complete + phone-OTP. Task 016 closes the three gaps so every guest email flow has an SMS
+twin, each with its own optional provider override (extends D26/D28).
+Task: [../tasks/016-sms-flow-parity/TASK.md](../tasks/016-sms-flow-parity/TASK.md).
+
+**Durable decisions:**
+1. **Guest-backed flows reuse `guest_sms` + `SendGuestSMSEvent`** — accept / acceptToCategory / reject
+   (Stage 1) and automations (Stage 3) already target a `Guest`, exactly like register-complete, so they
+   create a `guest_sms` row (snapshotting `sms_config_id`) and dispatch the existing listener. **No new
+   per-flow SMS table** for these. The listener's non-production block still applies (dev/stage won't send
+   bulk/notification SMS).
+2. **Invitations get their own `invitation_sms` table + listener** — invitations are token-based, not
+   guest-backed, so they mirror `invitation_emails`: nullable `sms_template_id` + `sms_config_id` on both
+   `invitations` and `invitation_collections`; `InvitationSms::createFromInvitation` resolves
+   invitation → collection; `SendInvitationSmsEvent`/`SendInvitationSmsListener` render invitation-specific
+   placeholders (`{{ first_name }}`, `{{ last_name }}`, `{{ invitation_link }}`) and send via `SmsSender`.
+   Fired from invite / bulk / reminder alongside the email event; `extract-bulk` inherits the source
+   collection's SMS template unless overridden.
+3. **Automations add `with_sms_template`** (mirrors `with_email_template`) + `sms_template_id` +
+   `sms_config_id` on `automation_setups`. SMS is **independent of email** — a setup may text, email, or
+   both. `AutomationController::send` fires the guest_sms event per guest when the toggle is on; `split`
+   carries the SMS fields to each chunk.
+4. **Provider override, same rule as D28** — blank/inactive/deleted `sms_config_id` → active-default. The
+   choice is snapshotted onto the send-row at create time.
+5. **Out of scope:** OTP text stays inline (D28); `SmsSender` remains Unifonic-only; **`mobile/*`
+   untouched** (only admin forms/routes changed).
+
+**Landed (working tree, on `dev`):** backend — migrations `000006` (invitation SMS) + `000007` (automation
+SMS); `InvitationSms` model + `SendInvitationSmsEvent`/`SendInvitationSmsListener` (+ `EventServiceProvider`);
+`InvitationsController` / `InvitationsCollectionController` persist + dispatch; `AutomationSetupsController`
+store/split persist; `AutomationController::send` dispatches guest_sms; `AutomationSetup` /
+`Invitation` / `InvitationCollection` fillable + casts; `Invitation`/`InvitationCollection`/`AutomationSetups`
+resources expose the fields. admin — SMS template + provider pickers on invitation / collection / extract-bulk /
+automation forms; `with_sms_template` toggle; `sms-template-select` `errors` prop made optional; interfaces +
+EN/AR (`sms_override`, `with_sms_template`). **Gates:** backend `pint --test` **passed** + `phpstan` **No
+errors**; admin `yarn type-check` + eslint green. **Remaining:** manual QA with a real active SMS provider.

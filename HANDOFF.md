@@ -3,6 +3,37 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-20 — Task 016 (SMS flow parity) code COMPLETE across backend + admin `dev` (ledger D29). ⚠️
+Backend + admin + docs are UNCOMMITTED working-tree changes.**
+- **What:** closes the SMS-vs-email gaps. Before, SMS only fired on register-complete + phone-OTP; now it
+  fires on **accept/reject**, **automations**, and **invitations** too — each with its own optional SMS
+  provider override, mirroring D27/D28.
+- **Stage 1 (accept/reject):** `GuestsController` accept/acceptToCategory/reject create a `guest_sms` row
+  (snapshot `sms_config_id`) + dispatch `SendGuestSMSEvent`; category "SMS notifications" picker relabelled
+  register/accept/reject.
+- **Stage 2 (invitations):** migration `2026_07_20_000006` — `invitations`/`invitation_collections` gain
+  `sms_template_id`+`sms_config_id`; new `invitation_sms` table. New `InvitationSms` +
+  `SendInvitationSmsEvent`/`SendInvitationSmsListener` (invitation-specific placeholders) fired from
+  invite/bulk/reminder alongside the email; extract-bulk inherits/overrides the SMS template. Admin SMS
+  template + provider pickers on invitation + collection forms + the extract modal.
+- **Stage 3 (automations):** migration `2026_07_20_000007` — `automation_setups` gains `with_sms_template`
+  + `sms_template_id` + `sms_config_id`. `AutomationController::send` creates a `guest_sms` row + dispatches
+  `SendGuestSMSEvent` per guest when the toggle is on (independent of email); `split` carries the fields.
+  Admin `with_sms_template` toggle + SMS template/provider pickers on the automation form.
+- **Design:** guest-backed flows (accept/reject, automations) **reuse `guest_sms` + `SendGuestSMSEvent`**
+  (same path as register-complete, non-prod block still applies); token-based invitations get their **own**
+  `invitation_sms` table + listener (mirroring `invitation_emails`). Provider override rule = D28
+  (blank/inactive → active-default, snapshot at create).
+- **Touched (backend):** migrations `000006`+`000007`; `InvitationSms` + invitation SMS event/listener (+
+  `EventServiceProvider`); `InvitationsController`/`InvitationsCollectionController` persist+dispatch;
+  `AutomationSetupsController` store/split; `AutomationController::send`; `AutomationSetup`/`Invitation`/
+  `InvitationCollection` fillable+casts; `Invitation`/`InvitationCollection`/`AutomationSetups` resources.
+- **Touched (admin):** `sms-template-select` (`errors` prop optional) + provider/template pickers on
+  invitation / collection / extract-bulk / automation forms + `with_sms_template` toggle + interfaces + EN/AR
+  (`sms_override`, `with_sms_template`).
+- **Gates:** backend `pint --test` passed + `phpstan` No errors; admin `yarn type-check` + eslint green;
+  `mobile/*` untouched. **Still open:** manual QA with a real active provider. **Needs commit + push.**
+
 **2026-07-20 — Task 014 (OTP SMS → dynamic provider + per-flow SMS override) code COMPLETE across backend +
 admin `dev` (ledger D28). ⚠️ Backend + admin + docs are UNCOMMITTED working-tree changes.**
 - **What:** deleted the hardcoded FGC OTP gateway (`cnc.fgc.sa` + committed `sdbankApi`/`SDB` password) from
