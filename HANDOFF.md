@@ -3,19 +3,31 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-20 — Task 015 (per-flow SMTP override) code COMPLETE across backend + admin `dev` (ledger D27).
-⚠️ Backend + admin + docs are UNCOMMITTED working-tree changes.**
+**2026-07-20 — Task 014 (OTP SMS → dynamic provider + per-flow SMS override) code COMPLETE across backend +
+admin `dev` (ledger D28). ⚠️ Backend + admin + docs are UNCOMMITTED working-tree changes.**
+- **What:** deleted the hardcoded FGC OTP gateway (`cnc.fgc.sa` + committed `sdbankApi`/`SDB` password) from
+  `AuthController` — **no static SMS code left**. Phone-OTP now flows through the DB-driven provider stack
+  (D26: `SmsProviderConfig` + `SmsSender`, Unifonic today). Added the SMS mirror of D27's SMTP pickers:
+  category has **two** SMS provider pickers — register-complete + phone-OTP. Blank/inactive → active-default.
+- **⚠️ Behaviour change:** OTP calls `SmsSender` directly, so it still sends on **dev/stage** (a code the
+  user waits for) — but now via the **real active-default provider**, not the old FGC test gateway. Register/
+  notification SMS keeps the listener's non-prod block.
+- **Touched (backend):** migration `2026_07_20_000005` (`categories.sms_config_id` + `otp_sms_config_id`,
+  `guest_sms.sms_config_id`) + `AuthController::phoneVerification` rewrite + `SendGuestSMSListener` snapshot +
+  `GuestsController` register/resend snapshot + `Category`/`GuestSMS` fillable + `CategoriesController`
+  validation/persist + `CategoriesResources` + `SmsProviderConfigController::selectList` + `GET
+  admin/sms-provider-configs/select`.
+- **Touched (admin):** reusable `sms-provider-config-select` + two category pickers + `interfaces/category`
+  + EN/AR. No frontend change (join form already forwards the `category` slug).
+- **Gates:** pint + phpstan clean; admin `yarn type-check` + eslint green; `mobile/*` untouched. **Still
+  open:** manual QA with a real active provider. **Needs commit + push.**
+
+**2026-07-20 — Task 015 (per-flow SMTP override) CLOSED + pushed (ledger D27).** Backend `2adc387`, admin
+`76ae079`, docs `8c9ef34`.
 - **What:** admins can pick which SMTP account sends each email flow instead of always the default.
   Category has **two** pickers: notifications (register/accept/reject) + guest email-OTP. Also overrides
   on automations and invitations/collections. Blank = default. Inactive/deleted override → fall back to
-  default. Automation override beats `MAIL_HOST_BULK`.
-- **Touched (backend):** migrations `2026_07_20_000003` + `000004` (`otp_smtp_config_id`) +
-  `DynamicSmtpService::applyConfigById` + snapshot on guest/automation/invitation email rows + guest OTP
-  uses `otp_smtp_config_id` + `GET admin/smtp-configs/select`.
-- **Touched (admin):** reusable `smtp-config-select` + two category pickers + automation / invitation /
-  invitation-collection forms + EN/AR.
-- **Gates:** pint + phpstan clean; admin `yarn type-check` green. **Still open:** manual QA with multiple
-  SMTP accounts. **Needs commit + push.**
+  default. Automation override beats `MAIL_HOST_BULK`. **Still open:** manual QA with multiple SMTP accounts.
 
 **2026-07-20 — Task 013 (SMS provider config) CLOSED + pushed (ledger D26).** Backend `96a15ce`, admin
 `661f134`, docs `f3802b3`. Manual Unifonic prod QA still pending.

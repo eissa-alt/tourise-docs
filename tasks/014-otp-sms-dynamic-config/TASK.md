@@ -1,10 +1,36 @@
 # Task 014 — Unify OTP SMS onto the dynamic SMS provider config
 
-- **Status:** `planned` (not started) — plan documented, awaiting kickoff + the 3 open decisions below
+- **Status:** `done (code)` — implemented 2026-07-20 (ledger D28); manual QA pending
 - **Opened:** 2026-07-20
 - **Owner:** —
-- **Sub-app(s):** backend (+ docs; admin only if an `fgc` provider form field is added)
+- **Sub-app(s):** backend + admin (+ docs)
 - **Branch(es):** `dev`
+
+## Resolution (what actually shipped — 2026-07-20)
+
+Scope was **expanded** from "just de-hardcode OTP" to also add the SMS mirror of the Task 015 SMTP pickers
+(user request: "rely only on the dynamic sms provider", "no static code should be remaining").
+
+- **FGC deleted, not abstracted.** The user chose to remove the hardcoded gateway outright rather than add an
+  `fgc` provider branch. `authenticateSMSAPI()` + `sendSMS()` and the `cnc.fgc.sa` URLs / committed
+  `sdbankApi` password are gone from `AuthController`, along with the now-unused `Http` import. **Decision 1
+  → resolved as (b): OTP uses the dynamic provider (Unifonic today).**
+- **Decision 2 → OTP sends in every environment.** `phoneVerification` calls `SmsSender` directly (not the
+  `SendGuestSMSEvent` listener), so it isn't subject to the non-prod block. ⚠️ On dev/stage this now hits the
+  real active-default provider instead of the old FGC test gateway.
+- **Decision 3 → inline message.** OTP sends `"Your verification code is: {otp}"` directly via `SmsSender`
+  (no `SmsTemplate`, no `guest_sms` log row).
+- **Per-flow SMS provider pickers added** (the D27 mirror): `categories.sms_config_id` (register-complete SMS)
+  and `categories.otp_sms_config_id` (phone-OTP SMS), nullable FK → `sms_provider_configs`, null-on-delete.
+  Blank/inactive → active-default. OTP resolves live from the join-form `category` slug; register snapshots
+  onto `guest_sms.sms_config_id`. New reusable `sms-provider-config-select` admin component + ungated `GET
+  admin/sms-provider-configs/select`. Migration `2026_07_20_000005`.
+- **Not in scope (still deferred):** accept/reject SMS, automations SMS, invitations SMS — those flows send
+  **no SMS at all today**, so there's nothing to pick a provider for. Building those send paths is a separate
+  feature task.
+- **Gates:** pint + phpstan clean; admin `yarn type-check` + eslint green; `mobile/*` untouched.
+
+_The original plan (below) is kept for the audit trail._
 
 ## Goal
 

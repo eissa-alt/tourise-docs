@@ -631,3 +631,38 @@ Task: [../tasks/015-per-flow-smtp-override/TASK.md](../tasks/015-per-flow-smtp-o
 `smtp-config-select` + pickers on category / automation / invitation / invitation-collection forms + EN/AR.
 **Gates:** pint + phpstan clean; admin `yarn type-check` green. **Remaining:** manual QA with multiple SMTP
 accounts.
+
+## D28 — 2026-07-20 — Guest OTP SMS de-hardcoded onto the dynamic provider + per-flow SMS provider override (SMS mirror of D27)
+
+Guest **phone-OTP** was sent by a hardcoded FGC gateway (`https://cnc.fgc.sa/authenticate` + `sendSmsNotifications`)
+with a **plaintext username/password committed in `AuthController`** (`sdbankApi` / `SDB` sender). Both private
+methods (`authenticateSMSAPI`, `sendSMS`) and the `Http` import are **deleted** — no static SMS gateway code
+remains. OTP now flows through the same DB-driven stack register-complete SMS uses (D26: `SmsProviderConfig` +
+`SmsSender`). Same shape as D27 for email.
+Task: [../tasks/014-otp-sms-dynamic-config/TASK.md](../tasks/014-otp-sms-dynamic-config/TASK.md).
+
+**Durable decisions:**
+1. **OTP relies only on the dynamic provider** — `SmsSender` currently speaks Unifonic only, so OTP is now
+   delivered by whatever active provider resolves (category override → active-default). The FGC gateway is
+   gone; if a client mandates a specific gateway, add it as a `provider_key` branch on `SmsSender` (not
+   hardcoded in a controller).
+2. **Category SMS is two pickers** (mirrors D27) — `categories.sms_config_id` = register-complete
+   notification SMS; `categories.otp_sms_config_id` = phone-OTP SMS. Both nullable FK → `sms_provider_configs`,
+   null-on-delete. Blank/inactive/deleted → active-default. OTP resolves live from the join-form `category`
+   slug; register snapshots onto `guest_sms.sms_config_id` at create.
+3. **OTP sends in every environment** — unlike `SendGuestSMSListener` (which blocks non-production bulk/
+   notification SMS), phone-OTP calls `SmsSender` directly and sends on dev/stage too, because it's a code the
+   registrant is actively waiting for (preserves prior behaviour). ⚠️ In non-prod this now hits the *real*
+   active-default provider instead of the old FGC test gateway.
+4. **Admin picker** lists active providers via new ungated `GET admin/sms-provider-configs/select`; reusable
+   `sms-provider-config-select` component. Additive migration `2026_07_20_000005_add_sms_config_override_columns`.
+5. **`mobile/*` untouched** — `phone-verification` request/response shapes unchanged; only an admin select
+   route was added. Mobile login-OTP (separate path) not in scope.
+
+**Landed (working tree, on `dev`):** backend — migration `000005` + `AuthController::phoneVerification`
+rewritten (FGC methods deleted) + `SendGuestSMSListener` honours the snapshot + `GuestsController` register/
+resend snapshot + `Category`/`GuestSMS` fillable + `CategoriesController` validation/persist +
+`CategoriesResources` + `SmsProviderConfigController::selectList` + route. admin — `sms-provider-config-select`
++ two category pickers + `interfaces/category` + EN/AR. **Gates:** pint + phpstan clean; admin `yarn
+type-check` + eslint green. **Remaining:** manual QA with a real active provider (dev now sends via the
+active-default, not FGC).
