@@ -599,3 +599,35 @@ DB-managed by admins (multi-row, `is_active` + a single `is_default`) exactly li
 (pint **passed** + phpstan **No errors** + tests **465/3** pre-existing); admin `yarn type-check` + eslint
 clean + `next build` compiles (new `/sms/provider-configs*` routes present). **Remaining:** manual send-test /
 delivery QA in production with a real Unifonic app.
+
+## D27 — 2026-07-20 — Per-flow SMTP override (choose which SMTP account sends each email flow)
+
+Emails always used the single active-default `smtp_configs` row via `DynamicSmtpService::applyDefaultIfAvailable()`.
+Task 015 lets admins pick a different SMTP account per flow, falling back to the default when blank/inactive.
+Task: [../tasks/015-per-flow-smtp-override/TASK.md](../tasks/015-per-flow-smtp-override/TASK.md).
+
+**Durable decisions:**
+1. **One shared resolver** — `DynamicSmtpService::applyConfigById(?id)` applies an active override, else the
+   active default (or `.env`). Inactive/deleted overrides never hard-fail a send.
+2. **Category SMTP is two pickers** — `categories.smtp_config_id` covers notification emails
+   (register-complete / accept / reject). Guest email-OTP uses a separate
+   `categories.otp_smtp_config_id` (join form posts the `category` slug). Both blank → active default.
+   Admin CMS login OTP is out of scope.
+3. **Snapshot at create** — the resolved override is copied onto `guest_emails` / `automations` /
+   `invitation_emails` so later category/setup edits don't change what a queued/sent row used. Guest
+   email-OTP has no send-row → resolves live from the category slug.
+4. **Automations: DB override beats `MAIL_HOST_BULK`** — the static `smtp-bulk` mailer is only used when no
+   override is present.
+5. **Invitations resolve invitation → collection → default** — nullable `smtp_config_id` on both
+   `invitations` and `invitation_collections`.
+6. **Admin pickers** list active configs only via ungated `GET admin/smtp-configs/select` (blank = use
+   default). Additive migration `2026_07_20_000003_add_smtp_config_override_columns`.
+7. **`mobile/*` untouched** — only an admin select route was added; public/OTP request/response shapes
+   unchanged.
+
+**Landed (working tree, on `dev`):** backend — migration + `applyConfigById` + snapshot wiring in
+`GuestsController` / `InvitationEmail::createFromInvitation` / automation expansion + notification
+`toMail()` paths + `AuthController` guest OTP + validation/resources + `smtp-configs/select`; admin —
+`smtp-config-select` + pickers on category / automation / invitation / invitation-collection forms + EN/AR.
+**Gates:** pint + phpstan clean; admin `yarn type-check` green. **Remaining:** manual QA with multiple SMTP
+accounts.

@@ -47,5 +47,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 011 | [scan-into-admin](011-scan-into-admin/TASK.md) | done (code) — gate scanning ported into admin, standalone scanner retired, new `scanning` RBAC feature; live browser-QA pending |
 | 012 | [linkedin-auto-post](012-linkedin-auto-post/TASK.md) | done (code) — per-category LinkedIn automatic "Share on LinkedIn" completed (backend + admin + frontend); ledger D25; LinkedIn-app + browser QA pending |
 | 013 | [sms-provider-config](013-sms-provider-config/TASK.md) | done (code) — DB-driven SMS provider config ("SMS SMTP") ported from cyan (backend + admin), listener rewired off env, `services.unifonic` removed; ledger D26; prod send-test QA pending |
+| 014 | [otp-sms-dynamic-config](014-otp-sms-dynamic-config/TASK.md) | planned — move registration phone-OTP off the hardcoded FGC gateway onto the dynamic `SmsSender`/`SmsProviderConfig` stack (+ remove hardcoded creds); register-complete already dynamic; 3 open decisions before kickoff |
+| 015 | [per-flow-smtp-override](015-per-flow-smtp-override/TASK.md) | done (code) — admins can override the default SMTP per flow: category has two pickers (notifications register/accept/reject + guest email-OTP), + automations + invitations; `applyConfigById` resolver, snapshot at create, override beats `MAIL_HOST_BULK`; gates green; manual QA pending |
 
 _Add a row per task as you open it; newest at the bottom._
