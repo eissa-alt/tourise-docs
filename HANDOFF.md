@@ -3,6 +3,30 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-20 — Task 013 (SMS provider config — DB-driven "SMS SMTP") code COMPLETE across backend + admin
+`dev` (ledger D26). ⚠️ Backend + admin + docs are UNCOMMITTED working-tree changes.**
+- **What:** ported cyan's SMS provider-config stack so SMS transport creds are DB-managed by admins (multi-row,
+  `is_active` + single `is_default`) exactly like the existing `smtp_configs` mail stack — instead of being
+  pinned to `.env` via `config('services.unifonic')`. Foundation for the follow-up SMS tasks. Adapted to
+  ALT conventions (mirrors ALT's own `SMTPConfig*`, not cyan verbatim).
+- **Touched (backend):** additive migration `2026_07_20_000002_create_sms_provider_configs_table` +
+  `SmsProviderConfig` (encrypted `app_sid`/`api_key`/`api_secret`, `$hidden`) + `SmsProviderConfigResource`
+  (masks `app_sid`) + `SmsProviderConfigController` (CRUD + toggle-active + make-default + check-default +
+  send-test, mirrors `SMTPConfigController` minus export/clone) + `Services/Sms/SmsSender` (unifonic adapter,
+  `provider_key` dispatch) + gated `admin/sms-provider-configs` routes + `AdminPermissions` (`sms_config`
+  widened to CRUD+block); `SendGuestSMSListener` rewired to the active default DB row via `SmsSender`;
+  **cutover cleanup** — removed `config/services.php` `unifonic` block + dead `GuestsController` debug methods
+  (`sendSMS2`/`sendSMS3`/`smsReplacePlaceholders`/`buildQrCodeLink`/`buildInvitationLink`) + their commented
+  `web.php` routes + the now-stale `env()` phpstan-baseline entry.
+- **Touched (admin):** `interfaces/sms-provider-config.ts` + `admin-modules/sms/provider-configs/*`
+  (form + listing + delete/send-test modals) + `pages/[lang]/sms/provider-configs/{index,create,edit/[id]}`
+  gated `checkFeaturePermission('sms_config')` + live SMS sidebar section (was commented) + module-icon +
+  EN/AR `web.json`.
+- **Gates:** backend `composer qa` green (pint passed + phpstan No errors + tests 465/3 pre-existing); admin
+  `yarn type-check` + eslint clean + `next build` compiles (new `/sms/provider-configs*` routes present);
+  `mobile/*` untouched. **Still open:** manual send-test / delivery QA in production with a real Unifonic app.
+  **Needs commit + push** (backend + admin + docs).
+
 **2026-07-20 — Task 012 (LinkedIn automatic "Share on LinkedIn") code COMPLETE across backend + admin +
 frontend `dev` (ledger D25). ⚠️ All three apps + docs are UNCOMMITTED working-tree changes.**
 - **What:** completed the `automatic` half of the per-category social share the admin form already

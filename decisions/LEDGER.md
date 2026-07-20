@@ -554,3 +554,48 @@ admin — `categories-form.tsx` + `interfaces/category.tsx` + EN/AR `web.json`; 
 + `success/sharebtn-sections.tsx` + `success/success-sections.tsx` + `join/[category]/success.tsx`. **Gates:**
 backend `composer qa` green (pint + phpstan **No errors** + tests **465/3** pre-existing); admin + frontend
 `yarn type-check` + eslint green. **Remaining:** manual QA with a real LinkedIn Share app + running stack.
+
+## D26 — 2026-07-20 — SMS provider config moved from `.env` to a DB-driven admin CRUD (cyan "SMS SMTP" port)
+
+SMS transport credentials were pinned to `.env` via `config('services.unifonic')` and read directly in
+`SendGuestSMSListener`. Task 013 ported cyan's **SMS provider config** stack so SMS credentials are now
+DB-managed by admins (multi-row, `is_active` + a single `is_default`) exactly like the existing
+`smtp_configs` mail stack — the foundation for the follow-up SMS tasks. Task:
+[../tasks/013-sms-provider-config/TASK.md](../tasks/013-sms-provider-config/TASK.md).
+
+**Durable decisions:**
+1. **Mirror `smtp_configs`, not cyan verbatim** — ALT already runs the DB-driven SMTP pattern, so the SMS
+   stack reuses its exact shape: multi-row, `is_active` + single `is_default`, secret masked on the wire
+   (`app_sid_masked`, last 4), leave-blank-to-keep on edit, `BaseApiController` + `apiSuccess/apiError`,
+   `admin.can:` gating, admin BFF-proxy calls, lucide + `getApiError` + `react-hot-toast` (no
+   `js-cookie`/Bearer, no heroicons). Additive migration `2026_07_20_000002_create_sms_provider_configs_table`.
+2. **Provider abstraction via `App\Services\Sms\SmsSender` + `provider_key`** — v1 validates `unifonic`
+   only (`Rule::in(['unifonic'])`); a new provider = one enum append + a `sendVia*` branch + (optionally)
+   surfacing the generic `api_key`/`api_secret` slots in the form. Unknown `provider_key` throws
+   (`InvalidArgumentException`) so a stale row fails loud instead of silently no-op'ing. `SmsSender` returns
+   the raw HTTP `Response` (Unifonic returns 200 even on failure — the `success` JSON key is the real signal).
+3. **Secrets encrypted at rest** — `app_sid`/`api_key`/`api_secret` use the `encrypted` cast; the resource
+   returns only `app_sid_masked`, and `api_key`/`api_secret` never leave the backend (`$hidden`).
+4. **`send-test` + the listener honour the non-production guard** — on non-prod both return/record
+   `sent:false` + a reason instead of hitting the provider, so dev/stage never sends real SMS.
+5. **RBAC `sms_config` widened** `['view','update']` → `['view','create','update','delete','block']` to
+   cover the new CRUD + toggle-active (block), matching `smtp_configs`. Routes live under a gated
+   `admin/sms-provider-configs` group (admin-only).
+6. **Clean cutover, no dual path** — the `config/services.php` `unifonic` block was **removed** (a fresh env
+   setting `UNIFONIC_*` would silently do nothing), and the dead `GuestsController` debug methods
+   `sendSMS2`/`sendSMS3`/`smsReplacePlaceholders`/`buildQrCodeLink`/`buildInvitationLink` (+ their commented
+   `web.php` routes + the now-stale `env()` phpstan-baseline entry, `count: 2`) were pruned — they duplicated
+   the real listener path and only referenced the old env creds.
+7. **SMS templates left as-is (out of scope)** — ALT already has an unlinked `sms/templates` + `sms/config`
+   admin page set; only the provider-config layer was missing. The follow-up "new SMS tasks" the user flagged
+   will surface those. **`mobile/*` untouched** — new routes are admin-only.
+
+**Landed (working tree, on `dev`):** backend — migration + `SmsProviderConfig` + `SmsProviderConfigResource`
++ `SmsProviderConfigController` + `Services/Sms/SmsSender` + `SendGuestSMSListener` (rewired) +
+`AdminPermissions` + `config/services.php` (unifonic removed) + `GuestsController` + `routes/{api,web}.php` +
+`phpstan-baseline.neon`; admin — `interfaces/sms-provider-config.ts` + `admin-modules/sms/provider-configs/*`
+(form + listing + delete/send-test modals) + `pages/[lang]/sms/provider-configs/{index,create,edit/[id]}` +
+`data/sidebar-links.tsx` + `data/module-icons.tsx` + EN/AR `web.json`. **Gates:** backend `composer qa` green
+(pint **passed** + phpstan **No errors** + tests **465/3** pre-existing); admin `yarn type-check` + eslint
+clean + `next build` compiles (new `/sms/provider-configs*` routes present). **Remaining:** manual send-test /
+delivery QA in production with a real Unifonic app.
