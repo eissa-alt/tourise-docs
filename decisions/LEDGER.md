@@ -773,3 +773,76 @@ validation-error surfacing + form width/gating) + `8b0960f` (SMS log pages + sid
 `2cf9409`/`4c83678` (earlier P17 comms/status UI); frontend `0d0d82b` (join pages read `with_email_otp`).
 **Gates:** backend `pint --test` + `phpstan` **No errors**; admin + frontend `yarn type-check` + eslint
 green. **Remaining:** manual QA with live providers.
+
+## D32 — 2026-07-22 — Logistics + e-visa re-added (Task 019): ops-confirmed data stays its own table; the February e-visa console is dead code
+
+The P5.trim (backend `08d542e`, admin `e3a0677`, both 2026-06-24) removed hotels/rooms,
+traveling-status, guest logistics and e-visa as "unused modules". Task 019 brings them back,
+modernized to everything this repo adopted afterwards (Tasks 001/002/009/010, P17.4).
+Task: [../tasks/019-logistics-evisa-port/TASK.md](../tasks/019-logistics-evisa-port/TASK.md).
+
+**Durable decisions:**
+
+1. **`guest_logistics` remains a separate 1:1 table — do NOT fold it into `guests`.** The two hold
+   different data, not duplicates. `guests` carries what the registrant DECLARED on the join form
+   (`expected_date_of_arrival`, `flight_arrival_time`, `require_flights`, `check_in_date`);
+   `guest_logistics` carries what operations BOOKED (`arrival_date`, `arrival_time`,
+   `check_in_date`). Both tables legitimately have `check_in_date`. Collapsing them destroys the
+   "guest asked for the 5th, we booked the 6th" comparison. The admin UI labels the ops side
+   `admin_*` for this reason — those ~24 EN/AR keys survived the trim and were reused.
+
+2. **The February e-visa "operations console" is NOT ported, and should not be.** It lives only on
+   the unmerged `origin/evisa` (backend `95d426d`) + `origin/Imtnan` (admin `a10fd14`).
+   `merge-base(evisa, e-visa) = a379b35` and `evisa` is not an ancestor of `e-visa` — they are
+   parallel attempts, and hci merged the March one. hci `main` has no trace of the console and its
+   last e-visa commits are 2026-03-03. It also **conflicts**: it drives `e_visa_status` with
+   `pending`/`in_process`/`received` while the shipped lifecycle uses `in_progress`/`issued` — two
+   state machines on one column, `in_process` vs `in_progress` being a silent trap. Its
+   `deriveGuestState()` additionally reads columns that do not exist here and treats
+   `empty($guest->valid_visa)` as "no visa", which with a real boolean makes `null` (never asked)
+   read as eligible.
+
+3. **E-visa eligibility is `valid_visa === false`, strictly.** `valid_visa` is a nullable boolean
+   here (Task 001 Track A), not hci's `'yes'`/`'no'` string: false = declared no visa/iqama =
+   eligible; true = already holds one; **null = never asked** (only foreign nationals are). A
+   `!== true` shortcut would make every Saudi/GCC registrant eligible. The e-visa listing endpoint is
+   hard-scoped to `valid_visa = false` — do not widen it; those rows carry passport-grade PII.
+
+4. **E-visa file I/O is entirely on the `private` disk** (Task 006). hci reads
+   `base_path('public/storage/uploads/...')` and writes `storeAs('public/...')`. Here reads go via
+   `addFromDisk('private', …)`, writes via `Storage::disk('private')->putFileAs()` into
+   `GuestDocumentController::TYPES`, and the package zip saves to the private disk. The visa xlsx is
+   piped into the zip with `Excel::raw()` rather than hci's temp file, so no PII spreadsheet is left
+   on disk.
+
+5. **Bulk guest queries stay on `GuestsController`.** `applyAdminGuestAccessFilter` (the P18.3
+   category scoping) is private there, and hci's `EVisaController` carries a third copy of it.
+   Not duplicated: `EVisaListing`, `ExportVisa` and the four logistics exports live on
+   `GuestsController`; `EVisaController` and `GuestLogisticsController` hold only per-guest,
+   id-keyed operations.
+
+6. **`inferFeatureId` is first-match-wins, and nested pages MUST precede their parent.** Rooms live
+   at `/hotels/[hotel_id]/...`, logistics at `/guests/[slug]/logistics/...`. Both needed their rule
+   inserted ABOVE the broader `/hotels` and `/guests` rules, or the page gates on the wrong feature
+   and renders for an admin whose API calls then 403. Callers pass `router.pathname`, so the literal
+   `[hotel_id]` segment is matchable and exact. This is the bug class already shipped in `sms_logs`.
+
+**Landed (pushed: NO — local on `dev`):** backend `303c629` (hotels/rooms/traveling-status +
+guest_logistics schema, models, controllers, resources, routes, RBAC), `0ed06f3` (4 logistics
+exports), `0ea04fb` (`valid_visa` persistence fix), `89f1673` (e-visa generation, PDF, issued-visa,
+export, listing); admin `8641f65` (hotels/rooms/traveling-status CRUD), `01764ab` (per-guest
+logistics screen + hotel assignment), `83ba223` (e-visa console); frontend `b0e7e49` (`valid_visa`
+sent as a boolean).
+
+**Gates:** backend `pint --test` + `phpstan` **No errors** + `migrate:fresh --seed` clean; admin
+`yarn type-check` + `next build` **123/123 pages**; frontend `yarn type-check` + build clean; EN/AR at
+parity (web 1611/1611). **Mobile contract unaffected** — every new route is `/admin/*`, nothing
+removed or renamed, no `Mobile*` resource touched, so no mobile notice was issued.
+
+**Remaining:** `sendIssuedVisa` is NOT ported — hci `main` emails the issued visa
+(`workflow_value = 'ON_ISSUED_VISA'`, sets `e_visa_status = 'sended'`). `issued_visa_send_count` /
+`issued_visa_sent_at` exist here with casts and the console renders a send-count column, but nothing
+writes them; the columns are kept deliberately for when it is built. Missing prerequisites:
+`categories.issued_visa_email`, `guests.issued_visa_sent`, `guests.issued_visa_sent_by`, and the
+`ON_ISSUED_VISA` workflow value. Also open: the logistics screen's `Promise.all` fails hard for an
+admin with `guest_logistics` but not `guests_listing,see_more`; and manual QA of the whole flow.

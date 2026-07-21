@@ -3,6 +3,38 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-22 — Logistics + e-visa re-added from the P5.trim (Task 019, ledger D32). ⚠️ COMMITTED BUT
+NOT PUSHED — 8 commits sit local on `dev` across backend / admin / frontend.**
+- **What:** hotels, rooms (nested), traveling-status, per-guest `guest_logistics` + 4 exports + the
+  logistics screen with hotel assignment, and e-visa package generation / PDF / issued-visa handling /
+  admin console. Recovered from this repo's own pre-trim code where it still matched (`08d542e^`,
+  `e3a0677^`) and from hci-2026 `origin/main` for e-visa, which is a newer generation than what we
+  deleted (`e_visa_files` with real audit timestamps, not `e_visa_exports`).
+- **Modernized on the way in:** `status` → `is_active` booleans, six string date/time columns → `date` +
+  `string(5)` `HH:mm`, `flight_costs` → decimal, `block`/`activate` → one `toggle-status`, RESTful
+  groups + `admin.can` gating, `useFetch`, `masked-date-input`, `CustomSwitchInputBoolean`.
+- **Six pre-existing defects found and fixed** (none were the task): `valid_visa` silently discarded on
+  every registration; room inventory leaking on re-assignment; `GuestsExportFlights` exporting 20 blank
+  columns; the visa PDF shipping literal `contact-email` placeholder text to embassies; every e-visa
+  admin endpoint 404'ing on the wrong base path; and the `inferFeatureId` first-match-wins trap three
+  times over.
+- **Deliberately NOT ported:** February's e-visa "operations console". It is absent from hci `main`
+  (never merged, abandoned), and it drives `e_visa_status` with `pending`/`in_process`/`received`
+  against the shipped `in_progress`/`issued` — two state machines on one column.
+- **Commits:** backend `303c629`, `0ed06f3`, `0ea04fb`, `89f1673`; admin `8641f65`, `01764ab`,
+  `83ba223`; frontend `b0e7e49`.
+- **Gates:** backend `pint --test` + `phpstan` **No errors** + `migrate:fresh --seed` clean; admin
+  `yarn type-check` + `next build` **123/123**; frontend `type-check` + build clean; EN/AR parity
+  1611/1611. **Mobile contract unaffected** (all new routes `/admin/*`, nothing removed/renamed) — no
+  notice issued.
+- **Still open:** the push itself (the `composer qa` gate runs `php artisan test`, which wipes the dev
+  DB — see the phpunit.xml note below); `sendIssuedVisa` not ported, leaving `issued_visa_send_count` /
+  `issued_visa_sent_at` written by nobody; the logistics screen's `Promise.all` failing hard for an
+  admin with `guest_logistics` but not `guests_listing,see_more`; and manual QA of the whole flow.
+- **⚠️ `phpunit.xml` runs `RefreshDatabase` against the real MySQL dev DB.** The obvious fix
+  (uncommenting the sqlite/`:memory:` lines) makes it worse — 5 failures vs the documented 3, because
+  `EventDaysTest` is MySQL-dependent. Unresolved; it blocks a clean `composer qa`.
+
 **2026-07-21 — Single-channel invitations (D30) + SMS logs (D31) + categories comms restructure + P17 UX
 batch. ALL PUSHED across backend / admin / frontend `dev`; docs on `main`.**
 - **Single-channel invitations (Task 017, ledger D30):** an invitation collection now sends on **exactly one**

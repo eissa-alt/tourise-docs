@@ -53,4 +53,6 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 017 | [single-channel-invitations](017-single-channel-invitations/TASK.md) | done (code) — an invitation collection now sends on exactly one channel (email\|sms; whatsapp reserved); `channel` enum folded into `000006`, scoped template/provider, channel-aware guard + status, channel picker + observability; **reverses the parallel-send half of D29**; ledger D30; gates green; manual QA pending |
 | 018 | [sms-logs](018-sms-logs/TASK.md) | done (code) — read-only guest + invitation SMS log pages mirroring the email logs, new `sms_logs` RBAC feature (view/export); ledger D31; gates green; manual QA pending |
 
+| 019 | [logistics-evisa-port](019-logistics-evisa-port/TASK.md) | done (code) — re-added hotels/rooms, traveling-status, per-guest logistics + 4 exports, and e-visa generation/PDF/console, all modernized to Tasks 001/002/009/010; found and fixed 6 pre-existing defects incl. `valid_visa` being silently discarded on every registration; February's e-visa ops console deliberately NOT ported (dead on hci main); ledger D32; gates green; `sendIssuedVisa` + manual QA pending |
+
 _Add a row per task as you open it; newest at the bottom._
