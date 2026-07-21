@@ -548,7 +548,7 @@ completed it, ported **best-of-both** from cyan (P37.4) + hci and adapted to ALT
    `sharebtn-sections.tsx`.
 7. **`mobile/*` untouched** — new routes are public web only; no mobile contract delta.
 
-**Landed (working tree, on `dev`):** backend — migration + `LinkedInController` + `Category` fillable +
+**Landed (pushed, on `dev` — backend `c9884ca`, admin `c2885c2`, frontend `e8d7991`):** backend — migration + `LinkedInController` + `Category` fillable +
 `CategoriesController` (`getVisibility`+`update`) + `CategoriesResources` + `config/app.php` + `routes/api.php`;
 admin — `categories-form.tsx` + `interfaces/category.tsx` + EN/AR `web.json`; frontend — `linkedin-redirect.tsx`
 + `success/sharebtn-sections.tsx` + `success/success-sections.tsx` + `join/[category]/success.tsx`. **Gates:**
@@ -590,7 +590,7 @@ DB-managed by admins (multi-row, `is_active` + a single `is_default`) exactly li
    admin page set; only the provider-config layer was missing. The follow-up "new SMS tasks" the user flagged
    will surface those. **`mobile/*` untouched** — new routes are admin-only.
 
-**Landed (working tree, on `dev`):** backend — migration + `SmsProviderConfig` + `SmsProviderConfigResource`
+**Landed (pushed, on `dev` — backend `96a15ce`, admin `661f134`):** backend — migration + `SmsProviderConfig` + `SmsProviderConfigResource`
 + `SmsProviderConfigController` + `Services/Sms/SmsSender` + `SendGuestSMSListener` (rewired) +
 `AdminPermissions` + `config/services.php` (unifonic removed) + `GuestsController` + `routes/{api,web}.php` +
 `phpstan-baseline.neon`; admin — `interfaces/sms-provider-config.ts` + `admin-modules/sms/provider-configs/*`
@@ -625,7 +625,7 @@ Task: [../tasks/015-per-flow-smtp-override/TASK.md](../tasks/015-per-flow-smtp-o
 7. **`mobile/*` untouched** — only an admin select route was added; public/OTP request/response shapes
    unchanged.
 
-**Landed (working tree, on `dev`):** backend — migration + `applyConfigById` + snapshot wiring in
+**Landed (pushed, on `dev` — backend `2adc387`, admin `76ae079`):** backend — migration + `applyConfigById` + snapshot wiring in
 `GuestsController` / `InvitationEmail::createFromInvitation` / automation expansion + notification
 `toMail()` paths + `AuthController` guest OTP + validation/resources + `smtp-configs/select`; admin —
 `smtp-config-select` + pickers on category / automation / invitation / invitation-collection forms + EN/AR.
@@ -659,7 +659,7 @@ Task: [../tasks/014-otp-sms-dynamic-config/TASK.md](../tasks/014-otp-sms-dynamic
 5. **`mobile/*` untouched** — `phone-verification` request/response shapes unchanged; only an admin select
    route was added. Mobile login-OTP (separate path) not in scope.
 
-**Landed (working tree, on `dev`):** backend — migration `000005` + `AuthController::phoneVerification`
+**Landed (pushed, on `dev` — backend `ae2ad17`, admin `568e56a`):** backend — migration `000005` + `AuthController::phoneVerification`
 rewritten (FGC methods deleted) + `SendGuestSMSListener` honours the snapshot + `GuestsController` register/
 resend snapshot + `Category`/`GuestSMS` fillable + `CategoriesController` validation/persist +
 `CategoriesResources` + `SmsProviderConfigController::selectList` + route. admin — `sms-provider-config-select`
@@ -696,7 +696,7 @@ Task: [../tasks/016-sms-flow-parity/TASK.md](../tasks/016-sms-flow-parity/TASK.m
 5. **Out of scope:** OTP text stays inline (D28); `SmsSender` remains Unifonic-only; **`mobile/*`
    untouched** (only admin forms/routes changed).
 
-**Landed (working tree, on `dev`):** backend — migrations `000006` (invitation SMS) + `000007` (automation
+**Landed (pushed, on `dev` — backend `7ba6152`, admin `79f1995`):** backend — migrations `000006` (invitation SMS) + `000007` (automation
 SMS); `InvitationSms` model + `SendInvitationSmsEvent`/`SendInvitationSmsListener` (+ `EventServiceProvider`);
 `InvitationsController` / `InvitationsCollectionController` persist + dispatch; `AutomationSetupsController`
 store/split persist; `AutomationController::send` dispatches guest_sms; `AutomationSetup` /

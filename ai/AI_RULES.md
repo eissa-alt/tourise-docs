@@ -20,7 +20,7 @@ Binding rules for any AI agent operating in this repo.
 2. **Do not bump framework versions** (Next, React, Laravel, PHP) without an explicit task and a dedicated branch. This project is still Next 12 / React 17.
 3. **Do not break the mobile API contract.** If a change is unavoidable, the `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.*` file gets a matching update in the same PR.
 4. **Do not delete or replace** `components/admin-modules/guests/froms/` (admin) or `components/join/forms/pif/` / `components/join/forms/clientA/` (frontend). cyan-basecode retired that pattern — PIF has not.
-5. **Do not remove Sentry config files** in any of the three Next apps.
+5. **Do not re-add Sentry.** It was removed from admin, frontend and backend by the OWASP hardening; there are no `sentry.*.config.ts` files left and neither `@sentry/nextjs` nor `sentry/sentry-laravel` should return (CLAUDE.md hard rule 3).
 6. **Do not introduce new dependencies** without justification.
 7. **Do not rename files, classes, or routes** unless required by the task.
 8. **Do not edit `assets*/`, `badges/`, `documents/`, `fav/`, `fonts/`, `seo/`, `tech docs/`, `import_Test/`** one level above this repos folder — those are client-supplied assets and one-off sheets, not code.

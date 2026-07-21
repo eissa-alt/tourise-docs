@@ -23,7 +23,7 @@ yarn type-check                         # tsc only
 yarn production                         # full build → catches lint + type errors
 ```
 
-`.env.*` files are gitignored. `yarn.lock` is committed — do not switch to npm. Sentry is wired in all three Next apps — keep the three `sentry.*.config.ts` files in place.
+`.env.*` files are gitignored. `yarn.lock` is committed — do not switch to npm. **Sentry has been removed** (admin + frontend + backend) by the OWASP hardening — there are no `sentry.*.config.ts` files and `@sentry/nextjs` / `sentry/sentry-laravel` must not be re-added (CLAUDE.md hard rule 3). Note there are **two** Next apps, not three; the `-landing` app was dropped (ledger D2).
 
 ## End-to-end "add a feature" flow
 

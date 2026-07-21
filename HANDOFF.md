@@ -504,7 +504,12 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 + docs cleanup (dropped the `-landing` app). `origin` is set on all repos
 (`github.com/eissa-alt/alt-static-basecode-*`) and each branch tracks + matches its upstream.
 
-## Current SHAs (all pushed, in sync with `origin`)
+## SHAs as of 2026-07-06 — HISTORICAL, do not read as current
+
+> ⚠️ This snapshot is 102 backend commits stale (`4e1d532` was HEAD on 2026-07-06). It is kept as a
+> record of that session, not as the current state — see the dated entries at the top of this file.
+> Everything below this line is likewise historical: statements about gates, versions and outstanding
+> work were true when written and have not been rewritten.
 
 - `alt-backend` — `dev` = `main` @ `4e1d532` (PR #1 merge). Forgot-password backend at `a8184ca`; admin
   email-invite / `password_mode` **backend** flow at `04001b3` (P2.ST8). **Backend uses `dev`** and PRs
@@ -570,7 +575,9 @@ Prettier 3, zero lint warnings, husky + lint-staged, GTM removed) + dead-depende
 - **Admin / Frontend:** `yarn type-check` + `yarn production` **green**; ESLint **0 warnings**. The
   pre-commit hook enforces Prettier/ESLint autofix on every commit.
 - **Backend:** `pint --dirty --test` **green** on the forgot-password change. Run `php artisan test`
-  before the next backend push. (Repo isn't Pint-clean at baseline — always use `pint --dirty`.)
+  before the next backend push. (Repo wasn't Pint-clean at baseline then — the advice at the time was
+  `pint --dirty`. **Superseded:** ledger D10 made the repo Pint-clean and the gate is now the full
+  `pint --test`; see CLAUDE.md hard rule 5.)
 - **SMTP smoke test: DONE** — invite + reset-password email delivery verified against the active DB SMTP
   config (`DynamicSmtpService`).
 
