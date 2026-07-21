@@ -705,3 +705,71 @@ resources expose the fields. admin — SMS template + provider pickers on invita
 automation forms; `with_sms_template` toggle; `sms-template-select` `errors` prop made optional; interfaces +
 EN/AR (`sms_override`, `with_sms_template`). **Gates:** backend `pint --test` **passed** + `phpstan` **No
 errors**; admin `yarn type-check` + eslint green. **Remaining:** manual QA with a real active SMS provider.
+
+## D30 — 2026-07-21 — Invitations send on a single delivery channel (email | sms), not both
+
+**Reverses the parallel-send half of D29.** D29 wired an SMS twin *alongside* the invitation email, so a
+collection could fire both at once. In practice that made status, error-tracking, and "resend" ambiguous
+(resend *what* — the email, the SMS, or both?). An invitation collection now picks **exactly one** channel.
+Task: [../tasks/017-single-channel-invitations/TASK.md](../tasks/017-single-channel-invitations/TASK.md).
+
+**Durable decisions:**
+1. **`channel` enum on `invitation_collections` + `invitations`** (`email` | `sms`; `whatsapp` reserved but
+   rejected server-side), default `email`, folded into migration `2026_07_20_000006`. The store/update paths
+   **scope the template + provider to the chosen channel** and null the other side, so only that channel can
+   fire. `extractBulk` and the collection edit propagate `channel` down to child invitations (sends read the
+   per-row snapshot).
+2. **Admin picks the channel up-front** via a dropdown, and unconfigured channels are **disabled** (gated on
+   a configured default SMTP / SMS provider) with a link to set them up — you can't choose a channel you
+   can't send on. Overrides follow the category switch-before-dropdown pattern (toggle on → show picker).
+3. **Status is channel-agnostic** — a successful SMS send bumps `invitation.is_sent` / `send_count` exactly
+   like email, and the `invite` guard checks `phone` for SMS collections (not `email`). Resend re-sends the
+   one channel the collection is on.
+4. **Observability:** `InvitationResource` exposes `channel` + `sms_template_name`; the listing shows a
+   channel badge and the see-more modal has an SMS-history tab twinning the email history.
+5. **WhatsApp is deliberately deferred** — reserved in the picker as a disabled "coming soon" option; the
+   next channel task, not this one.
+
+**Landed (pushed, on `dev`):** backend `0fcd3c5` (`InvitationsController` / `InvitationsCollectionController`
+scope + propagate, channel-aware guard, SMS status bump; `Invitation`/`InvitationCollection` fillable +
+`smsTemplate` relation; `Invitation`/`InvitationCollection` resources; migration `000006` channel column);
+admin `f1589df` (channel picker + per-channel override sections on the create + collection-edit forms;
+channel badge in listing; SMS-history tab; wider bulk-send modal with channel/phone/template columns;
+reorganized update-info modal; `DialogShell` 4xl/5xl; `ui-select` disabled options; titles preloaded once;
+interfaces + EN/AR). **Gates:** backend `pint --test` + `phpstan` **No errors**; admin `yarn type-check` +
+eslint green. **Remaining:** manual QA with a real active provider.
+
+## D31 — 2026-07-21 — Category communications restructured (master email/SMS gates + `with_email_otp` rename) + SMS log observability
+
+Two related consolidations. Task:
+[../tasks/018-sms-logs/TASK.md](../tasks/018-sms-logs/TASK.md) (logs) and the categories comms work folded
+into 017's session.
+
+**Durable decisions:**
+1. **Master channel switches `with_email` / `with_sms`** on categories, enforced centrally in
+   `Category::getNotificationTemplate` — when a master flag is off the backend returns no template for that
+   channel, so it **never sends** on it regardless of per-event settings. Child per-event values are kept
+   (turning the master off hides but doesn't destroy them).
+2. **`with_otp` → `with_email_otp` rename** for symmetry with the pre-existing `with_sms_otp`. Value/meaning
+   unchanged (category requires an email-OTP step). Cross-repo lockstep: backend resource + guest OTP guard,
+   admin form, **and** the public frontend join pages (they read the flag off the category payload and pass
+   it as `withOtp` — miss one and email OTP silently disables). **Mobile payload rename** — invitation-verify
+   responses now return `with_email_otp`; documented in
+   [../mobile/MOBILE_NOTICE_CATEGORY_WITH_EMAIL_OTP_RENAME.md](../mobile/MOBILE_NOTICE_CATEGORY_WITH_EMAIL_OTP_RENAME.md).
+   Both flag changes folded into the categories migration (no new migration — `migrate:fresh` workflow).
+3. **Admin-access scope on the categories form** — a new "Admin access" tab lists every admin (any
+   role/status) so a fresh category can be dropped into their data scope at create/edit time, backed by a new
+   `GET admin/categories/assignable-admins` endpoint.
+4. **SMS logs** — read-only guest + invitation SMS log listings mirroring the email logs, behind a new
+   `sms_logs` RBAC feature (`view` / `export`). `guest_sms` and `invitation_sms` each get a
+   controller/resource/export + a super-gated admin page under `/logs`, beside the email logs in the sidebar.
+   Note: SMS `is_sent` is a real boolean (email logs use `yes`/`no` strings), and SMS has no
+   delivered/open/click, so those columns are intentionally dropped.
+
+**Landed (pushed, on `dev`):** backend `3c73f0f` (categories comms + `assignableAdmins` + `with_email_otp`
+rename across resource/model/migration/seeder/export + guest OTP guard) + `34e09e7` (SMS log
+controllers/resources/exports + `sms_logs` permission + routes); admin `702d9b1` (admin-access tab +
+validation-error surfacing + form width/gating) + `8b0960f` (SMS log pages + sidebar) + `69ddd13`/`4c83678`/
+`2cf9409`/`4c83678` (earlier P17 comms/status UI); frontend `0d0d82b` (join pages read `with_email_otp`).
+**Gates:** backend `pint --test` + `phpstan` **No errors**; admin + frontend `yarn type-check` + eslint
+green. **Remaining:** manual QA with live providers.

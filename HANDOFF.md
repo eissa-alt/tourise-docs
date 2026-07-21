@@ -3,6 +3,37 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-21 — Single-channel invitations (D30) + SMS logs (D31) + categories comms restructure + P17 UX
+batch. ALL PUSHED across backend / admin / frontend `dev`; docs on `main`.**
+- **Single-channel invitations (Task 017, ledger D30):** an invitation collection now sends on **exactly one**
+  channel (`email` | `sms`; `whatsapp` reserved/disabled), reversing D29's parallel send. `channel` enum
+  folded into migration `000006`; store/update scope the template + provider to the chosen channel; extract +
+  collection-edit propagate `channel`; `invite` guard is channel-aware (checks `phone` for SMS); SMS success
+  bumps `is_sent`/`send_count`. Admin: channel picker gated on a configured default (disabled + link when
+  not), per-channel override sections on **both** create and collection-edit forms, channel badge in listing,
+  SMS-history tab in see-more, wider bulk-send modal (channel/phone/template columns), reorganized update-info
+  modal, `DialogShell` 4xl/5xl. Backend `0fcd3c5`, admin `f1589df`.
+- **SMS logs (Task 018, ledger D31):** read-only Guest SMS + Invitation SMS log pages mirroring the email
+  logs, behind a new `sms_logs` RBAC feature (view/export); `guest_sms` + `invitation_sms` each get a
+  controller/resource/export + super-gated `/logs/*` page + sidebar link. Backend `34e09e7`, admin `8b0960f`.
+- **Categories comms restructure (ledger D31):** master `with_email` / `with_sms` switches, **enforced** in
+  `Category::getNotificationTemplate` (master off → never sends on that channel); `with_otp` →
+  `with_email_otp` rename in lockstep across backend + admin + **frontend join pages** (mobile payload rename
+  → notice `docs/mobile/MOBILE_NOTICE_CATEGORY_WITH_EMAIL_OTP_RENAME.md`); new "Admin access" tab +
+  `assignable-admins` endpoint; validation-error surfacing; form width/gating. Backend `3c73f0f`, admin
+  `702d9b1`, frontend `0d0d82b`.
+- **P17 UX batch (earlier this session, admin):** gate scanning → its own `/gate-scan` page (`dac5c14`);
+  sidebar SMS grouped under Communications + SMS-templates link (`2cf9409`); categories 5-tab form + provider
+  override switches + OTP gating (`4c83678`); status dropdown → toggle switch across entity forms (`69ddd13`).
+  Seeder: categories seeded with OTP off until a default SMTP exists (backend `c50ebb8`).
+- **Also:** guests listing bottom spacing (admin `8c57f55`); the previously-unpushed LinkedIn OAuth commit
+  (frontend `e8d7991`, Task 012) was pushed in the same round.
+- **Gates:** backend `pint --test` + `phpstan` **No errors**; `composer qa` tests **465 pass / 3 fail** (the
+  3 are pre-existing avatar-URL + `/`→403 env failures — verified my diff touches none of those areas). Admin
+  + frontend `yarn type-check` + eslint/prettier (husky) green. **`yarn production` NOT run** — needs the
+  gitignored `.env.production`. **Remaining:** manual QA with live SMTP/SMS providers; automation-form UX
+  polish (mirror the invitations pass); WhatsApp channel (deliberately deferred — next big piece).
+
 **2026-07-20 — Task 016 (SMS flow parity) code COMPLETE across backend + admin `dev` (ledger D29). ⚠️
 Backend + admin + docs are UNCOMMITTED working-tree changes.**
 - **What:** closes the SMS-vs-email gaps. Before, SMS only fired on register-complete + phone-OTP; now it
