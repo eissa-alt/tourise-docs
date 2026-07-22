@@ -19,7 +19,7 @@ Binding rules for any AI agent operating in this repo.
 1. **Do not touch `.env*` files** or the deploy key `alt-static-basecode.pem` (one level above the repos folder).
 2. **Do not bump framework versions** (Next, React, Laravel, PHP) without an explicit task and a dedicated branch. This project is still Next 12 / React 17.
 3. **Do not break the mobile API contract.** If a change is unavoidable, the `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.*` file gets a matching update in the same PR.
-4. **Do not delete or replace** `components/admin-modules/guests/froms/` (admin) or `components/join/forms/pif/` / `components/join/forms/clientA/` (frontend). cyan-basecode retired that pattern — PIF has not.
+4. **Do not delete or replace the form-shapes pattern** — `components/admin-modules/guests/froms/` (admin) and `components/join/forms/` (frontend), driven by `FORM_SHAPES_CONFIG` + the `loadStepComponent` registries. cyan-basecode retired that pattern; this baseline has not, and CLAUDE.md hard rule 4 still stands (do not port cyan's `DynamicFormRenderer`). The *pattern* is protected, not the client folder names: the `pif/` subtree was renamed to `default/` in P22.1 (the baseline ships no client-branded shapes), so a future clone renames `default/` → its own client rather than resurrecting `pif/`.
 5. **Do not re-add Sentry.** It was removed from admin, frontend and backend by the OWASP hardening; there are no `sentry.*.config.ts` files left and neither `@sentry/nextjs` nor `sentry/sentry-laravel` should return (CLAUDE.md hard rule 3).
 6. **Do not introduce new dependencies** without justification.
 7. **Do not rename files, classes, or routes** unless required by the task.
