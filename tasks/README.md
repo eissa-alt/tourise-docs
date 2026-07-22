@@ -56,3 +56,13 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 019 | [logistics-evisa-port](019-logistics-evisa-port/TASK.md) | done (code) — re-added hotels/rooms, traveling-status, per-guest logistics + 4 exports, and e-visa generation/PDF/console, all modernized to Tasks 001/002/009/010; found and fixed 6 pre-existing defects incl. `valid_visa` being silently discarded on every registration; February's e-visa ops console deliberately NOT ported (dead on hci main); ledger D32; gates green; `sendIssuedVisa` + manual QA pending |
 
 _Add a row per task as you open it; newest at the bottom._
+
+## Parked buckets
+
+Not tasks — batches of follow-ups an owner explicitly chose to defer. Read before opening new work in
+the same area, so a known-parked item isn't rediscovered as a "bug".
+
+| File | Covers | Status |
+|---|---|---|
+| [PHASE3_PARKED_TODO.md](PHASE3_PARKED_TODO.md) | admin/frontend code-quality audit leftovers | closed 2026-07-19 |
+| [PHASE22_PARKED_TODO.md](PHASE22_PARKED_TODO.md) | follow-ups surfaced by the P22 client-name sweep | **open** — parked 2026-07-22 |

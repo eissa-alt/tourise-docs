@@ -3,6 +3,31 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
+**2026-07-22 (latest) — P22 client-name sweep (P22.1–P22.6). ALL PUSHED.**
+- **Every past-client name is out of the three code repos** — PIF, HCI, EDGEx, TOURISE, DeveGO, plus
+  dead FAF/DGCA/ICAO templates. `components/join/forms/pif/` is now `forms/default/`; `pif-one-step`
+  was deleted rather than renamed (no category used it and the form-shape select never offered it).
+  `docs/ai/AI_RULES.md` rule 4 was rewritten in the same breath: it protects the *form-shapes pattern*,
+  not the `pif/` folder name, so a clone renames `default/` rather than resurrecting `pif/`.
+- **Two dead-code finds carried real branding.** `emails/notify_guest/{en,ar}` (12 hardcoded
+  @hci_ksa social links) had **zero** references anywhere — the live guest-email path is
+  `emails.base.waypoint`, which renders socials from the `social_media_links` table.
+- **The invitation-PDF feature is parked, not fixed** (`343e6e8`, `efabc6d`). Four call sites loaded
+  `pdf.invitation`, a view that has **never existed in this repo's history**; `dinner_invite` is not a
+  column either. Routes, the automation attachment branch and the admin toggle are gone; the DB column
+  and API contract are untouched, so re-enabling needs no migration.
+- **Badge QR codes now render locally** (`9d4d5f3`). They used to `<img src>` api.qrserver.com, so mPDF
+  made an outbound request per badge — printing hung when that service was slow, and every guest's
+  registration number went to a third party. New `App\Services\QrCodeGenerator`; badge printing
+  **manually confirmed** by the owner. Note: **no automated test covers badge/PDF rendering.**
+- **⚠️ The email QR still calls qrserver.com on purpose** — Gmail/Outlook strip `data:` images, so the
+  PDF fix does not transfer. Parked with the decision written up.
+- **Commits:** backend `57f6d19`, `8a937d4`, `343e6e8`, `9d4d5f3`; admin `2c1cb75`, `cdaf902`,
+  `4b27162`, `efabc6d`; frontend `3822549`, `52f6ebf`, `aa78591`; docs `ed5d187`.
+- **Parked follow-ups → [`tasks/PHASE22_PARKED_TODO.md`](tasks/PHASE22_PARKED_TODO.md)** — the email QR,
+  the ledger debt below, 622 unused translation keys, branded PDF backgrounds needing real artwork, and
+  the test-coverage gaps. **Read it before starting work in any of those areas.**
+
 **2026-07-22 (later) — P20 correction pass (ledger D33). ALL PUSHED.**
 - **`inferFeatureId` swept, not spot-checked.** The first-match-wins trap turned up **six** times, two
   of them in already-shipped code: `sms_logs` (`/logs/*-sms` gated on `email_logs`, shipped P18.2),
