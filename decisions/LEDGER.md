@@ -894,3 +894,43 @@ appears and the page refuses, or the page renders and the API 403s.
   compare through the model cast. With the avatar fixtures and the stock `ExampleTest` also fixed,
   `composer qa` is green end to end (467/0) and the documented "465 pass / 3 pre-existing" baseline is
   retired.
+
+## D34 — 2026-07-22 — E-Visa lifecycle closes: `sent` is the terminal state, and `check:rbac` guards the map
+
+**Durable decisions:**
+
+1. **The e-visa lifecycle is `null → in_progress → issued → sent`.** `sent` is written by
+   `EVisaController::sendIssued` when the issued visa is emailed to the guest. hci `main` uses the
+   typo'd `'sended'` for this state — alt does **not**; anything ported from hci that compares against
+   `'sended'` is wrong here.
+2. **`sendIssuedVisa` reuses the existing guest-email machinery**, it does not send mail directly: a
+   `GuestEmail` row with `workflow_value = 'ON_ISSUED_VISA'` plus `SendGuestEmailEvent`, exactly like
+   the other category-driven notifications. That inherits the D27 per-flow SMTP override for free.
+3. **`categories.issued_visa_email` is the template selector**, nullable FK → `email_templates`,
+   picked on the category form's actions tab, ungated (there is no `with_issued_visa` toggle). The
+   send endpoint 422s with a message naming that exact path when it is unset.
+4. **`guests.issued_visa_sent` from hci was deliberately NOT added.** `issued_visa_sent_at` is a
+   nullable timestamp and already encodes "has it been sent"; a parallel `'yes'`/`'no'` string would be
+   a second source of truth. `issued_visa_sent_by` (FK → admins) *was* added, for the audit trail.
+5. **Re-sending is intentional.** Every send increments `issued_visa_send_count`; the confirm step
+   tells the operator how many times the guest has already received it. Do not "fix" this into a
+   one-shot.
+
+**A process note worth keeping.** The two lanes that built this each did their job correctly and the
+result was still unusable: the backend required `categories.issued_visa_email` and 422'd with "set it
+in Categories → …", while nothing in the admin could set it, because that lane was scoped to the
+e-visa console. Neither lane was wrong; the SEAM was. When splitting work, the thing to verify is not
+each half but the path a user actually walks through both.
+
+**Guard added:** `yarn check:rbac` (admin, zero-dependency) cross-checks every sidebar `featureId`
+against `inferFeatureIdFromPath(href)` and against the backend catalog, exiting non-zero on
+disagreement. Written because the D33 trap had produced six bugs and every one was mechanically
+detectable. Consider running it beside `yarn type-check` in the gate.
+
+**Landed (pushed, on `dev`):** backend `6219994`; admin `1416537` (check:rbac) and its parent (send
+action + category picker). **Gates:** `composer qa` green (pint + phpstan + 467/0);
+`yarn type-check` + `next build` 123/123; EN/AR parity 1618/1618; `migrate:fresh --seed` clean with
+both new columns.
+
+**Remaining:** none of Task 019, P20 or P21 has been exercised in a browser. The e-visa **send**
+action in particular has never been run — it emails a real guest via a real template.

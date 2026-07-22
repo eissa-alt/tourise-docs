@@ -1,6 +1,6 @@
 # Task 019 — Re-add logistics + e-visa (ported from hci-2026)
 
-- **Status:** `done (code)` — manual QA pending
+- **Status:** `done (code)` — manual QA pending (nothing has been opened in a browser)
 - **Opened:** 2026-07-21
 - **Owner:** AI agent
 - **Sub-app(s):** backend + admin + frontend (+ docs)
@@ -26,8 +26,9 @@ re-add plus a modernization, not a revert.
   (`guest_logistics`), the four logistics exports, the per-guest logistics screen with hotel
   assignment, e-visa package generation + PDF + issued-visa handling, the e-visa admin console,
   and the `valid_visa` registration fix found en route.
-- **Out:** the February e-visa "operations console" (see Decisions), `sendIssuedVisa` (see Open),
-  the tiers module (removed by the same trim, not being restored).
+- **Out:** the February e-visa "operations console" (see Decisions), the tiers module (removed by
+  the same trim, not being restored). `sendIssuedVisa` was initially out of scope and was completed
+  afterwards as P21 — see Open.
 
 ## Log
 
@@ -38,6 +39,10 @@ re-add plus a modernization, not a revert.
 - 2026-07-22 — P19.5: `valid_visa` persistence fix (backend + frontend).
 - 2026-07-22 — P19.6 / P19.7: e-visa generation, PDF, admin console.
 - 2026-07-22 — P4 (ops console) dropped on evidence; see Decisions.
+- 2026-07-22 — P19.8: test suite stopped wiping the dev DB; `composer qa` green 467/0.
+- 2026-07-22 — P20: correction pass (ledger D33) — RBAC sweep, the logistics 404, the 403 policy,
+  `CategoriesExport`, and the stale agent-facing docs.
+- 2026-07-22 — P21: `sendIssuedVisa` completed + `yarn check:rbac` added.
 
 ## Decisions
 
@@ -85,22 +90,37 @@ Promoted to the ledger as **D32**.
 6. **`inferFeatureId` first-match-wins**, three times: rooms live under `/hotels/[hotel_id]`,
    logistics under `/guests/[slug]`, and e-visa needed its own rule. Each needs its specific rule
    ordered BEFORE the broader one or the page gates on the wrong feature — the same bug class
-   already shipped in `sms_logs` (P18.2, still open).
+   already shipped in `sms_logs` (P18.2). Fixed in P20.1, along with two further long-standing cases
+   (`/emails/smtp-configs`, `/gate-scan`) found by sweeping every link instead of spot-checking.
+   Six instances total; promoted to ledger **D33** with a `yarn check:rbac` guard.
+7. **The logistics screen 404'd on every load.** It called `/admin/guests/...` while the admin axios
+   base already ends in `/api/admin`. It shipped that way in P19.4 and was caught only when re-reading
+   the code to answer a question — build and type-check both passed. Fixed in P20.3.
+8. **`CategoriesExport` printed 20 values under 21 headings** (`map()` omitted `visibility`), shifting
+   every column from position 6. Pre-existing; fixed in P20.2.
+9. **The test suite wiped the dev database.** `phpunit.xml` had sqlite/`:memory:` commented out, so
+   `php artisan test` ran `RefreshDatabase` against the real MySQL dev DB. Fixed in P19.8, together
+   with the three long-standing failures — `composer qa` is now green end to end (467/0).
 
 ## Open / follow-up
 
-- **`sendIssuedVisa` is not ported.** hci `main` emails the issued visa to the guest via a
-  `GuestEmail` with `workflow_value = 'ON_ISSUED_VISA'`, increments `issued_visa_send_count`, stamps
-  `issued_visa_sent_at` and sets `e_visa_status = 'sended'`. `issued_visa_send_count` and
-  `issued_visa_sent_at` exist here with casts, and the console renders a send-count column, but
-  **nothing writes them**. Kept deliberately (this is a basecode; the columns will be wanted).
-  Missing prerequisites: `categories.issued_visa_email`, `guests.issued_visa_sent`,
-  `guests.issued_visa_sent_by`, and the `ON_ISSUED_VISA` workflow value.
-- **Logistics screen 403 fragility.** It loads the guest (gated `guests_listing,see_more`) and the
-  logistics record in one `Promise.all`, so an admin holding `guest_logistics` but not `see_more`
-  fails the whole load instead of degrading. Needs a policy call on how `guest_logistics` is granted.
+- ✅ **`sendIssuedVisa` — DONE (2026-07-22, P21).** Backend `6219994`, admin `1416537`'s parent.
+  Adds `categories.issued_visa_email` + `guests.issued_visa_sent_by`, `EVisaController::sendIssued`
+  (GuestEmail with `workflow_value = ON_ISSUED_VISA` -> `SendGuestEmailEvent`, increments the send
+  count, stamps sent_at/sent_by in a transaction), `POST admin/guests/{id}/e-visa/send`, the admin
+  send action, and the category template picker. Status value is **`sent`**, not hci's typo'd
+  `sended`; lifecycle is now null -> in_progress -> issued -> sent. `issued_visa_send_count` /
+  `issued_visa_sent_at` are no longer orphans.
+- ✅ **Logistics screen 403 — RESOLVED (P20.5).** The guest leg of the `Promise.all` is now tolerant:
+  when it fails, `canReadGuest` goes false, the guest-declared fields are hidden rather than shown
+  blank, and they are dropped from the PUT so a logistics-only admin cannot null values they were
+  never shown. A logistics-only role stays viable; grant both permissions together for the strict
+  reading, no code change needed.
 - **TypeGate drift.** The logistics page uses `TypeGate` (which resolves via `inferFeatureIdFromPath`);
   sibling guest pages still pass legacy `types` arrays. Worth its own cleanup task.
+- ⚠️ **Nothing has been opened in a browser.** Every claim above is type-check / build / phpstan /
+  unit-test. The logistics screen is the priority — it shipped 404'ing and has had zero real use —
+  and the e-visa **send** action has never been run at all (it emails a real guest).
 - Manual QA: create a hotel → add rooms → assign a guest → set dates via the masked input → export
   accommodation/flights → generate an e-visa package → upload an issued file. Verify RBAC by logging
   in without each new feature and confirming the sidebar link and the page gate agree.
@@ -113,3 +133,6 @@ Promoted to the ledger as **D32**.
 | P19.3 / P19.4 | `0ed06f3` | `01764ab` | — |
 | P19.5 | `0ea04fb` | — | `b0e7e49` |
 | P19.6 / P19.7 | `89f1673` | `83ba223` | — |
+| P19.8 (test suite) | `c9bbdf9` | — | — |
+| P20 (corrections) | `ecce5a6` | `621abdb`, `7193f6f`, `1bd50e5`, `436d225` | — |
+| P21 (send issued visa) | `6219994` | `1416537` + parent | — |
