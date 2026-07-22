@@ -3,8 +3,32 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-22 — Logistics + e-visa re-added from the P5.trim (Task 019, ledger D32). ⚠️ COMMITTED BUT
-NOT PUSHED — 8 commits sit local on `dev` across backend / admin / frontend.**
+**2026-07-22 (later) — P20 correction pass (ledger D33). ALL PUSHED.**
+- **`inferFeatureId` swept, not spot-checked.** The first-match-wins trap turned up **six** times, two
+  of them in already-shipped code: `sms_logs` (`/logs/*-sms` gated on `email_logs`, shipped P18.2),
+  `/emails/smtp-configs` and `/gate-scan` (both long-standing, the latter defeating the gate-agent role
+  D23 exists for). A ~20-line script comparing every live sidebar link's declared `featureId` against
+  `inferFeatureIdFromPath(href)` found the two nobody had spotted. **All 28 live links now agree —
+  turn that script into a test.**
+- **The logistics screen was dead on arrival** (`7193f6f`). It called `/admin/guests/...` while the
+  admin axios base already ends in `/api/admin`, so every request 404'd and the screen rendered its
+  error state on every load. It shipped that way in P19.4 and was only caught when re-reading the code
+  to answer a question. **Rule: admin Axios paths never carry an `/admin/` prefix.**
+- **Logistics 403 resolved** (`436d225`): the loader's `Promise.all` spans two features, so the guest
+  leg is now tolerant — it hides the guest-declared fields when unreadable and drops them from the PUT
+  so they cannot be nulled unseen. A logistics-only role stays viable.
+- **`CategoriesExport` column shift** (`ecce5a6`): `map()` omitted `visibility`, printing 20 values
+  under 21 headings.
+- **`composer qa` is green end to end (467/0)** (`c9bbdf9`) and **`php artisan test` no longer wipes the
+  dev database** — `phpunit.xml` now pins sqlite `:memory:`. The "465 pass / 3 pre-existing" baseline is
+  retired; treat any failure as real.
+- **Commits:** backend `ecce5a6`, `c9bbdf9`; admin `621abdb`, `7193f6f`, `1bd50e5`, `436d225`.
+- **⚠️ Still unexercised:** none of Task 019 or P20 has been opened in a browser. The logistics screen
+  is the priority — it has had zero real use. RBAC needs a real restricted login too; the sweep proves
+  the map is self-consistent, not that the whole chain works.
+
+**2026-07-22 — Logistics + e-visa re-added from the P5.trim (Task 019, ledger D32). Since PUSHED —
+8 commits across backend / admin / frontend / docs.**
 - **What:** hotels, rooms (nested), traveling-status, per-guest `guest_logistics` + 4 exports + the
   logistics screen with hotel assignment, and e-visa package generation / PDF / issued-visa handling /
   admin console. Recovered from this repo's own pre-trim code where it still matched (`08d542e^`,

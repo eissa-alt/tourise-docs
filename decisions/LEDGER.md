@@ -846,3 +846,51 @@ writes them; the columns are kept deliberately for when it is built. Missing pre
 `categories.issued_visa_email`, `guests.issued_visa_sent`, `guests.issued_visa_sent_by`, and the
 `ON_ISSUED_VISA` workflow value. Also open: the logistics screen's `Promise.all` fails hard for an
 admin with `guest_logistics` but not `guests_listing,see_more`; and manual QA of the whole flow.
+
+## D33 — 2026-07-22 — `inferFeatureId` is first-match-wins: six mismatches found, and the sweep that finds the seventh
+
+Closing out Task 019 surfaced the same defect class six times, twice in code that had already
+shipped. `utils/inferFeatureId.ts` maps a route to its RBAC feature by `Array.find` — **first match
+wins** — and it is consumed by `TypeGate` (page access) and `TopSection` (action buttons), while the
+sidebar carries its own hand-declared `featureId`. When the two disagree, nothing errors: the link
+appears and the page refuses, or the page renders and the API 403s.
+
+**Durable rules:**
+
+1. **A nested route MUST be registered above its parent.** `/hotels/[hotel_id]/...`,
+   `/guests/[slug]/logistics/...`, `/logs/(guest|invitation)-sms`, `/emails/smtp-configs` all sit
+   under a broader rule that would otherwise swallow them.
+2. **Callers pass `router.pathname`**, i.e. the Next route PATTERN with the parameter name intact
+   (`/hotels/[hotel_id]/rooms/create`) — never a resolved id. Matching the literal `[hotel_id]` is
+   therefore exact, and lets a rule cover a detail page without also matching sibling static routes
+   like `/hotels/create`.
+3. **Every new page needs a rule.** A missing rule resolves to `null`, and `TypeGate`/`TopSection`
+   then fall back to Super-Admin only — which silently defeats a purpose-built feature (see
+   `/gate-scan`, where the whole point of the `scanning` feature from D23 is a gate-agent role that
+   is not a super admin).
+4. **The sidebar's declared `featureId` and `inferFeatureIdFromPath(href)` must agree.** This is
+   mechanically checkable and should be a test — a ~20-line script parsing both files caught the two
+   pre-existing cases (`/emails/smtp-configs`, `/gate-scan`) that six rounds of human/agent review had
+   missed. All 28 live sidebar links now agree.
+
+**Instances:** rooms, guest logistics and e-visa (caught during Task 019, never shipped wrong);
+`sms_logs` (shipped in P18.2 — `/logs/guest-sms` + `/logs/invitation-sms` gated on `email_logs`);
+`/emails/smtp-configs` and `/gate-scan` (both long-standing).
+
+**Also landed in this pass (P20):**
+- admin `621abdb` sms_logs rules; `1bd50e5` smtp-configs + gate-scan rules
+- admin `7193f6f` — the logistics screen called `/admin/guests/...` while the axios base already ends
+  in `/api/admin`, so every request 404'd and the screen rendered its error state on every load. It
+  shipped that way in P19.4. **Rule: admin Axios paths are relative to a base that already includes
+  `/api/admin` — never prefix `/admin/`.**
+- admin `436d225` — the logistics loader's `Promise.all` spans two features
+  (`guest_logistics` + `guests_listing,see_more`); the guest leg is now tolerant, hides the
+  guest-declared fields when unreadable, and drops them from the PUT so they cannot be nulled unseen.
+- backend `ecce5a6` — `CategoriesExport::map()` omitted `visibility`, printing 20 values under 21
+  headings; every column from position 6 was shifted one left.
+- backend `c9bbdf9` — `phpunit.xml` had the sqlite/`:memory:` env commented out, so `php artisan test`
+  ran `RefreshDatabase` against the real MySQL dev database. Two `EventDaysTest` assertions compared a
+  raw `date` column (`2026-11-16` on MySQL vs `2026-11-16 00:00:00` on SQLite) and were rewritten to
+  compare through the model cast. With the avatar fixtures and the stock `ExampleTest` also fixed,
+  `composer qa` is green end to end (467/0) and the documented "465 pass / 3 pre-existing" baseline is
+  retired.
