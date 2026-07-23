@@ -3,7 +3,30 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-22 (latest) — P22 client-name sweep (P22.1–P22.6). ALL PUSHED.**
+**2026-07-24 (latest) — P23 email/SMS audit hardening: 33 confirmed fixes across all three apps. Committed on
+`dev` (backend 12 + admin 1 + frontend 1), NOT pushed. Ledger D35.**
+- **What:** a full audit of the email/SMS subsystem surfaced 45 candidates → **33 verified + fixed** in small
+  reviewed batches (P23.1–P23.14). Highlights: accept/reject notifications un-suppressed (H1 — the D31 master
+  gate was starved by a partial eager-load of `with_email`/`with_sms`); automation send made **idempotent**
+  (409 on re-send) + side-effects on the email path + e-badge on split; invitation `extractBulk`
+  channel-scoped (no more double-message); phone OTP hardened (CSPRNG + 30-min TTL + persist-after-send);
+  email-log boolean filters fixed; `env`→`config` for `config:cache` safety; SMS test-send made real,
+  mobile-OTP SMTP re-applied in the worker, `workflow_value` tagged on every guest-SMS.
+- **⚠️ Behaviour changes now live on `dev`:** **SMS sends in every environment** (guards removed — real
+  Unifonic texts/cost from dev/stage, incl. bulk runs); phone OTP **expires after 30 min**
+  (`PHONE_OTP_TTL_MINUTES`); register SMS now also goes to **partner guests**; an automation setup can be
+  **sent only once** (re-click → 409). **Email deliberately still sends everywhere** — H2's non-prod guard was
+  rejected (breaks local testing); control delivery via `.env` `MAIL_MAILER`.
+- **Deferred with a precondition (not dropped):** **L-otpgate** (gate the OTP *send* on the master flag) needs
+  a 1-row data audit first — `with_email`/`with_sms` have no backfill migration and `migrate:fresh` is banned,
+  so gating blind could 500 registration; query in ledger D35. **L-reminderemail** (SMS-only invitations can't
+  be reminded) is a feature → fold into WhatsApp.
+- **Commits:** backend `d0cd0b0`,`28eca40`,`5b934c1`,`0c8ee04`,`d1ae700`,`b1f07e8`,`d7bf834`,`42e6269`,
+  `14085a6`,`eaa76be`,`7eb1e54`,`e8da311`; admin `f17ed0a`; frontend `c69f35c`. **Not pushed** — awaiting
+  review. **Gates:** every commit green (backend pint+phpstan; admin/frontend type-check). `routes/api.php`
+  untouched → no mobile delta.
+
+**2026-07-22 — P22 client-name sweep (P22.1–P22.6). ALL PUSHED.**
 - **Every past-client name is out of the three code repos** — PIF, HCI, EDGEx, TOURISE, DeveGO, plus
   dead FAF/DGCA/ICAO templates. `components/join/forms/pif/` is now `forms/default/`; `pif-one-step`
   was deleted rather than renamed (no category used it and the form-shape select never offered it).

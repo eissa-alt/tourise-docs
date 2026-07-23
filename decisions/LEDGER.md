@@ -934,3 +934,60 @@ both new columns.
 
 **Remaining:** none of Task 019, P20 or P21 has been exercised in a browser. The e-visa **send**
 action in particular has never been run — it emails a real guest via a real template.
+
+## D35 — 2026-07-24 — Email/SMS audit hardening pass (P23): 33 fixes, and the two deliberately left
+
+A full audit of the email/SMS subsystem (transport → send flows → single-channel invitations → category
+gating → logs → admin/frontend) surfaced 45 candidates; **33 survived adversarial verification** and were
+fixed across 14 reviewed commits (backend P23.1–P23.12, admin P23.13, frontend P23.14).
+
+**Durable decisions:**
+
+1. **SMS sends in every environment now** (`28eca40`). The `config('app.env') !== 'production'` block was
+   removed from both SMS listeners and the provider test endpoint. Rationale: `SmsSender` only talks to the
+   real Unifonic API — there is no `log`/fake transport like email's `MAIL_MAILER=log`, so the guard made
+   local/stage SMS untestable. **Consequence:** any SMS trigger (incl. a bulk automation/invitation run)
+   sends real texts with real cost from dev/stage — test with your own number. Phone-OTP already sent in all
+   envs, so this only makes the other flows consistent.
+2. **Email was left sending in every environment too — H2 NOT applied.** The audit flagged email's missing
+   non-prod guard as high severity, but a guard was explicitly rejected: it breaks local email testing.
+   Email delivery is controlled the normal Laravel way (`.env` `MAIL_MAILER` → `log`/mailpit); the only real
+   exposure is a staging box pointed at prod data with an active `smtp_configs` row, which is an ops concern.
+3. **Accept/reject notifications were silently dead and now work (H1, `d0cd0b0`).** `GuestsController::accept`
+   and `reject` constrained-eager-loaded the category without `with_email`/`with_sms`, so the D31 master gate
+   read them as `null` and returned no template on **every** accept/reject — killing that mail/SMS even when
+   the admin had configured it. Register/accept-to-category load the full model and were unaffected.
+4. **Phone OTP hardened (`0c8ee04`):** CSPRNG (`random_int`), a **30-minute TTL**
+   (`config('auth.phone_otp_ttl_minutes')`, env `PHONE_OTP_TTL_MINUTES`) enforced at both `phoneConfirmation`
+   and the registration gate, and persist-after-send (the token row is written only once the SMS goes out).
+5. **Automation `send()` is idempotent (`14085a6`):** a setup already `started`/`splitted` returns **409**
+   instead of re-blasting; only not-yet-sent rows are processed. Also: the status-change / category-move /
+   poster side-effects now run on the **email** path (previously only the no-email branch), and `split()`
+   carries `with_e_badge` (chunked automations no longer drop the e-badge).
+6. **Category OTP flags require their master channel (`e8da311`, L-nocrossvalidation).** `store()`/`update()`
+   reject `with_email_otp` without `with_email` (and the SMS pair), matching the documented master-switch
+   semantics (D31). Validation-only — never touches data at rest.
+7. **`env('PUBLIC_FRONTEND_URL')` → `config('app.frontend_url')`** in the guest SMS listener and the email
+   variable resolver (`d1ae700`, `eaa76be`) — `env()` returns null under `config:cache`, yielding host-less
+   links in a queued worker. Two stale `phpstan-baseline.neon` env entries were pruned in the same breath.
+
+**The two deliberately deferred (with a precondition, not just "later"):**
+
+- **L-otpgate — gate the OTP *send* on the master `with_email`/`with_sms` flag.** The docs say master-off
+  should block OTP too, but `with_email`/`with_sms` were added with `default(false)` and **no backfill
+  migration**, and `migrate:fresh` is now banned (real data), so the live state is unknown. Gating the send
+  before auditing risks 500ing registration for any category with `with_email=false` + `with_email_otp=true`.
+  **Precondition:** run `SELECT id, name_en FROM categories WHERE (with_email_otp=1 AND with_email=0) OR
+  (with_sms_otp=1 AND with_sms=0);` — 0 rows → safe to gate; any rows → fix that data first. D35.6's new
+  validation stops fresh inconsistencies regardless.
+- **L-reminderemail — SMS-only invitations have no reminder path** (`sendReminderByEmailsList` keys on the
+  `email` column, which is null for SMS-only invites). This is a feature (phone-list endpoint + admin UI +
+  mobile-contract check), not a fix — fold into the WhatsApp work.
+
+**Landed (committed on `dev`, NOT pushed — awaiting review):** backend P23.1–P23.12
+(`d0cd0b0`,`28eca40`,`5b934c1`,`0c8ee04`,`d1ae700`,`b1f07e8`,`d7bf834`,`42e6269`,`14085a6`,`eaa76be`,`7eb1e54`,`e8da311`);
+admin `f17ed0a`; frontend `c69f35c`. **Gates:** every commit green — backend `pint --test` + `phpstan`
+No-errors; admin/frontend `yarn type-check`. **`routes/api.php` untouched → no mobile-contract delta.**
+
+**Remaining:** the L-otpgate data audit above; manual QA of the changed flows against a live provider —
+especially the now-real test-SMS endpoint and the 30-min OTP TTL vs. the 4-step form's real completion time.
