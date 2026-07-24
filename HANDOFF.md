@@ -3,7 +3,39 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-24 (latest) — P23 email/SMS audit hardening: 33 confirmed fixes across all three apps. Committed on
+**2026-07-24 (latest) — P24: WhatsApp channel added end-to-end (Meta Cloud API), built as a twin of the
+email/SMS stack. Committed on `dev` (backend 12 + admin 5 + frontend 1) + the plan doc on `main`, NOT pushed.
+Ledger D36.**
+- **What:** a full WhatsApp delivery channel across all three apps — provider-config + templates CRUD, a
+  `WhatsAppSender` transport, the invitation send pipeline (whatsapp as a third `channel`), guest/automation
+  notifications (register / accept / reject), read-only logs, an inbound RSVP webhook, and WhatsApp OTP in the
+  public join form. Every ALT-facing piece mirrors our own email/SMS code; `x-hci-campaign` was a **reference
+  only** for the Meta-specific mechanics (Graph payload, webhook signature, template variable/button mapping).
+  Plan: `upgrades/WHATSAPP_INTEGRATION_PLAN.md`.
+- **Twin, not port:** `WhatsAppProviderConfig`↔`SmsProviderConfig`, `WhatsAppTemplate`↔`SmsTemplate`, queued
+  event/listener sends, separate `invitation_whatsapp` / `guest_whatsapps` observability tables, category
+  `with_whatsapp` master gate, and admin listing/form layouts all copied from the SMS stack. Transport is
+  `WhatsAppSender` keyed on `provider_key` (`meta_cloud` only in v1).
+- **⚠️ Schema is additive forward-only** — four new `2026_07_24_*` migrations ADD the whatsapp tables/columns;
+  no existing migration was edited (`migrate:fresh` is banned now that the DB has real data).
+- **Inbound RSVP webhook:** `GET /webhooks/whatsapp` verifies the provider `verify_token`; `POST` validates the
+  Meta HMAC-256 signature (`app_secret`), updates delivery status on the log row, sets `reply_status`
+  `confirmed`/`declined` from quick-reply buttons, and fires a QR follow-up on confirm.
+- **WhatsApp OTP shares the SMS phone code** — same `phone_verifications` row + `phoneConfirmation`; only the send
+  endpoint (`POST /guests/whatsapp-verification`, a `purpose='otp'` template + `otp_whatsapp_config_id`) differs.
+  Registration accepts `with_sms_otp` OR `with_whatsapp_otp`; the join form offers WhatsApp reusing the phone
+  step/confirm verbatim. **Channel note:** with both OTP flags on, the form has no picker and prefers WhatsApp.
+- **Mobile:** additive only — new **public** routes (`GET` + `POST /webhooks/whatsapp`,
+  `POST /guests/whatsapp-verification`) + an additive `with_whatsapp_otp` field on verify responses; nothing
+  removed/renamed. Check `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before wiring mobile to it.
+- **Commits (NOT pushed):** backend `d33affa`, `f185608`, `28ec5d8`, `d4daaf8`, `51b0622`, `2ee06bf`, `555a91e`,
+  `114bc35`, `7a370b0`, `f7e8ea8`, `14eff38`, `c224dd3`; admin `8d4f2f3`, `030df8b`, `0f09641`, `e536590`,
+  `f58872f`; frontend `657c173`; docs `1d9ee7f` (plan, on `main`). **Gates:** every commit green (backend
+  `pint --test` + `phpstan` No-errors; admin/frontend `yarn type-check`), EN + AR in-commit.
+- **Remaining:** manual QA against a real Meta WABA (template approval, live send, webhook signature + RSVP
+  round-trip, OTP delivery) — nothing exercised against Meta yet; and the both-OTP-flags-on channel-picker decision.
+
+**2026-07-24 — P23 email/SMS audit hardening: 33 confirmed fixes across all three apps. Committed on
 `dev` (backend 12 + admin 1 + frontend 1), NOT pushed. Ledger D35.**
 - **What:** a full audit of the email/SMS subsystem surfaced 45 candidates → **33 verified + fixed** in small
   reviewed batches (P23.1–P23.14). Highlights: accept/reject notifications un-suppressed (H1 — the D31 master

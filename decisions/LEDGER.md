@@ -991,3 +991,76 @@ No-errors; admin/frontend `yarn type-check`. **`routes/api.php` untouched → no
 
 **Remaining:** the L-otpgate data audit above; manual QA of the changed flows against a live provider —
 especially the now-real test-SMS endpoint and the 30-min OTP TTL vs. the 4-step form's real completion time.
+
+## D36 — 2026-07-24 — WhatsApp channel added end-to-end (invitations + guest/automation notifications + inbound RSVP + WhatsApp OTP), built as a twin of the email/SMS stack
+
+A full WhatsApp delivery channel (Meta WhatsApp Cloud API) was added across the backend, admin and public
+frontend, mirroring the existing email/SMS subsystems feature-for-feature. `x-hci-campaign` was assessed as a
+possible base and used as a **reference only** for the Meta-specific mechanics (Graph payload, webhook signature,
+template variable/button mapping) — every ALT-facing piece (provider config, templates, single-channel invitations,
+observability tables, event/listener sends, category master-gate, admin listing/form layout, join-form OTP) was
+built as a faithful twin of our own code, not ported. Plan:
+[../upgrades/WHATSAPP_INTEGRATION_PLAN.md](../upgrades/WHATSAPP_INTEGRATION_PLAN.md).
+
+**Durable decisions:**
+
+1. **Everything twins email/SMS; x-hci is reference-only.** `WhatsAppProviderConfig` mirrors `SmsProviderConfig`
+   (multi-row, `is_active` + single `is_default`, encrypted creds, secret masked on the wire, leave-blank-to-keep);
+   `WhatsAppTemplate` is a Meta-pointer twin of `SmsTemplate`; sends go through queued events/listeners
+   (`SendInvitationWhatsAppEvent` / `SendGuestWhatsAppEvent`) exactly like the SMS pair; observability is separate
+   tables (`invitation_whatsapp` / `guest_whatsapps`, `createFromInvitation` snapshot) twinning `invitation_sms` /
+   `guest_sms`; admin screens copy the `sms/provider-configs` + `sms/templates` layout. No `DynamicFormRenderer`,
+   no new conventions.
+2. **Transport is `App\Services\WhatsApp\WhatsAppSender`, keyed on `provider_key`** — v1 speaks `meta_cloud` only
+   (`Rule::in(['meta_cloud'])`); a new provider = one enum append + a `sendVia*` branch. It builds the Meta Graph
+   `type:template` payload (name + language + components: body params + URL/quick-reply button) and returns the raw
+   HTTP `Response`. `WhatsAppTemplateRenderer` resolves a template row → send-args (invitation / guest / OTP), with
+   per-language (`_en`/`_ar`) Meta template name, body-variable and button-URL-index mapping.
+3. **Schema changes are additive forward-only migrations.** `migrate:fresh` is banned now that the DB holds real
+   data, so four new `2026_07_24_*` migrations ADD the whatsapp tables/columns (`whatsapp_provider_configs`,
+   `whatsapp_templates`, whatsapp FKs + `invitation_whatsapp` on invitations, `guest_whatsapps` + automation/category
+   whatsapp columns) — no existing migration was edited.
+4. **Invitations extend the single-channel model (D30) to a third channel.** `channel` is now
+   `email | sms | whatsapp`; store / extract / collection-edit scope the template + provider to the chosen channel and
+   null the others, so exactly one channel fires. Guest-backed flows (register / accept / reject / automations) gate on
+   the category `with_whatsapp` master switch via `Category::getNotificationTemplate('...','whatsapp')`, mirroring the
+   D31 email/SMS master gates.
+5. **Inbound RSVP webhook.** `GET /webhooks/whatsapp` verifies `hub.verify_token` against the active-default
+   provider's `verify_token` (`hash_equals`); `POST /webhooks/whatsapp` validates the Meta `X-Hub-Signature-256`
+   HMAC with the provider `app_secret`, then per-entry: delivery **statuses** update the matching log row, and
+   quick-reply **button** replies set `reply_status` (`confirmed` / `declined`) + `replied_at`. A `confirmed` reply
+   fires a QR follow-up (a `purpose='qr'` active template) through the same send pipeline.
+6. **WhatsApp OTP shares the SMS phone code — a delivery twin, not a second code.**
+   `AuthController::whatsAppVerification` writes to the **same** `phone_verifications` table and is verified by the
+   **same** `phoneConfirmation`; only the send endpoint differs (a `purpose='otp'` template + `otp_whatsapp_config_id`).
+   The registration gate accepts either `with_sms_otp` or `with_whatsapp_otp`; `store()`/`update()` cross-validate
+   `with_whatsapp_otp ⟹ with_whatsapp`. The public join form offers WhatsApp as an OTP channel, reusing the phone
+   step / confirm / `sms_otp_token` verbatim.
+7. **RBAC: two new features** — `whatsapp_config` + `whatsapp_templates` (CRUD, mirroring `sms_config` / sms
+   templates) and `whatsapp_logs` (`view` / `export`), all under `admin.can:`-gated route groups.
+
+**Landed (committed on `dev`, NOT pushed — awaiting review):**
+
+- backend (12): `d33affa` (W0.1 provider CRUD), `f185608` (W0.2 template CRUD), `28ec5d8` (W0.3 `WhatsAppSender` +
+  send-test), `d4daaf8` (W1a invitation pipeline), `51b0622` (W1b invitation controllers), `2ee06bf` (W1c invitation
+  logs + `whatsapp_logs` RBAC), `555a91e` (W2a guest/automation pipeline + `with_whatsapp` gate), `114bc35` (W2b
+  fan-out + register/accept/reject), `7a370b0` (W2c guest logs), `f7e8ea8` (W3 webhook), `14eff38` (W4 OTP), `c224dd3`
+  (W4 expose `with_whatsapp_otp`).
+- admin (5): `8d4f2f3` (W0.4 provider UI), `030df8b` (W0.5 template UI), `0f09641` (W1d invitation channel picker),
+  `e536590` (W2 automation toggle + category gate + log pages), `f58872f` (RSVP badge alignment).
+- frontend (1): `657c173` (W4 join-form WhatsApp OTP option).
+- docs: `1d9ee7f` on `main` (`WHATSAPP_INTEGRATION_PLAN.md`, committed earlier).
+
+**Gates:** every commit green — backend `pint --test` + `phpstan` **No errors**; admin + frontend `yarn type-check`
+(husky eslint/prettier). EN + AR landed in the same commits.
+
+**Mobile contract:** additive only, but new **public** surface area — three new public routes
+(`GET` + `POST /webhooks/whatsapp`, `POST /guests/whatsapp-verification`) and an additive `with_whatsapp_otp` field
+on the invitation/category verify responses. Nothing was removed or renamed, so no existing mobile endpoint changed;
+the webhook + verification routes are server-to-server / web and not consumed by the Flutter client. Confirm against
+`docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` before wiring mobile to any of it.
+
+**Remaining:** manual QA against a real Meta WABA — template approval, live template send, webhook signature + RSVP
+round-trip (confirm → QR follow-up), and OTP delivery; nothing is exercised against Meta yet. Also: when a category
+enables **both** `with_sms_otp` and `with_whatsapp_otp`, the join form has no channel picker and prefers WhatsApp —
+add a picker (or a precedence decision) if both-on becomes a real configuration.
