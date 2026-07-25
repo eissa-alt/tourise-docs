@@ -18,6 +18,7 @@ Single entry point for AI agents (Claude Code / Claude Desktop / Cursor / any LL
 - `../decisions/LEDGER.md` — durable, cross-task locked decisions (`D1…Dn`).
 - `../process/WORKING_MECHANISM.md` — branching, commit format, task flow, quality gate, Definition of Done.
 - `alt-static-basecode-admin/FORM_RESTRUCTURE_GUIDE.md` — project-based dynamic-form folder layout.
+- `LISTING_SELECT_PATTERN.md` (this folder) — the reusable listing table + "clean select box" (`ListingTable` + `ListingFooter` + selection bar). Compose it; don't hand-roll a listing `<table>`.
 - `alt-static-basecode-backend/DARK_MODE_EMAIL_NOTES.md` — email-template dark-mode rules.
 - `../mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf` — backend contract changes for the mobile client.
 

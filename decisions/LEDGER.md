@@ -1110,3 +1110,53 @@ failure, `SessionsTest > search finds matching sessions`, is a pre-existing orde
 in place.
 
 **Status:** landed in the working tree, **NOT committed** — awaiting review.
+
+## D38 — 2026-07-25 — Automation create becomes a filter-and-select guest picker (replaces paste-emails): `guest_ids` list_type + `/guests/select-ids`, built on the shared listing primitives
+
+Admins disliked the old automation workflow (go elsewhere → filter/export guests → copy their emails
+or registration numbers → paste them into the automation form). The `/automation/create` page is now
+an in-app **filter → pick → run** flow: the shared guest filter panel, a checkbox table, and a "Run
+automation" popup that fires on the picked guests.
+
+**Durable decisions:**
+
+1. **Audience contract = selected guest IDs.** The automation store gains a third `list_type`,
+   `guest_ids`, resolved via `Guest::whereIn('id', …)` — additive alongside the existing `emails` /
+   `registration_numbers` paths. The picker ships the resolved IDs, so what is selected is exactly
+   what runs (count locked at click time). Validation is `guest_ids => required_if:list_type,guest_ids|array`
+   + `guest_ids.* => uuid` (no per-row `exists` — `whereIn` drops unknowns, and per-row `exists`
+   would fire one query per ID on a large select-all).
+2. **"Select all matching" resolves server-side.** `GET /admin/guests/select-ids` reuses `index()`'s
+   `applyFilters` + `applyAdminGuestAccessFilter` and returns `{ ids, count }`, so selecting the whole
+   filtered set is identical to what the listing shows and works across pagination. Admin-only
+   (`admin.can:guests_listing`), not in the mobile contract. The `store` `guest_ids` path trusts the
+   submitted IDs (no re-scoping) — fine while automation-create is super-only; re-scope if it ever
+   opens to restricted admins.
+3. **Create page replaced — no dual path.** `/automation/create` renders the picker; the paste form
+   (`automation-form.tsx`) is **deleted**. Its Name/Channel/Actions block was extracted to a shared
+   `automation-settings-fields.tsx` (react-hook-form `FormProvider`) consumed by the run-automation
+   modal, keeping the single-channel model + gated overrides from D37.
+4. **Built on the shared listing primitives**, not a hand-rolled table: `ListingTable` +
+   `ListingFooter` + an e-visa-style selection bar (checkbox `select` column, "Total selected: N of
+   M", select-all/clear/primary buttons). Documented as the reusable pattern in
+   [../ai/LISTING_SELECT_PATTERN.md](../ai/LISTING_SELECT_PATTERN.md) — the canonical exemplar is the
+   e-visa listing.
+
+**Files:** backend — `AutomationSetupsController@store` (guest_ids branch), `GuestsController@selectIds`,
+`routes/api.php`; admin — `automation/automation-guest-picker.tsx`, `automation-run-modal.tsx`,
+`automation-settings-fields.tsx`, `pages/[lang]/automation/create.tsx`, deleted `automation-form.tsx`;
+docs — `ai/LISTING_SELECT_PATTERN.md` (+ `ai/README.md` pointer).
+
+**Gates:** backend `pint --test` + `phpstan` **No errors** + `php artisan test` **469 passed**; admin
+`yarn type-check` + `eslint` clean. EN + AR keys in place.
+
+**Also in this wave:** the delivery **channel became optional** — an automation may be actions-only
+(status / poster / category with no message). The modal gates the channel behind a "Notify guests"
+switch and `store` accepts `channel = null` (extends D37's single-channel model). UI polish: the
+picker + listing + view-more render on `ListingTable` / `ListingFooter`; the listing name links to
+details and its columns regroup into Notification / Actions; and the shared `SearchGuestsBySuper`
+**Reset** now clears its inputs before navigating (**P24.24** — also fixes the `/guests` page).
+
+**Landed (committed on `dev`, NOT pushed):** backend `49ece52` (P24.23); admin `17ad5cf` (P24.23 —
+picker / modal / shared-fields, paste form removed, listing regroup) + `ffb01d3` (P24.24 — Reset fix).
+Docs on `main` carry this entry + `ai/LISTING_SELECT_PATTERN.md`.
