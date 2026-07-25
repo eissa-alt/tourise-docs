@@ -7,6 +7,13 @@
 - **Sub-app(s):** **new 4th sub-app** `alt-static-basecode-seating` + backend + admin (+ docs). Frontend/landing: none.
 - **Branch(es):** `dev` → feature branch `feat/seating`
 - **Investigation:** cross-repo workflow analysis 2026-07-25 (14 agents, adversarially verified against real 121 code).
+- **Revalidated vs Task 020 (2026-07-25, after 020 landed):** re-checked all assumptions against the current
+  tree — **plan holds, no new risks.** Only deltas: (1) migration slots `2026_07_25_000001–000004` are taken
+  (000001/000002 automation, **000003/000004 = task 020**) → seating uses the **next free** (`000005`/`000006`+,
+  re-check at build); (2) every `file:line` citation below is **pre-020 — re-derive against HEAD at build time**
+  (updateGuest ~+10, routes ~+5, model/resource ~+2); (3) 121 admin has **one consolidated `guests-listing.tsx`**
+  (per-type files merged in `599827f`); (4) the `seating` RBAC feature belongs in **backend
+  `app/Support/AdminPermissions.php`**. No merge collision with 020, no mobile-contract break.
 
 ## Goal
 
@@ -121,6 +128,10 @@ allowlist drops unknown keys — so tests must assert **persistence**, not just 
 - Config: `VITE_PIF_API_BASE_URL` (base only, never a token), `VITE_GOOGLE_RECAPTCHA_KEY`.
 
 ### Backend (additive, forward-only — real data exists, no `migrate:fresh`)
+> **Migration numbering (revalidated 2026-07-25):** `2026_07_25_000001–000004` are already used (000001/000002
+> automation channel+scheduling; 000003/000004 task-020 reconfirmation). Create M1–M3 at the **next free**
+> timestamps — currently `2026_07_25_000005/000006/000007` — and re-check immediately before creating them in
+> case more migrations land first. Never reuse a taken slot.
 - **M1** `..._create_seating_layouts_table` — bigint id, `name` unique, `longText data`, nullable uuid
   `updated_by`, timestamps. Controller keys the single shared row by `name='default'`.
 - **M2** `..._create_seating_layout_versions_table` — snapshot history (bigint fk, longText, updated_by,
@@ -135,9 +146,16 @@ allowlist drops unknown keys — so tests must assert **persistence**, not just 
 - `GuestsResources` — expose the 6 attendance fields (ISO-8601 + `*_by`).
 
 ### Admin
-- Launch entry-point in the guests-listing **TopSection `customAction`** slot (where the export button lives),
-  gated by `checkPermission('guests_listing', <action>, user)` or `user?.role?.is_super`. EN + AR label.
-- Handoff wiring per D-4.
+- **121 has ONE consolidated `guests-listing.tsx`** (the old per-type `guests-super`/`guests-view` files were
+  merged into it in commit `599827f`). The launch link goes in its **TopSection `customAction`** slot, beside
+  the export button (slot ~line 804 post-020 — re-derive at build). It's a **gated deep-link** (D-4 = own login;
+  a plain anchor to `NEXT_PUBLIC_SEATING_MANAGER_URL`, no BFF/token). EN + AR label.
+- **Gate with `checkFeaturePermission('seating', user)`** — ANDed with the page's existing `guests_listing`
+  module-access gate (`hasModuleAccess`), which is expected (the page already requires `guests_listing`).
+- **Add the `seating` feature to the BACKEND catalog `app/Support/AdminPermissions.php`** — the authoritative
+  catalog delivered in `user.permissions`, not a frontend file. Button-only (no sidebar link / route /
+  `inferFeatureId` rule) keeps `yarn check:rbac` green; if scope ever adds a link/rule, the catalog entry must
+  land first or `check:rbac` exits 1.
 
 ### Mobile contract
 - New routes are **admin-only** (`/admin/seating-layout`, `/admin/me`) → not mobile-facing. The 6 new
