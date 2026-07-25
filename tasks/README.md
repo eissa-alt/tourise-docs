@@ -54,6 +54,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 018 | [sms-logs](018-sms-logs/TASK.md) | done (code) — read-only guest + invitation SMS log pages mirroring the email logs, new `sms_logs` RBAC feature (view/export); ledger D31; gates green; manual QA pending |
 
 | 019 | [logistics-evisa-port](019-logistics-evisa-port/TASK.md) | done (code) — re-added hotels/rooms, traveling-status, per-guest logistics + 4 exports, and e-visa generation/PDF/console, all modernized to Tasks 001/002/009/010; found and fixed 6 pre-existing defects incl. `valid_visa` being silently discarded on every registration; February's e-visa ops console deliberately NOT ported (dead on hci main); ledger D32; gates green; `sendIssuedVisa` + manual QA pending |
+| 020 | [reconfirmation](020-reconfirmation/TASK.md) | in-progress (code) — guest attendance reconfirmation ("second RSVP"), built on 121's own machinery (not a 120 port): `reconfirmed_*` columns + `reconfirmation_tokens`, public `/reconfirm` page, `{{ reconfirmation_url }}` across email/SMS/WhatsApp via shared `ReconfirmationLink`, admin column/filter/see-more/exports; delivered by the D38/D39 automation; gates green (backend 474 tests, admin/frontend type-check); committed on `dev`/`main`, NOT pushed; dev-DB migrate + manual QA + mobile notice pending |
 
 _Add a row per task as you open it; newest at the bottom._
 
