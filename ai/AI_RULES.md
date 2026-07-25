@@ -37,3 +37,17 @@ Binding rules for any AI agent operating in this repo.
 - For admin redesign: `admin_ui_ux_refactor_plan.md` + `advanced_admin_redesign_rollout_checklist.md`.
 - For the mobile contract: `docs/mobile/BACKEND_INCOMING_CHANGES_FOR_MOBILE.pdf`.
 - Otherwise: stop and ask. Do not invent.
+
+## Presenting multi-option decisions (planning tasks)
+
+When a task carries several design choices (planning, ports, refactors), surface them to the owner like this
+(validated on Task 021):
+
+1. **One decision at a time**, in sequence — not a batched wall of questions.
+2. **"The problem, plainly"** — state what's being decided and why it matters, in short, simple language.
+3. **List options** as short labelled choices (a/b/c), each one line, with the concrete trade-off.
+4. **Give an explicit recommendation** + a one-line why; mark it "(recommend)".
+5. **Ask to lock it** ("Lock Qn = (a)?"), then **record the answer in the task's `TASK.md` Decisions section
+   (marked LOCKED)** before moving on. Promote durable ones to `../decisions/LEDGER.md` on completion.
+
+Keep replies short. Prefer this conversational one-by-one flow over batching many questions into one modal.
