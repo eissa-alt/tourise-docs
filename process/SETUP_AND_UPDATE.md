@@ -94,6 +94,19 @@ yarn type-check && yarn production
 composer qa            # = pint --test + phpstan analyse + php artisan test
 ```
 
+> **Running `yarn production` without a `.env.production`.** The `production` script is
+> `env-cmd -f .env.production next build`, so it errors (`Failed to find .env file`) if you only have
+> `.env.local` (dev) — common now that envs are split across a dedicated server + Vercel. To run the
+> **build gate** anyway, use a **throwaway copy** and delete it right after:
+>
+> ```bash
+> cp .env.local .env.production && yarn production; rm -f .env.production
+> ```
+>
+> Safe because: `.env.production` is **gitignored** (never committed), and this build is a **compile
+> check only** — the dev API URL gets baked in, so **discard the output, don't deploy it**. Always
+> `rm` the temp file when done (the trailing `rm` runs even if the build fails).
+
 ---
 
 ## B. Update after a pull (already installed / older version)
