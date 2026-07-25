@@ -1064,3 +1064,49 @@ the webhook + verification routes are server-to-server / web and not consumed by
 round-trip (confirm → QR follow-up), and OTP delivery; nothing is exercised against Meta yet. Also: when a category
 enables **both** `with_sms_otp` and `with_whatsapp_otp`, the join form has no channel picker and prefers WhatsApp —
 add a picker (or a precedence decision) if both-on becomes a real configuration.
+
+## D37 — 2026-07-25 — Automations move to a single delivery channel (email | sms | whatsapp), mirroring the invitations channel model; the create form reskinned to the Section-card pattern
+
+An automation setup previously used the **multi-toggle** model — three independent booleans
+(`with_email_template` / `with_sms_template` / `with_whatsapp_template`), any combination of which fired for the
+same guest in one run. It now picks **exactly one** delivery channel, adopting the invitations single-channel
+`channel` concept (D30 / D36) for a clean, trackable "this automation went via X" record. This is a deliberate
+**behaviour reduction** — an automation can no longer notify across multiple channels at once — chosen over the
+multi-channel-cards alternative after weighing it against tracking/consistency.
+
+**Durable decisions:**
+
+1. **`channel` is the single source of truth + the tracking field; the `with_*_template` booleans stay as
+   send-path storage and are derived from it server-side.** `store()` sets exactly one boolean true from
+   `channel` and nulls the two non-selected channels' template/config ids (e-badge is gated to email). This keeps
+   the `AutomationController` fan-out and `split()` — which both read the booleans — **untouched**, so the actual
+   send path did not change. `split()` also carries `channel` onto chunked setups.
+2. **Schema is additive forward-only.** A new `2026_07_25_000001_add_channel_to_automation_setups` migration ADDs a
+   nullable `channel` string; no existing migration was edited (`migrate:fresh` remains banned). Pre-existing rows
+   keep their old booleans and get `channel = null` — harmless, since automation setups are one-shot and have
+   already fired.
+3. **Validation is channel-driven.** `channel` is `required|in:email,sms,whatsapp`; the template ids move from
+   `required_if:with_*_template,yes` to `required_if:channel,<x>`. `AutomationSetupsResources` now exposes
+   `channel` (and the previously-missing `with_whatsapp_template` / `whatsapp_template_id` / `whatsapp_config_id`,
+   for parity with the email/SMS fields).
+4. **The admin create form is reskinned to the invitations/categories Section-card pattern.** Three grey
+   toggle-boxes → a single gated **Channel** dropdown (`check-default` disables a channel with no configured
+   default + an amber "Configure X →" link), each channel revealing its template + a switch-before-dropdown
+   provider override; a centered `lg:col-10` layout and a sticky Cancel / Submit footer. The ~10 previously
+   hardcoded English strings (paste placeholders/help, cross-check buttons, totals, "Attachments", "Custom PDF
+   attachment", the with-share hint) are routed through `translate()`, with EN + AR keys added in the same change.
+
+**Files:** backend — `2026_07_25_000001_add_channel_to_automation_setups.php`, `AutomationSetup.php`,
+`AutomationSetupsController.php` (`store` + `split`), `AutomationSetupsResources.php`; admin —
+`automation/automation-form.tsx`, `translations/{en,ar}/web.json` (11 new keys).
+
+**Mobile contract:** no change. Automation-setups is admin-only (`TypeGate super`), not in `routes/api.php`'s
+mobile surface — no endpoint added, removed, or renamed.
+
+**Gates:** backend `pint --test` **passed** + `phpstan` **No errors** + `php artisan test` **468 passed** (the one
+failure, `SessionsTest > search finds matching sessions`, is a pre-existing order-dependent flake — it passes
+30/30 in isolation and is unrelated to automations). Admin `yarn type-check` **green**; `eslint` clean on the form.
+`yarn production` was not run (no local `.env.production`; env files are gitignored and not created). EN + AR keys
+in place.
+
+**Status:** landed in the working tree, **NOT committed** — awaiting review.
