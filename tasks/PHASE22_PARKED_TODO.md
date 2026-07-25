@@ -113,9 +113,10 @@ re-enabling needs no migration — only UI and a route.
 - **No automated test covers badge or PDF rendering.** `git grep` over `tests/` finds nothing for
   `pdf.base` or badge PDFs. P22.6 was verified by rendering the blade to HTML and asserting the
   inline PNG, plus a manual print by the owner — there is no regression guard.
-- **`yarn check:rbac` is not in the quality gate.** It exists (`admin/scripts/check-rbac-map.mjs`) and
-  catches `inferFeatureId` ↔ sidebar mismatches — the bug class that shipped six times. Should sit
-  beside `yarn type-check` in the documented gate.
+- ~~**`yarn check:rbac` is not in the quality gate.**~~ **RESOLVED (D41, 2026-07-25).** It exists
+  (`admin/scripts/check-rbac-map.mjs`) and catches `inferFeatureId` ↔ sidebar mismatches — the bug class
+  that shipped six times (D33) plus once more on WhatsApp (D41). Now written into the documented gate in
+  `ai/CURRENT_WORKFLOW.md` + `process/SETUP_AND_UPDATE.md`, beside `yarn type-check`.
 
 ## 7. Watch
 

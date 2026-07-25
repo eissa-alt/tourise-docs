@@ -3,9 +3,14 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-25 (latest) — Automation scheduling (D39) + automation details page restyled (D40). Committed
-on `dev` + `main`, NOT pushed — push is the next action once the DB migration is run and the flow is
-smoke-tested. (This session also landed D37 single-channel + D38 filter-and-select picker.)**
+**2026-07-25 (latest) — Automation scheduling (D39) + details page restyle (D40) + a WhatsApp RBAC fix
+(D41). All **pushed** (`dev` + docs `main`); the older unpushed D38 picker went out in the same push.
+Dev DB migration applied. Still pending: prod scheduler + prod migrate + manual smoke test. (This session
+also landed D37 single-channel + D38 filter-and-select picker.)**
+- **WhatsApp RBAC fix (D41):** `check:rbac` was red (4 errors) — WhatsApp (D36) shipped routes + sidebar
+  features but no `inferFeatureId` rules (the D33 first-match-wins trap). Added 3 rules mirroring SMS; now
+  green. **`yarn check:rbac` is now in the documented admin gate** (it's a standalone script, not covered by
+  type-check / production / composer qa). Fix lives in the baseline so clones `--ff-only` catch up.
 - **Scheduling (D39):** run-automation modal gains a Scheduling step — *Send immediately* (auto-dispatches
   on Create) or *Schedule for later* (clean masked date + time, **not** the native `datetime-local`). A
   shared `AutomationDispatchService` holds the per-guest fan-out (fires the existing send events — it does
@@ -26,8 +31,9 @@ smoke-tested. (This session also landed D37 single-channel + D38 filter-and-sele
   "Send To All" can dispatch a *scheduled* automation early (not gated on `send_status`); (3) automation
   `created_by`/`updated_by` (no update endpoint yet). `send_status='sent'` means "handed to the queue", not
   "delivered".
-- **Commits (NOT pushed):** backend `38729eb` (P24.25); admin `673f00d` (P24.25 scheduling UI) + `903013c`
-  (P24.26 details restyle); docs `6b22155` (D39) + this update.
+- **Commits (pushed):** backend `38729eb` (P24.25); admin `673f00d` (P24.25 scheduling UI) + `903013c`
+  (P24.26 details) + `fe1ac09` (P24.27 WhatsApp RBAC fix); docs on `main` through `28a5e19` (+ D41/gate note
+  in this update).
 - **Gates:** backend `pint`/`phpstan`/`test` (469) green; admin `type-check` + `eslint` clean. `yarn
   production` not run (no local `.env.production`). **Manual testing pending** (needs the migration first).
 

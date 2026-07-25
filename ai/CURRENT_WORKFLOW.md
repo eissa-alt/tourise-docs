@@ -21,7 +21,14 @@ yarn install
 yarn local                              # dev server with .env.local
 yarn type-check                         # tsc only
 yarn production                         # full build → catches lint + type errors
+yarn check:rbac                         # ADMIN ONLY — sidebar featureId ↔ inferFeatureId parity (D33/D34)
 ```
+
+> **`yarn check:rbac` is part of the admin gate** (not frontend). It cross-checks every sidebar `featureId`
+> against `inferFeatureId` and fails on a mismatch — the `inferFeatureId` first-match-wins bug class that
+> has shipped repeatedly (D33 six times, D40-era WhatsApp once more). It is a **separate** script — NOT run
+> by `type-check` / `production` / `composer qa` — so run it explicitly on any change that touches routes,
+> the sidebar, or `utils/inferFeatureId.ts`.
 
 `.env.*` files are gitignored. `yarn.lock` is committed — do not switch to npm. **Sentry has been removed** (admin + frontend + backend) by the OWASP hardening — there are no `sentry.*.config.ts` files and `@sentry/nextjs` / `sentry/sentry-laravel` must not be re-added (CLAUDE.md hard rule 3). Note there are **two** Next apps, not three; the `-landing` app was dropped (ledger D2).
 

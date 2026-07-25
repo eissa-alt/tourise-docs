@@ -90,6 +90,8 @@ yarn local                               # dev server
 ```bash
 # in each JS app:
 yarn type-check && yarn production
+# admin only — sidebar featureId ↔ inferFeatureId parity (D33/D34); NOT covered by the above:
+(cd alt-static-basecode-admin && yarn check:rbac)
 # backend (full gate):
 composer qa            # = pint --test + phpstan analyse + php artisan test
 ```

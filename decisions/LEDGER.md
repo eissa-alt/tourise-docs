@@ -1221,13 +1221,14 @@ reused unchanged for the actual sending). Without the scheduler, *immediate* aut
 admin `yarn type-check` **green** + `eslint` clean on the changed files. `yarn production` not run (no
 local `.env.production`; env files are gitignored). EN + AR keys in place.
 
-**Landed (committed on `dev`, NOT pushed):** backend `38729eb` (P24.25 — service / command / Kernel /
-controllers / model / resource / route / migration); admin `673f00d` (P24.25 — schedule step + send_status
-badge + Cancel + the shared web.json keys, EN+AR). Docs on `main` carry this entry + HANDOFF.
+**Landed (pushed, on `dev`):** backend `38729eb` (P24.25 — service / command / Kernel / controllers / model /
+resource / route / migration); admin `673f00d` (P24.25 — schedule step + send_status badge + Cancel + the
+shared web.json keys, EN+AR). Docs on `main` carry this entry + HANDOFF.
 
-**Still pending before it works end-to-end:** `php artisan migrate` on the dev DB (the `2026_07_25_000002_*`
-migration), the **scheduler** running for scheduled sends (see the Deploy requirement above), and **manual
-testing** — the automated gates passed but the flow hasn't been exercised against a real DB yet.
+**Still pending before it works end-to-end:** the migration is **applied on the dev DB** (all 4 columns
+present); still needed — the **scheduler** running for scheduled sends (see the Deploy requirement above),
+`php artisan migrate` on **prod** at deploy, and **manual testing** (automated gates pass, but the flow
+hasn't been exercised against a real DB yet).
 
 ## D40 — 2026-07-25 — Automation details page rebuilt on the shared listing primitives (D38 pattern), Clicked column hidden, shared `sent_at` label tidied
 
@@ -1268,4 +1269,31 @@ collapsing to a single column is a pending UI decision.
 
 **Gates:** admin `yarn type-check` + `eslint` clean. (`yarn production` not run — no local `.env.production`.)
 
-**Landed (committed on `dev`, NOT pushed):** admin `903013c` (P24.26).
+**Landed (pushed, on `dev`):** admin `903013c` (P24.26).
+
+## D41 — 2026-07-25 — WhatsApp RBAC rules added to `inferFeatureId` (completes D33 coverage; the D34 `check:rbac` guard is now in the documented gate)
+
+The WhatsApp channel (D36) shipped its routes + sidebar features (`whatsapp_logs`, `whatsapp_templates`,
+`whatsapp_config`) but **never added the matching `inferFeatureId` rules** — so it hit the exact D33
+first-match-wins trap that D33/P18.2 fixed for SMS. `check:rbac` failed with **4 errors**:
+`/logs/(guest|invitation)-whatsapp` fell through to the generic `/logs` rule → `email_logs`, and
+`/whatsapp/templates` + `/whatsapp/provider-configs` matched nothing → `null` (Super-Admin only).
+
+**User impact (same as the P18.2 SMS bug):** an admin granted `whatsapp_logs` saw the link and got "not
+authorized"; one granted only `email_logs` rendered the WhatsApp log page and then ate a 403; and the two
+config features were effectively **ungrantable**.
+
+**Fix (3 rules mirroring SMS, `utils/inferFeatureId.ts`):** `/logs/(guest|invitation)-whatsapp` →
+`whatsapp_logs` **placed before** the generic `/logs` rule; `/whatsapp/templates` → `whatsapp_templates`
+**before** the generic `/whatsapp` → `whatsapp_config`. `check:rbac` now green (0 errors, 46 → 49 rules).
+
+**Process note (why it slipped):** `yarn check:rbac` (the D34 guard) is a **standalone script** — NOT run
+by `composer qa`, `yarn type-check`, or `yarn production` — so a gate run that skips it misses this bug
+class. It is now written into the documented gate: `ai/CURRENT_WORKFLOW.md` + `process/SETUP_AND_UPDATE.md`
+(and the old "check:rbac not in the gate" note in `tasks/PHASE22_PARKED_TODO.md` is marked resolved). Run
+it on any change touching routes / the sidebar / `inferFeatureId.ts`.
+
+**Baseline fix:** applied here in `alt-static-basecode` (the baseline) so clones (e.g. `123-pif-pep-v2`)
+catch up via `--ff-only` rather than each patching locally.
+
+**Landed (pushed, on `dev`):** admin `fe1ac09` (P24.27).
