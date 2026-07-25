@@ -1297,3 +1297,38 @@ it on any change touching routes / the sidebar / `inferFeatureId.ts`.
 catch up via `--ff-only` rather than each patching locally.
 
 **Landed (pushed, on `dev`):** admin `fe1ac09` (P24.27).
+
+## D42 — 2026-07-25 — Seating Plan Manager ported into the baseline as a 4th sub-app (`alt-static-basecode-seating`), API-wire, RBAC-graded
+
+**What:** brought the standalone **Seating Plan Manager** — a Vite/React SPA the client demoed for a month in
+v1 (`120-pif-private-events-platform`) — into the 121 baseline as a **new 4th sub-app**, so every clone
+(immediate consumer `123-pif-pep-v2`) inherits it. It integrates **API-wire** (no UI merge): signs in as an
+admin, polls guests, writes seat + attendance back onto the guests table, stores the board in `seating_layouts`.
+
+**Decisions (promoted from `tasks/021-seating/TASK.md` D-1…D-8):**
+- **D-1/D-2:** build in the **baseline** (not the clone); a standalone sub-app — retarget its API client, don't
+  rebuild in Next (proven, decoupled, canvas-heavy; SSR buys nothing).
+- **D-3 attendance:** 6 new shared columns (`checked_in_at/by`, `checked_out_at/by`, `food_checked_in_at/by`);
+  a `Guest::booted()` bridge keeps the legacy `check_in` boolean in sync. "One-truth" cleanup deferred.
+- **D-4 handoff:** the SPA uses its **own login** (no token handoff — the admin bearer is HttpOnly, D12); the
+  admin side is a gated deep-link. One-click SSO (a minted scoped token) is a possible follow-up.
+- **D-5 RBAC:** a dedicated **`seating`** feature with graded actions **`view`/`check_in`/`manage`**, mapped to
+  the SPA's existing 11-permission tiers via its one `mapAdminToUser` function. Enforced **both** server
+  (`admin.can:seating,<action>`) and client — v1 enforced tiers client-side only. Never `admins.type`.
+- **D-6:** full port incl. `seating_layout_versions` + `seating_audit_logs`.
+- **D-7:** keep the Vite/JS/Tailwind-v3 SPA as-is (own build chain). **D-8:** repo `alt-static-basecode-seating`.
+
+**Migrations:** additive, forward-only at `2026_07_25_000005..000008` (000001–000004 were taken by automation +
+task 020). Seat/attendance **writes ride** `PUT /admin/guests/{id}` (`guests_listing,edit`) — so a write-capable
+seating operator also needs that grant; a dedicated seating-scoped write endpoint is a possible follow-up.
+
+**Mobile contract:** new routes are **admin-only** (`/admin/seating-layout*`, `/admin/seating-audit-log`,
+`/admin/me`) + 6 additive `GuestsResources` fields → additive only, nothing removed/renamed.
+
+**Gates:** backend `pint --test` clean + `phpstan` No-errors + `php artisan test` **480 pass** (6 new); admin
+`type-check` clean + `check:rbac` OK; seating `npm run build` clean.
+
+**Status — NOT pushed.** On feature branches pending owner review: backend `feat/seating` `2334445` (P021.1),
+admin `feat/seating` `982747e` (P021.3), seating `dev` `e1b4191` (P021.2, on the verbatim import `e66c2df`).
+**Pending owner:** merge branches → `dev` + push; create the GitHub seating remotes; set `.env`
+(`CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_SEATING_MANAGER_URL`, seating `VITE_*`); dev-DB migrate; live QA.

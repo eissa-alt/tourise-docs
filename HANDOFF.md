@@ -3,7 +3,30 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-25 (latest) — Automation scheduling (D39) + details page restyle (D40) + a WhatsApp RBAC fix
+**2026-07-25 (latest) — Task 021 Seating Plan Manager implemented end-to-end (Phases A/B/C) — ledger D42.
+Code-complete + all gates green, on FEATURE BRANCHES, NOT pushed.**
+- **What:** ported the standalone Seating Plan Manager (Vite/React SPA from v1/120) into the baseline as a
+  **new 4th sub-app** `alt-static-basecode-seating` (API-wire, no UI merge) + backend endpoints + a new
+  `seating` RBAC feature + an admin deep-link launch button. Plan + decisions: `tasks/021-seating/TASK.md`; D42.
+- **Backend (`feat/seating` `2334445`, P021.1):** migrations `2026_07_25_000005..000008` (seating_layouts +
+  versions + audit_logs + 6 guest attendance columns); SeatingLayouts/SeatingAuditLogs controllers;
+  `/admin/seating-layout*` + `/admin/seating-audit-log` gated `admin.can:seating,<action>`; data-wrapped
+  `/admin/me`; `updateGuest` accepts the 6 attendance keys (seat + attendance write-back persists) + a
+  `Guest::booted()` bridge to legacy `check_in`. Gates: pint + phpstan clean, **480 tests pass** (6 new).
+- **Seating SPA (`dev` `e1b4191`, P021.2, on import `e66c2df`):** retargeted `pifApi.js`
+  (`guests-update/{id}` → `guests/{id}`) + `mapAdminToUser` now reads the `seating` RBAC actions
+  (view/check_in/manage) instead of the removed `admins.type`. `npm run build` clean.
+- **Admin (`feat/seating` `982747e`, P021.3):** `seating`-gated "Seating Manager" deep-link on the guests
+  listing (own-login, no token — D-4), EN+AR, `NEXT_PUBLIC_SEATING_MANAGER_URL` in `.env.example_prod`.
+  `type-check` + `check:rbac` green.
+- **123 inheritance:** `pif-pep-v2-seating` cloned + wired (`basecode-local`) — one `--ff-only` pulls this in.
+- **⚠️ Pending owner (nothing pushed):** review + merge the 3 branches → `dev` + push; create the GitHub seating
+  remotes (`eissa-alt/alt-static-basecode-seating` + `pif-pep-v2-seating`); set `.env` (`CORS_ALLOWED_ORIGINS`,
+  `NEXT_PUBLIC_SEATING_MANAGER_URL`, seating `VITE_PIF_API_BASE_URL` + `VITE_GOOGLE_RECAPTCHA_KEY`); run
+  `php artisan migrate` on dev/prod; live end-to-end QA against a running stack. Seat/attendance write-ops also
+  need `guests_listing,edit` (rides the guests endpoint). `yarn production` not run (needs `.env.production`).
+
+**2026-07-25 — Automation scheduling (D39) + details page restyle (D40) + a WhatsApp RBAC fix
 (D41). All **pushed** (`dev` + docs `main`); the older unpushed D38 picker went out in the same push.
 Dev DB migration applied. Still pending: prod scheduler + prod migrate + manual smoke test. (This session
 also landed D37 single-channel + D38 filter-and-select picker.)**

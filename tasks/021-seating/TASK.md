@@ -1,7 +1,8 @@
 # Task 021 — Seating Plan Manager (port into the ALT baseline)
 
-- **Status:** `planned` — all design decisions LOCKED 2026-07-25 (D-1…D-8). **Blocked on Task 020 landing**
-  (Q9); execution starts after. Not started.
+- **Status:** `done (code)` — Phases A/B/C implemented 2026-07-25, all gates green, on FEATURE BRANCHES
+  (backend/admin `feat/seating`, seating repo `dev`), **NOT pushed**. Ledger D42. Pending owner: review + merge
+  → `dev` + push; create the GitHub seating remotes; set `.env`; dev/prod migrate; live QA.
 - **Opened:** 2026-07-25
 - **Owner:** (unassigned)
 - **Sub-app(s):** **new 4th sub-app** `alt-static-basecode-seating` + backend + admin (+ docs). Frontend/landing: none.
@@ -250,18 +251,22 @@ no BFF route, no token) + env var + EN/AR. Gate: `yarn type-check` + `yarn produ
 - **Sequencing vs Task 020** (shared backend files) — Phase 0.
 - **`.env` (owner):** `CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_SEATING_MANAGER_URL`, `VITE_*` — gitignored, set on
   the server; do not edit `.env*`.
-- **`CLAUDE.md` + `docs/README.md`** say "three sub-apps" — update to four when this lands.
+- **✅ Done:** `CLAUDE.md` + `process/WORKING_MECHANISM.md` updated to "four sub-apps".
 
 ## Definition of Done
 
-- [ ] `alt-static-basecode-seating` repo mounted + builds; API client retargeted to 121.
-- [ ] Backend: M1–M3 + models + `SeatingLayoutsController` + routes + `updateGuest` allowlist + `/admin/me`
-      alias + `GuestsResources` fields; D-3 resolved.
-- [ ] Admin: launch button (RBAC/super-gated) + handoff per D-4; EN + AR in the same commit.
-- [ ] Feature tests: layout round-trip, seat write **persists**, attendance write **persists**, `/me` shape,
-      permission gate.
-- [ ] Quality gate green (backend `composer qa`; Next apps `yarn type-check` + `yarn production`; SPA `build`).
-- [ ] Mobile contract checked — additive notice for `/admin/seating-layout` + `/admin/me` + the new guest
-      fields; mobile-contract re-check **only if** D-4 Option a2 adds a mint endpoint.
-- [ ] Docs: this TASK.md → `done`; index row; ledger D42+; HANDOFF; `CLAUDE.md`/`README.md` "four sub-apps".
-- [ ] Task 020 landed/coordinated first (Phase 0).
+- [x] `alt-static-basecode-seating` repo mounted + builds; API client retargeted to 121.
+- [x] Backend: migrations + models + `SeatingLayoutsController`/`SeatingAuditLogsController` + routes +
+      `updateGuest` allowlist + `/admin/me` alias + `GuestsResources` fields; D-3 bridge resolved.
+- [x] Admin: `seating`-gated launch deep-link (D-4 own-login) + EN + AR in the same commit.
+- [x] Feature tests: layout round-trip, seat write **persists**, attendance write **persists**, `/me` shape,
+      permission gate (`SeatingTest`, 6 tests).
+- [x] Quality gate green — backend `composer qa` (pint + phpstan + **480 tests**); admin `type-check` +
+      `check:rbac`; SPA `npm run build`. ⚠️ `yarn production` NOT run (needs the gitignored `.env.production`).
+- [x] Mobile contract: new routes are admin-only + the 6 guest fields additive → additive-only, documented in
+      HANDOFF + ledger D42. No mobile route removed/renamed; no D-4 a2 mint endpoint added.
+- [x] Docs: this TASK.md → `done (code)`; index row; ledger D42; HANDOFF; `CLAUDE.md` + `WORKING_MECHANISM.md`
+      "four sub-apps".
+- [x] Task 020 landed first (Phase 0).
+- [ ] **Owner:** merge feature branches → `dev` + push; create seating GitHub remotes; set `.env`; dev/prod
+      migrate; live end-to-end QA against a running stack.

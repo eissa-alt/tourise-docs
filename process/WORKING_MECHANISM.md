@@ -14,10 +14,11 @@ Read-first process doc for anyone (human or AI) doing real work in alt-static-ba
 | Setting up / running locally | [SETUP_AND_UPDATE.md](SETUP_AND_UPDATE.md) |
 | Cloning this baseline into a new project | [CLONE_CHECKLIST.md](CLONE_CHECKLIST.md) |
 
-## The three sub-apps
+## The sub-apps
 
 Separate git repos mounted side by side, **no monorepo tooling**: `alt-static-basecode-backend`
-(Laravel 12), `-admin` (Next 15), `-frontend` (Next 15). `docs/` (this repo) is a fourth,
+(Laravel 12), `-admin` (Next 15), `-frontend` (Next 15), and `-seating` — a standalone Vite/React
+SPA (the Seating Plan Manager, task 021; API-wire only, no UI merge). `docs/` (this repo) is a
 doc-only sibling.
 
 ## Branching & commits
