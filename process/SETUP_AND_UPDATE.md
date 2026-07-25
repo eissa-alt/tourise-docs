@@ -59,6 +59,10 @@ php artisan serve                # http://127.0.0.1:8000
 # php artisan reverb:start
 ```
 
+> **Background processes (run in their own terminals).** The API alone doesn't *send* or *fire* anything:
+> - `php artisan queue:work` — processes queued sends (automation / invitation / notification email · SMS · WhatsApp · poster generation). Prod runs this under **supervisor**. Without it, nothing is actually sent.
+> - `php artisan schedule:work` — the Laravel scheduler; fires **scheduled automations** (runs `automations:dispatch-scheduled` every minute — **new in ledger D39**). Prod uses a cron `* * * * * php artisan schedule:run` **or** a supervisor `schedule:work` program. Without it, *immediate* automations still send (dispatched on create), but *scheduled* ones sit in `send_status = scheduled` forever.
+
 > **`.env` secrets:** `.env` is gitignored. After `cp .env.example .env`, set your local `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD`, mail, Firebase (push), and any API keys — get real values from a teammate / the secrets store.
 
 > **Quality gate + pre-commit hook (backend).** `composer install` auto-installs the Pint pre-commit
@@ -103,7 +107,9 @@ cd alt-static-basecode-backend
 git pull origin dev
 composer update              # NOT `composer install` — your local lock is stale; update re-resolves from composer.json
 php artisan optimize:clear   # clear stale config/route/view/compiled cache (Laravel 11→12)
-# php artisan migrate        # only if your DB is behind — no new migrations in the recent commits
+php artisan migrate          # REQUIRED after P24.25 — adds 2026_07_25_000002 (automation scheduling columns)
+# Restart any running background workers so they pick up the new code:
+#   php artisan queue:work   (sends)  ·  php artisan schedule:work  (fires scheduled automations — new)
 ```
 
 ### Admin / Frontend (per app)

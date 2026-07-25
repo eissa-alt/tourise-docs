@@ -3,19 +3,33 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-25 (latest) — Automation scheduling: "Send immediately" (auto-dispatch on create) or "Schedule
-for later" + a Cancel action and a `send_status` column. Ledger D39 (this session also landed D37 single-
-channel + D38 filter-and-select picker). In the working tree, NOT committed — awaiting review.**
-- **What:** the run-automation modal gains a Scheduling step (immediate/scheduled + `datetime-local`). A
+**2026-07-25 (latest) — Automation scheduling (D39) + automation details page restyled (D40). Committed
+on `dev` + `main`, NOT pushed — push is the next action once the DB migration is run and the flow is
+smoke-tested. (This session also landed D37 single-channel + D38 filter-and-select picker.)**
+- **Scheduling (D39):** run-automation modal gains a Scheduling step — *Send immediately* (auto-dispatches
+  on Create) or *Schedule for later* (clean masked date + time, **not** the native `datetime-local`). A
   shared `AutomationDispatchService` holds the per-guest fan-out (fires the existing send events — it does
   NOT replace the event→listener architecture) and is called by all three entry points: the manual Send
-  button, immediate-on-create in `store()`, and a cron command `automations:dispatch-scheduled`. Cancel is
-  allowed only while `send_status='scheduled'`.
-- **⚠️ Deploy (NEW dep):** prod must run the **Laravel scheduler** (`cron schedule:run` OR a supervisor
+  button, immediate-on-create in `store()`, and the cron command `automations:dispatch-scheduled`. Listing
+  gains a `send_status` badge + a Cancel action (only while `send_status='scheduled'`).
+- **Details page (D40):** `/automation/details/[id]` rebuilt on the shared listing primitives
+  (`useListingState` + `ListingTable`/`Filters`/`Footer` + `TopSection`) to match the admin theme; MORE
+  (Split/Send) + Export + status filter preserved; **Clicked** column hidden; orphaned search deleted;
+  shared `web:sent_at` label tidied (`"sent_at"` → `"Sent at"`, also affects logs/e-visa headers).
+- **⚠️ Deploy / run (NEW dep):** prod must run the **Laravel scheduler** (`cron schedule:run` OR a supervisor
   `schedule:work` program) for scheduled automations to fire — separate from the existing `queue:work`
   supervisor (reused unchanged for sending). Immediate automations don't need it. Run `php artisan migrate`
-  (`2026_07_25_000002_*`) on deploy and on the **dev DB before testing**.
-- **Gates:** backend `pint`/`phpstan`/`test` (469) green; admin `type-check` + `eslint` clean. Detail: D39.
+  (`2026_07_25_000002_*`) on deploy **and on the dev DB before testing**. Runbook updated:
+  `process/SETUP_AND_UPDATE.md`.
+- **Parked (raised, holding):** (1) the listing shows two near-redundant status columns — legacy **Operation
+  status** vs new **Send status** — collapsing to one is a pending UI call; (2) the details page's manual
+  "Send To All" can dispatch a *scheduled* automation early (not gated on `send_status`); (3) automation
+  `created_by`/`updated_by` (no update endpoint yet). `send_status='sent'` means "handed to the queue", not
+  "delivered".
+- **Commits (NOT pushed):** backend `38729eb` (P24.25); admin `673f00d` (P24.25 scheduling UI) + `903013c`
+  (P24.26 details restyle); docs `6b22155` (D39) + this update.
+- **Gates:** backend `pint`/`phpstan`/`test` (469) green; admin `type-check` + `eslint` clean. `yarn
+  production` not run (no local `.env.production`). **Manual testing pending** (needs the migration first).
 
 **2026-07-24 — P24: WhatsApp channel added end-to-end (Meta Cloud API), built as a twin of the
 email/SMS stack. Committed on `dev` (backend 12 + admin 5 + frontend 1) + the plan doc on `main`, NOT pushed.

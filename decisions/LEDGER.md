@@ -1221,5 +1221,51 @@ reused unchanged for the actual sending). Without the scheduler, *immediate* aut
 admin `yarn type-check` **green** + `eslint` clean on the changed files. `yarn production` not run (no
 local `.env.production`; env files are gitignored). EN + AR keys in place.
 
-**Status:** landed in the working tree, **NOT committed** — awaiting review + manual testing (needs
-`php artisan migrate` on the dev DB first).
+**Landed (committed on `dev`, NOT pushed):** backend `38729eb` (P24.25 — service / command / Kernel /
+controllers / model / resource / route / migration); admin `673f00d` (P24.25 — schedule step + send_status
+badge + Cancel + the shared web.json keys, EN+AR). Docs on `main` carry this entry + HANDOFF.
+
+**Still pending before it works end-to-end:** `php artisan migrate` on the dev DB (the `2026_07_25_000002_*`
+migration), the **scheduler** running for scheduled sends (see the Deploy requirement above), and **manual
+testing** — the automated gates passed but the flow hasn't been exercised against a real DB yet.
+
+## D40 — 2026-07-25 — Automation details page rebuilt on the shared listing primitives (D38 pattern), Clicked column hidden, shared `sent_at` label tidied
+
+The per-guest automation details page (`/automation/details/[id]`) was still the old NextCrazy-generated
+pattern (raw `<table>` + `TableCaption`/`TablePagination` + a bespoke `automation-details-search` + manual
+fetch). Rebuilt on the **same shared primitives** as the D38 listing — `useListingState` +
+`ListingTable` / `ListingFilters` / `ListingFooter` + `TopSection` — so it matches the admin theme.
+
+**Durable points:**
+
+1. **Setup-level fields live once, not per row.** `name` + `email_template` are constant across every row
+   of a setup, so they moved out of the table into a small **summary card** (name · template · total
+   guests). The table is now purely per-guest: Guest (name + email) · Category · Sent (badge) · Sent at ·
+   Delivered · Opened.
+2. **Behaviour preserved:** the **MORE** menu (Split by 500 / Send To All), **Export**, the is_sent status
+   filter (all / yes / null), and the back button all carry over unchanged. Pagination now routes through
+   `useListingState`, which also **fixes the old broken `automations/details/` paginate path**.
+3. **`Clicked` column hidden** for now (kept in the interface + backend + resource; a one-line comment in
+   `automation-details.tsx` shows how to restore it). Delivered / Opened / Clicked are webhook-populated
+   tracking flags that are usually empty.
+4. **Shared `web:sent_at` EN label tidied** from the literal `"sent_at"` → `"Sent at"` (AR was already
+   proper). That key is shared, so the logs / e-visa headers get the nicer label too — an intentional,
+   net-positive side effect.
+5. **Orphaned `automation-details-search.tsx` deleted** (only this page used it).
+
+**Open edge (parked):** the details page still exposes the manual "Send To All" action, which would
+dispatch a *scheduled* automation **early** if clicked before its time — it is not gated on
+`send_status = scheduled`. Left as-is (a manual override is defensible); gate it later if unwanted.
+
+**Also parked (raised, user chose to hold):** the listing now shows **two** near-redundant status columns —
+legacy **Operation status** (`status`: not_started / started / splitted) and the new **Send status**
+(`send_status`). They move in lockstep for immediate automations and only diverge for scheduled ones;
+collapsing to a single column is a pending UI decision.
+
+**Files:** admin — `automation/automation-details.tsx` (rewrite), `pages/[lang]/automation/details/[id].tsx`
+(simplified to `mode` only), deleted `shared/forms/filters/automation-details-search.tsx`, `translations/{en,ar}/web.json`
+(`opened`, `no_email`, `sent_at` tidy).
+
+**Gates:** admin `yarn type-check` + `eslint` clean. (`yarn production` not run — no local `.env.production`.)
+
+**Landed (committed on `dev`, NOT pushed):** admin `903013c` (P24.26).
