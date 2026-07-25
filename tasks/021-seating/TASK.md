@@ -201,12 +201,25 @@ no BFF route, no token) + env var + EN/AR. Gate: `yarn type-check` + `yarn produ
   token logic to port. If the client later wants one-click SSO, add Option a2 (BFF + a short-lived seating-scoped
   minted token; touches `routes/api.php` → mobile-contract check) as a small follow-up. Option A (forward the
   raw 6h admin bearer in a URL) is **rejected** — it re-exposes the token the Task 005 hardening hides.
-- **D-5 — Seating access = dedicated `seating` RBAC feature (LOCKED, provisional until testing).** Add a
-  `seating` feature to the permissions catalog (mirrors `scanning` from Task 011), grantable to any role
-  independently — so on-site event staff can get seating without guest-edit/admin rights. It gates both the
-  backend seating endpoints and the admin launch link, and the SPA's internal roles map from 121's
-  `role`/`permissions` (never `admins.type` — do not port 120's seating `type` strings). Marked **provisional:**
-  re-confirm the exact action granularity (view / edit / check-in) once we test with real seating operators.
+- **D-5 — Seating access = dedicated `seating` RBAC feature with 3 graded actions (LOCKED; granularity
+  provisional until testing).** Add a `seating` feature to the backend catalog `app/Support/AdminPermissions.php`
+  (mirrors `scanning` from Task 011), grantable to any role independently — so on-site event staff get seating
+  without guest-edit/admin rights. **Actions = `view` / `check_in` / `manage`**, mapping directly onto the SPA's
+  existing internal permission presets:
+  - `seating:view` → `SEE_PREVIEW` (read-only).
+  - `seating:check_in` → `+ MARK_ATTENDANCE` (preview + attendance).
+  - `seating:manage` → `+ EDIT_LAYOUT, ADJUST_SEAT_COUNT, MANAGE_GUESTS, IMPORT/EXPORT, ALLOCATE, RESET,
+    VIEW_AUDIT_LOG` (full manager). (Existing **super** stays super; v1's **demo** sandbox is not ported.)
+  - **Audit finding (v1, 2026-07-25):** the SPA is already permission-array-driven (11 `hasPerm()` permissions);
+    `admin.type` only *seeds* the array in one function `mapAdminToUser` (App.jsx:415-495). So the SPA change is
+    **that one function** — build the permission array from 121's granted `seating` actions instead of hardcoded
+    `type` presets; every downstream UI gate is unchanged. v1's `seating`/`seating-checkin`/`seating-view` (+
+    `view`/`gate`/`checkin` aliases) collapse to exactly these 3 levels.
+  - **Enforce BOTH sides:** gate the backend seating routes on `admin.can:seating,<action>` AND the SPA UI on the
+    mapped permissions. ⚠️ v1 enforced the tiers **client-side only** (backend checked nothing — a "view" admin
+    could write via the API); 121 fixes that. Never `admins.type` — do not port 120's seating `type` strings.
+  - **Provisional:** re-confirm the exact action split (esp. whether `check_in` and `manage` should separate
+    further, and whether audit-log needs its own action) once we test with real seating operators.
 - **D-6 — Full port (LOCKED).** Bring the complete 120 backend seating footprint: `seating_layouts` +
   `seating_layout_versions` (+ `versions`/`versions/{id}` read-back endpoints) AND `seating_audit_logs` +
   `SeatingAuditLogsController` (index/store). Note: the SPA as-is doesn't call the audit-log or version-browse
