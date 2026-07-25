@@ -3,7 +3,21 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-24 (latest) — P24: WhatsApp channel added end-to-end (Meta Cloud API), built as a twin of the
+**2026-07-25 (latest) — Automation scheduling: "Send immediately" (auto-dispatch on create) or "Schedule
+for later" + a Cancel action and a `send_status` column. Ledger D39 (this session also landed D37 single-
+channel + D38 filter-and-select picker). In the working tree, NOT committed — awaiting review.**
+- **What:** the run-automation modal gains a Scheduling step (immediate/scheduled + `datetime-local`). A
+  shared `AutomationDispatchService` holds the per-guest fan-out (fires the existing send events — it does
+  NOT replace the event→listener architecture) and is called by all three entry points: the manual Send
+  button, immediate-on-create in `store()`, and a cron command `automations:dispatch-scheduled`. Cancel is
+  allowed only while `send_status='scheduled'`.
+- **⚠️ Deploy (NEW dep):** prod must run the **Laravel scheduler** (`cron schedule:run` OR a supervisor
+  `schedule:work` program) for scheduled automations to fire — separate from the existing `queue:work`
+  supervisor (reused unchanged for sending). Immediate automations don't need it. Run `php artisan migrate`
+  (`2026_07_25_000002_*`) on deploy and on the **dev DB before testing**.
+- **Gates:** backend `pint`/`phpstan`/`test` (469) green; admin `type-check` + `eslint` clean. Detail: D39.
+
+**2026-07-24 — P24: WhatsApp channel added end-to-end (Meta Cloud API), built as a twin of the
 email/SMS stack. Committed on `dev` (backend 12 + admin 5 + frontend 1) + the plan doc on `main`, NOT pushed.
 Ledger D36.**
 - **What:** a full WhatsApp delivery channel across all three apps — provider-config + templates CRUD, a

@@ -1160,3 +1160,66 @@ details and its columns regroup into Notification / Actions; and the shared `Sea
 **Landed (committed on `dev`, NOT pushed):** backend `49ece52` (P24.23); admin `17ad5cf` (P24.23 —
 picker / modal / shared-fields, paste form removed, listing regroup) + `ffb01d3` (P24.24 — Reset fix).
 Docs on `main` carry this entry + `ai/LISTING_SELECT_PATTERN.md`.
+
+## D39 — 2026-07-25 — Automation scheduling: "Send immediately" (auto-dispatch on create) or "Schedule for later"; a shared `AutomationDispatchService` + a cron-driven command; **prod must run the Laravel scheduler**
+
+The run-automation modal gains a **Scheduling** step: *Send immediately* (default) or *Schedule for
+later* + a **clean masked date + time pair** (the shared `MaskedDateInput` / `MaskedTimeInput`, same
+components as the logistics forms, combined into `scheduled_at` on submit — not the native
+`datetime-local`). Adapted from `120-pif-private-events-platform`'s scheduling scaffold, but rewired to
+**our** multi-channel fan-out (120's dispatcher is email-only/older-pattern — not copied).
+
+**Durable decisions:**
+
+1. **Send/dispatch is one shared loop.** The per-guest fan-out (which of `SendAutomationEmailEvent` /
+   `SendGuestSMSEvent` / `SendGuestWhatsAppEvent` / `SocialCardGenerationEvent` to fire, plus the
+   status/category/poster side-effects and per-row `is_sent` idempotency) lives in
+   `App\Services\AutomationDispatchService::dispatch()`. It is called by all three entry points — the
+   manual "Send" button (`AutomationController@send`), the immediate-on-create path
+   (`AutomationSetupsController@store`), and the scheduled command — so every path behaves identically.
+   The service **fires the existing events**; it does not replace the event→queued-listener
+   architecture (sending still flows event → listener → supervisor `queue:work`). It sits *above* the
+   events purely to avoid duplicating the loop.
+2. **"Send immediately" auto-dispatches on Create.** `store()` with `schedule_type = immediate` (or
+   absent) creates the setup + rows, then dispatches inline and sets `status='started'`,
+   `send_status='sent'`, `last_dispatched_at` — no second "Send" click. This is why the picker's
+   primary CTA both creates AND sends.
+3. **Scheduling state machine is a SEPARATE column** (`send_status`: draft | scheduled | processing |
+   sent | cancelled | failed) kept apart from the legacy operation `status`. New columns are additive
+   forward-only (migration `2026_07_25_000002_add_scheduling_to_automation_setups.php`): `schedule_type`,
+   `scheduled_at`, `send_status`, `last_dispatched_at` + a `(send_status, scheduled_at)` index. **DB is
+   source of truth** (not a delayed queue job) — that is what makes Cancel + a status column clean and
+   recoverable.
+4. **A cron-driven command fires due rows.** `automations:dispatch-scheduled` (scheduled `->everyMinute()
+   ->withoutOverlapping()` in `App\Console\Kernel`) claims each due row atomically
+   (`scheduled → processing`, guarded update, skip if not claimed), dispatches via the service, then sets
+   `status='started'`, `send_status='sent'`, `last_dispatched_at`; on throw → `send_status='failed'` +
+   `Log::error`.
+5. **Cancel** = `POST /admin/automations-setups/{id}/cancel` (gated `admin.can:automation,update`), allowed
+   **only** while `send_status='scheduled'` → `cancelled`. The listing shows a Cancel action for exactly
+   those rows and a `send_status` badge column (+ the scheduled time).
+6. **Timezone:** `scheduled_at` is a naive **Asia/Riyadh** datetime (app timezone) compared to
+   `Carbon::now()` in the same zone — no conversion. The masked date input's `minDate` blocks past
+   days; the backend re-validates `after:now`.
+
+**⚠️ Deploy requirement (NEW dependency):** scheduled automations only fire if the **Laravel scheduler**
+runs in prod — either a cron `* * * * * php artisan schedule:run`, or a supervisor program running
+`php artisan schedule:work`. This is **separate** from the existing `queue:work` supervisor (which is
+reused unchanged for the actual sending). Without the scheduler, *immediate* automations still work
+(dispatched inline on create), but *scheduled* ones sit in `send_status='scheduled'` forever. Also run
+`php artisan migrate` (the `2026_07_25_000002_*` migration) on deploy.
+
+**Files:** backend — `AutomationDispatchService` (new), `Console/Commands/DispatchScheduledAutomations`
+(new), `Console/Kernel` (schedule), `AutomationController@send` (now calls the service),
+`AutomationSetupsController@store` (schedule fields + auto-dispatch) + `cancel()`, `AutomationSetup`
+(fillable/casts), `AutomationSetupsResources` (4 fields), `routes/api.php` (cancel route), migration
+`2026_07_25_000002_*`; admin — `automation-settings-fields.tsx` (Scheduling section + type/defaults),
+`automation-run-modal.tsx` (payload), `automation-listing.tsx` (send_status badge + Cancel),
+`interfaces/automation-setup.tsx`, EN + AR `web.json`.
+
+**Gates:** backend `pint --test` **passed** + `phpstan` **No errors** + `php artisan test` **469 passed**;
+admin `yarn type-check` **green** + `eslint` clean on the changed files. `yarn production` not run (no
+local `.env.production`; env files are gitignored). EN + AR keys in place.
+
+**Status:** landed in the working tree, **NOT committed** — awaiting review + manual testing (needs
+`php artisan migrate` on the dev DB first).
