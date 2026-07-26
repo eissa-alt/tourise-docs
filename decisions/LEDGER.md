@@ -1328,7 +1328,12 @@ seating operator also needs that grant; a dedicated seating-scoped write endpoin
 **Gates:** backend `pint --test` clean + `phpstan` No-errors + `php artisan test` **480 pass** (6 new); admin
 `type-check` clean + `check:rbac` OK; seating `npm run build` clean.
 
-**Status — NOT pushed.** On feature branches pending owner review: backend `feat/seating` `2334445` (P021.1),
-admin `feat/seating` `982747e` (P021.3), seating `dev` `e1b4191` (P021.2, on the verbatim import `e66c2df`).
-**Pending owner:** merge branches → `dev` + push; create the GitHub seating remotes; set `.env`
-(`CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_SEATING_MANAGER_URL`, seating `VITE_*`); dev-DB migrate; live QA.
+**Status — MERGED + PUSHED (2026-07-26).** Backend + admin `feat/seating` merged to `dev` (`076cb8d` / `0f34b2d`);
+docs on `main`. **SPA re-based (addendum):** the initial fork was stale (`d145e13`); it was rebuilt on the current
+120 upstream **`85fecfb`** — the version the client actually tested (dark-mode theming, room presets, table-shape
+geometry, a SyncStatus indicator; 3 backend-less modals dropped) — keeping the **full 120 git history** so future
+upstream updates can be pulled, with the retarget re-applied (`guests/{id}` + `permissions.seating`). Published to
+`eissa-alt/alt-static-basecode-seating` (`dev`+`main` `09d23a5`), `npm run build` clean; 123 `pif-pep-v2-seating`
+re-cloned to match. **Backend + admin needed NO change** — the `85fecfb` API contract equals what was built (the
+D-6 full port already covered the `seating-audit-log` endpoints the newer SPA calls). **Pending owner:** set `.env`
+(`CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_SEATING_MANAGER_URL`, seating `VITE_*`); `php artisan migrate`; live QA.

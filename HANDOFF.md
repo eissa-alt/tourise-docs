@@ -3,7 +3,22 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-25 (latest) — Task 021 Seating Plan Manager implemented end-to-end (Phases A/B/C) — ledger D42.
+**2026-07-26 (latest) — Task 021 seating MERGED, and the SPA re-based to the current upstream `85fecfb`.**
+- **Merged + pushed:** backend + admin `feat/seating` → `dev` (`076cb8d` / `0f34b2d`); docs on `main`. Backend
+  480 tests green; admin `type-check` + `check:rbac` green.
+- **SPA re-based (important):** the first import was stale (`d145e13`). Rebuilt on the current 120 upstream
+  **`85fecfb`** — the version the client actually tested (dark-mode theming, room presets, table-shape geometry,
+  a SyncStatus indicator; 3 backend-less modals removed) — keeping the **full 120 git history** so future upstream
+  updates can be pulled. Retarget re-applied (`guests-update/{id}`→`guests/{id}` + `mapAdminToUser` reads
+  `permissions.seating`). Published to `eissa-alt/alt-static-basecode-seating` (`dev`+`main` `09d23a5`),
+  `npm run build` clean; 123 `pif-pep-v2-seating` re-cloned to match (wired via `basecode-local`).
+- **Backend + admin unchanged** — verified the `85fecfb` API contract == what was built. The D-6 "full port"
+  (building the `seating-audit-log` GET/POST) turned out to be exactly what the newer SPA calls.
+- **⚠️ Pending owner:** set `.env` (backend `CORS_ALLOWED_ORIGINS`, admin `NEXT_PUBLIC_SEATING_MANAGER_URL`,
+  seating `VITE_PIF_API_BASE_URL` + `VITE_GOOGLE_RECAPTCHA_KEY`); `php artisan migrate` (dev/prod); live
+  end-to-end QA. Seat/attendance write-ops also need `guests_listing,edit` (the write rides the guests endpoint).
+
+**2026-07-25 — Task 021 Seating Plan Manager implemented end-to-end (Phases A/B/C) — ledger D42.
 Code-complete + all gates green, on FEATURE BRANCHES, NOT pushed.**
 - **What:** ported the standalone Seating Plan Manager (Vite/React SPA from v1/120) into the baseline as a
   **new 4th sub-app** `alt-static-basecode-seating` (API-wire, no UI merge) + backend endpoints + a new

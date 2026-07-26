@@ -1,8 +1,11 @@
 # Task 021 — Seating Plan Manager (port into the ALT baseline)
 
-- **Status:** `done (code)` — Phases A/B/C implemented 2026-07-25, all gates green, on FEATURE BRANCHES
-  (backend/admin `feat/seating`, seating repo `dev`), **NOT pushed**. Ledger D42. Pending owner: review + merge
-  → `dev` + push; create the GitHub seating remotes; set `.env`; dev/prod migrate; live QA.
+- **Status:** `done` — **merged + pushed** (2026-07-26): backend `dev` `076cb8d`, admin `dev` `0f34b2d`, docs
+  `main`. The SPA was **re-based to the current 120 upstream `85fecfb`** (the client-tested version; full 120 git
+  history kept for future pulls) with the retarget re-applied, published to `alt-static-basecode-seating`
+  (`dev`+`main` `09d23a5`); 123 `pif-pep-v2-seating` re-cloned to match. **Backend + admin needed no change** —
+  the `85fecfb` API contract equals what was built. Ledger D42. Pending owner: `.env` + `php artisan migrate` +
+  live QA.
 - **Opened:** 2026-07-25
 - **Owner:** (unassigned)
 - **Sub-app(s):** **new 4th sub-app** `alt-static-basecode-seating` + backend + admin (+ docs). Frontend/landing: none.
