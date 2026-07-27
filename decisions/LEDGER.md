@@ -1344,3 +1344,60 @@ upstream updates can be pulled, with the retarget re-applied (`guests/{id}` + `p
 re-cloned to match. **Backend + admin needed NO change** — the `85fecfb` API contract equals what was built (the
 D-6 full port already covered the `seating-audit-log` endpoints the newer SPA calls). **Pending owner:** set `.env`
 (`CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_SEATING_MANAGER_URL`, seating `VITE_*`); `php artisan migrate`; live QA.
+
+## D43 — 2026-07-27 — Guest history records WHAT an edit changed — as a redacted delta, never a snapshot
+
+**What:** `history_logs` rows gained `previous_payload` / `payload` (additive migration
+`2026_07_27_000001`), filled in `GuestsController::updateGuest`, and the admin renders them as a
+`Field | From | To` table in the guest see-more modal. Prompted by a comparison against
+`115-cyan-basecode`, which had the richer version first (`2026_05_06_000004_extend_history_logs_for_payload`).
+
+**Durable decisions:**
+
+1. **A DELTA, never a snapshot — this is the load-bearing one.** Only fields that actually changed are
+   stored. Cyan snapshots the whole record on both sides, but it can afford to: cyan's guests table has
+   **no PII columns at all** (everything is one `form_data` JSON blob) and its uploads sit on the
+   **public** disk. 121 is the opposite on both counts — ~110 fillable columns including `religion`,
+   `birth_date`, `document_number`, `full_name_on_document`, plus five **private-disk** file fields that
+   exist because of D14. A verbatim port would have made `history_logs` the largest uncontrolled PII
+   store in the database, rewritten on every edit, with **no erasure path** (`guest_id` has no
+   `onDelete`). It is also a volume problem independent of privacy: the **Seating Plan Manager writes
+   every seat drag through `PUT /admin/guests/{id}`**, the same handler that logs — a full snapshot
+   would persist a passport number twice for a seat move. **Do not "complete" this feature by adding
+   snapshots.**
+2. **File fields record only THAT they changed** (`[file]` sentinel), never the value. `personal_image`,
+   `document_copy`, `visa_copy`, `issued_visa` are private-disk paths served exclusively through signed
+   URLs (D14); writing the path into a plain json column routes around that control.
+3. **`[]` and `null` mean different things, and the distinction survives to the client.** `[]` = the save
+   ran and changed nothing → the UI says "No changes in edit". `null` = unknown — a row written before
+   this feature, or an action that never carried a field edit → the UI keeps the plain one-line format.
+   There is **no backfill** (the old values were never recorded), so the list stays permanently mixed.
+4. **Cyan's `source` / `actor_type` / `ip` / `user_agent` were deliberately NOT ported.** `source`
+   collides with the existing `guests.source` column; `actor_type` invites confusion with the retired
+   `admins.type`; and cyan never renders `ip` nor even exposes `user_agent` — speculative storage.
+   Capturing registrant IP on the public `/complete-data` / `/reconfirm` routes is a privacy-notice
+   decision, not a code one.
+5. **The dynamic-forms coupling is real but shallow, and it is in the producer only.** Cyan's admin diff
+   renderer walks a `Record<string, unknown>` and prints raw keys — zero `FormDefinition` coupling, so it
+   ports. Only `'payload' => $formDataNormalizer->normalize($form, …)` is coupled, and totally. So
+   CLAUDE.md hard-rule 4 is **not** engaged by this port: the schema and the UI came across, the payload
+   producer was re-authored against 121's static columns.
+6. **Scope: one write site.** Only `updateGuest` carries a payload. The other 27 `HistoryLog::create`
+   sites are state transitions (`Badge Printed`, `Hotel Assigned`, …) where the action name says
+   everything.
+
+**Not yet true:** this is **not** a complete audit trail. `importGuestsExcel`, the `upload*` methods,
+`attend()` / `guestsSyncOffline()`, `reGenerateSMP()` and `MobileAuthController::updateProfile` (which
+mutates guest phone and avatar) write **no history row at all**. Describe the feature accordingly, or
+scope a follow-up.
+
+**Also fixed en route:** the history view rendered an Email/First/Last table that looked like part of the
+log but was read from react-hook-form — the guest's values *right now*, unrelated to any row. Deleted.
+And the view now lives in the see-more modal: the `/extra/{id}` page it used to live on is reachable by
+direct URL only, and resolves to feature-level `guests_listing` while the API requires
+`guests_listing,see_more` — so the modal is both discoverable and the correct RBAC host.
+
+**Landed (on `dev`, not pushed):** backend `0df228e` (P022.1); admin `a959703` (P022.2) + `5ae2afb`
+(P022.3). Gates: pint + phpstan clean, **484 tests** (4 new — `history_logs` had zero coverage before),
+admin `type-check` + `eslint` + `check:rbac` green, EN/AR 1760/1760. Dev DB migrated; **prod
+`php artisan migrate` still pending**. Task log: `tasks/022-guest-history-payload/TASK.md`.

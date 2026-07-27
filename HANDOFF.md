@@ -3,7 +3,39 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-27 (latest) — Prod queue/scheduler runbook added + a docs-accuracy sweep. Docs repo only; no
+**2026-07-27 (latest) — Task 022: guest history now shows WHAT an edit changed. Committed on `dev`
+(backend + admin), NOT pushed. Ledger D43.**
+- **What:** `history_logs` gained `previous_payload` / `payload` (additive migration
+  `2026_07_27_000001`), filled in `updateGuest`; the admin renders a `Field | From | To` table with the
+  old value struck through, plus a "No changes in edit" note. Ported in spirit from `115-cyan-basecode`,
+  which had it first — but **re-authored**, not copied.
+- **⚠️ A DELTA, NEVER A SNAPSHOT — do not "finish" this by adding full snapshots.** Cyan snapshots the
+  whole record because its guests table is one `form_data` JSON blob with no PII columns and public-disk
+  uploads. 121 has ~110 columns incl. `religion`, `birth_date`, `document_number` and five private-disk
+  file fields (D14), and the **Seating SPA writes every seat drag through the same `PUT
+  /admin/guests/{id}`** — a snapshot would persist a passport number twice per seat move, with no
+  erasure path. File fields store a `[file]` sentinel, never the path.
+- **`[]` ≠ `null`:** `[]` = "changed nothing" (shows the note); `null` = unknown — a pre-task row or an
+  action that never carried an edit (keeps the one-line format). **No backfill is possible**, so the
+  list stays permanently mixed.
+- **Moved into the see-more modal** (`5ae2afb`). The `/guests/{slug}/extra/{id}` page it lived on is
+  reachable by **direct URL only** — the listing's see-more button opens the modal — so the feature was
+  effectively invisible. Also the better RBAC host: the API needs `guests_listing,see_more` but that
+  page resolves to feature-level `guests_listing`.
+- **Deleted a misleading UI element:** the Email/First/Last table under the log was read from
+  react-hook-form — the guest's values *right now*, unrelated to any row.
+- **Not a complete audit trail (be accurate about this):** `importGuestsExcel`, the `upload*` methods,
+  `attend()`/`guestsSyncOffline()`, `reGenerateSMP()` and `MobileAuthController::updateProfile` still
+  write **no history row at all**.
+- **Commits (NOT pushed):** backend `0df228e` (P022.1); admin `a959703` (P022.2) + `5ae2afb` (P022.3).
+  **Gates:** pint + phpstan clean, **484 tests** (4 new — `history_logs` had zero coverage), admin
+  `type-check` + `eslint` + `check:rbac` green, EN/AR 1760/1760. Dev DB migrated; **prod migrate
+  pending.** Verified in the browser: diff table, no-changes note, modal tab.
+- **Known gaps left open (in `tasks/022-guest-history-payload/TASK.md`):** `HistoryLogsController::index`
+  has no `applyAdminGuestAccessFilter` scoping (it would now leak a field diff to an out-of-scope admin)
+  and no pagination; an unchanged save still writes a "Guest updated" row.
+
+**2026-07-27 — Prod queue/scheduler runbook added + a docs-accuracy sweep. Docs repo only; no
 code touched. All four code repos remain clean and in sync with `origin`.**
 - **New runbook:** `process/QUEUE_SETUP_PROD.md` (+ PDF twin for DevOps) — the supervisor program for
   `queue:work`, both scheduler options (cron `schedule:run` or a `schedule:work` program, `numprocs=1`),
