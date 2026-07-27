@@ -17,7 +17,7 @@ Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` 
 | [tasks/](tasks/) | The work-log axis — one folder per task. [tasks/README.md](tasks/README.md) explains how to open one. |
 | [decisions/](decisions/LEDGER.md) | Append-only ledger of durable, cross-task locked decisions (`D1…Dn`). |
 | [upgrades/](upgrades/README.md) | Upgrade records + portable migration playbooks/runbooks (the Parts 1–5 initiative). |
-| [process/](process/WORKING_MECHANISM.md) | How we work — branching, commit format, task flow, quality gate, Definition of Done. Also [SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md) (local run) + [CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md) (spin up a new project from this baseline). |
+| [process/](process/WORKING_MECHANISM.md) | How we work — branching, commit format, task flow, quality gate, Definition of Done. Also [SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md) (local run), [QUEUE_SETUP_PROD.md](process/QUEUE_SETUP_PROD.md) (prod queue worker + scheduler, md + pdf) + [CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md) (spin up a new project from this baseline). |
 | [mobile/](mobile/) | The mobile API contract (PDF + HTML twin). **Read before touching `routes/api.php`.** |
 
 ## Start here
@@ -26,6 +26,7 @@ Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` 
 - **First session in the repo →** paste [ai/KICKOFF_PROMPT.md](ai/KICKOFF_PROMPT.md) as the agent's first message.
 - **Setting up / running locally (or after a `git pull`) →** [process/SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md).
 - **Picking up / starting work →** [process/WORKING_MECHANISM.md](process/WORKING_MECHANISM.md) + open a [task](tasks/README.md).
+- **Deploying to a production box (queue worker + scheduler) →** [process/QUEUE_SETUP_PROD.md](process/QUEUE_SETUP_PROD.md) — hand the PDF twin to DevOps.
 - **Cloning this baseline into a new project →** [process/CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md).
 
 ## Conventions

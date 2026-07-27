@@ -157,6 +157,11 @@ Rename gets the strings right; it does **not** make these *true* for the new pro
 - [ ] **Review `CLAUDE.md` project-specific rules** — e.g. the form-shapes rule (#4) and the
   sub-app list. Keep the inherited guardrails (Sentry removed, quality gate, commit format,
   no framework bumps).
+- [ ] **Regenerate the prod queue runbook PDF** — `docs/process/QUEUE_SETUP_PROD.pdf` is **binary**, so
+  Bucket 1's `*.md` sweep renames the markdown but leaves the PDF carrying the **old** project's server
+  path and supervisor program names. DevOps gets handed the PDF, so a stale one is worse than none.
+  After the rename, re-print it from the updated markdown (headless Chrome → A4), or delete the PDF and
+  keep the `.md` only.
 - [ ] **Lighter touch (rename usually enough, skim once):** `docs/ai/CODING_STYLE.md`,
   `CURRENT_WORKFLOW.md`, `AI_RULES.md`, `KICKOFF_PROMPT.md`, `docs/process/*`,
   `docs/process/SETUP_AND_UPDATE.md` (confirm clone URLs + the prereqs/versions still hold).

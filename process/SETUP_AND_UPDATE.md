@@ -62,6 +62,8 @@ php artisan serve                # http://127.0.0.1:8000
 > **Background processes (run in their own terminals).** The API alone doesn't *send* or *fire* anything:
 > - `php artisan queue:work` — processes queued sends (automation / invitation / notification email · SMS · WhatsApp · poster generation). Prod runs this under **supervisor**. Without it, nothing is actually sent.
 > - `php artisan schedule:work` — the Laravel scheduler; fires **scheduled automations** (runs `automations:dispatch-scheduled` every minute — **new in ledger D39**). Prod uses a cron `* * * * * php artisan schedule:run` **or** a supervisor `schedule:work` program. Without it, *immediate* automations still send (dispatched on create), but *scheduled* ones sit in `send_status = scheduled` forever.
+>
+> **Production setup for both of the above → [QUEUE_SETUP_PROD.md](QUEUE_SETUP_PROD.md)** (supervisor configs, cron line, `queue:restart` after each deploy, verification steps). It has a PDF twin to hand to DevOps.
 
 > **`.env` secrets:** `.env` is gitignored. After `cp .env.example .env`, set your local `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD`, mail, Firebase (push), and any API keys — get real values from a teammate / the secrets store.
 

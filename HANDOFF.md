@@ -3,7 +3,27 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-26 (latest) — Task 021 seating MERGED, and the SPA re-based to the current upstream `85fecfb`.**
+**2026-07-27 (latest) — Prod queue/scheduler runbook added + a docs-accuracy sweep. Docs repo only; no
+code touched. All four code repos remain clean and in sync with `origin`.**
+- **New runbook:** `process/QUEUE_SETUP_PROD.md` (+ PDF twin for DevOps) — the supervisor program for
+  `queue:work`, both scheduler options (cron `schedule:run` or a `schedule:work` program, `numprocs=1`),
+  `queue:restart` after every deploy, and verification commands. Brought over from the **123** clone and
+  **de-branded** (server path, both program names, both log files now read `alt-static-basecode`); PDF
+  re-printed via headless Chrome to match. This is the written-up form of D39's prod dependency —
+  **installing it on the prod box is still outstanding.**
+- **Task 020 status corrected:** both the tasks-index row and `020-reconfirmation/TASK.md` claimed the
+  work was uncommitted / "NOT pushed". It is **pushed** — backend `27b764f`+`045223a`, admin `e12d548`,
+  frontend `854b44d`, all contained in `origin/dev`. Now `done (code)`; dev-DB migrate + manual QA +
+  mobile notice remain the open items.
+- **Also corrected:** `PHASE22_PARKED_TODO.md` §2 claimed "the ledger stops at D34" — it runs to **D42**.
+  The two findings it names (SMTP mailer memoisation / `forgetMailers`, and the `GuestsResources`
+  date-only fix) *are* still genuinely unrecorded, so the item stays open, scoped to just those two.
+- **Cross-links added** so the runbook is findable: docs map + a "Deploying to production" quick-link,
+  `SETUP_AND_UPDATE.md` (beside the local `queue:work`/`schedule:work` notes), and a D39 addendum.
+- **New clone-checklist item:** the runbook's **PDF is binary**, so Bucket 1's `*.md` rename sweep misses
+  it — a clone would hand DevOps a PDF naming the wrong project. Flagged with the fix.
+
+**2026-07-26 — Task 021 seating MERGED, and the SPA re-based to the current upstream `85fecfb`.**
 - **Merged + pushed:** backend + admin `feat/seating` → `dev` (`076cb8d` / `0f34b2d`); docs on `main`. Backend
   480 tests green; admin `type-check` + `check:rbac` green.
 - **SPA re-based (important):** the first import was stale (`d145e13`). Rebuilt on the current 120 upstream

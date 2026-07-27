@@ -1230,6 +1230,13 @@ present); still needed — the **scheduler** running for scheduled sends (see th
 `php artisan migrate` on **prod** at deploy, and **manual testing** (automated gates pass, but the flow
 hasn't been exercised against a real DB yet).
 
+> **Addendum 2026-07-27 — the Deploy requirement above now has a concrete runbook.**
+> [`process/QUEUE_SETUP_PROD.md`](../process/QUEUE_SETUP_PROD.md) (+ a PDF twin for DevOps) carries the
+> supervisor program for `queue:work`, both scheduler options (cron `schedule:run` or a `schedule:work`
+> program, `numprocs=1`), `queue:restart` after every deploy, and the verification commands. Brought over
+> from the 123 clone and de-branded. The decision itself is unchanged — this only means nobody has to
+> re-derive the config. **Installing it on the prod box is still outstanding.**
+
 ## D40 — 2026-07-25 — Automation details page rebuilt on the shared listing primitives (D38 pattern), Clicked column hidden, shared `sent_at` label tidied
 
 The per-guest automation details page (`/automation/details/[id]`) was still the old NextCrazy-generated

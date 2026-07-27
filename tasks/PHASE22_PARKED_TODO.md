@@ -42,10 +42,16 @@ this. Two real options:
 
 `QrCodeGenerator` (added in `9d4d5f3`) already does the local rendering either option needs.
 
-## 2. Docs debt — the ledger stops at D34
+## 2. Docs debt — two findings still unrecorded in the ledger
 
-`decisions/LEDGER.md` ends at **D34**. Everything from **P21.7 onward is unrecorded**, and two of
-those are things a future session would not rediscover by reading code:
+> **Corrected 2026-07-27.** The original heading here said "the ledger stops at D34". That is no longer
+> true — `decisions/LEDGER.md` now runs to **D42** (D35–D42 landed 07-24 → 07-25, covering P23 audit
+> hardening, WhatsApp, the automation channel/picker/scheduling work, and seating). The **two specific
+> findings below are still genuinely absent** (re-checked: `forgetMailers` and the `GuestsResources`
+> date-only fix return no ledger hits), so this item stays open — but only for these two, not for the
+> whole post-P21.7 range.
+
+The two things a future session would not rediscover by reading code:
 
 - **System-wide date shift** — every date-only API field was arriving a day early. `JsonResource`
   serialised Carbon as ISO-with-timezone, and `Asia/Riyadh` (UTC+3) pushed the day back. Fixed by

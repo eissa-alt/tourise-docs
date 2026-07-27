@@ -1,6 +1,6 @@
 # Task 020 — Reconfirmation (guest attendance re-confirmation)
 
-- **Status:** `in-progress` — **Phase A + B implemented 2026-07-25 (uncommitted, all gates green)**: backend, frontend (email), admin surfacing, and the SMS + WhatsApp `{{ reconfirmation_url }}` variable (shared `ReconfirmationLink` helper). Manual QA + commit pending.
+- **Status:** `done (code)` — **Phase A + B implemented 2026-07-25, committed + pushed** (backend `27b764f` + `045223a`, admin `e12d548`, frontend `854b44d` — all contained in `origin/dev`): backend, frontend (email), admin surfacing, and the SMS + WhatsApp `{{ reconfirmation_url }}` variable (shared `ReconfirmationLink` helper). All gates green. Dev-DB migrate + manual QA + mobile notice still pending.
 - **Opened:** 2026-07-25
 - **Owner:** (unassigned)
 - **Sub-app(s):** backend + admin + frontend (+ docs)
