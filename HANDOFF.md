@@ -3,8 +3,30 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-27 (latest) — Task 022: guest history now shows WHAT an edit changed. Committed on `dev`
-(backend + admin), NOT pushed. Ledger D43.**
+**2026-07-27 (latest) — Admin phone field (Task 024, D45) + guest-access single-record scoping
+(Task 023, D44). All committed on `dev` and PUSHED across backend + admin + docs. Dev DB migrated; prod
+`migrate` + manual QA pending.**
+- **Admin phone (D45):** admins now have a `phone` — same field name + `PhoneInputV2` widget as guests
+  (owner: "use what we have for guest to be consistent", so `phone`, **not** `phone_number`). Additive
+  migration `2026_07_27_000002` (nullable at the DB; **required** at the request/form layer — so editing a
+  pre-existing admin now forces entering a phone). Exposed in `AdminsResources` + `AuthController::profile()`;
+  form field + listing column + typed `AdminType`. **Same admin commit, owner request:** create form now
+  defaults **status ON** and the **Data scope** section **expanded** (edit mode unaffected). **Shared fix:**
+  `PhoneInputV2` error text was `text-error` — undefined in this app's Tailwind v4 theme, so validation
+  messages rendered gray; now `text-red-500` (also fixes the guest admin forms, which share the component).
+  **Deferred (owner):** a phone search/filter on the listing + an admins export. Commits: backend `f1c3dc3`
+  (P024.1), admin `f743fae` (P024.2).
+- **Guest-access scope (D44):** `GET /admin/guests/{id}` + `GET /admin/history-logs/{id}` are now scoped to
+  the admin's categories/statuses via new `App\Support\GuestAccessScope::denies()` (a twin of the list-scope
+  filter). A scoped admin opening an out-of-scope guest by UUID now gets **403** — closes a hole Task 022
+  widened. Backend `ae1c210` (P023.1) — pushed earlier this session, **now documented** (folder 023 + D44).
+  ⚠️ **Mirror rule:** if the list filter or `GatesController::deniesGateScope` changes, change
+  `GuestAccessScope` too.
+- **Gates (both):** pint + phpstan clean, **489 tests** (5 new via P023.1); admin `type-check` + eslint green.
+  Not mobile-facing — both live under `/admin/*`; `routes/api.php` untouched.
+
+**2026-07-27 — Task 022: guest history now shows WHAT an edit changed. Committed + PUSHED on `dev`
+(backend + admin). Ledger D43.**
 - **What:** `history_logs` gained `previous_payload` / `payload` (additive migration
   `2026_07_27_000001`), filled in `updateGuest`; the admin renders a `Field | From | To` table with the
   old value struck through, plus a "No changes in edit" note. Ported in spirit from `115-cyan-basecode`,
@@ -27,7 +49,7 @@
 - **Not a complete audit trail (be accurate about this):** `importGuestsExcel`, the `upload*` methods,
   `attend()`/`guestsSyncOffline()`, `reGenerateSMP()` and `MobileAuthController::updateProfile` still
   write **no history row at all**.
-- **Commits (NOT pushed):** backend `0df228e` (P022.1); admin `a959703` (P022.2) + `5ae2afb` (P022.3).
+- **Commits (PUSHED):** backend `0df228e` (P022.1); admin `a959703` (P022.2) + `5ae2afb` (P022.3).
   **Gates:** pint + phpstan clean, **484 tests** (4 new — `history_logs` had zero coverage), admin
   `type-check` + `eslint` + `check:rbac` green, EN/AR 1760/1760. Dev DB migrated; **prod migrate
   pending.** Verified in the browser: diff table, no-changes note, modal tab.

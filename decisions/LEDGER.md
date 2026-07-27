@@ -1401,3 +1401,60 @@ direct URL only, and resolves to feature-level `guests_listing` while the API re
 (P022.3). Gates: pint + phpstan clean, **484 tests** (4 new — `history_logs` had zero coverage before),
 admin `type-check` + `eslint` + `check:rbac` green, EN/AR 1760/1760. Dev DB migrated; **prod
 `php artisan migrate` still pending**. Task log: `tasks/022-guest-history-payload/TASK.md`.
+
+## D44 — 2026-07-27 — Single-record guest reads are scoped to the admin's categories/statuses
+
+**What:** `applyAdminGuestAccessFilter` had always scoped guest **list** queries, but the single-record
+reads had no equivalent — `GET /admin/guests/{id}` and `GET /admin/history-logs/{id}` returned any guest
+to any admin holding the UUID, ignoring the categories/statuses that admin is bound to. Both are gated
+`guests_listing,see_more`, so the caller is an admin — but one reading a guest they cannot see in any
+listing. Task 022 (D43) sharpened the stakes by putting a field-level edit diff behind the history
+endpoint, but the leak is the guest record itself via `show()`; the diff is incremental exposure on a
+hole that predated it.
+
+**Durable decisions:**
+
+1. New `App\Support\GuestAccessScope::denies()` is a **single-record twin** of the list filter and must
+   mirror it exactly: super bypasses; an admin with **no** restrictions set sees nothing (the list
+   filter answers that case with `0 = 1`, not "everything"); category and status bounds are ANDed; `null`
+   is permitted in the status list for the admin UI's "No-Value" option. Shape follows
+   `GatesController::deniesGateScope`. **If either side's rules change, change both.**
+2. **Behaviour change:** a scoped admin who could previously open any guest by UUID now gets **403**. The
+   listing never showed them those guests, so no legitimate flow should depend on it.
+3. **Not covered, deliberately:** `GuestDraftsController::show` has the same shape and `guest_drafts`
+   does carry `category_id`, but it is a separate RBAC feature and whether drafts should be
+   category-scoped at all is undecided.
+
+**Landed:** backend `ae1c210` (`P023.1`) — committed + **pushed** to `origin/dev`. Gates: pint + phpstan
+clean, **489 tests** (5 new). Not mobile-facing. Task log: `tasks/023-guest-access-scope/TASK.md`.
+
+## D45 — 2026-07-27 — Admins get a phone number, named `phone` to match guests
+
+**What:** admins gained a phone number, captured on create/edit and shown in the listing. Additive,
+forward-only migration `2026_07_27_000002` adds a nullable `phone` (`string(100)`) to `admins`; exposed
+via `AdminsResources` (login + `/me`) and the flat `AuthController::profile()`.
+
+**Durable decisions:**
+
+1. **Column is `phone`, not `phone_number`** — guests use `phone` everywhere (DB, API, forms), so admins
+   match it for consistency (owner's explicit call). A clone that renames this field must rename it on
+   both entities together.
+2. **DB column nullable; "required" enforced at the request/form layer.** Existing admins predate the
+   field and `migrate:fresh` is banned (real data), so a NOT-NULL column is impossible. `store` validates
+   `required`; `update` validates `sometimes|required`. Owner chose required on create **and** edit — so
+   editing a pre-existing admin now forces entering a phone before it can be saved.
+3. **Widget = `PhoneInputV2`** (the guest phone widget: country flags + libphonenumber E.164), not the
+   plain `CustomInput` the other admin fields use — consistency + real validation.
+4. **Deferred, not dropped:** a phone **search/filter** on the admins listing (needs a backend `index`
+   filter) and an **admins export** (none exists today).
+
+**Also (same admin commit, owner request):** the create form now defaults **status ON** and the **Data
+scope** section **expanded** (edit mode unaffected — `reset()` loads the record). And a shared-component
+fix: `PhoneInputV2`'s error text used `text-error`, which is **not a defined color** in the admin's
+Tailwind v4 theme, so validation messages rendered gray — switched to `text-red-500`; this also corrects
+the guest admin forms, which share the component.
+
+**Landed:** backend `f1c3dc3` (`P024.1`), admin `f743fae` (`P024.2`) — committed + **pushed**. Gates:
+pint + phpstan clean, 489 tests; admin `type-check` + eslint green; EN/AR reused (`web:phone`,
+`validation:invalid_phone`, no new keys). Dev DB migrated; prod `migrate` + manual QA pending. Not
+mobile-facing (`/admin/admins`, `routes/api.php` untouched). Task log: `tasks/024-admin-phone/TASK.md`.
