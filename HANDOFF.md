@@ -3,7 +3,59 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-27 (latest) — Admin phone field (Task 024, D45) + guest-access single-record scoping
+**2026-07-28 (latest, documented 2026-08-01) — an eight-item batch (P025–P032) across backend + admin:
+two category features, three bug fixes, and the automation manual-run option. Tasks 025–032, ledger D46 +
+D47 + addenda to D39/D42. All working trees clean; ⚠️ THREE COMMITS ARE STILL UNPUSHED and the full
+quality gate has NOT been re-run since 07-28.**
+- **Why this entry is late:** the code landed 2026-07-28 but nothing was written up — no handoff entry,
+  no ledger entries, no task folders (the board stopped at 024 while commits ran to P032). A drift sweep
+  on 2026-08-01 caught it; this batch is the write-up. **No code was changed while documenting.**
+- **⚠️ Unpushed (3):** backend `6e7fd94` (P031.1) · admin `3fc30c9` (P031.1) + `77cea97` (P032.1).
+  Everything else in the batch is on `origin/dev`. Frontend, seating and docs are in sync.
+- **⚠️ Biggest deploy trap — D47 defaults OFF.** Task 028's migration `2026_07_28_000001` adds the five
+  guest row-action switches **defaulting to false, with no backfill**, so **the moment it runs on prod,
+  every guest row action vanishes from every category — resend email/SMS/WhatsApp, print badge, and
+  *mark collected* — until an admin turns each one on.** Plan the switch-on as part of the deploy, not
+  after. (`with_issued_visa` in `000002` *is* backfilled, so the issued-visa template keeps working.)
+- **Task 027 — category cloning now actually copies everything (D46).** The old `clone` ran attributes
+  through `fill()`, so **any column missing from `$fillable` was silently dropped** — and would keep
+  being dropped for columns added later. Now `replicate()` inside one transaction, plus badge
+  assignments, admin data scope, meeting-room links, and share-poster files **duplicated** to fresh names
+  so a clone never shares an image with its source. Note the access-surface consequence: copying the
+  admin scope means **the clone inherits its source's visibility** rather than starting private.
+  Backend `0be944e`. **No test covers `clone`.**
+- **Task 026 — guests filter by registration date.** `created_from`/`created_to` went into the **shared
+  `applyFilters()`**, so the listing *and* every guests export honour the range for free; `whereDate`
+  keeps both bounds inclusive and date-only, either alone is valid. New shared admin
+  `date-range-input.tsx` emits `YYYY-MM-DD` straight into the query params. Backend `6abee02`, admin
+  `6978795`.
+- **Task 031 — automations gain a `manual` schedule (D39 addendum).** Saved as a draft
+  (`schedule_type='manual'`, `send_status='draft'`, not dispatched on create) and run later through the
+  **existing** `POST /automations/send/{id}`. **No migration needed** — `schedule_type` is `string(20)`,
+  not an enum. Also: draft-gated Run action + `ConfirmModal`, direct Run/Split buttons on the details
+  page, and run-neutral wording ("Send immediately"→"Run immediately", status "Sent"→"Completed";
+  admin `af2a24a`, confusingly also stamped `P027.1`). **D39 parked item #2 is still open** — the
+  *details* page's Run is still not gated on `send_status`, so it can fire a scheduled automation early.
+- **Task 025 — the Seating Manager link is gone from the guests listing (D42 addendum).** Button only;
+  the RBAC feature, the seating sub-app, the endpoints, the component and its labels all stay, so
+  re-adding is one line. Read D42 as "seating is integrated, but not advertised from the admin."
+- **Three bug fixes:** **029** title creation failed when its optional switches were untouched
+  (`show_in_badge`/`show_in_user_form` are NOT NULL; an unchecked switch arrived as `null`) — coerced
+  with `$request->boolean()` in `store` *and* `update`. **030** automation creation was blocked unless a
+  guest status was picked — `guest_status_id` lacked `nullable` *and* its `required_if` matched the
+  string `'yes'` while the form sends a boolean, so it never fired. **032** `{{ reconfirmation_url }}`
+  added to the email editor's variable palette (the resolver already substituted it since Task 020).
+- **Gates — be accurate about this:** every commit passed its **pre-commit hook** (Pint on staged PHP;
+  eslint/prettier on staged TS) at commit time, but **`composer qa` and `yarn type-check` / `yarn
+  production` have not been run across this batch**. Run them before pushing the three outstanding
+  commits.
+- **Dev DB is migrated** (`migrate:status`: `2026_07_28_000001` + `000002` both **Ran**). **Prod is not.**
+- **Small follow-ups left open** (all in `tasks/031-automation-manual-run/TASK.md`): the details-page Run
+  button's label is a hardcoded `'Run'` literal, not a translation key (pre-existing — it was
+  `'Send To All'` before — so it won't render in Arabic), and `automation-details.tsx` carries the old
+  "More" dropdown commented out rather than deleted.
+
+**2026-07-27 — Admin phone field (Task 024, D45) + guest-access single-record scoping
 (Task 023, D44). All committed on `dev` and PUSHED across backend + admin + docs. Dev DB migrated; prod
 `migrate` + manual QA pending.**
 - **Admin phone (D45):** admins now have a `phone` — same field name + `PhoneInputV2` widget as guests

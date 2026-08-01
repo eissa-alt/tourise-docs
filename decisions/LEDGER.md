@@ -1237,6 +1237,18 @@ hasn't been exercised against a real DB yet).
 > from the 123 clone and de-branded. The decision itself is unchanged — this only means nobody has to
 > re-derive the config. **Installing it on the prod box is still outstanding.**
 
+> **Addendum 2026-07-28 — a third scheduling option: `manual`.** Beside *immediate* and *scheduled*, an
+> automation can now be saved as a **draft to run later by hand** (`schedule_type = 'manual'`,
+> `send_status = 'draft'`, no dispatch on create); an admin runs it from the listing's Run action, which
+> goes through the **existing** manual send endpoint `POST /automations/send/{id}` — no new endpoint, no
+> new state machine. **No migration was needed:** `schedule_type` is `string(20)` in
+> `2026_07_25_000002`, not an enum, so it accepts the third value as-is (don't "fix" this with a
+> redundant migration). The listing's Run action is gated on `send_status === 'draft'`.
+> **Parked item #2 above is still open and now has a second home:** the *details* page's Run button is
+> still not gated on `send_status`, so it can dispatch a scheduled automation early. Backend `6e7fd94`,
+> admin `3fc30c9` (`P031.1`) — **both unpushed as of 2026-08-01**. Detail:
+> [`tasks/031-automation-manual-run/TASK.md`](../tasks/031-automation-manual-run/TASK.md).
+
 ## D40 — 2026-07-25 — Automation details page rebuilt on the shared listing primitives (D38 pattern), Clicked column hidden, shared `sent_at` label tidied
 
 The per-guest automation details page (`/automation/details/[id]`) was still the old NextCrazy-generated
@@ -1344,6 +1356,15 @@ upstream updates can be pulled, with the retarget re-applied (`guests/{id}` + `p
 re-cloned to match. **Backend + admin needed NO change** — the `85fecfb` API contract equals what was built (the
 D-6 full port already covered the `seating-audit-log` endpoints the newer SPA calls). **Pending owner:** set `.env`
 (`CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_SEATING_MANAGER_URL`, seating `VITE_*`); `php artisan migrate`; live QA.
+
+> **Addendum 2026-07-28 — the admin launch button described above no longer renders.** The
+> `seating`-gated "Seating Manager" deep-link was removed from the guests-listing toolbar (admin
+> `5b19580`, `P025.1`). **Everything behind it is intact** — the `seating` RBAC feature, the
+> `alt-static-basecode-seating` sub-app, the backend `/admin/seating-*` endpoints, the
+> `OpenSeatingManagerButton` component, its EN/AR labels, and `NEXT_PUBLIC_SEATING_MANAGER_URL` — so
+> re-adding the button is a one-line change and the SPA is still reachable by its own URL under its own
+> login. Read this decision as "seating is integrated, but not advertised from the admin."
+> Detail: [`tasks/025-hide-seating-link/TASK.md`](../tasks/025-hide-seating-link/TASK.md).
 
 ## D43 — 2026-07-27 — Guest history records WHAT an edit changed — as a redacted delta, never a snapshot
 
@@ -1458,3 +1479,72 @@ the guest admin forms, which share the component.
 pint + phpstan clean, 489 tests; admin `type-check` + eslint green; EN/AR reused (`web:phone`,
 `validation:invalid_phone`, no new keys). Dev DB migrated; prod `migrate` + manual QA pending. Not
 mobile-facing (`/admin/admins`, `routes/api.php` untouched). Task log: `tasks/024-admin-phone/TASK.md`.
+
+## D46 — 2026-07-28 — Cloning a category deep-copies it: `replicate()` for columns, plus relations and its own poster files
+
+**What:** `CategoriesController::clone` was producing a partial copy — the admin had to re-enter settings
+by hand on every clone. Rewritten to copy everything a category owns, inside one `DB::transaction`.
+
+**Durable decisions:**
+
+1. **`replicate()`, never `getAttributes()` + `fill()`.** The old path ran the copied attributes through
+   `fill()`, so **any column missing from `$fillable` was silently dropped** — and would keep being
+   dropped for every column added in future. `replicate()` copies every column regardless of `$fillable`
+   and resets id/timestamps. This is the part that must survive: a clone must not depend on `$fillable`
+   being complete.
+2. **Relations are copied explicitly, in the transaction:** badge assignments (`badge_category` pivot,
+   via the Eloquent relation), admin data scope (`admins.category_ids` — a JSON column, not a pivot, so
+   it reuses the existing `adminsWithCategory()` / `syncCategoryAdmins()` helpers), and meeting-room
+   links (`meeting_room_categories` — no Eloquent relation on `Category`, so rows are inserted directly).
+   **Adding a new category relation means adding it here too** — there is no generic mechanism.
+3. **Share-poster files are duplicated, never shared.** `duplicatePoster()` copies each poster to a fresh
+   random basename on the public disk, so editing or deleting one category's poster can never affect the
+   other; `share_poster_url` is recomputed to match `CategoriesResources`. A missing source file returns
+   the original name unchanged rather than failing the clone.
+4. **Consequence to know before cloning:** copying the admin data scope means the clone is visible to
+   every admin who could see the original — it inherits its source's visibility rather than starting
+   private. That is the intended meaning of "a copy of this category", but it is a real access-surface
+   change on a wide-scoped source.
+
+**Unchanged:** the slug/name copy behaviour (`{slug}-copy`, `-copy-1`, …, and `(Copy)` / `(نسخة)`
+appended to the names) and the `titles.cat_list` update.
+
+**Landed:** backend `0be944e` (`P027.1`), +94/−41 — committed + **pushed**. Gates: pint clean at commit
+time via the pre-commit hook; **`composer qa` has not been re-run since**. **No automated test covers
+`clone`** — add one alongside the browser QA. Not mobile-facing (`/admin/categories`, `routes/api.php`
+untouched). Task log: [`tasks/027-category-clone-fix/TASK.md`](../tasks/027-category-clone-fix/TASK.md).
+
+## D47 — 2026-07-28 — Guest-listing row actions are gated per category, defaulting OFF
+
+**What:** each category now decides which of the five guest-listing row actions its guests expose —
+resend email / SMS / WhatsApp, print badge, mark collected — and the issued-visa email template sits
+behind its own `with_issued_visa` toggle instead of being inferred from "a template is selected". Two
+additive, forward-only migrations: `2026_07_28_000001` (the five row-action booleans) and
+`2026_07_28_000002` (`with_issued_visa`).
+
+**Durable decisions:**
+
+1. **The category switch is an ADDITIONAL gate on top of RBAC, not a replacement.** An action renders
+   only when the category switch **and** `checkActionPermission(...)` both pass. Neither one alone.
+2. **⚠️ The five row-action toggles default to `false` and are NOT backfilled.** Existing categories opt
+   in explicitly. **Operational consequence: the moment this migration runs, every guest row action
+   disappears from every category until an admin turns it back on — including *print badge*.** Turn the
+   switches on per category immediately after the prod migrate, before any on-site use. The dev DB is
+   already migrated; **prod is not.**
+3. **`with_issued_visa` IS backfilled** (`update … where issued_visa_email is not null`). The asymmetry
+   with #2 is deliberate: the old issued-visa behaviour was itself derived from a selected template, so a
+   backfill reproduces it exactly; the row actions had no equivalent signal to derive from.
+4. **A switched-on comms action stays visible but disabled when its provider isn't configured**, with a
+   `web:provider_not_configured` tooltip — so an admin can tell "not allowed for this category" from
+   "not set up yet". Readiness comes from the three existing `*/check-default` endpoints, mirroring the
+   categories and automation forms.
+5. **The listing reads the switches off the guest row's embedded category** (`row.category?.with_*`).
+   `GuestsResources` serialises the whole `category` model, so the new columns ride along with no
+   resource change — but that also means **the gating depends on `category` staying eagerly loaded** on
+   the guests index. Dropping that eager load would hide every row action.
+
+**Landed:** backend `072dff2` + admin `718bcf7` (both `P028.1`) — committed + **pushed**. EN + AR in the
+same commit (11 keys each). Gates: pre-commit hooks green at commit time; **full gate not re-run since**.
+Dev DB migrated; **prod `migrate` + per-category switch-on + manual QA pending.** Not mobile-facing
+(`/admin/*`, `routes/api.php` untouched). Task log:
+[`tasks/028-category-guest-action-gates/TASK.md`](../tasks/028-category-guest-action-gates/TASK.md).
