@@ -6,6 +6,32 @@
 
 ---
 
+## How we work through this list
+
+> **One item at a time. No commits until the owner has reviewed the changes.**
+
+The loop for every item on this list:
+
+1. **Pick one item.** Not a batch, not "all the one-liners". One.
+2. **Make the change.**
+3. **Run the quality gate** for that app:
+   - Backend: `composer qa` (Pint + PHPStan + tests)
+   - Admin / frontend: `yarn type-check` + `yarn production`
+4. **Show the actual diff.** Not a summary of it — the real `git diff`, so the owner reads
+   the code that would enter history.
+5. **Stop and wait.** The owner reviews.
+6. **Only after an explicit "commit"** — commit it. Pushing is a separate approval again.
+
+**Why one at a time:** these changes touch shared components and shared controllers. Several items
+in this document look small but reach far — one edit to `ListingTable` touches 46 listings, one edit
+to `ui-select` touches every dropdown in the admin. Batching them makes a bad change hard to isolate
+and hard to reject cleanly. Reviewing one diff at a time means "no" costs nothing.
+
+**Leaving the working tree dirty between steps is fine.** That is the review point, not a problem to
+tidy up.
+
+---
+
 ## 1. What this is
 
 We cloned this baseline three times. Each clone found and fixed bugs. Those fixes stayed in the
@@ -469,6 +495,8 @@ Each of these was checked and rejected with evidence.
 
 ## 12. Notes for whoever does this
 
+- **Process:** see [How we work through this list](#how-we-work-through-this-list) at the top —
+  **one item at a time, and no commit until the owner has reviewed the diff.**
 - **Order:** section 4 first. They are cheap, independent, and cover most of the high-severity list.
   Then the broken-things lists. Save the five large jobs for last — they need a decision, not a port.
 - **Do not copy commits blindly.** Several fork fixes are incomplete or wrong for us:
