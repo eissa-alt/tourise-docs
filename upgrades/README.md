@@ -12,6 +12,7 @@ cluster — they reference each other by bare filename, so they live together he
 | Doc | Type | Status |
 |---|---|---|
 | [BASELINE_DECISION.md](BASELINE_DECISION.md) | decision record | ✅ locked — directors chosen as the clone baseline (2026-06-05). Ledgered as **D1** in [../decisions/LEDGER.md](../decisions/LEDGER.md). |
+| [FORK_PORT_BACK_FINDINGS.md](FORK_PORT_BACK_FINDINGS.md) | findings + open-work plan | 🅿️ planned (2026-08-06) — what to copy back from the three clones (`122-gfeai-v2`, `123-pif-pep-v2`, `124-ewc-2026-v2`). ~60 verified items, 87 checkboxes, 17 of them one-liners; also records defects in this baseline that **no fork fixes** (2 public forced-500 test hooks, unthrottled public `/pdf/{id}`, cross-client storage buckets on live PDF paths). Nothing ported yet. |
 | [UPGRADE_SUMMARY.md](UPGRADE_SUMMARY.md) | execution log | ✅ Parts 1–5 merged to `dev` + pushed (all sub-apps). SHA source-of-truth. W1 rings complete. |
 | [CYAN_BASECODE_MIGRATION_PLAYBOOK.md](CYAN_BASECODE_MIGRATION_PLAYBOOK.md) | reference (portable) | ♻️ how-to-replay the directors upgrades onto **cyan-basecode** (🔶 CYAN DELTA callouts). |
 | [TAILWIND_V3_TO_V4_MIGRATION_RUNBOOK.md](TAILWIND_V3_TO_V4_MIGRATION_RUNBOOK.md) | reference (portable) | ♻️ engine-level Tailwind v3→v4 recipe for the ALT lineage. |
