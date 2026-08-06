@@ -3,15 +3,45 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-07-28 (latest, documented 2026-08-01) — an eight-item batch (P025–P032) across backend + admin:
+**2026-08-06 (latest) — release hygiene, no code change: `dev` → `main` merged in all three apps, the
+merged `feat/seating` branches pruned, and the P025–P032 quality gate finally re-run.**
+- **`dev` → `main` is done.** Backend PR #4 (`fcc2541`), admin PR #4 (`4405a04`), frontend PR #2
+  (`75f7e3a`), all merged 2026-08-06 ~12:17. In each repo `origin/main`'s **tree hash now equals
+  `origin/dev`'s** and `origin/dev` is 0 commits ahead — the whole backlog (153 backend / 113 admin /
+  46 frontend commits, through P032) is on `main`. Seating was already equal; docs is single-branch.
+- **Branches pruned.** `feat/seating` deleted local + remote in **backend** (`2334445`) and **admin**
+  (`982747e`) — both fully merged into `dev` *and* `main` (PR #3, backend `076cb8d` / admin `0f34b2d`),
+  0 unique commits. The P021 work is untouched in history. Every repo now carries just `dev` + `main`
+  (docs: `main`), all in sync, all working trees clean.
+- **⚠️ Quality gate re-run 2026-08-06 — green, with two caveats worth knowing:**
+  - **Backend:** `pint --test` **passed**; `phpstan` **0 errors** (361 files); `php artisan test`
+    **488 passed / 1 failed**. The one failure is **pre-existing flakiness, not a P025–P032 regression** —
+    see the next bullet.
+  - **Admin + frontend:** `type-check` **passed in both**. **`yarn production` not run** — no local
+    `.env.production`, which is the **expected, documented** state (D22 convention: DevOps creates it on
+    deploy; see `decisions/LEDGER.md` "its absence is why `yarn production` can't run locally — expected,
+    not a fault"). It **can** be run via the throwaway-copy workaround in
+    [`process/SETUP_AND_UPDATE.md`](process/SETUP_AND_UPDATE.md) — `cp .env.local .env.production &&
+    yarn production; rm -f .env.production` — which was **not** done here. So the build half of the gate
+    is unverified for this batch, consistent with every prior batch.
+- **⚠️ Flaky test — `SessionsTest::test_search_finds_matching_sessions` (~10% fail rate).** Re-run 10×
+  on unchanged code: **9 pass, 1 fail**. Cause: the test creates a decoy session `'Cybersecurity Panel'`
+  and asserts `keyword=AI` returns exactly **1** row, but `MobileSessionController::search()` also
+  matches **`name_ar` / `description_en` / `description_ar`**, which `SessionFactory` fills with faker
+  prose — any generated word containing the substring `ai` (*said, again, maintain, explain, fail*)
+  makes the decoy match too. **Not yet fixed; no task folder opened.** Fix is to pin the decoy's other
+  searchable columns in the factory call rather than to loosen the assertion.
+
+**2026-07-28 (documented 2026-08-01) — an eight-item batch (P025–P032) across backend + admin:
 two category features, three bug fixes, and the automation manual-run option. Tasks 025–032, ledger D46 +
-D47 + addenda to D39/D42. All working trees clean; ⚠️ THREE COMMITS ARE STILL UNPUSHED and the full
-quality gate has NOT been re-run since 07-28.**
+D47 + addenda to D39/D42. All working trees clean; all commits pushed and, as of 2026-08-06, merged to
+`main` (see the entry above).**
 - **Why this entry is late:** the code landed 2026-07-28 but nothing was written up — no handoff entry,
   no ledger entries, no task folders (the board stopped at 024 while commits ran to P032). A drift sweep
   on 2026-08-01 caught it; this batch is the write-up. **No code was changed while documenting.**
-- **⚠️ Unpushed (3):** backend `6e7fd94` (P031.1) · admin `3fc30c9` (P031.1) + `77cea97` (P032.1).
-  Everything else in the batch is on `origin/dev`. Frontend, seating and docs are in sync.
+- **Pushed + merged (was flagged unpushed here until 2026-08-06):** backend `6e7fd94` (P031.1) · admin
+  `3fc30c9` (P031.1) + `77cea97` (P032.1) are all on `origin/dev` **and** `origin/main`. The rest of the
+  batch was already on `origin/dev`. Frontend, seating and docs are in sync.
 - **⚠️ Biggest deploy trap — D47 defaults OFF.** Task 028's migration `2026_07_28_000001` adds the five
   guest row-action switches **defaulting to false, with no backfill**, so **the moment it runs on prod,
   every guest row action vanishes from every category — resend email/SMS/WhatsApp, print badge, and
@@ -45,10 +75,12 @@ quality gate has NOT been re-run since 07-28.**
   guest status was picked — `guest_status_id` lacked `nullable` *and* its `required_if` matched the
   string `'yes'` while the form sends a boolean, so it never fired. **032** `{{ reconfirmation_url }}`
   added to the email editor's variable palette (the resolver already substituted it since Task 020).
-- **Gates — be accurate about this:** every commit passed its **pre-commit hook** (Pint on staged PHP;
-  eslint/prettier on staged TS) at commit time, but **`composer qa` and `yarn type-check` / `yarn
-  production` have not been run across this batch**. Run them before pushing the three outstanding
-  commits.
+- **Gates — re-run 2026-08-06, green.** Every commit passed its **pre-commit hook** (Pint on staged PHP;
+  eslint/prettier on staged TS) at commit time. The full gate has now been run across the batch:
+  backend `pint --test` + `phpstan` (0 errors) clean and **488/489 tests pass** (the 1 failure is the
+  pre-existing `SessionsTest` flake, not this batch); admin + frontend `type-check` clean.
+  **`yarn production` remains unverified** — needs a `.env.production`, absent by design (D22); runnable
+  via the `process/SETUP_AND_UPDATE.md` workaround if wanted. See the 2026-08-06 entry at the top.
 - **Dev DB is migrated** (`migrate:status`: `2026_07_28_000001` + `000002` both **Ran**). **Prod is not.**
 - **Small follow-ups left open** (all in `tasks/031-automation-manual-run/TASK.md`): the details-page Run
   button's label is a hardcoded `'Run'` literal, not a translation key (pre-existing — it was
@@ -663,9 +695,9 @@ Plan: `upgrades/cleanup-hardening/CLEANUP_AND_HARDENING_MASTER_PLAN.md` Task 004
   export/upload through the proxy) before `dev`→`main`. Saudi hotfix-reverted their P2 once over these edges.
 
 **2026-07-11 → 07-12 — Env-var / dead-code cleanup pass (admin + frontend). Committed on `dev`.
-Frontend is pushed and in sync with `origin/dev` (`64037eb`). Admin `dev` is 4 ahead of `origin/dev`
-(NOT yet pushed) — `f6bcf7b` → `a361586` → `37cf1a1` → `8345f19`.**
-- **Admin (4 unpushed commits):** retired baseline env vars that were config-noise, moving the values
+Frontend pushed and in sync with `origin/dev` (`64037eb`). Admin was 4 ahead of `origin/dev` at the time
+— `f6bcf7b` → `a361586` → `37cf1a1` → `8345f19`; all four pushed since, and on `main` from 2026-08-06.**
+- **Admin (the 4 commits):** retired baseline env vars that were config-noise, moving the values
   to code constants. `f6bcf7b` drop `NEXT_PUBLIC_LISTING_PER_PAGE_LIMIT` from listing URLs
   (`utils/fetch-data-url.ts`, print-logs). `a361586` move cookie-age env vars → code constants
   (`auth/provider.tsx`, `i18n/provider.tsx`). `37cf1a1` retire `NEXT_PUBLIC_ENV` from 9 `data/*-select.tsx`

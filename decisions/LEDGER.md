@@ -124,7 +124,7 @@ become `getApiError(error)?.data?.*` with real types instead of `any`. Log-only 
 CLAUDE.md's "no widening to `any`" rule and gives one canonical place to evolve the API-error shape.
 **Going forward, new code must use `catch (error: unknown)` + `getApiError`, never `catch (e: any)`.**
 `@typescript-eslint/no-explicit-any` stays **off** globally (unchanged) — this was a targeted burn-down,
-not a rule flip. Commits: admin `5ceacc3`, frontend `8544c39` (both on `dev`, unpushed pending review).
+not a rule flip. Commits: admin `5ceacc3`, frontend `8544c39` (both pushed; on `dev` **and** `main` since 2026-08-06).
 Gates green: `type-check` + lint 0 warnings, both apps.
 
 ## D10 — 2026-07-08 — backend gate is `pint --test` (repo is Pint-clean); backend tooling chain adopted
@@ -243,7 +243,7 @@ no byte-identical-URL guarantee needed — was fine; the emitted URLs came out i
 `/{module}` paths; frontend keeps **zero** (its var was comment-only dead). Sensitive registrant files stay
 on the private disk + signed `*_url` (D14) — never rebuilt from an env var.
 
-**Landed (on `dev`, unpushed):** FE `89c1ce3`; admin `b5bb5b2`→`9137fd9`→`fd628cd` (+ tracked `.env.example`);
+**Landed (pushed; on `dev` and `main` since 2026-08-06):** FE `89c1ce3`; admin `b5bb5b2`→`9137fd9`→`fd628cd` (+ tracked `.env.example`);
 backend `58ca08c` (new public `social_card_image_url`) + `5cebb86` (46 `env('PUBLIC_STORAGE_URL2')` sites /
 28 files, incl. 7 mobile resources, → `Storage::disk('public')->url()`; self-healing sites →
 `rtrim(...url(''),'/')`; phpstan baseline pruned 45→18 env ignores, masking nothing). Byte-identical output
@@ -1246,7 +1246,7 @@ hasn't been exercised against a real DB yet).
 > redundant migration). The listing's Run action is gated on `send_status === 'draft'`.
 > **Parked item #2 above is still open and now has a second home:** the *details* page's Run button is
 > still not gated on `send_status`, so it can dispatch a scheduled automation early. Backend `6e7fd94`,
-> admin `3fc30c9` (`P031.1`) — **both unpushed as of 2026-08-01**. Detail:
+> admin `3fc30c9` (`P031.1`) — **both pushed and merged to `main` on 2026-08-06**. Detail:
 > [`tasks/031-automation-manual-run/TASK.md`](../tasks/031-automation-manual-run/TASK.md).
 
 ## D40 — 2026-07-25 — Automation details page rebuilt on the shared listing primitives (D38 pattern), Clicked column hidden, shared `sent_at` label tidied

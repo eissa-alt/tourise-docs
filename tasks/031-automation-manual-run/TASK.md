@@ -1,6 +1,6 @@
 # Task 031 — Automation: manual (run-later) option + run/split UI cleanup
 
-- **Status:** `done (code)` — **UNPUSHED**; manual QA pending
+- **Status:** `done (code)` — pushed + merged to `main` 2026-08-06; manual QA pending
 - **Opened:** 2026-07-28
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -53,17 +53,22 @@ and *scheduled*. Plus the run/split UI cleanup and run-neutral wording that land
   (`P031.1`): `automation-listing.tsx` (+Run action, ConfirmModal), `automation-details.tsx`,
   `automation-settings-fields.tsx`, `send-emails-action.tsx`, `split-emails-action.tsx`, EN + AR
   (5 keys each). Admin `af2a24a` (`P027.1`): wording only, EN + AR.
-- 2026-08-01 — documented (this file, index row, D39 addendum, handoff). **All three commits are still
-  unpushed** (backend `6e7fd94`; admin `3fc30c9` + `77cea97`).
+- 2026-08-01 — documented (this file, index row, D39 addendum, handoff). All three commits still
+  unpushed at that point (backend `6e7fd94`; admin `3fc30c9` + `77cea97`).
+- 2026-08-06 — all three **pushed and merged to `main`** (backend PR #4 `fcc2541`, admin PR #4
+  `4405a04`). Full quality gate re-run: pint + phpstan clean, 488/489 tests pass (the 1 failure is the
+  pre-existing `SessionsTest::test_search_finds_matching_sessions` flake, unrelated), admin
+  `type-check` clean. `yarn production` not run — no local `.env.production` (expected, D22).
 
 ## Definition of Done
 
 - [x] Code committed on `dev` in the relevant sub-app(s)
 - [x] EN + AR translations in the same commit
-- [x] Quality gate — pre-commit hooks green at commit time; **full gate not re-run since** (see handoff)
+- [x] Quality gate — pre-commit hooks green at commit time; **full gate re-run 2026-08-06** (see handoff)
 - [x] Docs updated (this TASK.md; index row; D39 addendum; handoff)
 - [x] Mobile contract unaffected — `/admin/automations*`, `routes/api.php` untouched
-- [ ] **Push** backend `6e7fd94` + admin `3fc30c9` after the gate is re-run
+- [x] **Push** backend `6e7fd94` + admin `3fc30c9` after the gate is re-run — done 2026-08-06, and both
+      merged to `main`
 - [ ] Manual QA — create a manual automation, confirm it is *not* dispatched on create, then Run it from
       the listing and confirm the fan-out happens exactly once
 - [ ] Close or re-park the three known gaps above

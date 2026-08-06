@@ -191,7 +191,8 @@ unreachable. The 1 admin var it references is kept anyway (pinned by the live gu
 4. **Docs** — set this doc's status to done; note SHAs; promote durable choice to `../decisions/LEDGER.md`;
    refresh `../HANDOFF.md`.
 
-**Status:** ✅ **DONE** (2026-07-13, ledger D16). All 4 phases executed, gates green, on `dev` (unpushed).
+**Status:** ✅ **DONE** (2026-07-13, ledger D16). All 4 phases executed, gates green; pushed, and on
+`dev` **and** `main` since 2026-08-06.
 
 - **Phase 1 — frontend** `89c1ce3`: scrubbed 3 dead commented `NEXT_PUBLIC_STORAGE_URL` refs. `type-check` + `production` green.
 - **Phase 2 — admin** `b5bb5b2` (2a: `utils/storage.ts` + 4 file-inputs) → `9137fd9` (2b: see-more/attachments, drop dead fallbacks) → `fd628cd` (2c: tracked `.env.example`). Backend dep `58ca08c` (2b: new public `social_card_image_url`). `type-check` + `production` green.

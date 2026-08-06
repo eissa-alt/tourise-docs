@@ -1,6 +1,6 @@
 # Task 032 — Email editor: expose the reconfirmation link variable
 
-- **Status:** `done (code)` — **UNPUSHED**; manual QA pending
+- **Status:** `done (code)` — pushed + merged to `main` 2026-08-06; manual QA pending
 - **Opened:** 2026-07-28
 - **Owner:** —
 - **Sub-app(s):** admin
@@ -26,7 +26,8 @@ it — so the one way to use the feature was to type the placeholder from memory
 ## Log
 
 - 2026-07-28 — admin `77cea97` (`P032.1`): 1 line.
-- 2026-08-01 — documented (this file, index row, handoff). **Unpushed.**
+- 2026-08-01 — documented (this file, index row, handoff). Unpushed at that point.
+- 2026-08-06 — **pushed and merged to `main`** (admin PR #4 `4405a04`). Admin `type-check` clean.
 
 ## Definition of Done
 
