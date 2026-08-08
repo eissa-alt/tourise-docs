@@ -3,7 +3,55 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-08-06 (latest) — release hygiene, no code change: `dev` → `main` merged in all three apps, the
+**2026-08-06 (latest) — Task 033 opened: a three-pass audit of the three clone projects produced a
+port-back backlog. Analysis is DONE and committed; NOTHING has been ported. Also: the flaky
+`SessionsTest` is fixed and the two P031 follow-ups are closed — all three pushed.**
+- **The deliverable is [`upgrades/FORK_PORT_BACK_FINDINGS.md`](upgrades/FORK_PORT_BACK_FINDINGS.md)**
+  (docs `7f049d3`, working process `212d58a`). ~60 verified items, 87 checkboxes: **17 one-liners**,
+  20 small, 8 medium, 5 large. Grouped by project, quick wins first. The task record is
+  [`tasks/033-fork-port-back/TASK.md`](tasks/033-fork-port-back/TASK.md); that TASK.md carries the
+  locked decisions and open questions, the findings doc carries the checkbox list.
+- **⚠️ Binding working process for this backlog: ONE item at a time, and no commit until the owner
+  has reviewed the actual diff** (not a summary). Pushing is a separate approval. Written at the top
+  of the findings doc. Reason: much of the list touches shared code — one `ListingTable` edit reaches
+  46 listings, one `ui-select` edit reaches every admin dropdown.
+- **Three things worth knowing before anything else:** (1) a multi-use invitation link **dies after
+  the first registration**, and because the check isn't scoped to the invitation, if that email ever
+  registered anywhere else on the site the link **never opens at all** —
+  `InvitationsController.php:467` runs before the remaining-uses gate at `:475`; (2) the tokenized
+  "complete your data" link **creates a duplicate guest** instead of updating the record, in **2 of
+  our 3 form shapes** — a link we email to real registrants; (3)
+  `GET /admin/guest-data-offline` **has never worked** — it filters on `dinner_invite`, a column no
+  migration creates, and the code's own comment at `GuestsController.php:2704` already says so.
+- **The audit also found defects in THIS baseline that no fork fixes**, so no fork-diff could have
+  surfaced them (findings doc §9): **two forced-500 test hooks on public unauthenticated routes**
+  (`GuestsController.php:3732`, `InvitationsController.php:441`), a **`dd()` in committed controller
+  code** (`:2638`, breaks our own hard rule 8), **public unthrottled `/pdf/{id}` routes**
+  (`routes/web.php:24-25`) that run Imagick + write a file per request, five unrouted OTP endpoints
+  that skip reCAPTCHA, and **hardcoded object-storage buckets belonging to other ALT clients** on
+  live PDF render paths (devego, ims, tourise, hci-2026, glmc, faf).
+- **⚠️ Three earlier conclusions were WRONG and are corrected in the doc** — if you remember them the
+  old way, re-read: **P029.1 only half-fixed the title 500** (`gender_specific_ar` still assigns a
+  raw array to an uncast `text` column in both `store` and `update`); **the email-log boolean fix
+  landed on the backend but not the admin**, so every Sent/Delivered/Opened cell renders "No" today;
+  and **the guests listing drops 9 filters on pagination**, not none — plus the "Reconfirmation"
+  filter is dead end-to-end.
+- **Two items are deliberately NOT ported, with reasons in the TASK.md:** gfeai's SMS non-production
+  guard would **reverse our own P23.2 decision** (`28eca40` removed those guards on purpose, *after*
+  gfeai forked), and gfeai's CSP widening would undo the env-derived origin design.
+- **Open, needs a human:** does the admin CSP actually block reCAPTCHA on login? Two agents reached
+  opposite conclusions from source — **settle it in a browser**, not by reading more code. And check
+  whether the backend's `GOOGLE_RECAPTCHA_SECRET` is Google's *test* secret before enforcing
+  reCAPTCHA in production (we don't read `.env`).
+- **Code shipped this session (all pushed to `origin/dev`):** backend `4adaaec` (**P033.1** — fixes
+  the `SessionsTest::test_search_finds_matching_sessions` flake that made the last gate 488/489; the
+  decoy's `name_ar`/`description_en`/`description_ar` are now pinned instead of faker prose, so a
+  stray "ai" substring can't match — passed 5/5 before commit). Admin `ecf3ffc` (**P031.2** — the
+  hardcoded `Run` / `Send To All` / `Split by 500` literals now go through `useTranslate`, EN + AR)
+  and `a6ab9dc` (**P031.3** — deletes the commented-out "More" dropdown). Those close the two
+  follow-ups the 2026-07-28 entry left open. All working trees clean, all repos in sync.
+
+**2026-08-06 — release hygiene, no code change: `dev` → `main` merged in all three apps, the
 merged `feat/seating` branches pruned, and the P025–P032 quality gate finally re-run.**
 - **`dev` → `main` is done.** Backend PR #4 (`fcc2541`), admin PR #4 (`4405a04`), frontend PR #2
   (`75f7e3a`), all merged 2026-08-06 ~12:17. In each repo `origin/main`'s **tree hash now equals
