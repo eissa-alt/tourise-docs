@@ -108,26 +108,57 @@ comment already says the column is missing. It has never worked.
 All one-line or near-one-line. All verified twice. None depend on each other. Together they close
 most of the high-severity list.
 
-- [ ] **Fix the invitation link.** Move the "already submitted" check so it only runs when no uses
+> **✅ SECTION 4 IS CLOSED — 2026-08-08.** Nine items shipped, one closed as won't-do. Commits are
+> on `dev` in each app, **not pushed**. Backend tests went 489 → 494. Two items' *descriptions* were
+> wrong and are corrected in place below — the file/line references were sound both times, which is
+> why "open the file before you edit" is the rule that saved them.
+
+- [x] **Fix the invitation link.** Move the "already submitted" check so it only runs when no uses
       remain. `InvitationsController.php:467` runs before the `remaining === 0` gate at `:475`.
       Copy from **ewc `e647bb9`** — it is the same fix plus a 127-line test.
-- [ ] **Fix the endpoint that always 500s.** `GuestsController.php:3615` does
+      **DONE — backend `117da56`.** Gated on `remaining < 1`, not `=== 0`, so a negative `remaining`
+      (over-used row) can no longer read as a valid link. ewc's `InvitationLinkTest` taken verbatim
+      (5 tests); confirmed failing without the controller change before it was kept.
+- [x] **Fix the endpoint that always 500s.** `GuestsController.php:3615` does
       `Guest::where('dinner_invite', 'yes')`. No migration creates that column. Remove the filter.
       Same phantom column is also used as a listing filter at `:216-221`.
-- [ ] **Make gate check-in write `checked_in_at`.** `attend()` at `GuestsController.php:3585-3611`
+      **DONE — backend `7bf1d9c`.** Also added `with('scannedBy')`: the resource reads
+      `scannedBy?->email` per row and this code had never executed, so switching it on without
+      eager-loading would have introduced an N+1 over the whole guests table on its first success.
+      `ExportInvitations` (PARKED, unrouted) and the null `dinner_invite` key in `GuestsResources`
+      were left alone; the admin still forwards 3 dead `dinner_invite` params — fold into the
+      dead-filter-keys item in section 5.
+- [x] **Make gate check-in write `checked_in_at`.** `attend()` at `GuestsController.php:3585-3611`
       writes four other fields but not this one, so the Seating Manager and the admin both think
       nobody has checked in. From pep `976ae89`.
-- [ ] **Fix the two upload paths.** `custom-file-input.tsx:212` posts to `/upload`,
+      **DONE — backend `880a7c0`.** Additive part only; pep's single-check-in 422 guard and
+      `check_in_count = 1` were **not** taken (they change `attend()`'s response contract — still
+      needs iPad-scanner sign-off). Verified the `Guest::booted()` bridge does not double-increment
+      `check_in_count`: its guard requires `check_in`/`check_in_count` clean, and `attend()` dirties
+      both.
+- [x] **Fix the two upload paths.** `custom-file-input.tsx:212` posts to `/upload`,
       `custom-file-input-3.tsx:104` posts to `/upload-document`. Neither route exists under the
       admin API base. Real routes are `/admin/guests/upload` and `/admin/guests/upload-document`.
       Copy from pep `fd41aed` (fixes both) — gfeai only fixed one.
       **Also remove the fallback on the next line of each file.** It builds a public URL for a file
       stored on the private disk, so the preview breaks even after the path is fixed.
-- [ ] **Delete two test backdoors.** `GuestsController.php:3732` throws a 500 when the token is
+      **DONE — admin `9fb01fa`.** ⚠️ **The fix named above is wrong as written.** The admin axios
+      base already ends in `/api/admin`, so `/admin/guests/upload` would resolve to
+      `api/admin/admin/guests/upload`. The correct axios path drops the prefix: **`guests/upload`**
+      (the P20 rule). Also: deleting the fallback is not enough on its own — `uploadAdmin` /
+      `uploadDocumentAdmin` return only `data`, **never a `url` key**, so `response.data.url` is
+      always undefined and the preview would vanish. Both now fall back to the local base64 already
+      in hand, as pep does.
+- [x] **Delete two test backdoors.** `GuestsController.php:3732` throws a 500 when the token is
       `IUFRP3GYZ4ISPUEU`. `InvitationsController.php:441` does the same for `RWYI82IWDG`. Both are on
       public, unauthenticated routes. Both marked `// TODO: remove this test hook`.
-- [ ] **Delete the `dd()` in committed code.** `GuestsController.php:2638`. Breaks our own rule 8.
+      **DONE — backend `afd4eee`.** Grepped all four repos: exactly these two, no third hook.
+- [x] **Delete the `dd()` in committed code.** `GuestsController.php:2638`. Breaks our own rule 8.
       The method is not routed today, but it ships in every clone.
+      **DONE — backend `e3591cc`.** Backend now has zero `dd()`/`dump()`/`var_dump()`. Note this
+      quietens the method rather than fixing it: `ExportEBadgesFiltered` is unrouted with **zero
+      callers in any repo**, builds a per-guest PDF into `$guestPdfOutput` it never uses, and returns
+      `''`. **Open:** mark it PARKED (the convention `ExportInvitations` already uses) or delete it.
 - [x] ~~**Un-comment the sidebar links.**~~ **NOT PORTED — owner decision, 2026-08-08.** See the
       row in section 10. ⚠️ **This item's description was wrong.** The commented block is not three
       links: it is the whole **"Mobile App Section"** — a section header plus **nine** modules
@@ -136,15 +167,38 @@ most of the high-severity list.
       `inferFeatureId` rule, and a real action set in `AdminPermissions.php:69-80`. They were hidden
       deliberately in admin `1e449dc` (2026-06-24, a sidebar-restyle commit), and the inline comment
       records that the pages stay reachable by direct URL.
-- [ ] **Add a plain `build` script** to admin and frontend `package.json`. Today there are only
+- [x] **Add a plain `build` script** to admin and frontend `package.json`. Today there are only
       `env-cmd`-wrapped variants, so neither app builds on Vercel or in CI. From ewc `557228b` /
       `28c79ee`.
-- [ ] **Add a null guard to reCAPTCHA.** `app/Rules/ReCaptcha.php:36` is
+      **DONE — admin `2db85bd`, frontend `38f42d8`.** ⚠️ **This repairs the quality gate itself.**
+      Every build script is `env-cmd -f .env.<name>`, and every one of those files is gitignored —
+      which is *why* the handoff has recorded "`yarn production` not run" for batch after batch. The
+      runnable gate is now **`yarn type-check` + `yarn build`** (+ `yarn check:rbac` on admin);
+      `yarn production` stays for local prod-config builds. Verified with no `.env` present: admin
+      build exit 0 (92.3s), frontend exit 0 (52.7s). **`CLAUDE.md` rule 5 and
+      `process/SETUP_AND_UPDATE.md` updated to match.**
+- [x] **Add a null guard to reCAPTCHA.** `app/Rules/ReCaptcha.php:36` is
       `return $response->json()['success'];`. If Google returns a non-JSON body or the network
       fails, `json()` is null and this throws — turning a bot-check failure into a 500 on admin
       login *and* public registration. From gfeai `eafd3e4`.
-- [ ] **Raise the API rate limit.** `RouteServiceProvider.php:49` is still `perMinute(200)`. gfeai
+      **DONE — backend `9631e17`.** ⚠️ **Correction:** Google's siteverify docs say the response is
+      *always* JSON carrying `success`, errors included — so this is **not** Google's behaviour. The
+      guard defends the transport (proxy, WAF, captive portal, an incident serving HTML). Verified
+      by probe: HTML body / empty body / JSON-without-`success` each **500 before, `false` after**,
+      while the two documented shapes are byte-identical either side — which is what makes it safe.
+      **A connection failure still 500s** (`??` cannot catch a `ConnectionException` thrown before
+      any response exists); left deliberately — access is already fail-closed, so it is an
+      error-surface gap, not a security one. Only the guard was taken from `eafd3e4`; its
+      environment-skip half remains a section 5 item.
+- [x] **Raise the API rate limit.** `RouteServiceProvider.php:49` is still `perMinute(200)`. gfeai
       went to 300, then 500, under real load. Multi-step registration forms burst past 200.
+      **DONE — backend `a19e8de`, 200 → 500.** `throttle:api` is on the whole `api` middleware group
+      (`Kernel.php:71`), so this one number governs **all 476 routes**; the 30/min `public-api` /
+      `sensitive-api` / `store-guest-api` limits stack on top and are unchanged, so the
+      abuse-sensitive paths stay tight. Anonymous traffic is keyed by **IP**, so a venue full of
+      guests behind one NAT shares a single budget — the main reason 200 was too tight. Honest note:
+      gfeai's 200→300 (`40763f6`) carries a written rationale; its 300→500 (`c99aa58`) does **not**.
+      "Under real load" above is not supported by that commit.
 
 ---
 
@@ -456,6 +510,22 @@ Found by auditing our code directly. No fork comparison could have surfaced them
       defaulting to null. Port the mechanism, then extend it to the buckets gfeai did not cover.
 - [ ] **`X-Mailer` uses `env()` outside a config file**, so it sends **empty under `config:cache`**
       — i.e. in production.
+- [ ] **⚠️ `GOOGLE_RECAPTCHA_SECRET` is read with `env()` outside a config file** —
+      `app/Rules/ReCaptcha.php:31`. Same defect class as `X-Mailer` above, but the consequence is far
+      worse: Laravel does not load `.env` when the config is cached, so under `php artisan
+      config:cache` — the normal production step — **the secret is `null`**. Google then replies
+      `success: false, invalid-input-secret`, and **every login and every registration is rejected**,
+      at all **13** call sites. There is no `recaptcha` key in `config/` at all. *Found 2026-08-08
+      while doing the section 4 guard; not surfaced by the original audit.* **Verify against the real
+      deploy before anything else — if it runs `config:cache`, this is a live outage waiting on the
+      next cache clear.** Fix: a `config/services.php` entry + `config('services.recaptcha.secret')`.
+- [ ] **`check_in_time` and `checked_in_at` hold the same fact.** Two generations of attendance
+      columns: the 2023 `check_in` / `check_in_time` / `check_in_count` set, and the July-2026
+      seating set (`checked_in_at` + `checked_in_by`, plus check-out and food pairs). A
+      `Guest::booted()` hook copies between them so whichever client writes, both stay true. The
+      legacy columns cannot simply be dropped — admin filters, reports and the out-of-repo iPad
+      scanner read them. *Raised 2026-08-08 while doing section 4's `checked_in_at` item.* Not a
+      quick win: needs a migration, an admin/reports sweep and scanner sign-off.
 - [ ] **20 export classes duplicate the same row-number binder** with no shared trait.
 - [ ] **`composer.lock` is untracked in all four backend repos.** Every clone's `composer install`
       resolves fresh versions. Non-reproducible builds, and no supply-chain pinning — which sits

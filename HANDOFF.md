@@ -3,7 +3,48 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-08-06 (latest) — Task 033 opened: a three-pass audit of the three clone projects produced a
+**2026-08-08 (latest) — Task 033: section 4 of the port-back backlog is CLOSED. Nine items shipped,
+one closed as won't-do, 11 commits across backend / admin / frontend / docs. ALL COMMITTED, NOTHING
+PUSHED. Backend tests 489 → 494. The admin/frontend build gate was repaired and ran green for the
+first time.**
+- **Commits (none pushed).** Backend `dev`: `afd4eee` (test backdoors) · `117da56` (invitation link
+  + 5 tests) · `7bf1d9c` (phantom `dinner_invite`) · `880a7c0` (`checked_in_at`) · `e3591cc` (the
+  `dd()`) · `9631e17` (reCAPTCHA guard) · `a19e8de` (rate limit 200→500). Admin `dev`: `9fb01fa`
+  (upload paths) · `2db85bd` (plain `build`). Frontend `dev`: `38f42d8` (plain `build`). Docs `main`:
+  `a36d172` (sidebar won't-do). Full per-item detail in
+  [`upgrades/FORK_PORT_BACK_FINDINGS.md`](upgrades/FORK_PORT_BACK_FINDINGS.md) §4 and
+  [`tasks/033-fork-port-back/TASK.md`](tasks/033-fork-port-back/TASK.md).
+- **⚠️ THE GATE CHANGED — `yarn production` → `yarn build`.** The Next apps had *only*
+  `env-cmd -f .env.<name>` scripts, and every one of those files is gitignored, so the build half of
+  the gate **could never run in CI and needed a throwaway file locally** — that is the real reason
+  this handoff has said "`yarn production` not run" for batch after batch. A plain
+  `"build": "next build"` now exists in both apps. **The gate is `yarn type-check` + `yarn build`
+  (+ `yarn check:rbac` on admin)**, all runnable with no `.env` present. `CLAUDE.md` rule 5 and
+  `process/SETUP_AND_UPDATE.md` updated. `yarn production` remains, local-only.
+- **⚠️ Read before touching production: `GOOGLE_RECAPTCHA_SECRET` is read with `env()` outside a
+  config file** (`ReCaptcha.php:31`). Laravel does not load `.env` when config is cached, so under
+  `php artisan config:cache` the secret is **`null`** → Google returns `invalid-input-secret` →
+  **every login and every registration is rejected**, at all 13 call sites. There is no `recaptcha`
+  key in `config/` at all. Found this session, not by the audit. **Confirm whether the deploy runs
+  `config:cache` before anything else.**
+- **⚠️ Two findings-doc items had wrong descriptions** — file/line refs were right, the summaries
+  drifted. The upload item named `/admin/guests/upload`, which as an *axios* path resolves to
+  `api/admin/admin/…` (the P20 trap); the correct path is `guests/upload`. The sidebar item said
+  three links; it is **nine** plus a section header, hidden deliberately in `1e449dc`, and is now
+  recorded as **not ported**. **Open the file before editing — it caught both.**
+- **What section 4 actually bought:** multi-use invitations work again (a 50-use link died on the
+  first registration, and never opened at all if that email had registered anywhere on the site);
+  `GET /admin/guest-data-offline` works for the first time ever; gate scans now register in the
+  Seating Manager; two remotely-triggerable 500s and a committed `dd()` are gone; two admin upload
+  widgets that 404'd on **every** use are fixed; both Next apps can build in CI at all.
+- **Deferred by owner decision (all recorded, none lost):** pep's single-check-in 422 rewrite (needs
+  out-of-repo iPad-scanner sign-off); the reCAPTCHA `ConnectionException` 500 (access is already
+  fail-closed — error-surface only); the mobile-CMS sidebar block; whether `ExportEBadgesFiltered`
+  gets a PARKED docblock or deletion; and the `check_in_time` ↔ `checked_in_at` duplication.
+- **Next:** sections 5–9, ~50 items. The five large ones need decisions rather than ports — worth a
+  planning pass, not a straight roll-in. **Pushing all 11 commits is still outstanding.**
+
+**2026-08-06 — Task 033 opened: a three-pass audit of the three clone projects produced a
 port-back backlog. Analysis is DONE and committed; NOTHING has been ported. Also: the flaky
 `SessionsTest` is fixed and the two P031 follow-ups are closed — all three pushed.**
 - **The deliverable is [`upgrades/FORK_PORT_BACK_FINDINGS.md`](upgrades/FORK_PORT_BACK_FINDINGS.md)**

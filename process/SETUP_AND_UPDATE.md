@@ -91,25 +91,36 @@ yarn local                               # dev server
 
 ```bash
 # in each JS app:
-yarn type-check && yarn production
+yarn type-check && yarn build
 # admin only — sidebar featureId ↔ inferFeatureId parity (D33/D34); NOT covered by the above:
 (cd alt-static-basecode-admin && yarn check:rbac)
 # backend (full gate):
 composer qa            # = pint --test + phpstan analyse + php artisan test
 ```
 
-> **Running `yarn production` without a `.env.production`.** The `production` script is
-> `env-cmd -f .env.production next build`, so it errors (`Failed to find .env file`) if you only have
-> `.env.local` (dev) — common now that envs are split across a dedicated server + Vercel. To run the
-> **build gate** anyway, use a **throwaway copy** and delete it right after:
+> **Use `yarn build`, not `yarn production`, for the gate.** `build` is a plain `next build` (added
+> 2026-08-08, Task 033 — admin `2db85bd`, frontend `38f42d8`). It needs **no `.env` file at all**, so
+> it runs anywhere: your machine, CI, Vercel. Every *other* build script is
+> `env-cmd -f .env.<name> next build`, and all those files are gitignored — which is exactly why this
+> handoff recorded "`yarn production` not run" batch after batch. That is fixed; the gate is runnable
+> now, so **there is no longer any excuse to skip the build half.**
+>
+> **`yarn production` is local-only.** It still exists and is still the right way to compile against
+> real production config **when you actually hold `.env.production`**. If you don't, don't reach for
+> it — run `yarn build`.
+>
+> <details><summary>Obsolete: the throwaway-<code>.env.production</code> workaround</summary>
+>
+> Before `yarn build` existed, running the build gate meant faking the env file:
 >
 > ```bash
 > cp .env.local .env.production && yarn production; rm -f .env.production
 > ```
 >
-> Safe because: `.env.production` is **gitignored** (never committed), and this build is a **compile
-> check only** — the dev API URL gets baked in, so **discard the output, don't deploy it**. Always
-> `rm` the temp file when done (the trailing `rm` runs even if the build fails).
+> **Don't use this.** It bakes the dev API URL into a "production" build, and a run interrupted
+> before the trailing `rm` leaves a stray `.env.production` behind — which happened on 2026-08-08.
+> Kept only so the pattern is recognisable in older handoff entries.
+> </details>
 
 ---
 

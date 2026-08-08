@@ -52,6 +52,34 @@ Newest at the bottom.
     P029.1 only half-fixed the title 500; the email-log boolean fix landed on the backend but not the
     admin; the guests listing drops **9** filters on pagination, not none.
 
+- **2026-08-08 — section 4 (the quick wins) CLOSED.** Nine items shipped, one closed as won't-do.
+  **11 commits on `dev` / docs `main`, none pushed.** Backend tests **489 → 494**. Every item followed
+  the working process: change → gate → real diff → owner review → commit.
+  - **Backend (7):** `afd4eee` test backdoors · `117da56` invitation link + 5 tests · `7bf1d9c`
+    phantom `dinner_invite` · `880a7c0` `checked_in_at` · `e3591cc` the `dd()` · `9631e17` reCAPTCHA
+    guard · `a19e8de` rate limit 200→500.
+  - **Admin (2):** `9fb01fa` upload paths · `2db85bd` plain `build`. **Frontend (1):** `38f42d8`
+    plain `build`. **Docs (1):** `a36d172` sidebar links won't-do.
+  - **The gate is repaired.** `yarn production` could never run in CI — it wraps a gitignored
+    `.env` file — which is why the handoff records it unrun batch after batch. With the plain `build`
+    script the Next gate is now `yarn type-check` + `yarn build` (+ `check:rbac` on admin) and **ran
+    green for the first time**. `CLAUDE.md` rule 5 + `process/SETUP_AND_UPDATE.md` updated to match.
+  - **⚠️ Two findings-doc items had wrong descriptions** (file/line refs were sound; the summaries
+    drifted). The upload item named `/admin/guests/upload`, which as an axios path resolves to
+    `api/admin/admin/...` — the P20 trap; correct path is `guests/upload`. The sidebar item said three
+    links; it is nine plus a section header, hidden deliberately. **Keep opening the file before
+    editing — that is what caught both.**
+  - **⚠️ New, not from any fork — `GOOGLE_RECAPTCHA_SECRET` is read via `env()` outside config**
+    (`ReCaptcha.php:31`). Under `config:cache` that is `null`, which would reject **every login and
+    registration** at 13 call sites. Recorded in findings section 9. **Check the real deploy before
+    anything else.**
+  - **Deferred by owner decision, all recorded:** pep's single-check-in 422 rewrite (needs
+    iPad-scanner sign-off); the reCAPTCHA `ConnectionException` 500 (already fail-closed, so
+    error-surface only); the mobile-CMS sidebar block; and whether `ExportEBadgesFiltered` gets a
+    PARKED docblock or deletion.
+  - **Still needs a human, unchanged:** does the admin CSP block reCAPTCHA on login (settle in a
+    browser), and is the backend's reCAPTCHA secret Google's *test* secret.
+
 ## Decisions
 
 Task-local. Durable ones → [`../../decisions/LEDGER.md`](../../decisions/LEDGER.md).
@@ -90,7 +118,8 @@ Per-item, not per-task — this backlog will close in batches over several sessi
 
 - [ ] Code merged to `dev` in the relevant sub-app(s)
 - [ ] EN + AR translations in the same commit (if any user-facing strings)
-- [ ] Quality gate green (backend `composer qa`; Next apps `yarn type-check` + `yarn production`)
+- [ ] Quality gate green (backend `composer qa`; Next apps `yarn type-check` + `yarn build`, plus
+      `yarn check:rbac` on admin — see the 2026-08-08 log entry; `yarn production` is local-only)
 - [ ] Findings-doc checkbox ticked for each item shipped
 - [ ] Docs updated (this TASK.md log kept current; index row updated)
 - [ ] Mobile contract checked if `routes/api.php` touched ([`../../mobile/`](../../mobile/))
