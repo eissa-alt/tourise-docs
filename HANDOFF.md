@@ -3,7 +3,40 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-08-08 (latest) — Task 033: section 4 of the port-back backlog is CLOSED. Nine items shipped,
+**2026-08-08 (latest) — Task 033: section 4 CLOSED and section 5 STARTED. 20 commits total across
+backend / admin / frontend / docs. ALL COMMITTED, NOTHING PUSHED. Backend tests 489 → 494. A live
+production defect was found and fixed: reCAPTCHA was rejecting every login and registration under
+`config:cache`.**
+- **⚠️ READ FIRST — `GOOGLE_RECAPTCHA_SECRET` was returning `null` in production.** It was read with
+  `env()` outside a config file (`ReCaptcha.php:31`), and Laravel stops loading `.env` once the
+  config is cached. Proven on a real config cache: `env()` → `NULL`, `config()` → present. Google
+  received an empty secret, answered `invalid-input-secret`, and **every login and every
+  registration was rejected**, at all 13 call sites. Fixed in backend `bf31b85`.
+  **larastan was already catching this** (`noEnvCallsOutsideOfConfig`) — the finding sat suppressed
+  in `phpstan-baseline.neon`. **12 entries for the same rule remain across 13 other files**;
+  `DynamicSmtpService` (4 calls) is the next to look at — ledger D971 says it has already caused an
+  incident there.
+- **Section 5 items shipped (8):** admin `4151422` every dropdown freezing the page (14 panels /
+  13 files) · `ec9ab15` guests listing dropping 9 filters on pagination · `6cc17d5` email-log flags
+  reading "No" forever · `9f10242` Reconfirmation filter wired to the API · `67710b3` three blank
+  boolean columns · `864db95` invitations form showing the real 422. Frontend `2d66436` the same
+  dropdown freeze on the public registration form (**no fork ever fixed this side**) · `1d542c4` the
+  complete-data link creating a duplicate guest instead of updating one.
+- **New doc — [`upgrades/FORK_PORT_BACK_LEFTOVERS.md`](upgrades/FORK_PORT_BACK_LEFTOVERS.md).**
+  Everything hit and deliberately **not** acted on, with the reason: the 12 remaining `env()` calls,
+  8 dead filter keys with no rendered control, the `ExportEBadgesFiltered` park-or-delete call, the
+  `check_in_time`/`checked_in_at` duplication, and the click-list of what still needs a browser.
+- **⚠️ The findings doc keeps being wrong in its summaries** (its file/line refs have been right
+  every time). Corrections recorded in place: the email-log bug is **5 files not 4**, and the fifth
+  (`automation-details`) **must not** be changed — it renders string columns, so `=== 'yes'` is
+  correct there; only **1 of 9** "dead filter keys" is a real bug; the dropdown `anchor` +
+  `modal={false}` fixes do **not** have to land together, and `anchor` was skipped on purpose;
+  `print-logs.tsx` needed no fix. **Keep opening the file before editing.**
+- **Nothing has been verified in a browser** this session — all reasoned from source with every gate
+  green. Click-list in the leftovers doc §4.
+- **Next:** section 5 has ~30 items left. **Pushing all 20 commits is still outstanding.**
+
+**2026-08-08 — Task 033: section 4 of the port-back backlog is CLOSED. Nine items shipped,
 one closed as won't-do, 11 commits across backend / admin / frontend / docs. ALL COMMITTED, NOTHING
 PUSHED. Backend tests 489 → 494. The admin/frontend build gate was repaired and ran green for the
 first time.**

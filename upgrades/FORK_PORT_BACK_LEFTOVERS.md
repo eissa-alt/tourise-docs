@@ -1,0 +1,146 @@
+# Fork port-back — leftovers and open decisions
+
+**Opened:** 2026-08-08 · **Task:** [033](../tasks/033-fork-port-back/TASK.md) ·
+**Working list:** [`FORK_PORT_BACK_FINDINGS.md`](FORK_PORT_BACK_FINDINGS.md)
+
+Things found **while doing** the port-back that were deliberately **not** acted on. None of these
+are "forgotten" — each was hit, understood, and parked because acting would have meant guessing at a
+decision that belongs to the owner, or widening scope past the item in hand.
+
+Ordered by how much they can hurt.
+
+---
+
+## 1. Needs checking against the real deploy
+
+### 1.1 Twelve more `env()` calls that go null under `config:cache`
+
+`P033.11` fixed the reCAPTCHA secret. The same defect class is still live in **13 other files**,
+recorded as 12 remaining entries in `phpstan-baseline.neon` under
+`larastan.noEnvCallsOutsideOfConfig`:
+
+```
+AuthController · EmailsTemplatesController · GuestOtpMailable · GuestOtpNotification
+SendAutomationEmailNotification · DynamicSmtpService (×4)
+SpeakersController · SponsorsController · SpeakerLabelsController · SponsorLabelsController
+InvitationsExport · InvitationsCollectionsWithInvitationsExport
+```
+
+**Why it matters:** Laravel stops loading `.env` once the config is cached, so every one of these
+reads `null` in a normal production deploy. `DynamicSmtpService` is the one to look at first —
+ledger D971 records that this exact failure has already caused a real incident there. The
+`X-Mailer` instance is already listed in findings §9.
+
+**Why parked:** each needs its own config key and a judgement about the right default. Mechanical,
+but 13 separate decisions, and the linter already tracks them — the baseline entries *are* the
+backlog.
+
+---
+
+## 2. Decisions, not ports
+
+### 2.1 Eight dead filter keys on the guests listing
+
+`P033.17` wired `reconfirmed_will_attend`. Eight others are pushed into the URL by
+`search-guests-by-super.tsx` but **no control renders them**, so nobody can set them except by
+hand-editing the URL:
+
+| key | backend filter exists? |
+|---|---|
+| `require_accommodation`, `require_flights` | **yes** — only the UI is missing |
+| `accommodation_requests`, `admin_check_in_date`, `admin_check_out_date`, `flight_comments`, `self_booking`, `transportation_comments` | **no** |
+
+Plus the three `dinner_invite` params still forwarded by the admin after `P033.4` removed the
+backend filter (the column never existed).
+
+**The decision:** delete the dead plumbing, or build the missing controls and the six backend
+filters. Both are defensible; the six with no backend filter are mostly free-text/comment/date
+fields that may not be worth filtering on at all.
+
+### 2.2 `ExportEBadgesFiltered` — park it properly or delete it
+
+`P033.7` removed the `dd()` from it. The method is still **unrouted with zero callers in any repo**,
+builds a per-guest PDF into a variable it never uses, and returns `''`. It reads as working code.
+
+**The decision:** give it a PARKED docblock (the convention `ExportInvitations` already uses two
+hundred lines above it) or delete it outright. Nothing depends on it either way.
+
+### 2.3 `check_in_time` ↔ `checked_in_at` duplication
+
+Two generations of attendance columns holding one fact, reconciled by a `Guest::booted()` hook. The
+2023 set (`check_in` / `check_in_time` / `check_in_count`) and the July-2026 seating set
+(`checked_in_at` + `checked_in_by`, plus check-out and food pairs).
+
+The legacy columns cannot simply be dropped — admin filters, reports **and the out-of-repo iPad
+scanner** read them. Needs a migration, an admin/reports sweep and scanner sign-off. Recorded in
+findings §9.
+
+### 2.4 reCAPTCHA still 500s on a connection failure
+
+`P033.9` guards the *response shape*. A `ConnectionException` is thrown before any response exists,
+so `??` cannot catch it and a Google outage still surfaces as a 500 on admin login.
+
+**Owner decision, taken 2026-08-08: leave as is.** Access is already fail-closed in that case, so
+this is an error-surface gap, not a security one. Recorded here so it is not re-raised as new.
+
+### 2.5 complete-data discards most of the four-step form
+
+`updateGuestMissingData` uses `$request->only([...])` with a **12-field allow-list**. A guest
+completing the four-step shape through a tokenized link fills in visa, accommodation and flight
+fields that are then silently dropped. Before `P033.14` they were lost to a duplicate record;
+now they are lost to the allow-list.
+
+**The decision:** widen the allow-list per form shape, or accept that complete-data is a
+profile-only flow and stop rendering the logistics steps on it. gfeai chose the second route
+(`6b15463` splits `/complete-data` from `/complete-logistics`) — that is the large
+`completion_tokens` item in findings §5.
+
+---
+
+## 3. Cosmetic / hygiene
+
+### 3.1 `anchor` on Headless UI panels (dropdown clipping)
+
+`P033.12`/`P033.13` fixed the freeze with `modal={false}` and deliberately did **not** add
+`anchor`. Panels are clipped inside overflow containers on some screens; adding `anchor` switches
+them to portal positioning, which conflicts with the `absolute` classes all 17 sites use. Worth
+doing **with a browser open**, not as a blind sweep. See the correction recorded in findings §5.
+
+### 3.2 `console.*` in the frontend app
+
+The admin is now clean (`P033.19` removed the last one). The **frontend** still has some, including
+`console.error(error)` in `one-step/step-1.tsx`. Hard rule 8. A one-commit sweep, not done here
+because it is unrelated to any findings item.
+
+### 3.3 `print-logs.tsx` pagination shape
+
+Carries the same hand-written-key `paginate()` shape the guests listing had, but takes exactly
+`{mode, page, query, status}` — so it loses nothing today. Hardening it is one line and prevents the
+identical bug the day someone adds a filter.
+
+### 3.4 `GuestsResources` still emits a null `dinner_invite`
+
+`P033.4` removed the backend filter for a column no migration creates. The resource still returns
+the key, always `null`. Harmless, but it is a response-shape change so it was left alone.
+
+### 3.5 `CLAUDE.md` is untracked
+
+The wrapper root has no `.git`, so the rule-5 gate update made on 2026-08-08 (`yarn production` →
+`yarn build`) lives only on one machine and will not reach a clone or a teammate. Worth deciding
+where that file should be version-controlled.
+
+---
+
+## 4. Verification owed
+
+Nothing in this session was exercised in a browser — all of it is reasoned from source, with gates
+green. Worth a click-test before trusting:
+
+- a dropdown in the admin, and **Country on a phone** in the public form (`P033.12` / `P033.13`)
+- a real tokenized complete-data link end to end (`P033.14`)
+- the Reconfirmation filter returning different rows (`P033.17`)
+- an email log row showing a real Sent/Delivered value (`P033.16`)
+- a guest upload from the admin guest form — those paths 404'd for a long time (`P033.6`)
+
+Still unanswered from the original audit: **does the admin CSP block reCAPTCHA on login** (settle in
+a browser, not from source), and **is the backend's reCAPTCHA secret Google's *test* secret**.

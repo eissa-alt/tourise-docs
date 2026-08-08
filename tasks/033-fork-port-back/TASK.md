@@ -80,6 +80,32 @@ Newest at the bottom.
   - **Still needs a human, unchanged:** does the admin CSP block reCAPTCHA on login (settle in a
     browser), and is the backend's reCAPTCHA secret Google's *test* secret.
 
+- **2026-08-08 (later) — section 5 started; 8 more items shipped, unattended.** The owner was away
+  and explicitly authorised continuing without per-item review, with anything uncertain parked
+  rather than guessed. **Commits only — nothing pushed** (that approval was not given and was not
+  inferred). New: [`upgrades/FORK_PORT_BACK_LEFTOVERS.md`](../../upgrades/FORK_PORT_BACK_LEFTOVERS.md)
+  records everything deliberately not acted on.
+  - **Backend (1):** `bf31b85` reCAPTCHA secret `env()` → `config()`.
+  - **Admin (6):** `4151422` dropdown freeze (14 panels/13 files) · `ec9ab15` pagination dropping 9
+    filters · `6cc17d5` email-log flags always "No" · `9f10242` Reconfirmation filter wired ·
+    `67710b3` three blank boolean columns · `864db95` invitations form showing the real 422.
+  - **Frontend (2):** `2d66436` registration-form dropdown freeze · `1d542c4` complete-data link
+    creating a duplicate guest.
+  - **⚠️ `GOOGLE_RECAPTCHA_SECRET` was null in production.** Proven on a real config cache:
+    `env()` → `NULL`, `config()` → present. Under `config:cache` Google got an empty secret and
+    answered `invalid-input-secret`, rejecting **every login and registration** at 13 call sites.
+    **larastan was already catching it** — the finding sat suppressed in `phpstan-baseline.neon`.
+    12 entries for the same rule remain across 13 files; `DynamicSmtpService` (4 calls) is next.
+  - **⚠️ Four more findings-doc claims were wrong**, each caught by opening the file: the email-log
+    bug is **5 files not 4**, and the 5th (`automation-details`) **must not** be "fixed" — it renders
+    string columns, so its `=== 'yes'` is correct; only **1 of the 9** dead filter keys is a real
+    user-facing bug (the other 8 have no rendered control); the dropdown `anchor`/`modal` fixes do
+    **not** have to land together (read from `@headlessui/react@2.2.10` source — `modal` defaults
+    true independently, and `anchor` was deliberately skipped to avoid 14 layout regressions); and
+    `print-logs.tsx` needed no fix at all.
+  - **Nothing was browser-verified** — all of it is reasoned from source with gates green. The
+    click-list is in the leftovers doc §4.
+
 ## Decisions
 
 Task-local. Durable ones → [`../../decisions/LEDGER.md`](../../decisions/LEDGER.md).

@@ -213,31 +213,69 @@ most of the high-severity list.
       **The fork's fix is incomplete.** The same bug is in `InvitationsController::index`,
       `::getAllInvitations` and `::export`. Fix all four. From gfeai `7ce4225`.
 
-- [ ] **The guests listing loses 9 filters when you turn the page.**
+- [x] **The guests listing loses 9 filters when you turn the page.**
       Filter the list, click page 2, and page 2 comes back unfiltered while the filter chips still
       show. `guests-listing.tsx:247-292` rebuilds the URL from a hand-written list of 36 keys, but
       the search form pushes 43. The fix is one line — `searchQueries` on line 245 already holds
       the whole query. From gfeai `a4dab7a`.
       **Same file, related:** `print-logs.tsx` has the same pattern.
+      **DONE — admin `ec9ab15`.** The nine were derived rather than taken on trust, by diffing
+      paginate's keys against what the search form pushes: `accommodation_requests`,
+      `admin_check_in_date`, `admin_check_out_date`, `flight_comments`, `reconfirmed_will_attend`,
+      `require_accommodation`, `require_flights`, `self_booking`, `transportation_comments`. **All
+      nine are logistics/accommodation filters** — the Task 019 set, added long after this key list
+      was written, which is the argument for spreading rather than adding nine more lines.
+      `lang`/`slug`/`id` are destructured out (route segments, not filters).
+      **`print-logs.tsx` needed no fix** — it takes exactly `{mode,page,query,status}`, so it
+      already carries every filter it has. Same fragile shape, zero data loss today.
 
-- [ ] **The "Reconfirmation" filter does nothing at all.**
+- [x] **The "Reconfirmation" filter does nothing at all.**
       Pick Yes or No, hit Search, the URL changes, the results do not.
       `search-guests-by-super.tsx:216` pushes `reconfirmed_will_attend` into the URL, but
       `fetch-data-url.ts:83-126` has no parameter for it, so it never reaches the API.
       **9 keys total** are pushed but never forwarded. From gfeai `9ea56fd`.
+      **DONE — admin `9f10242`.** ⚠️ **Only ONE of the nine is a user-facing bug.** Each was checked
+      against both ends:
 
-- [ ] **Every email log row says "No".**
+      | key | control rendered? | backend filter? |
+      |---|---|---|
+      | `reconfirmed_will_attend` | **yes** | **yes** (`applyFilters:143`, `pending`/`yes`/`no`) |
+      | `require_accommodation` / `require_flights` | no | yes |
+      | the other six | no | no |
+
+      Only `reconfirmed_will_attend` has a control a user can actually operate, so only it was
+      wired. The other eight exist solely as a type, a `defaultValues` mapping and a submit-payload
+      key — nothing renders them, so they are unreachable except by hand-editing the URL. Same
+      phantom-plumbing pattern as `dinner_invite`. **Left alone deliberately → see
+      `FORK_PORT_BACK_LEFTOVERS.md`:** deleting dead plumbing vs adding six backend filters is a
+      decision, not a port.
+
+- [x] **Every email log row says "No".**
       Sent, Delivered, Opened, Clicked all show a grey "No" badge forever — including for messages
       that were definitely delivered. The backend now sends real booleans; the admin still compares
       against the string `'yes'`. **4 files, 14 comparison sites.** The correct helper already
       exists at `guest-sms-logs-listing.tsx:26`. From gfeai `7eff9cc` + `af620c0`.
+      **DONE — admin `6cc17d5`.** ⚠️ **It is 5 files, not 4** — the two see-more modals
+      (`see-more-admin.tsx` → `guest_emails`, `table-see-more-invitation-modal.tsx` →
+      `invitation_emails`) were not listed. Four are fixed. **The fifth must NOT be:**
+      `automation-details.tsx` renders the `Automation` model, whose `is_sent`/`is_delivered`/
+      `is_open` are **string** columns (migration `2024_05_17_155941`) with no boolean cast, and the
+      backend filters them with `where('is_sent','yes')`. Its `=== 'yes'` is correct — changing it
+      would be a regression. Filter option values (`'yes'`/`'no'`) are also correct and untouched;
+      they match the SMS listing and the backend has accepted them since P23.11.
 
-- [ ] **Three columns are permanently blank.**
+- [x] **Three columns are permanently blank.**
       React renders `true` and `false` as nothing, so you cannot tell the two apart. In the
       invitations listing (`:252` `render: row => row.is_sent`) and two badge/verified chips.
       Found by checking all 84 boolean columns against both apps.
+      **DONE — admin `67710b3`.** All three confirmed boolean-cast on their models: invitations
+      "Sent" (`Invitation`), badges "Show background" (`Badge`), and the verified chip in
+      `see-more-admin.tsx` (`Guest`) which rendered its icon with no label. Now an explicit Yes/No
+      badge, a Yes/No label, and the existing `web:verified` string — all three keys already existed
+      in EN + AR, so no translation change was needed. `guests-listing.tsx:707` already did this
+      correctly (`row.verified === true && <BadgeCheck/>`) and is untouched.
 
-- [ ] **Every dropdown in the admin freezes the page.**
+- [x] **Every dropdown in the admin freezes the page.**
       Open any select, action menu, export menu or filter, and the page will not scroll — and
       clicks outside the panel are swallowed, because the rest of the page goes inert.
       Headless UI 2.2.10 defaults `modal` to `true`; we never pass `modal={false}`.
@@ -246,16 +284,34 @@ most of the high-severity list.
       **Two fixes must land together:** `anchor="bottom start"` (gfeai `cd0a861`) stops the panel
       being clipped, `modal={false}` (gfeai `60c0e26`) stops the freeze. Porting `anchor` alone
       would likely *introduce* the freeze.
+      **DONE — admin `4151422`.** 14/14 panels across 13 files, coverage checked by count.
+      ⚠️ **The "must land together" claim above is wrong**, verified by reading
+      `@headlessui/react@2.2.10` rather than the commit summaries. In `listbox.js`:
+      `{ anchor:s, portal:a=!1, modal:_=!0 }` — `modal` defaults true **independently of `anchor`**;
+      `o && (a=!0)` shows `anchor` merely forces `portal`; and the freeze is
+      `useScrollLock(modal && open)` + `useInertOthers(modal && open)`. So `modal={false}` alone
+      fixes it, and `anchor` neither causes nor prevents it. **`anchor` was deliberately NOT taken:**
+      every one of our panels positions manually with `absolute` classes, so switching to portal
+      positioning risks 14 layout regressions for no bug-fix value. The clipping `anchor` addresses
+      is real but separate and needs visual QA.
 
-- [ ] **The public registration form has the same freeze.**
+- [x] **The public registration form has the same freeze.**
       No fork ever fixed this side. Three components —
       `countries-select-new.tsx:224`, `titles-select-new.tsx:165`, and the static select — back
       every dropdown a registrant touches. On a phone, tapping Country freezes the page.
+      **DONE — frontend `2d66436`.** All three (`countries-select-new` uses `ComboboxOptions`,
+      confirmed to carry the same `modal:b=!0` default as `ListboxOptions`). `modal={false}` only,
+      same reasoning as the admin side.
 
-- [ ] **Invitations form hides the real error.**
+- [x] **Invitations form hides the real error.**
       A duplicate collection name comes back as a clear 422 message, but `invitations-form.tsx:469`
       logs it to the console and shows a generic "something went wrong" toast. Next 15's dev overlay
       then reports it as a crash. From gfeai `0be14a0`.
+      **DONE — admin `864db95`.** The 422 branch already set the per-field errors correctly; it just
+      fired the generic `res:500` toast afterwards regardless. The API returns its messages under
+      `data` keyed by field with no top-level `message`, so the toast now shows the first field
+      message. Removing the `console.error` also cleared the **last** `console.*` call in the admin
+      app — `components/`, `pages/` and `utils/` are now clean under hard rule 8.
 
 - [ ] **Invitations can be created for people who already registered.**
       These can never be redeemed — the register endpoint rejects duplicate emails and
@@ -339,12 +395,23 @@ most of the high-severity list.
 
 ### Public registration form (frontend)
 
-- [ ] **The complete-data link creates a duplicate guest.**
+- [x] **The complete-data link creates a duplicate guest.**
       `complete-data/[category]/[token].tsx:57` passes `onCustomSubmit`, and
       `renderFormSteps.tsx` forwards it at `:155` and `:217` — but only
       `one-step-rsvp/step-1.tsx` actually uses it. `one-step/step-1.tsx:204` and
       `fours-steps/step-4.tsx:90` just POST to `guests`. **2 of our 3 form shapes.**
       From gfeai `6b15463`.
+      **DONE — frontend `1d542c4`.** Both now branch on `onCustomSubmit` before the create. Passing
+      raw `getValues()` was checked rather than assumed — `fours-steps` strips `*_url` and
+      Saudi-conditional fields before its own POST, but the backend's `updateGuestMissingData` uses
+      `$request->only([...])` with a **12-field allow-list**, so extra keys are dropped server-side.
+      gfeai's commit fixes `default/one-step` plus its own project shapes; it does not carry
+      `fours-steps`, so that half is ours.
+      ⚠️ **Pre-existing, NOT fixed:** that 12-field allow-list means complete-data only ever updates
+      `gender, title_id, first_name, last_name, company, job_title, email, phone, personal_image,
+      will_attend, dietary_requirements`. A guest completing the **four-step** form via a token link
+      fills in visa/accommodation/flight fields that are then **silently discarded** — previously
+      lost to a duplicate record, now lost to the allow-list. See `FORK_PORT_BACK_LEFTOVERS.md`.
 
 - [ ] **Prefilled forms reject the guest's own email.**
       `isUniqueAttribute(...)` is called with the mode hardcoded to `'create'`, so the check matches
@@ -380,8 +447,8 @@ most of the high-severity list.
 
 ## 6. TODO — 123-pif-pep-v2
 
-- [ ] **Fix the always-500 offline scanner endpoint** and the dead dinner filter — see section 4.
-- [ ] **Write `checked_in_at` on gate check-in** — see section 4.
+- [x] **Fix the always-500 offline scanner endpoint** and the dead dinner filter — see section 4.
+- [x] **Write `checked_in_at` on gate check-in** — see section 4.
 - [ ] **Fix the seating chair overlap.** The seating app draws chairs on top of each other at every
       table corner — 0px apart on U-shape tables, 55.1px apart for a 56px chair on rectangles once
       `headSeats >= 2`. pep `8c39930`.
@@ -474,11 +541,11 @@ inherited a complete integration and had nothing to fix in it.
 
 ## 8. TODO — 124-ewc-2026-v2
 
-- [ ] **Invitation link fix + the 127-line `InvitationLinkTest`** — `e647bb9`. **Take this version,
+- [x] **Invitation link fix + the 127-line `InvitationLinkTest`** — `e647bb9`. **Take this version,
       not gfeai's.** It keys purely on `remaining`, and it comes with tests. It also documents why
       gfeai's first attempt (`21037e6`) was wrong: gating on `usage_type` still blocked
       number-of-use invitations whose `usage_type` was `single` or unset.
-- [ ] **Plain `build` script** — see section 4.
+- [x] **Plain `build` script** — see section 4.
 - [ ] **Derive `is_saudi` from the ISO country code**, not the country's display name. Today it
       matches a localized label, so it breaks in Arabic. The shared country select cannot even
       expose the code — that needs adding. `dcee22e` / `38b4209`.
@@ -493,8 +560,8 @@ inherited a complete integration and had nothing to fix in it.
 
 Found by auditing our code directly. No fork comparison could have surfaced them.
 
-- [ ] **Two forced-500 test hooks on public routes** — see section 4.
-- [ ] **A `dd()` in committed controller code** — see section 4.
+- [x] **Two forced-500 test hooks on public routes** — see section 4.
+- [x] **A `dd()` in committed controller code** — see section 4.
 - [ ] **Public, unauthenticated, unthrottled `/pdf/{id}` routes.** `routes/web.php:24-25`. The `web`
       middleware group has no throttle and no auth. Each request runs Imagick + PDF rendering and
       **writes a new file to public storage**. Anyone can call it in a loop.
@@ -510,7 +577,7 @@ Found by auditing our code directly. No fork comparison could have surfaced them
       defaulting to null. Port the mechanism, then extend it to the buckets gfeai did not cover.
 - [ ] **`X-Mailer` uses `env()` outside a config file**, so it sends **empty under `config:cache`**
       — i.e. in production.
-- [ ] **⚠️ `GOOGLE_RECAPTCHA_SECRET` is read with `env()` outside a config file** —
+- [x] **⚠️ `GOOGLE_RECAPTCHA_SECRET` is read with `env()` outside a config file** —
       `app/Rules/ReCaptcha.php:31`. Same defect class as `X-Mailer` above, but the consequence is far
       worse: Laravel does not load `.env` when the config is cached, so under `php artisan
       config:cache` — the normal production step — **the secret is `null`**. Google then replies
@@ -519,6 +586,13 @@ Found by auditing our code directly. No fork comparison could have surfaced them
       while doing the section 4 guard; not surfaced by the original audit.* **Verify against the real
       deploy before anything else — if it runs `config:cache`, this is a live outage waiting on the
       next cache clear.** Fix: a `config/services.php` entry + `config('services.recaptcha.secret')`.
+      **DONE — backend `bf31b85`.** Proven on a real config cache before and after:
+      `env('GOOGLE_RECAPTCHA_SECRET')` → `NULL`, `config('services.recaptcha.secret')` → present.
+      **larastan was already catching this** (`noEnvCallsOutsideOfConfig`) — the finding sat
+      suppressed in `phpstan-baseline.neon`; fixing the code made the ignore unmatched, which turned
+      the gate red and forced its removal. **12 baseline entries for the same rule remain across 13
+      files** — `DynamicSmtpService` (4 calls) is the next worth looking at, and ledger D971 records
+      that it has already caused a real incident.
 - [ ] **`check_in_time` and `checked_in_at` hold the same fact.** Two generations of attendance
       columns: the 2023 `check_in` / `check_in_time` / `check_in_count` set, and the July-2026
       seating set (`checked_in_at` + `checked_in_by`, plus check-out and food pairs). A
