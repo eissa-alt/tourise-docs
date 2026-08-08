@@ -128,9 +128,14 @@ most of the high-severity list.
       public, unauthenticated routes. Both marked `// TODO: remove this test hook`.
 - [ ] **Delete the `dd()` in committed code.** `GuestsController.php:2638`. Breaks our own rule 8.
       The method is not routed today, but it ships in every clone.
-- [ ] **Un-comment the sidebar links.** `data/sidebar-links.tsx:437-444` hides `/conference`. The
-      same block also hides `event_days` and `sessions`. All three pages exist, all three have
-      routes and feature ids — they are just unreachable. Three dead features, one comment block.
+- [x] ~~**Un-comment the sidebar links.**~~ **NOT PORTED — owner decision, 2026-08-08.** See the
+      row in section 10. ⚠️ **This item's description was wrong.** The commented block is not three
+      links: it is the whole **"Mobile App Section"** — a section header plus **nine** modules
+      (`event_days`, `conference`, `sessions`, `workshops`, `publications`, `media_center`,
+      `notifications`, `meeting_rooms`, `speakers`). All nine are complete end-to-end — page,
+      `inferFeatureId` rule, and a real action set in `AdminPermissions.php:69-80`. They were hidden
+      deliberately in admin `1e449dc` (2026-06-24, a sidebar-restyle commit), and the inline comment
+      records that the pages stay reachable by direct URL.
 - [ ] **Add a plain `build` script** to admin and frontend `package.json`. Today there are only
       `env-cmd`-wrapped variants, so neither app builds on Vercel or in CI. From ewc `557228b` /
       `28c79ee`.
@@ -475,6 +480,7 @@ Each of these was checked and rejected with evidence.
 | **Email-log boolean filters, backend half** | We fixed this independently in P23.11 (`7eb1e54`) — five days *before* gfeai did, in both controllers, for all four filters. **The admin half is still broken** (section 5). |
 | **`/join` landing page** | The fork's version is a 35-line empty shell. |
 | **Most gfeai work before 2026-07-22** | We built the same things in parallel. Reading all 166 unread commits found only 8 real gaps, all listed above. |
+| **Un-commenting the mobile-CMS sidebar links** (section 4) | **Owner decision, 2026-08-08.** The block is not the three links section 4 described — it is a nine-module "Mobile App Section", hidden on purpose in admin `1e449dc` during a sidebar restyle. The pages stay reachable by direct URL and every module is still RBAC-gated, so nothing is broken by leaving the nav as it is. Restoring all nine would change the admin nav in every clone off the back of a miscounted audit item. **Do not re-raise on the next audit.** If a project needs the mobile CMS surfaced, restore the block in that clone. |
 
 ---
 
