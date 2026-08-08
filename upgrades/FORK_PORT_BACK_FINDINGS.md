@@ -206,12 +206,20 @@ most of the high-severity list.
 
 ### Broken things users hit
 
-- [ ] **Super Admins see no invitation collections and export empty files.**
+- [x] **Super Admins see no invitation collections and export empty files.**
       `InvitationsCollectionController.php:33/176/192` turn `null` into `[]`, then treat `[]` as "no
       access". A Super Admin has no category list, so they get nothing. There is no `is_super`
       bypass here, unlike `GuestsController::applyAdminGuestAccessFilter:368`.
       **The fork's fix is incomplete.** The same bug is in `InvitationsController::index`,
       `::getAllInvitations` and `::export`. Fix all four. From gfeai `7ce4225`.
+      **DONE — backend `6f37068`.** ⚠️ **It is 7 sites in 3 controllers, not 4 in 2.**
+      `DashboardStatsController::applyAdminGuestAccessFilter` is not mentioned above at all — it is
+      a near-copy of the Guests one with the `is_super` early return missing, so a Super Admin also
+      saw a **dashboard of zeroes**. ⚠️ **The exports needed a different fix from the listings:** the
+      Export classes distinguish `null` (no filter) from `[]` (deny all) —
+      `InvitationsCollectionsExport:30/37` — and the controllers were flattening a Super Admin's
+      `null` into `[]`, which the export then read as deny-all. Leaving it `null` is the fix; adding
+      a `whereIn` would not have been.
 
 - [x] **The guests listing loses 9 filters when you turn the page.**
       Filter the list, click page 2, and page 2 comes back unfiltered while the filter chips still
@@ -339,8 +347,12 @@ most of the high-severity list.
       **Port the mechanism, not corrected letters** — a headings-based lookup (gfeai `5c39fd8` /
       `7ce4225`), plus the alignment test (gfeai `741ad17`). We have **zero** export tests today.
 
-- [ ] **"Send test" is clickable while creating a template** and posts to
+- [x] **"Send test" is clickable while creating a template** and posts to
       `/email-templates/send-test/undefined`. From gfeai `b194523`.
+      **DONE — admin `e3aa1de`.** Now edit-only; there is nothing to test against until the template
+      exists. Its label was also a hardcoded `'Send test'` literal that would never render in
+      Arabic — now goes through `useTranslate`, reusing the existing `web:send_test_email` key, so no
+      translation files changed.
 
 - [ ] **Date fields say "required" when they clearly contain a date.**
       Type a real date that falls outside min/max and `masked-date-input.tsx:124-134` reports it as
