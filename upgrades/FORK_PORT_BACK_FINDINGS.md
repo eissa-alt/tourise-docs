@@ -574,12 +574,28 @@ Found by auditing our code directly. No fork comparison could have surfaced them
 
 - [x] **Two forced-500 test hooks on public routes** — see section 4.
 - [x] **A `dd()` in committed controller code** — see section 4.
-- [ ] **Public, unauthenticated, unthrottled `/pdf/{id}` routes.** `routes/web.php:24-25`. The `web`
+- [x] **Public, unauthenticated, unthrottled `/pdf/{id}` routes.** `routes/web.php:24-25`. The `web`
       middleware group has no throttle and no auth. Each request runs Imagick + PDF rendering and
       **writes a new file to public storage**. Anyone can call it in a loop.
-- [ ] **Five unrouted OTP endpoints that skip reCAPTCHA.** In `AuthController` — one has the
+      **DONE — backend `f2976e1`, deleted rather than throttled.** Worse than described on reading:
+      each request wrote **two** permanent files to public storage (the PDF *and* the Imagick PNG),
+      so throttling would only slow the disk fill. The card also embeds `personal_img_url` from the
+      **private** disk (a D14-protected guest photo) into a **public**-disk file, keyed on a
+      guessable `registration_number` — so it could materialise any guest's photo and details on
+      demand. Safe to delete because the handlers were named `getSocialCardWebTest` / `…Ar` with
+      **zero callers in any of the five repos**, and a working twin already exists:
+      `GET /api/get-social-card{,-img}/{id}` → `getSocialCard` / `getSocialCardImage`, which the
+      frontend actually calls and which sit under `throttle:public-api` (30/min by IP).
+      134 controller lines + 2 routes removed.
+- [x] **Five unrouted OTP endpoints that skip reCAPTCHA.** In `AuthController` — one has the
       reCAPTCHA rule commented out. Each mints an email-verification token. Not routed today, so it
       is a latent bypass, not a live one. Delete them or gate them.
+      **DONE — backend `ef17898`, deleted.** `sendGuestOtpNotification`, `sendGuestOtpMailable`,
+      `emailVerificationTemp`, `emailVerificationTempEmpty`, `emailVerificationTempWithMailGun` —
+      all unrouted, zero callers. The live path (`emailVerification`, `routes/api.php:171`, under
+      `throttle:sensitive-api`) enforces reCAPTCHA and is untouched. Route count 476 → 474, entirely
+      accounted for by the `/pdf` pair above. **Bonus:** the dead code held **7 of AuthController's
+      11 `env()`-outside-config calls**, so its baseline count dropped 11 → 4. 288 lines removed.
 - [ ] **Hardcoded buckets belonging to other ALT clients**, on live render paths:
       - `GuestsController.php:3256` — a **devego** bucket, on `POST /generate-static-badges`
       - an **ims** bucket sticker URL on three badge-PDF paths
@@ -587,8 +603,28 @@ Found by auditing our code directly. No fork comparison could have surfaced them
       Every clone renders client-facing PDFs pulling images from a different customer's storage.
       **The fix mechanism exists in gfeai `60ba649`** — `config/pdf.php` keys, env-backed,
       defaulting to null. Port the mechanism, then extend it to the buckets gfeai did not cover.
-- [ ] **`X-Mailer` uses `env()` outside a config file**, so it sends **empty under `config:cache`**
+- [x] **`X-Mailer` uses `env()` outside a config file**, so it sends **empty under `config:cache`**
       — i.e. in production.
+      **DONE — backend `c1b118c`.** Scoped to the whole defect, not the one named line: the same
+      three-line `replyTo` + `X-Mailer` block is copy-pasted across **four** mail-sending files, so
+      **11 calls in 6 files** were swapped to their existing config keys
+      (`config('mail.from.address')` / `config('mail.from.name')` / `config('app.frontend_url')`).
+      Two real production consequences: guest OTP, admin login OTP and template test-sends went out
+      with **no Reply-To and an empty `X-Mailer`**; and invitation exports wrote join links starting
+      `/en/join/…` **with no domain**, making the workbook handed to a client unusable. Verified
+      under a real config cache (`env()` → `NULL`, `config()` → real value).
+      ⚠️ **Not finished — two groups deliberately left, each needing its own item:**
+      - **`DynamicSmtpService` (4 calls).** `applyFallbackConfig()` exists to *restore* the `.env`
+        defaults after a dynamic SMTP override, so `config()` there would read the value it is about
+        to overwrite. Needs the originals cached at boot. **This is the file ledger D971 says already
+        caused an incident — treat as the highest-value remaining `env()` item.**
+      - **No config key exists yet (10 calls, 5 files):** `FRONTEND_BASE_URL` +
+        `REVALIDATE_SECRET_TOKEN` (Speakers / Sponsors / SpeakerLabels / SponsorLabels controllers),
+        `SECURITY_ALERT_EMAILS`, `MAIL_HOST_BULK`, `MAIL_EHLO_DOMAIN`. Mechanical, but each needs a
+        key added.
+      **Debt: 12 files → 6.** `phpstan-baseline.neon` shrank 27 lines. Note the larastan rule
+      `noEnvCallsOutsideOfConfig` catches this class automatically — it is what surfaced the
+      reCAPTCHA outage, so **do not re-add baseline entries for it.**
 - [x] **⚠️ `GOOGLE_RECAPTCHA_SECRET` is read with `env()` outside a config file** —
       `app/Rules/ReCaptcha.php:31`. Same defect class as `X-Mailer` above, but the consequence is far
       worse: Laravel does not load `.env` when the config is cached, so under `php artisan
