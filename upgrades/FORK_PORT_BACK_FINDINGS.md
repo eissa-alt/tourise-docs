@@ -383,9 +383,27 @@ most of the high-severity list.
       and badges — templates are the gap. Paired backend + admin. gfeai `1a423f5` / `3f97f70`.
 - [ ] **Bulk missing-data notify** — `POST /admin/guests/notify-bulk` with a sent/skipped tally.
       Hidden inside a commit titled "feat: rebrand". gfeai `4c6187e`.
-- [ ] **Harden base64 uploads.** `UploadService.php:61` takes the file extension from whatever mime
+- [x] **Harden base64 uploads.** `UploadService.php:61` takes the file extension from whatever mime
       the caller declares, with no allow-list — `data:x/phtml;base64,…` writes a `.phtml` file to
       the **public** disk. There is also no size limit. 4 call sites are affected.
+      **DONE — backend `113c9fd`.** The service validated the *bytes* but took the extension from
+      the caller-declared mime — different inputs, so real PNG bytes sent as `data:x/phtml;base64,…`
+      passed the sniff and landed as `.phtml`. Now: honour the declared extension only when
+      allow-listed (`jpg`/`png` — all the admin components ever send), else fall back to sniffing,
+      else **refuse** rather than guess `jpg`. Plus a 10 MB ceiling.
+      ⚠️ **`gif`/`webp`/`svg` had to come out of BOTH the allow-list and the sniff fallback** —
+      stripping only the allow-list left them reachable through the fallback, and every test stayed
+      green, so it looked done and was not. Two code paths decide the extension.
+      **Also fixed a real bug nobody reported:** SVG was stored as `.svg+xml` (everything after the
+      slash in `image/svg+xml`), an extension no server serves as an image — so SVG upload never
+      worked. A test was *asserting* that broken output rather than catching it.
+      **Four null guards added alongside**, because refusals became far more likely and Badges /
+      Sponsors / Speakers / Categories returned `status: success` with a **null** filename and a URL
+      ending in `/`, so the admin stored the null. They now 422, matching `GuestsController`. All 9
+      call sites across 6 controllers guarded. Path traversal on the caller-controlled `$dir` was
+      tested and is blocked by Flysystem. 5 new regression tests; 498 pass.
+      **Still open (pre-existing, logged in LEFTOVERS §3):** those four endpoints have **no request
+      validation at all**, and `$dir` is built from unsanitised `moduleName`/`inputName`.
 - [ ] **Skip reCAPTCHA outside production** (opt back in with `RECAPTCHA_ENFORCE`). Local dev
       currently cannot log in or register. gfeai `eafd3e4`.
       ⚠️ That commit also reports that the backend's Google secret is Google's **test** secret and

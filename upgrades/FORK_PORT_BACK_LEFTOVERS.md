@@ -129,6 +129,23 @@ The wrapper root has no `.git`, so the rule-5 gate update made on 2026-08-08 (`y
 `yarn build`) lives only on one machine and will not reach a clone or a teammate. Worth deciding
 where that file should be version-controlled.
 
+### 3.6 The four public-disk upload endpoints have no request validation
+
+`BadgesController::upload`, `SponsorsController::upload`, `SpeakersController::upload` and
+`CategoriesController::upload` carry **no `Validator` and no `required` rule at all**. Two
+consequences, both pre-existing and untouched by `P033.25`:
+
+- a missing `file` field reaches a `string`-typed parameter and **500s** instead of returning 422;
+- `$dir` is built from `$request->moduleName.'/'.$request->inputName`, **unsanitised**, so an
+  authenticated admin can write into arbitrary folders under the public disk. Traversal itself was
+  tested and *is* blocked by Flysystem (`PathTraversalDetected`), but it surfaces as an unhandled
+  500 rather than a clean rejection.
+
+`P033.25` closed the executable-extension path at the service layer, which covers every caller. This
+is the caller-layer half: four files, and it needs a per-endpoint decision on accepted types rather
+than a blanket rule. Note `'jpeg'` in `ALLOWED_EXTENSIONS` is also dead — normalization turns
+`jpeg` into `jpg` before the `in_array`, so it can never match. Cosmetic.
+
 ---
 
 ## 4. Verification owed
