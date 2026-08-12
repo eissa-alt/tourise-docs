@@ -97,6 +97,49 @@ profile-only flow and stop rendering the logistics steps on it. gfeai chose the 
 
 ---
 
+### 2.6 Other ALT clients' buckets on live render paths — PARKED 2026-08-12
+
+**21 hardcoded URLs across 15 files**, all pointing at object storage belonging to other ALT
+clients, on paths that render client-facing documents:
+
+| Asset | Bucket | Used for | Refs |
+|---|---|---|---|
+| `spacer-500-px.png` | `sec-emails` | Outlook width shim in email layouts | 8 |
+| `man_dark.png` / `woman_dark.png` | `hci-2026` | social-card placeholder avatars | 4 |
+| `badges2/sticker.jpg` | `ims` | badge printing | 3 |
+| `static-badge.png`, `shape_3.jpg` | `devego` | static badges, wrong-QR sheet | 2 |
+| `ticket-edited-v3.jpg` | `tourise` | **guest ticket background** | 1 |
+| `gosi_logos.png` | `glmc` | e-visa header | 1 |
+| `e_visa_footer.png` | `temp-001` | e-visa footer | 1 |
+| `invitation.jpg` | `faf` | invitation PDF (parked template) | 1 |
+
+Three separate problems: the artwork **belongs to another customer** (a fresh clone prints tickets
+carrying Tourise's design), the hosts are **outside our control** (if IMS deletes that object our
+badges break), and every render makes an **outbound request to a third party**. Note `temp-001` is
+not even a client bucket — it is a scratch bucket, serving the footer of a document sent to
+embassies.
+
+**A complete implementation was written and then discarded on owner instruction** (2026-08-12), not
+because it was wrong — gates were green — but to defer the visual change. It is recoverable:
+
+- patch: `scratchpad/P033.26-render-assets.patch`
+- new config file: `scratchpad/P033.26-config-assets.php`
+
+⚠️ **Scratchpad is session-scoped and will be cleaned up.** If this is not restored soon, treat the
+work as gone and redo it from this note.
+
+What it did: a `config/assets.php` with 10 env-backed keys, all defaulting to **null**, with
+templates omitting the element when unset (except the 8 email shims, which are `height="0"` and
+invisible either way). Named `assets`, not gfeai's `pdf`, because 8 of the 21 are email assets.
+10 keys documented in `.env.example` + `.env.example_prod`. All 14 touched templates were
+compile-checked and the social card was rendered both set and unset — PDF/email rendering has **no
+automated coverage**, so that was the only real verification available.
+
+**The decision this needs:** with no env set, badges print without the sticker, tickets without a
+background, social cards without a placeholder avatar. Blank-but-honest versus keeping another
+client's artwork until each project supplies its own. The alternative is copying the 8 images into
+this repo, which relocates the confidentiality problem rather than solving it.
+
 ## 3. Cosmetic / hygiene
 
 ### 3.1 `anchor` on Headless UI panels (dropdown clipping)
