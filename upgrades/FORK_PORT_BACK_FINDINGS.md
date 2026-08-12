@@ -326,16 +326,36 @@ most of the high-severity list.
       `guests.email` is unique. Needs the check server-side *and* in both admin fill modes (Excel
       and manual). From gfeai `4d4fed0` + `ec316cc`.
 
-- [ ] **Invitation create writes NULL into three NOT NULL columns.**
+- [x] **Invitation create writes NULL into three NOT NULL columns.**
       `prefilldata`, `lock_data`, `with_from`. Same bug we already fixed for `is_sent` in
       `1f3839d` — it missed these three. From gfeai `4d4fed0`.
+      **DONE — backend `5414ca3`.** ⚠️ **Worse than this item implies:** it reads as a
+      data-integrity nit, but it is a **hard 500 on invitation creation**. The admin form only
+      sends those keys when someone flips the switch, so the *default* path inserted three nulls
+      and the create failed outright. Verified by reverting: `received 500`. Fixed with
+      `$request->boolean()` (the idiom P029 already used for the title switches), which also
+      handles the `'true'`/`'1'`/`'on'` string forms `?? null` did not. Adds **first coverage for
+      `POST /admin/invitations`** — itself a listed gap — including a case with an explicit
+      `false`, which a naive `?? false` would pass while still being wrong.
 
-- [ ] **Saving a title with Arabic gender names throws a 500.**
+- [x] **Saving a title with Arabic gender names throws a 500.**
       `normalizeGenderSpecific` returns an array, the column is untyped `text`, and
       `TitlesResources` reads it back with `json_decode`. Needs `json_encode()` in **both**
       `TitlesController.php:88` (store) and `:149` (update).
       *Note: we previously believed P029.1 fixed this. It only fixed half.*
       Also add `?? 0` on `order` in update, and the 62-line test — we have **zero** title tests.
+      **DONE — backend `f1609b4`.** Root cause captured: `ErrorException: Array to string
+      conversion` in `Connection.php`.
+      ⚠️ **This item is wrong about "both".** `update()` was **never broken** — assigning to a
+      model attribute and calling `save()` lets Eloquent encode the array on the way out, while
+      `Model::create()` → insert does not. Measured, not assumed (`save() => OK`, column holds
+      valid JSON). Found only because the update test kept passing unfixed. Encoding now lives in
+      the helper so both paths are explicit rather than one silently depending on that framework
+      behaviour. **The `order` half is a real second bug** and is fixed: `order` is a NOT NULL
+      integer with no default, and `has()` is true for a present-but-null key.
+      **Four tests added** (titles had zero, which is how P029.1 shipped as a half-fix): store and
+      update with Arabic names, the resource round-trip, and `order: null`. Unfixed, three of four
+      fail — the passing one is the update-encoding case, consistent with the correction above.
 
 - [ ] **Export column letters point at the wrong columns.**
       Not "fragile" — already wrong. `GuestsExport.php:36-39` has `DATE_COLS = ['S','W']` labelled
@@ -632,10 +652,19 @@ Found by auditing our code directly. No fork comparison could have surfaced them
       `/en/join/…` **with no domain**, making the workbook handed to a client unusable. Verified
       under a real config cache (`env()` → `NULL`, `config()` → real value).
       ⚠️ **Not finished — two groups deliberately left, each needing its own item:**
-      - **`DynamicSmtpService` (4 calls).** `applyFallbackConfig()` exists to *restore* the `.env`
-        defaults after a dynamic SMTP override, so `config()` there would read the value it is about
-        to overwrite. Needs the originals cached at boot. **This is the file ledger D971 says already
-        caused an incident — treat as the highest-value remaining `env()` item.**
+      - ~~**`DynamicSmtpService` (4 calls).**~~ **DONE — backend `ee002b0`.** `applyFallbackConfig()`
+        exists to *restore* the `.env` defaults after a dynamic SMTP override, so `config()` there
+        would read the value it is about to overwrite — which is why `P033.24` skipped it. It now
+        **snapshots the pristine `config/mail.php` values once per process on first construction**,
+        necessarily before any override, since every mutation of those keys happens inside this
+        class. Under `config:cache` the old `env()` reads returned `NULL`, so the "restore" was
+        **wiping the From address** — the incident ledger D971 records.
+        ⚠️ **Test honesty:** the new test pins the contract but passes **with or without** the fix,
+        because the suite never runs with a cached config and that is the only condition where the
+        bug appears. The cached-config demonstration is the real evidence.
+        ⚠️ The snapshot is `static`, so a long-lived queue worker holds it for its whole life —
+        **`queue:restart` after a deploy is now load-bearing for mail config too** (already required
+        by the prod runbook).
       - **No config key exists yet (10 calls, 5 files):** `FRONTEND_BASE_URL` +
         `REVALIDATE_SECRET_TOKEN` (Speakers / Sponsors / SpeakerLabels / SponsorLabels controllers),
         `SECURITY_ALERT_EMAILS`, `MAIL_HOST_BULK`, `MAIL_EHLO_DOMAIN`. Mechanical, but each needs a

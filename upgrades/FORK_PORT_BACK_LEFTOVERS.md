@@ -15,25 +15,26 @@ Ordered by how much they can hurt.
 
 ### 1.1 Twelve more `env()` calls that go null under `config:cache`
 
-`P033.11` fixed the reCAPTCHA secret. The same defect class is still live in **13 other files**,
-recorded as 12 remaining entries in `phpstan-baseline.neon` under
+**Updated 2026-08-12 — 12 files down to 5.** `P033.11` fixed the reCAPTCHA secret, `P033.24` swapped
+the 11 calls that already had a config key, `P033.23` deleted 7 more along with dead code, and
+`P033.26` fixed `DynamicSmtpService`. What remains, per `phpstan-baseline.neon` under
 `larastan.noEnvCallsOutsideOfConfig`:
 
-```
-AuthController · EmailsTemplatesController · GuestOtpMailable · GuestOtpNotification
-SendAutomationEmailNotification · DynamicSmtpService (×4)
-SpeakersController · SponsorsController · SpeakerLabelsController · SponsorLabelsController
-InvitationsExport · InvitationsCollectionsWithInvitationsExport
-```
+| File | Calls | Variable |
+|---|---|---|
+| `SpeakersController` · `SponsorsController` · `SpeakerLabelsController` · `SponsorLabelsController` | 2 each | `FRONTEND_BASE_URL`, `REVALIDATE_SECRET_TOKEN` |
+| `AuthController` | 1 | `SECURITY_ALERT_EMAILS` |
+| `SendAutomationEmailNotification` | 1 | `MAIL_HOST_BULK` |
 
 **Why it matters:** Laravel stops loading `.env` once the config is cached, so every one of these
-reads `null` in a normal production deploy. `DynamicSmtpService` is the one to look at first —
-ledger D971 records that this exact failure has already caused a real incident there. The
-`X-Mailer` instance is already listed in findings §9.
+reads `null` in a normal production deploy. The four ISR-revalidation controllers are the notable
+group — a null `FRONTEND_BASE_URL` means speaker/sponsor page revalidation silently stops firing in
+production, with no error.
 
-**Why parked:** each needs its own config key and a judgement about the right default. Mechanical,
-but 13 separate decisions, and the linter already tracks them — the baseline entries *are* the
-backlog.
+**Why still parked:** unlike the ones already fixed, **none of these has a config key yet**, so each
+needs one added and a judgement about the right default. Mechanical, but not a swap. The linter
+tracks them — the baseline entries *are* the backlog, and PHPStan fails the build if one is fixed
+without removing its entry.
 
 ---
 
