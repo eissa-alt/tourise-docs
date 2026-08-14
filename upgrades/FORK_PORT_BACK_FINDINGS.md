@@ -374,13 +374,37 @@ most of the high-severity list.
       Arabic — now goes through `useTranslate`, reusing the existing `web:send_test_email` key, so no
       translation files changed.
 
-- [ ] **Date fields say "required" when they clearly contain a date.**
+- [x] **Date fields say "required" when they clearly contain a date.**
       Type a real date that falls outside min/max and `masked-date-input.tsx:124-134` reports it as
       missing instead of out of range. 8 files, ~14 call sites. From gfeai `daee938`.
+      **DONE — admin `ece978e`.** A new `rangeError` prop wins over `error` while the box holds a
+      **complete** date that min/max rejects. That completeness check is the subtle part: half-typed
+      input is unfinished, not out of range, so without it the message would flash on every
+      keystroke. Committing `null` is kept, so a bad value still cannot be submitted — only the
+      message changed. EN + AR `validation:date_out_of_range` added.
+      ⚠️ **"8 files, ~14 call sites" is wrong.** There are 15 `MaskedDateInput` sites but only
+      **two** pass `minDate`/`maxDate`, and a bounds error is impossible without bounds —
+      `automation-settings-fields.tsx:599` (scheduling in the past) and
+      `fours-steps/step-2.tsx:502` (birth date in the future). The other 13 needed no change.
 
-- [ ] **Download errors always show the generic 500 toast.**
+- [x] **Download errors always show the generic 500 toast.**
       On a `responseType: 'blob'` request the real message ("no default SMTP config") is inside the
       Blob and never read. **7 call sites.**
+      **DONE — admin `5c31268`.** New `readApiErrorBody()` / `readApiErrorMessage()` in
+      `utils/api-error.ts`, wired into all seven sites.
+      **Three things this item does not mention, all found while doing it:**
+      1. **It hid 422 validation errors too.** Three sites read `apiError?.data?.data` to fill
+         per-field form errors — equally undefined on a Blob, so `responseErrors` was always `{}`
+         and field errors never reached the form. Hence the helper returns the parsed *body*, not
+         just a string.
+      2. **Two modals showed nothing at all.** `export-modal` and `custom-export-modal` had
+         `catch {}` with the entire body commented out, so a failed export looked like a successful
+         no-op — worse than a wrong message.
+      3. **An error path that is not an exception.** `e-visa-listing.downloadGenerated` checks for
+         `content-type: application/json` on a **200** and toasted a bare 500, while the API puts
+         the reason in that body.
+      ⚠️ `e-visa-listing` has two near-identical catch blocks; the first (`:315`) is **not** the blob
+      one. Easy to patch the wrong one — I did, briefly.
 
 - [ ] **Social-media modal sends bad data.** `order` goes as a string (backend wants an integer,
       422), `link` has no URL validation, and every platform tile draws a check mark, not just the
