@@ -377,6 +377,30 @@ most of the high-severity list.
       **Port the mechanism, not corrected letters** — a headings-based lookup (gfeai `5c39fd8` /
       `7ce4225`), plus the alignment test (gfeai `741ad17`). We have **zero** export tests today.
 
+      **🔎 FULL AUDIT — 2026-08-12** (every constant resolved against its own `headings()`; owner
+      asked to hold the decision, so nothing is changed yet). Two corrections to the text above:
+      **only 5 of the 28 classes use column letters at all** — the other 23 bind by *row number* and
+      are unaffected — and `COL_TITLE_FROM='Z'` runs the title converter over **"Tier Name"**, not
+      over genders. `GuestsExportView.php` does not exist.
+
+      | Class | Constant | Points at | Verdict |
+      |---|---|---|---|
+      | `GuestsExport` | `DATE_COLS` `S`,`W` | Source · Reconfirmed Will Attend | ❌ real dates are **M, Q, X** — and **X is missing entirely** |
+      | `GuestsExportGuestView` | `DATE_COLS` `S` | Reconfirmed Will Attend | ❌ |
+      | `InvitationsExport` | `COL_TITLE_FROM` `Z` | **Tier Name** | ❌ title converter runs over it |
+      | `InvitationsExport` | `COL_PHONE_FROM` `AF` | Job title (From) | ❌ phone formatting over a job title |
+      | `InvitationsCollectionsWithInvitationsExport` | same two | same | ❌ identical drift |
+      | `GuestDraftsExport` | all four | correct | ✅ |
+
+      **The trap worth naming:** every `COL_TITLE` / `COL_EMAIL` / `COL_PHONE` constant is currently
+      **correct** — by luck. They are right only because no column was inserted before them yet, and
+      the wrong ones above are what happens when one is. That is the argument for the lookup over
+      corrected values.
+
+      **Options put to the owner (held):** (1) headings-lookup across the 5 classes + gfeai's
+      alignment test; (2) correct the 6 wrong letters only, ~6 lines; (3) letters now, mechanism as
+      its own later item.
+
 - [x] **"Send test" is clickable while creating a template** and posts to
       `/email-templates/send-test/undefined`. From gfeai `b194523`.
       **DONE — admin `e3aa1de`.** Now edit-only; there is nothing to test against until the template
