@@ -321,10 +321,20 @@ most of the high-severity list.
       message. Removing the `console.error` also cleared the **last** `console.*` call in the admin
       app — `components/`, `pages/` and `utils/` are now clean under hard rule 8.
 
-- [ ] **Invitations can be created for people who already registered.**
+- [x] **Invitations can be created for people who already registered.**
       These can never be redeemed — the register endpoint rejects duplicate emails and
       `guests.email` is unique. Needs the check server-side *and* in both admin fill modes (Excel
       and manual). From gfeai `4d4fed0` + `ec316cc`.
+      **DONE (server side) — backend `faac288`.** Premise verified: `guests.email` is `unique` in
+      the migration, and register refuses duplicates at `GuestsController:547`. `store()` now
+      refuses the batch **before `DB::beginTransaction()`**, so a refused batch mints nothing (the
+      test asserts `Invitation::count() === 0`, not just the 422). Both sides are lowered/trimmed —
+      the test submits `TAKEN@example.com` against a stored `taken@example.com`, since the naive
+      version would let that through and create exactly the dead link this prevents.
+      ⚠️ **The admin half is deliberately NOT done.** The server gate holds for every caller and is
+      where correctness lives; the admin pre-check is UX — warn before submitting 200 rows rather
+      than after — and is a separate change across two fill modes (Excel and manual). Not bundled
+      in silently. See LEFTOVERS.
 
 - [x] **Invitation create writes NULL into three NOT NULL columns.**
       `prefilldata`, `lock_data`, `with_from`. Same bug we already fixed for `is_sent` in

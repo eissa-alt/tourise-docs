@@ -141,6 +141,26 @@ background, social cards without a placeholder avatar. Blank-but-honest versus k
 client's artwork until each project supplies its own. The alternative is copying the 8 images into
 this repo, which relocates the confidentiality problem rather than solving it.
 
+### 2.7 Invitation batches: no admin-side pre-check for registered emails
+
+`P033.32` added the **server** gate — `POST /admin/invitations` now 422s a batch containing an email
+that already has a registration, before anything is minted. That is the half that matters for
+correctness, and it holds for every caller.
+
+**Not done: the admin-side pre-check.** Today an admin pastes 200 rows, submits, and learns from a
+422 that row 137 is already registered — with nothing created, so the whole batch has to be
+resubmitted. gfeai does this check in the form as well (`ec316cc`), in **both** fill modes:
+
+- **Excel** — validate on parse, before the rows reach the payload
+- **Manual** — validate per row as it is entered
+
+The endpoint `POST /admin/invitations/check-emails-list` already exists and is what such a check
+would call.
+
+**Why parked:** pure UX, two distinct fill paths, and it needs a decision about how to present a
+partial failure — block the whole batch, or drop the offending rows and continue? The server
+currently blocks the whole batch, so a form that silently dropped rows would disagree with it.
+
 ## 3. Cosmetic / hygiene
 
 ### 3.1 `anchor` on Headless UI panels (dropdown clipping)
