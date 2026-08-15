@@ -377,29 +377,40 @@ most of the high-severity list.
       **Port the mechanism, not corrected letters** — a headings-based lookup (gfeai `5c39fd8` /
       `7ce4225`), plus the alignment test (gfeai `741ad17`). We have **zero** export tests today.
 
-      **🔎 FULL AUDIT — 2026-08-12** (every constant resolved against its own `headings()`; owner
-      asked to hold the decision, so nothing is changed yet). Two corrections to the text above:
-      **only 5 of the 28 classes use column letters at all** — the other 23 bind by *row number* and
-      are unaffected — and `COL_TITLE_FROM='Z'` runs the title converter over **"Tier Name"**, not
-      over genders. `GuestsExportView.php` does not exist.
+      **🔎 AUDIT — 2026-08-12, corrected 2026-08-12.** ⚠️ **My first audit here was wrong twice**
+      and is replaced below. Both errors came from one cause: a regex that read `headings()`
+      *including commented-out entries*. It claimed a 36-vs-33 headings/map mismatch (there is
+      **none** — 34 vs 34) and claimed column `Z` is "Tier Name" (it is **`Gender (From)`**). **The
+      original item text above was right: the title converter did run over genders.**
 
-      | Class | Constant | Points at | Verdict |
-      |---|---|---|---|
-      | `GuestsExport` | `DATE_COLS` `S`,`W` | Source · Reconfirmed Will Attend | ❌ real dates are **M, Q, X** — and **X is missing entirely** |
-      | `GuestsExportGuestView` | `DATE_COLS` `S` | Reconfirmed Will Attend | ❌ |
-      | `InvitationsExport` | `COL_TITLE_FROM` `Z` | **Tier Name** | ❌ title converter runs over it |
-      | `InvitationsExport` | `COL_PHONE_FROM` `AF` | Job title (From) | ❌ phone formatting over a job title |
-      | `InvitationsCollectionsWithInvitationsExport` | same two | same | ❌ identical drift |
-      | `GuestDraftsExport` | all four | correct | ✅ |
+      **Root cause:** `'Tier Name'` was commented out of `headings()` and its map value removed,
+      shifting every guest-field column **left by one**. Two constants never moved with it.
 
-      **The trap worth naming:** every `COL_TITLE` / `COL_EMAIL` / `COL_PHONE` constant is currently
-      **correct** — by luck. They are right only because no column was inserted before them yet, and
-      the wrong ones above are what happens when one is. That is the argument for the lookup over
-      corrected values.
+      | Class | Constant | Was | Landed on | Now |
+      |---|---|---|---|---|
+      | `InvitationsExport` + `…CollectionsWithInvitations…` | `COL_TITLE_FROM` | `Z` | `Gender (From)` → `Title::findOrFail('male')` → **uncaught, whole export 500s** | `AA` |
+      | both | `COL_PHONE_FROM` | `AF` | `Email (From)` → phone text-formatting | `AG` |
+      | `GuestsExport` | `DATE_COLS` | `S`,`W` | Source · Reconfirmed Will Attend | *unchanged — see below* |
+      | `GuestDraftsExport` | all four | — | correct | ✅ |
 
-      **Options put to the owner (held):** (1) headings-lookup across the 5 classes + gfeai's
-      alignment test; (2) correct the 6 wrong letters only, ~6 lines; (3) letters now, mechanism as
-      its own later item.
+      Layout in both invitation classes: `A–Y` base row (25), `Z–AG` guest fields (8), `AH` Created
+      At. **Only 5 of the 28 export classes use column letters at all** — the other 23 bind by row
+      number and are unaffected.
+
+      **DONE (the crash) — backend `fa4f4a8`.** Both constants corrected in both classes, plus
+      `ExportColumnAlignmentTest`: 12 cases resolving every constant against its own `headings()`.
+      Verified load-bearing — with the old values it reports
+      `COL_TITLE_FROM = 'Z' points at 'Gender (From)', not 'Title (From)'`.
+
+      **STILL OPEN — two follow-ups:**
+      1. **`GuestsExport` / `GuestsExportGuestView` `DATE_COLS`.** Cosmetic: headings and map are
+         aligned (25/25), the letters are simply wrong — date conversion lands on Source and
+         Reconfirmed Will Attend while the three real date columns (**M, Q, X** — note `X` is
+         missing from the constant entirely) get none.
+      2. **The headings-lookup mechanism** (gfeai `5c39fd8` / `7ce4225`). Worth noting *why*: every
+         `COL_TITLE` / `COL_EMAIL` / `COL_PHONE` constant is currently correct **by luck** — right
+         only because nothing has been inserted before them yet. The alignment test now catches
+         drift, which removes most of the urgency.
 
 - [x] **"Send test" is clickable while creating a template** and posts to
       `/email-templates/send-test/undefined`. From gfeai `b194523`.
