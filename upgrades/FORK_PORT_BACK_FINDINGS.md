@@ -552,11 +552,19 @@ most of the high-severity list.
 
 ### Big jobs — decide before starting
 
-- [ ] **DB-driven mandatory-field catalogue (`form_shape_fields`).**
+- [x] **DB-driven mandatory-field catalogue (`form_shape_fields`).** — **tried and reversed.**
       Today the field lists are hardcoded in the admin and frontend bundles. gfeai moves them into a
       table, serves them over the API, and enforces them server-side.
       **This sits right on the "no forms business logic" line.** The catalogue and the enforcement
       are architecture; the per-shape field lists are project data. Worth its own task.
+      **Outcome:** the catalogue half was delivered under Task 033 (table + seeder + endpoints, the
+      admin fetching with no bundled copy) and **reversed on 2026-09-06 by
+      [Task 035](../tasks/035-bundled-mandatory-fields/TASK.md)**. Making project data a seeded
+      table meant each environment needed a re-seed after any list change, and the media shape
+      shipped its list to the seeder only — the picker read "No results found" until someone
+      re-seeded. The lists are back in the admin bundle. The *enforcement* half was never built and
+      is still open: nothing on the backend validates `categories.mandatory_fields`. Do not re-open
+      the catalogue half without reading Task 035 first.
 - [ ] **Split the completion flow into purpose-scoped tokens (`completion_tokens`).**
       Replaces one-row-per-email token tables. Only relevant if we keep logistics.
       ⚠️ Related bug found on the way: sending a test email **silently invalidates the completion
