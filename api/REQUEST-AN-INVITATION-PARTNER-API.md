@@ -1,4 +1,7 @@
-# Request an Invitation — partner API
+# TOURISE 2027 — partner API
+
+Two endpoints, one key: file an invitation request, and subscribe someone to
+the newsletter.
 
 For a website that is not ours. They build the form; we take the request.
 
@@ -108,3 +111,56 @@ exists so a double submit does not put the same person in the queue twice.
 - **CORS**: if the form posts from the browser, the partner's origin must be in
   `CORS_ALLOWED_ORIGINS` on the API. Posting from their server needs nothing.
 - Rate limit is per key, so one partner cannot exhaust another's budget.
+
+
+---
+
+# Newsletter signup
+
+The same key, for a signup box on a partner site.
+
+```http
+POST /api/newsletter/subscribe
+X-Api-Key: tri_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "sara@example.com",
+  "first_name": "Sara",
+  "last_name": "Idris",
+  "company": "Partner Co",
+  "lang": "en"
+}
+```
+
+Only `email` is required. New subscribers join the default list.
+
+### Responses
+
+Always `201` on success. Read `state` to say the right thing:
+
+| `state` | Meaning | Say |
+|---|---|---|
+| `subscribed` | New — they are now on the list | "Thanks for subscribing" |
+| `already_subscribed` | Was already on the list | "You are already subscribed" |
+| `resubscribed` | Had unsubscribed, now back | "Welcome back" |
+
+`401` for a missing, unknown or revoked key. `422` if the address is not valid.
+
+### About `token`
+
+`token` is returned **only** when `state` is `subscribed` — a genuinely new
+address. It is a bearer credential: whoever holds it can read that subscriber
+and unsubscribe them, so it is never returned for an address that already
+existed, where the caller may know the address without owning it.
+
+Do not build a flow that depends on getting it back for an existing subscriber.
+
+### Attribution
+
+TOURISE records which partner site each subscriber came from, taken from the
+key rather than anything you send. The first site to subscribe an address keeps
+the attribution — a later signup elsewhere does not rewrite where they
+originally came from.
