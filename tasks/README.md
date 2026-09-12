@@ -86,3 +86,4 @@ the same area, so a known-parked item isn't rediscovered as a "bug".
 |---|---|---|
 | [PHASE3_PARKED_TODO.md](PHASE3_PARKED_TODO.md) | admin/frontend code-quality audit leftovers | closed 2026-07-19 |
 | [PHASE22_PARKED_TODO.md](PHASE22_PARKED_TODO.md) | follow-ups surfaced by the P22 client-name sweep | **open** — parked 2026-07-22 |
+| [POST_CLEANUP_PARKED_TODO.md](POST_CLEANUP_PARKED_TODO.md) | findings from the post-branch-cleanup status sweep — one high (bulk mailer silently skipped under `config:cache`), the closed-PR-#4 visibility gap, and the docs drift | **open** — parked 2026-09-12 |
