@@ -3,7 +3,40 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-08-08 (latest) — Task 033: section 4 CLOSED and section 5 STARTED. 20 commits total across
+**2026-09-12 (latest) — Task 036: the five system emails stop being blades and become builder
+templates. Backend `c92ab56` + admin `1f0ee8e`, both on `dev`, **NOT PUSHED**. Backend tests 641 on
+the merged tree. Ledger D48 + D49.**
+- **What changed:** admin login code, guest verification code, admin invite, admin login
+  notification and root-admin login alert are rows now (`type = 'system'`, found by `system_key`),
+  seeded from the invitation template's own header + black footer and edited in the same Waypoint
+  builder. All five senders switched; **14 blade views deleted** — `resources/views/emails/` is down
+  to `base/waypoint.blade.php` and the plain-text OTP twin.
+- **The duplicate footer is gone.** `waypoint.blade.php` spliced a second "Follow us" row plus an
+  unflagged copyright line in before `</body>` on every send, so every builder-built email carried
+  two footers at two widths. It echoes `$content` and nothing else now.
+- **⚠️ Two builder fixes apply ON SAVE, so old templates keep the bugs until re-saved.** Arabic was
+  shipping LTR (bidi moved trailing punctuation to the wrong end), and bare domains were auto-linked
+  by Gmail in its own blue — `TOURISE.COM` unreadable on the black footer, in production. The link
+  fix is **ported from `113-pif-directors-gathering`**. There is no server-side renderer to migrate
+  stored HTML with, so the catch-up is manual: **open the live invitation template and save it once
+  per language.** Local templates are ~1KB stubs and unaffected; the affected one is production-only.
+- **Two hazards closed while wiring it:** cloning a system template copied `system_key` and hit its
+  unique index (a 500), and deactivating one would have stopped every admin login code silently,
+  recoverable only through the database. Both refuse now.
+- **Read as newly decorative, not functional:** the whole social-links feature (tables, controllers,
+  10 routes, the `override_social_links` switch) and the `email_configs` columns `with_header` /
+  `with_footer` / `with_social` / `cta_color` / `background_*` / `poster_*`. All still present, all
+  read by nothing, awaiting a cleanup task. Ledger D48 #7.
+- **Next:** push all three repos · prod `migrate` + `db:seed --class=SystemEmailTemplatesSeeder` ·
+  the one production re-save above · browser QA (send-test all five, EN + AR) · then the parked
+  `email_configs` cleanup and a per-block text-direction control for mixed-language blocks (D49 #1).
+- **⚠️ This entry covers 2026-09-12 only.** Everything between 2026-08-12 and 2026-09-12 — tasks 034
+  and 035, the newsletter pages, the VIP shape, the media equipment sheet, the partner API keys —
+  is **still unrecorded here**; ~327 code commits against 9 docs commits. Derive current state from
+  `git log` on `dev` and the highest-numbered `tasks/*/TASK.md`, and see
+  [`tasks/POST_CLEANUP_PARKED_TODO.md`](tasks/POST_CLEANUP_PARKED_TODO.md) item 8.
+
+**2026-08-08 — Task 033: section 4 CLOSED and section 5 STARTED. 20 commits total across
 backend / admin / frontend / docs. ALL COMMITTED, NOTHING PUSHED. Backend tests 489 → 494. A live
 production defect was found and fixed: reCAPTCHA was rejecting every login and registration under
 `config:cache`.**

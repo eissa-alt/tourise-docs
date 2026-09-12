@@ -168,7 +168,9 @@ longer empty**, and saving keeps the selections.
 
 ## 8. The docs this repo tells you to read first describe a repo that isn't here
 
-- **`HANDOFF.md`** — last touched 2026-08-08, five weeks stale at park time. It is the designated
+- **`HANDOFF.md`** — last touched 2026-08-08, five weeks stale at park time. **Partially
+  addressed 2026-09-12:** a Task 036 entry was added at the top, but it covers that day only —
+  the 2026-08-12 → 2026-09-12 gap below is still unrecorded. It is the designated
   "read first for current state" pointer and still says *"ALL COMMITTED, NOTHING PUSHED"* and
   *"section 5 has ~30 items left"*. Everything after — tasks 034 and 035, and the whole newsletter /
   media-equipment / invitation-requests / VIP-shape stream through 2026-09-12 — is invisible in it.
