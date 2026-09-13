@@ -1635,3 +1635,50 @@ save pipeline rather than per template.
 
 **Landed:** admin `1f0ee8e` (with D48's admin half). Task log:
 [`tasks/036-system-email-templates/TASK.md`](../tasks/036-system-email-templates/TASK.md).
+
+## D50 — 2026-09-13 — Reply-To is a property of the SMTP account, not of the category
+
+**What:** guests reply to a category-specific address (`media@`, `vip@`) while every mail still
+leaves the one authenticated `no-reply@` mailbox. Two nullable columns on `smtp_configs`
+(`reply_to_address`, `reply_to_name`) and one `Config::set` in `DynamicSmtpService`.
+
+**Durable decisions:**
+
+1. **The column goes on `smtp_configs`, even though the requirement is per-category.** Every send
+   path in this app already resolves exactly one thing — `smtp_config_id` — and the per-category
+   choice is already wired through `categories.smtp_config_id` / `otp_smtp_config_id` (D27). So the
+   category-level UI the requirement seems to ask for **already exists**: clone the account, set a
+   different Reply-To, point the category at it. Putting the column on `categories` instead would
+   have needed a second resolution path plus a second **snapshot** column on `guest_emails` /
+   `automations` / `invitation_emails` to keep the promise migration `2026_07_20_000003` makes (a
+   later category edit must not retroactively change a queued row) — and would still have left
+   newsletters, invitations and admin mail with no Reply-To, because none of those are
+   category-scoped. **Cost accepted:** N rows share one mailbox's credentials, so a password
+   rotation edits N rows.
+2. **No Mailable, Notification or template knows this feature exists.** `MailManager::
+   setGlobalAddress()` reads `mail.reply_to` on the same line it reads `mail.from`, falling back to
+   the global key for any mailer that does not define its own — so setting `mail.reply_to` beside
+   the existing `mail.from` write reaches every one of the ~15 call sites at once. Verified against
+   the framework source and pinned by a test that asserts the header on a real built message, not
+   the config value.
+3. **⚠️ `mail.reply_to` is written on EVERY apply, null included — never conditionally.** Config
+   outlives a job in a long-lived queue worker. A write guarded by `if ($config->reply_to_address)`
+   would leave a Media Reply-To attached to the next job sent through an account without one:
+   replies to an unrelated email silently rerouted, with nothing in any log. `applyFallbackConfig()`
+   restores it from `$pristine` for the same reason. This is the same leak-across-jobs shape as the
+   memoised-mailer bug (D27) and the `env()`-under-`config:cache` bug (D971) — the third instance of
+   it in this one service, which is why all three now have a test.
+4. **Reply-To, not a per-category From.** Reply-To carries no SPF/DKIM obligation, so `media@` and
+   `vip@` need no DNS work; varying `From` per category would need each address authenticated and
+   would risk deliverability. The addresses must nonetheless be **real, monitored mailboxes** or
+   replies bounce.
+5. **OTP and admin system mail inherit the account they are pointed at** (owner decision) rather
+   than being force-suppressed in code. Consequence to remember: a Reply-To on the **default**
+   account also applies to admin login codes, admin invites and the two security alerts, since those
+   resolve through `applyDefaultIfAvailable()`.
+
+**Landed:** backend `ce437a7`, admin `69d734b` — committed on `dev` after owner review of the
+diff, **not pushed**. Gates: pint + **644 tests** (641 → 644); phpstan unchanged at 5 pre-existing
+larastan false positives, verified against a pristine worktree of `HEAD`. Admin `type-check` +
+`build` + `check:rbac`. EN + AR in the same change. **Not mobile-facing.** Task log:
+[`tasks/037-per-category-reply-to/TASK.md`](../tasks/037-per-category-reply-to/TASK.md).
