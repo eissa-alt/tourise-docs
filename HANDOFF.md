@@ -3,7 +3,33 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-08-08 (latest) — Task 033: section 4 CLOSED and section 5 STARTED. 20 commits total across
+**2026-09-13 (latest) — Task 036: per-category Reply-To mailboxes SEEDED ON PRODUCTION. Backend +
+admin pushed to `dev`. Backend tests 671 → 676.**
+- **What changed for a guest:** hitting *reply* now reaches the team that owns their audience
+  instead of one shared inbox. From stays `noreply@tourise.com` as `TOURISE 2027` on every account;
+  only Reply-To varies. Production: **7 accounts, 9 categories wired, 0 left alone.**
+- **⚠️ Not yet safe to rely on.** The provider is verified for `altsa.co`, not `tourise.com` — if
+  that verification is missing, **all seven accounts fail at send time** and the first symptom is a
+  guest not receiving an invitation. The seven mailboxes also have to exist and be monitored; a
+  Reply-To header costs nothing to set, and a reply to a non-existent one vanishes with no bounce.
+- **⚠️ General Registration has no mailbox.** The client's sheet routes *General delegates* to
+  `contact@`, which the owner excluded — so its replies do not reach Saud Alamri today. Also
+  unmapped: `Media-other` (probably belongs on `media@`). `exhibitor@` / `workforce@` exist with no
+  category yet — **re-run the seeder** once those categories are created.
+- **The near miss worth remembering:** the seeder first derived Reply-To as
+  `{category-slug}@tourise.com`. Checked against the client's sheet, **only 1 of 10 addresses was
+  real** — it would have invented nine mailboxes nobody owns. Several categories legitimately share
+  one inbox (4 dignitary → `protocol@`, Speaker + Moderator → `programming@`), so an account belongs
+  to a *mailbox*, not to a category. Full record in
+  [`tasks/036-category-reply-to-mailboxes/TASK.md`](tasks/036-category-reply-to-mailboxes/TASK.md).
+- **Also shipped:** SMTP **bulk edit** (select-then-edit, badges-style — rotate one password across
+  every account); the SMTP listing merges From into one column and gains **Reply-To**; categories
+  get a **View more** naming both SMTP accounts; invitation collections show which **email template**
+  they send with (with an N+1 guard — that listing had no eager loading at all).
+- **Still true from 2026-08-08 below:** production has no Supervisor (queue on `sync`), and no
+  `schedule:run` cron, so scheduled automations never fire.
+
+**2026-08-08 — Task 033: section 4 CLOSED and section 5 STARTED. 20 commits total across
 backend / admin / frontend / docs. ALL COMMITTED, NOTHING PUSHED. Backend tests 489 → 494. A live
 production defect was found and fixed: reCAPTCHA was rejecting every login and registration under
 `config:cache`.**
