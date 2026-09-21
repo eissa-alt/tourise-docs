@@ -3,7 +3,27 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-21 (latest) — Tasks 038 + 039: the dashboard becomes the registration report, and the
+**2026-09-21 (latest, evening) — Task 040 + admin guides for staff. Admin pushed to `dev` only.**
+- **Task 040 — newsletter delete removed.** Subscribers and Newsletter Templates lose their Delete
+  action (Subscribers loses its Actions column with it); a template is retired with **Block**.
+  Admin `d6683ec` on `dev`. **Kept off `main` on the owner's word:** admin `main` is behind `dev` by
+  Tasks 038 + 039, and backend `main` has neither the Dignitary Parties routes nor the dashboard
+  filters, so a `dev` → `main` merge would ship admin pages that 404 on production. Backend delete
+  routes are untouched.
+- **Guides in [`client/`](client/):** `TOURISE_ADMIN_TUTORIAL` (22 pages, 24 lessons, a real
+  screenshot per lesson with numbered markers; names, emails, phones, photos, tokens and test
+  categories blurred) and `TOURISE_ADMIN_USER_GUIDE` (5-page summary). Both describe **`dev`** —
+  Dignitary Parties, and newsletter items that can't be deleted — so re-check them when `main` catches up.
+  The `client/` guides from 2026-09-17 (Access & Roles) are still untracked.
+- **⚠️ Wrong hint in the admin, not fixed:** the admin form's Data scope note says "Leave empty for
+  no restriction", and the category Admin access help says unrestricted admins see new categories.
+  The server does the opposite — `GuestAccessScope` gives a non-Super admin with no categories and
+  no statuses **no guests**. The guides follow the server.
+- **Running Tourise beside PSF:** the PSF stack holds :3000 / :3001 / :8000, and the admin's
+  `.env.local` points at :8000. Screenshots came from the backend on :8010 (`APP_URL` overridden)
+  and `next dev -p 3010` with `NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8010/api/admin`.
+
+**2026-09-21 — Tasks 038 + 039: the dashboard becomes the registration report, and the
 dignitary invites their own party. Backend + admin + frontend pushed to `dev`. Backend tests → 834.**
 - **Task 038 — dashboard + guest filters.** The dashboard filters by the guest list's **own**
   parameters through one shared `GuestFilters` (D48): category, seniority, status, region, industry,

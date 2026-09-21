@@ -20,6 +20,7 @@ Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` 
 | [process/](process/WORKING_MECHANISM.md) | How we work — branching, commit format, task flow, quality gate, Definition of Done. Also [SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md) (local run), [QUEUE_SETUP_PROD.md](process/QUEUE_SETUP_PROD.md) (prod queue worker + scheduler, md + pdf) + [CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md) (spin up a new project from this baseline). |
 | [design/](design/THEME.md) | The Tourise 2027 theme — tokens, field anatomy, layout, the reusable components in `components/theme`, and the traps that cost time. **Read before building any new form or screen.** |
 | [mobile/](mobile/) | The mobile API contract (PDF + HTML twin). **Read before touching `routes/api.php`.** |
+| [client/](client/) | Guides for the event team, each a PDF with its HTML source: the step-by-step admin **tutorial** (screenshots, 24 lessons) and the short **user guide**. |
 
 ## Start here
 
