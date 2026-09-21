@@ -1548,3 +1548,50 @@ same commit (11 keys each). Gates: pre-commit hooks green at commit time; **full
 Dev DB migrated; **prod `migrate` + per-category switch-on + manual QA pending.** Not mobile-facing
 (`/admin/*`, `routes/api.php` untouched). Task log:
 [`tasks/028-category-guest-action-gates/TASK.md`](../tasks/028-category-guest-action-gates/TASK.md).
+
+## D48 — 2026-09-21 — The dashboard reads the guest list's filters; charts wear TOURISE, the admin keeps its own colours
+
+**What:** the dashboard is filterable by the guest listing's own query parameters and counts exactly
+what the listing shows for them. Charts use the TOURISE palette; the admin UI does not.
+
+**Durable decisions:**
+
+1. **`App\Support\GuestFilters` is the one implementation of the guest filters.** The listing, its
+   exports and the dashboard all call it. A new guest filter goes there, once — never into a
+   controller — or the dashboard and the list it links to start disagreeing.
+2. **The admin's category/status scope always applies after the filters**, so a filter narrows what an
+   admin sees and never widens it.
+3. **Dashboard figures are actual only** (no targets) and **"confirmed" means `will_attend = yes`**;
+   "no reply yet" is `will_attend` null **or** `''`.
+4. **Clicking a chart or figure filters the dashboard in place**; it never navigates to the guest list.
+5. **The TOURISE palette is for charts only** (`SERIES` in `dashbaord/chart-kit.tsx`). The admin's
+   `primary`, `--admin-primary-blue` and blue button classes stay as they are — a full re-theme was
+   built and reverted on the owner's instruction.
+
+**Landed:** backend `28da7a1` + `f66aa10`, admin `45924c2` — pushed to `dev`. Task log:
+[`tasks/038-dashboard-report-filters/TASK.md`](../tasks/038-dashboard-report-filters/TASK.md).
+
+## D49 — 2026-09-21 — A dignitary's party is invited by the dignitary, through invitations that carry the dignitary
+
+**What:** the dignitary names their delegation, security and protocol on their own form; each person
+gets a personal, single-use invitation stamped with `invitations.dignitary_guest_id`, emailed at once.
+
+**Durable decisions:**
+
+1. **The link between a person and their dignitary is the invitation**, not text the person types and
+   not `primary_guest_id` (that is the +1 relation — reusing it would turn every delegate into a
+   plus-one in exports, badges and the companion filter).
+2. **The server takes the dignitary from the invitation** and overrides whatever the form sends for
+   `accompanying_dignitary_name` / `dignitary_registration_code`.
+3. **No shared or team-forwarded links.** A multi-use link per group, created and copied by the team,
+   was built first and rejected by the owner. The dignitary's own form is the entry point; the admin's
+   *Invite someone* covers anyone left out.
+4. **Invitations go out when the dignitary submits** — the dignitary category is private, so there is
+   no approval to wait for. **Pre-filled, not locked.**
+5. **Permissions reuse the catalogue:** view = `guests_listing`, invite/send = `invitations.create`,
+   choose the email = `invitations.update`. The admin scope rule now exists in three places
+   (`GuestsController`, `DashboardStatsController`, `GuestAccessScope::denies/apply`) — change them together.
+
+**Landed:** backend `ea4844b`, admin `35b260e` + `1d3adcd`, frontend `fa457c7` — pushed to `dev`.
+Dev `migrate` + choosing the invitation email pending. Task log:
+[`tasks/039-dignitary-parties/TASK.md`](../tasks/039-dignitary-parties/TASK.md).

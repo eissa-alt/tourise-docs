@@ -3,7 +3,31 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-13 (latest) — Task 036: per-category Reply-To mailboxes SEEDED ON PRODUCTION. Backend +
+**2026-09-21 (latest) — Tasks 038 + 039: the dashboard becomes the registration report, and the
+dignitary invites their own party. Backend + admin + frontend pushed to `dev`. Backend tests → 834.**
+- **Task 038 — dashboard + guest filters.** The dashboard filters by the guest list's **own**
+  parameters through one shared `GuestFilters` (D48): category, seniority, status, region, industry,
+  dates, and an All / Confirmed / Declined / No reply switch. Key figures, registrations over time,
+  audience profile; clicks filter in place; prints as an A4-landscape report. Charts use the TOURISE
+  palette — **the admin keeps its own blue** (a full re-theme was built and reverted on the owner's
+  word). Guest list: essentials fixed, everything else from **+ Add filter**, kept per admin in
+  `admins.preferences`.
+- **Task 039 — dignitary parties.** The dignitary adds their delegation, security and protocol on
+  their own form; each gets a **personal invitation carrying the dignitary**
+  (`invitations.dignitary_guest_id`), emailed at once, opening pre-filled with the dignitary shown
+  read-only. Admin **Dignitary Parties** page: registered / invited / email state, Invite someone,
+  Send / Resend. A first cut with shared links the team forwards was **rejected by the owner — don't
+  bring it back** (D49).
+- **⚠️ Before dev is usable:** `php artisan migrate` (two migrations: `admins.preferences`,
+  `invitations.dignitary_guest_id`), then **choose the invitation email** on Dignitary Parties —
+  until then party invitations are created but not emailed.
+- **Caught after the push:** the admin's *Invite someone* dialog read "Missing translation for
+  'web:party_group'" — the key was only in the public site's translations. Fixed in admin
+  `1d3adcd`; both apps scanned, every static id now resolves in EN + AR.
+- **Local-run trap:** a second `next dev` of the admin in the same folder shares `.next` with the one
+  on :3000 and corrupts it (500s, then 404s). Run a second copy from a `git worktree` instead.
+
+**2026-09-13 — Task 036: per-category Reply-To mailboxes SEEDED ON PRODUCTION. Backend +
 admin pushed to `dev`. Backend tests 671 → 676.**
 - **What changed for a guest:** hitting *reply* now reaches the team that owns their audience
   instead of one shared inbox. From stays `noreply@tourise.com` as `TOURISE 2027` on every account;
