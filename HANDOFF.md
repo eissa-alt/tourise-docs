@@ -3,7 +3,16 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-23 (latest) — Task 043: the guest list is the quantity. Backend + admin, UNCOMMITTED,
+**2026-09-23 (latest) — Task 044: an invitation always prefills, and never locks. Admin only,
+UNCOMMITTED.**
+- Team request: **Prefill data** is shown on and takes no input; **Lock data** is gone from the
+  page. Both the create form and the single-invitation edit screen, so the two cannot disagree —
+  and that screen now saves `lock_data: false`, which unlocks an invitation locked before this
+  (nothing is locked today).
+- **On hold at the team's request:** a popup listing duplicate emails on import, until they have
+  tested what happens now — a red toast naming them, and the uploaded sheet is cleared.
+
+**2026-09-23 — Task 043: the guest list is the quantity. Backend + admin, UNCOMMITTED,
 awaiting the owner's review.**
 - **Invitations → Create no longer asks for Quantity.** Single-use: one invitation per guest — a
   card added with **+**, dropped with **×**, or a row of the Excel file, with the rows-vs-quantity
