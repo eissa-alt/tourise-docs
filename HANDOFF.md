@@ -3,7 +3,24 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-22 (latest) — Task 042: "Download Excel sample" on Invitations → Create, and imported
+**2026-09-23 (latest) — Task 043: the guest list is the quantity. Backend + admin, UNCOMMITTED,
+awaiting the owner's review.**
+- **Invitations → Create no longer asks for Quantity.** Single-use: one invitation per guest — a
+  card added with **+**, dropped with **×**, or a row of the Excel file, with the rows-vs-quantity
+  check gone. Multiple-use: **one shared link**, with **Number of use** where Quantity was and no
+  guest rows (owner, 2026-09-23; the DB holds no multiple-use collection, so nothing existing
+  changes). Ported from 123-pif-pep-v2 `a5d59c2` / `a0c7cb8`.
+- **`valid_up_to` is validated at last** — it had no rule and is written to `remaining`, so an
+  omitted value minted a link with no uses left.
+- **The shared Excel parser drops blank rows** and SheetJS's phantom `__EMPTY` columns. Each row is
+  now an invitation, so a sheet's formatted padding rows would each have minted an empty one. This
+  reaches Operations → Import as well.
+- **⚠️ Found, not fixed:** a rejected batch **locks the invitation form** until reload (`guests_list`
+  is a `useFieldArray` root, whose errors react-hook-form never clears; pep fixed it with
+  `clearErrors()`, `d196a49`), and the form's **edit** path is orphaned — it GETs a list and PUTs a
+  route that doesn't exist; collection edits go through the separate collection form.
+
+**2026-09-22 — Task 042: "Download Excel sample" on Invitations → Create, and imported
 phones in the form's shape. Backend + admin, UNCOMMITTED, awaiting the owner's review.**
 - **The sample:** `GET /api/admin/invitations/import-template` builds
   `resources/templates/tourise-invitation-import.xlsx` with the **active titles** in its Title
