@@ -3,7 +3,29 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-21 (latest, evening) — Task 040 + admin guides for staff. Admin pushed to `dev` only.**
+**2026-09-22 (latest) — Task 042: "Download Excel sample" on Invitations → Create, and imported
+phones in the form's shape. Backend + admin, UNCOMMITTED, awaiting the owner's review.**
+- **The sample:** `GET /api/admin/invitations/import-template` builds
+  `resources/templates/tourise-invitation-import.xlsx` with the **active titles** in its Title
+  dropdown, so each environment gets its own list. No Category column, since the page picks the
+  category. Headers auto-map on upload.
+- **Phones:** stored as E.164 like the registration form's. The sample's Phone instructions say
+  "always start with + and the country code"; the import still reads `050…` as Saudi. A bad phone
+  turns red in Excel as it's typed, shows red in the admin preview after upload, and blocks the
+  import at Create. A **Country Code** column (the phone field's own countries) was built, then
+  **taken out of the sample for now**: the service adds it back as soon as the template has the
+  column, and the admin still reads one in any file.
+- **CC and BCC:** the sample ends with **CC Emails** and **BCC Emails**. BCC per invitation is
+  new: migration `2026_09_22_000001` (`invitations.bcc_emails_list`), sent alongside the template's
+  BCC, and editable wherever CC is. The page's column auto-mapper was fixed on the way; "CC Emails"
+  used to map to Email and overwrite the guest's address. **Production needs this migration too.**
+- **⚠️ Not ours, but in the gate:** `composer qa`'s PHPStan step fails on 5 `relationExistence`
+  errors in `DashboardStatsController` / `RolesController`, from backend `28da7a1`.
+- **⚠️ Stale line below:** the 2026-09-21 evening entry says Task 040 was "kept off `main`". Fifty-one
+  minutes later all three apps' `dev` was merged to `main` (admin PR #20, backend #15, frontend #11),
+  so `main` = `dev`, and production needs the two 2026-09-21 migrations before it runs that code.
+
+**2026-09-21 (evening) — Task 040 + admin guides for staff. Admin pushed to `dev` only.**
 - **Task 040 — newsletter delete removed.** Subscribers and Newsletter Templates lose their Delete
   action (Subscribers loses its Actions column with it); a template is retired with **Block**.
   Admin `d6683ec` on `dev`. **Kept off `main` on the owner's word:** admin `main` is behind `dev` by
