@@ -1,10 +1,10 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `todo` — scoped 2026-09-23/24, **on hold at the owner's request before any code**
+- **Status:** `in-progress` — titles built, gates green, committed to `feat/module-audit-logs` (not merged). Module 2 outstanding.
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
-- **Branch(es):** none yet
+- **Branch(es):** `feat/module-audit-logs` in `tourise-backend` + `tourise-admin`, off `dev`
 
 ## Goal
 
@@ -44,15 +44,15 @@ gates, areas, newsletters, automations, app config, dignitary parties or meeting
 
 ## Scope
 
-- **In:** one generic audit table; a single write path; a per-record History tab reusing the existing
-  From/To renderer; a global audit screen behind its own feature id.
+- **In:** one generic audit table; a single write path; a per-record history panel and a per-module
+  trail, both reusing one From/To renderer; an export of the trail.
 - **Out:**
   - The six delivery tables and `login_attempts` / `badge_print_logs` — different axis, they stay.
   - `history_logs` — production data, guest-facing timeline, already rendered. **Not migrated.** It
     keeps serving guests and simply stops growing for new modules.
   - Backfill of any kind. There is nothing to backfill from.
 
-## Design (proposed, not built)
+## Design (built)
 
 **One table, not one per module.** `audit_logs`, polymorphic:
 
@@ -181,6 +181,58 @@ and sort by, and reconstructing it from a log table on every list query would be
 
 These answer the team's literal question and do not need the audit system to exist.
 
+## What changed while building (this supersedes the design above where they disagree)
+
+Five decisions moved between the plan and the code. They are recorded here rather than edited into the
+design above, so the reasoning for each is not lost.
+
+1. **Per-module permissions replaced the global `audit_logs` feature** (owner, 2026-09-25). Each module
+   grants **`record_history`** (one record's history) and **`audit_trail`** (the module's whole trail)
+   separately, and both are distinct from `see_more`, which opens the record. The owner wanted full
+   per-module control. The global feature was removed with its cross-module endpoint — which also
+   removed an Export checkbox that granted nothing.
+2. **A popup, not a page.** `/audit-logs` was built, then deleted at the owner's request. The trail
+   opens from each module's toolbar and hits `GET /admin/<module>/logs`.
+3. **`subject_type` / `subject_id` are nullable.** An export is audited and has no single subject — it
+   is of the list, not of one record. Changed in the migration before it was committed.
+4. **Exports are logged.** The trait cannot see them (nothing is written, so no model event fires), so
+   the controller calls `AuditLog::record()` directly. Exporting the *trail* is logged too, with
+   `scope: audit_trail` to keep it apart from exporting the module's own data.
+5. **The action filter is derived, not declared.** The trail returns the actions that module has
+   actually recorded, read before the action filter is applied. Titles are blocked and never deleted,
+   so a fixed list offered a `Deleted` filter that could only return nothing — and a module that later
+   logs a send or a bulk update needs no change to have it appear. Unknown actions fall back to a
+   humanised label, so a new one is legible before its translation exists.
+
+**Guests are not part of this.** They stay on `history_logs`, including their exports (owner,
+2026-09-25).
+
+## Blueprint — what module 2 costs
+
+Six touch points, **no migration, no new table, no schema decision**. The action filter, the From/To
+renderer, the export and the permission wiring all follow.
+
+| # | Where | Cost |
+|---|---|---|
+| 1 | The model — `use Auditable;` + `protected string $auditFeature = '<feature>';` | 2 lines |
+| 2 | `AuditLogsController` — three wrappers delegating to `featureTrail` / `featureTrailExport` / `subjectLogs` | ~12 lines |
+| 3 | `routes/api.php` — `/logs`, `/logs/export`, `/{id}/logs` under the module's prefix | 3 lines |
+| 4 | `AdminPermissions` — add `record_history` + `audit_trail` to the feature | 1 line |
+| 5 | The listing — two permission checks, the history button, `AuditTrailButton`, two modals | ~25 lines, mirrors titles |
+| 6 | *Only if it stores ids* — add the field to `CATEGORY_ID_FIELDS` so they read as names | 1 line |
+
+Two notes for whoever does it:
+
+- **Audited models must not bypass Eloquent.** `Model::where(...)->update()` and raw `DB::table()`
+  writes fire no events and log nothing, silently. The inventory is in *Blind spots* below.
+- **Step 2 is collapsible.** Those three wrappers only bind a feature name and a model class; a
+  route-level `->defaults('feature', '<feature>')` plus a feature → model map would reduce them to two
+  entries. Left explicit for the first module — fold them when they start to feel like boilerplate.
+
+**This is still a prediction.** With one module, a generic `audit_logs` table and a dedicated
+`title_logs` table are indistinguishable; the claim that module N+1 is cheap is only demonstrated by
+doing module 2, which was the reason for running a PoC at all.
+
 ## Log
 
 - 2026-09-23 — opened. Team asked for invitation-collection logs; owner widened to every module and
@@ -190,6 +242,13 @@ These answer the team's literal question and do not need the audit system to exi
   guests to March 2027 and the allowlist as the volume control. The two `history_logs` findings
   recorded and deliberately left unfixed. **Put on hold by the owner before any code, branch or
   schema.**
+- 2026-09-24/26 — built on titles: `audit_logs`, the `Auditable` trait, `AuditLog::record()` as the
+  single writer, the record-history panel, the module trail popup and its export. Titles also gained
+  the **See more** it never had, and the listing was fixed along the way — two boolean columns were
+  blank on every row (no render, and React draws a boolean as nothing), two headers were raw column
+  names with no Arabic, a Categories column was added, and listing filters gained `multiselect`,
+  reusing the forms' `CheckboxDropdown`. 16 tests. Backend `d8bd2b7` + `96b9e46`, admin `5172c93` +
+  `bdbd2d5`, on `feat/module-audit-logs` in each repo — **not merged to `dev`**.
 
 ## Decisions
 
@@ -202,13 +261,23 @@ These answer the team's literal question and do not need the audit system to exi
   reverse the deliberate no-snapshot PII decision.
 - **`history_logs` is not migrated or absorbed.**
 - **The two pre-existing findings stay unfixed** until fixed properly here (owner, 2026-09-24).
+- **`record_history` and `audit_trail` are per-module and separate** (owner, 2026-09-25), replacing the
+  global `audit_logs` feature.
+- **The trail is a popup per module**, not a cross-module page (owner, 2026-09-25).
+- **Exports are audited**, including the trail's own export (2026-09-25). Remove the latter if it reads
+  as noise — it is one row per export, not a loop.
+- **Offered actions are derived from the data**, not declared per model (2026-09-26).
 
 ## Sequencing
 
-Recommended **after task 041** (security port wave 1 — `todo`, 0/23, no branch). This feature copies PII
-into a second table, and 041 exists to close disclosure holes; landing this first widens exactly the
-surface 041 is meant to shrink. **Owner has not yet ruled on sequencing — this is a recommendation, not
-a decision.**
+Recommended **after task 041** (security port wave 1 — still `todo`, 0/23, no branch). This feature
+copies PII into a second table, and 041 exists to close disclosure holes; landing it first widens
+exactly the surface 041 is meant to shrink.
+
+**What actually happened:** the titles work was built first, on its own branch and not merged. The
+recommendation stands for the **merge**, not the build — 041 should land before this reaches `dev`,
+or the two should be reviewed together. The exposure here is narrow while it is one low-risk module
+(titles carry no PII), and grows with every module added.
 
 ## Definition of Done
 
@@ -216,6 +285,7 @@ a decision.**
 - [ ] EN + AR translations in the same commit (if any user-facing strings)
 - [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check`
       + `yarn build` + `yarn check:rbac`)
+- [ ] **Module 2 onboarded**, proving the blueprint above
 - [ ] Retention / pruning policy decided and implemented, not deferred
 - [ ] Eloquent-bypass list above either converted or explicitly logged
 - [ ] Team told the data is forward-only, before they see the UI
