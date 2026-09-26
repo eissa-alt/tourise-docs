@@ -192,26 +192,8 @@ Content-Type: application/json
 <div class="good"><div class="callout-h">Success</div>
 <p><code>HTTP 201</code> &nbsp; <code>{ "status": "success", "data": { "id": "01a0…", "duplicate": false } }</code></p></div>
 
-<h3>Fields</h3>
-<p><code>email</code> is always required. Everything else is required only if the category says so in Step 1. Any field not
-on this list is ignored &mdash; the API accepts exactly these.</p>
-<table>
-<thead><tr><th style="width:31%">Field</th><th style="width:13%">Type</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td class="k">email</td><td class="t">string</td><td>Always required. Identifies the request; duplicates are matched on it.</td></tr>
-<tr><td class="k">first_name</td><td class="t">string</td><td>max 100</td></tr>
-<tr><td class="k">last_name</td><td class="t">string</td><td>max 100</td></tr>
-<tr><td class="k">company</td><td class="t">string</td><td>max 100</td></tr>
-<tr><td class="k">job_title</td><td class="t">string</td><td>max 100</td></tr>
-<tr><td class="k">phone</td><td class="t">string</td><td>max 100. Send it with the country code.</td></tr>
-<tr><td class="k">industry</td><td class="t">string</td><td>max 100</td></tr>
-<tr><td class="k">country_of_residence</td><td class="t">uuid</td><td>A country UUID, not a name. See below.</td></tr>
-<tr><td class="k">nationality</td><td class="t">uuid</td><td>A country UUID, not a name. See below.</td></tr>
-<tr><td class="k">social_media_channel_1</td><td class="t">string</td><td>max 255</td></tr>
-<tr><td class="k">social_media_channel_2</td><td class="t">string</td><td>max 255</td></tr>
-<tr><td class="k">lang</td><td class="t">string</td><td><code>en</code> or <code>ar</code>. Defaults to <code>en</code>. Sets the language of the reply.</td></tr>
-<tr><td class="k">subscribe_newsletter</td><td class="t">boolean</td><td>Newsletter opt-in. Send <code>false</code> when the box was shown and left unticked &mdash; that is a different fact from never asking.</td></tr>
-</tbody></table>
+<p><code>email</code> is always required. Everything else is required only if the category says so, and the field list in Step 1 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored.</p>
+
 <div class="note"><div class="callout-h">Countries are UUIDs</div>
 <p><code>country_of_residence</code> and <code>nationality</code> take the id from <code>GET /api/countries</code> &mdash; not
 <code>"Saudi Arabia"</code>. Fetch that list once and use it to populate your dropdowns.</p></div>
