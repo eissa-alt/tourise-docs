@@ -72,14 +72,15 @@ Public, no key needed. Tells the partner what to render and what to require.
     "slug": "press",
     "name_en": "Press",
     "with_email_otp": true,
-    "mandatory_fields": ["first_name", "company"],
-    "optional_fields": ["phone"]
+    "mandatory_fields": ["first_name", "company"]
   }
 }
 ```
 
-`mandatory_fields` / `optional_fields` are `null` when the category has not been
-configured — meaning nothing extra is required beyond `email`.
+`mandatory_fields` is `null` when the category has not been configured —
+meaning nothing extra is required beyond `email`. (`optional_fields` is a
+column on the request category and the endpoint still returns it, but it is
+not part of what a partner builds against — left out of the guide on purpose.)
 
 ## 2. File a request
 

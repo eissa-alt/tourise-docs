@@ -168,11 +168,10 @@ TOURISE changes it.</p>
         "slug": "press",
         "name_en": "Press",
         "with_email_otp": true,
-        "mandatory_fields": ["first_name", "company"],
-        "optional_fields": ["phone"]
+        "mandatory_fields": ["first_name", "company"]
     }
 }</code></pre>
-<p><code>null</code> for both lists means the category is not configured &mdash; nothing beyond <code>email</code> is required.
+<p><code>null</code> means the category is not configured &mdash; nothing beyond <code>email</code> is required.
 <code>with_email_otp</code> says whether the TOURISE form asks for an emailed code; see <i>Email verification</i>.</p>
 
 <h2>Step 2 &mdash; File the request</h2>
@@ -192,7 +191,7 @@ Content-Type: application/json
 <div class="good"><div class="callout-h">Success</div>
 <p><code>HTTP 201</code> &nbsp; <code>{ "status": "success", "data": { "id": "01a0…", "duplicate": false } }</code></p></div>
 
-<p><code>email</code> is always required. Everything else is required only if the category says so, and the field list in Step 1 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored.</p>
+<p><code>email</code> is always required. Everything else is required only if the category says so, and the list in Step 1 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored.</p>
 
 <div class="note"><div class="callout-h">Countries are UUIDs</div>
 <p><code>country_of_residence</code> and <code>nationality</code> take the id from <code>GET /api/countries</code> &mdash; not
