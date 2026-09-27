@@ -76,6 +76,13 @@ difference: pep hid the Multiple usage type, and tourise keeps it.
     refuses every later submit. pep hit this and fixed it with `clearErrors()` at the top of submit
     (`d196a49`). Small, and worth doing next.
 
+- 2026-09-27 — **a blank manual card mints an invitation again** (owner: "at least one should be
+  created, as before"). Dropping fully-empty rows was right for a sheet and wrong for a card: the
+  card exists because someone clicked **Add guest**, and a blank single-use link is how one is made
+  to hand out or print. Before this, such a card produced the API's own
+  "The guests list field is required when usage type is single". Excel still drops blank rows, which
+  are padding nobody typed (`other/05-blank-rows.xlsx`).
+
 ## Decisions
 
 - **Single: the guest list is the count** (ported). Nobody types a number that can disagree with the
