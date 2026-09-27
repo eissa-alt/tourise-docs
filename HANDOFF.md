@@ -3,8 +3,33 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-23 (latest) — Task 044: an invitation always prefills, and never locks. Admin only,
-UNCOMMITTED.**
+**2026-09-27 (latest) — Task 045: one audit trail for every module. Titles + invitations built on
+`feat/module-audit-logs` in backend + admin. Committed, NOT merged to `dev`, NOT pushed.**
+- **`audit_logs`** — one polymorphic table for every module, written only through
+  `AuditLog::record()`: the `Auditable` trait for model edits, controllers directly for actions that
+  write no model. `history_logs` is untouched and **guests stay on it**.
+- **Per module:** a record-history panel and a trail popup with its own export, behind **separate**
+  `record_history` and `audit_trail` grants. The action filter is derived from the rows, so a module
+  is never offered a filter that returns nothing.
+- **The team's original ask is answered** — `created_by` on `invitation_collections`, and `sent` /
+  `sent_bulk` for "sent by". **Forward-only:** anything created before the column reads "—" for ever.
+- **Secrets are resolved, never stored.** `invitation_token` is read for the screen and the sheet and
+  written to no row — it redeems the invitation, and the trail is readable by anyone with
+  `audit_trail`.
+- **⚠️ Behaviour change:** editing a collection **no longer writes to its invitations**. Its fields are
+  what reporting and exports read; sends read each invitation's own. The two can now diverge with
+  nothing to reconcile them — the form marks each field In sync / Out of sync / Not applied. Category,
+  email template and SMTP override moved onto the invitation; channel is read-only on both.
+- **Found and fixed on the way:** a single-use invitation could have its number of uses raised, turning
+  one guest's personal link into one several people could redeem.
+- **Migrations production needs:** `2026_09_24_000001_create_audit_logs_table`,
+  `2026_09_26_000001_add_created_by_to_invitation_collections`.
+- **⚠️ Merge after task 041** (security wave 1, still `todo`): this copies PII into a second table.
+- Backend `d8bd2b7` + `96b9e46` + `4dece91`; admin `5172c93` + `bdbd2d5` + `3fb9632`. 882 backend
+  tests. `yarn build` not run — the dev server held `.next`.
+
+**2026-09-23 — Task 044: an invitation always prefills, and never locks. Admin only. Committed and
+pushed to `dev` (admin `8fdb871`).**
 - Team request: **Prefill data** is shown on and takes no input; **Lock data** is gone from the
   page. Both the create form and the single-invitation edit screen, so the two cannot disagree —
   and that screen now saves `lock_data: false`, which unlocks an invitation locked before this
@@ -12,8 +37,8 @@ UNCOMMITTED.**
 - **On hold at the team's request:** a popup listing duplicate emails on import, until they have
   tested what happens now — a red toast naming them, and the uploaded sheet is cleared.
 
-**2026-09-23 — Task 043: the guest list is the quantity. Backend + admin, UNCOMMITTED,
-awaiting the owner's review.**
+**2026-09-23 — Task 043: the guest list is the quantity. Backend + admin. Committed and pushed to
+`dev` (backend `5dde1ea`, admin `699fd6a`).**
 - **Invitations → Create no longer asks for Quantity.** Single-use: one invitation per guest — a
   card added with **+**, dropped with **×**, or a row of the Excel file, with the rows-vs-quantity
   check gone. Multiple-use: **one shared link**, with **Number of use** where Quantity was and no
@@ -30,7 +55,8 @@ awaiting the owner's review.**
   route that doesn't exist; collection edits go through the separate collection form.
 
 **2026-09-22 — Task 042: "Download Excel sample" on Invitations → Create, and imported
-phones in the form's shape. Backend + admin, UNCOMMITTED, awaiting the owner's review.**
+phones in the form's shape. Backend + admin. Committed and pushed to `dev` (backend `4be9a17`,
+admin `f3fe2d4`).**
 - **The sample:** `GET /api/admin/invitations/import-template` builds
   `resources/templates/tourise-invitation-import.xlsx` with the **active titles** in its Title
   dropdown, so each environment gets its own list. No Category column, since the page picks the
