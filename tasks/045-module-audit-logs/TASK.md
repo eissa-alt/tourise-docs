@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress` — titles built, gates green, committed to `feat/module-audit-logs` (not merged). Module 2 outstanding.
+- **Status:** `in-progress` — titles + invitations built, gates green, committed to `feat/module-audit-logs` (not merged). The blueprint below is now measured rather than predicted.
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -171,15 +171,20 @@ tolerant of both shapes would be the dual-code-path / legacy-fallback logic `CLA
 inside this task, which touches those columns anyway — a correct fix is three coupled parts: writer +
 reader + a backfill of `history_logs WHERE invitation_request_id IS NOT NULL`, written since 2026-09-05.
 
-## Cheap wins available independently of this task
+## The team's original ask — answered (2026-09-26)
 
-Both are **columns, not log rows** — "who owns this collection" is an attribute you will want to filter
-and sort by, and reconstructing it from a log table on every list query would be wrong:
+Both were **columns and actions, not just log rows**:
 
-- `created_by` on `invitation_collections`.
-- Sender attribution on invitation sends.
+- **`created_by` on `invitation_collections`** — a column, because the list is filtered and sorted by
+  it; reconstructing it from a log table on every query would be the wrong shape. Stamped in the
+  model's `creating` hook rather than at each of the three creation sites (the invitation form,
+  extract-bulk, and the dignitary service), so a fourth cannot miss it. Shown as **Created by** on the
+  collections listing.
+- **"Sent by"** — both send paths now record: `sent` for one invitation, `sent_bulk` for a selection
+  (one row for the action, not one per recipient). The six delivery tables record that a message went
+  out and what happened to it, but never which admin caused it.
 
-These answer the team's literal question and do not need the audit system to exist.
+**Still forward-only.** Collections made before the column exists read "—" for ever.
 
 ## What changed while building (this supersedes the design above where they disagree)
 
@@ -229,9 +234,25 @@ Two notes for whoever does it:
   route-level `->defaults('feature', '<feature>')` plus a feature → model map would reduce them to two
   entries. Left explicit for the first module — fold them when they start to feel like boilerplate.
 
-**This is still a prediction.** With one module, a generic `audit_logs` table and a dedicated
-`title_logs` table are indistinguishable; the claim that module N+1 is cheap is only demonstrated by
-doing module 2, which was the reason for running a PoC at all.
+### Measured against module 2 (invitations, 2026-09-26)
+
+The six steps held: no migration for the audit table, no new table, and the action filter, renderer,
+export and permission wiring all followed. **Two things the checklist did not predict:**
+
+1. **Bulk-created models need `$auditEvents`.** A collection is minted with all of its invitations in
+   one `saveMany()`, which would have written hundreds of identical `created` rows for one click. The
+   trait grew a per-model event opt-out; invitations record `updated` and `deleted` only.
+2. **Exclusions are per-model security work, not a checklist line.** Titles needed none. Invitations
+   needed `invitation_token` kept out — it redeems the invitation, and the trail is readable by anyone
+   with `audit_trail` — plus the send counters, which move on every send and answer nothing.
+
+**What cost more than the six steps:** the module's own bypasses. Four actions wrote nothing until
+they were logged explicitly — the bulk category change and extract-to-collection (mass updates), and
+both send paths (which write no model at all). Budget for that per module; it is the real variable,
+not the wiring.
+
+Step 6 generalised on the way: a single `CATEGORY_ID_FIELDS` set became `AuditLabels`, a column → model
+map that resolves any referenced id to a name at read time.
 
 ## Log
 
@@ -249,6 +270,16 @@ doing module 2, which was the reason for running a PoC at all.
   names with no Arabic, a Categories column was added, and listing filters gained `multiselect`,
   reusing the forms' `CheckboxDropdown`. 16 tests. Backend `d8bd2b7` + `96b9e46`, admin `5172c93` +
   `bdbd2d5`, on `feat/module-audit-logs` in each repo — **not merged to `dev`**.
+- 2026-09-26/27 — **module 2: invitations + collections**, both under the `invitations` feature.
+  `invitation_token` and the send counters excluded; no per-invitation `created` rows; the four
+  previously-silent actions logged (bulk category change, extract-to-collection, `sent`, `sent_bulk`)
+  plus all three exports. `created_by` added to collections, answering the team's first question, and
+  the send logging answering the second. **A collection stopped rewriting its invitations**, and what
+  it no longer sets — category, email template, SMTP override — is editable on the invitation instead.
+  `AuditLabels` resolves ids, tokens and parent collections at read time for both the screen and the
+  sheet. Found and fixed on the way: a single-use invitation could have its number of uses raised,
+  turning one guest's personal link into a shared one. 13 tests; 882 total. Backend `4dece91`, admin
+  `3fb9632`.
 
 ## Decisions
 
@@ -267,6 +298,16 @@ doing module 2, which was the reason for running a PoC at all.
 - **Exports are audited**, including the trail's own export (2026-09-25). Remove the latter if it reads
   as noise — it is one row per export, not a loop.
 - **Offered actions are derived from the data**, not declared per model (2026-09-26).
+- **A collection no longer writes to its invitations** (owner, 2026-09-26). Its copy of the shared
+  fields is what reporting and exports read; sends read each invitation's own. The two can therefore
+  diverge, with nothing to reconcile them — the form marks each field In sync / Out of sync / Not
+  applied so it is visible rather than silent. Channel is read-only there, and on the invitation, since
+  templates are channel-specific and a switch would strand them.
+- **Secrets are resolved, never stored** (2026-09-26). `invitation_token` is read for the screen and
+  the sheet and written to no audit row: it redeems the invitation, and a stored copy would be a
+  working credential in a table that outlives the record.
+- **Per-module trails are scoped** (2026-09-27). The trail opened from one collection shows that
+  collection and its invitations — rows, action filter and export alike — not the whole module.
 
 ## Sequencing
 
@@ -285,7 +326,7 @@ or the two should be reviewed together. The exposure here is narrow while it is 
 - [ ] EN + AR translations in the same commit (if any user-facing strings)
 - [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check`
       + `yarn build` + `yarn check:rbac`)
-- [ ] **Module 2 onboarded**, proving the blueprint above
+- [x] **Module 2 onboarded**, proving the blueprint above — invitations + collections (2026-09-26)
 - [ ] Retention / pruning policy decided and implemented, not deferred
 - [ ] Eloquent-bypass list above either converted or explicitly logged
 - [ ] Team told the data is forward-only, before they see the UI
