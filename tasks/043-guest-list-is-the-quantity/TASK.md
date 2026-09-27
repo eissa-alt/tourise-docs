@@ -1,6 +1,7 @@
 # Task 043 — The guest list is the quantity
 
-- **Status:** `in-progress` — code written and gates green, uncommitted, awaiting the owner's review
+- **Status:** `done (code)`: pushed to `dev` on 2026-09-23 (backend `5dde1ea`, admin `699fd6a`). The
+  2026-09-27 follow-ups are on `feat/audit-logs-and-invitation-fixes`, not merged yet.
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -74,7 +75,7 @@ difference: pep hid the Multiple usage type, and tourise keeps it.
   - A **rejected batch locks the form** until the page is reloaded: `guests_list` is a
     `useFieldArray` root, and react-hook-form never clears errors it does not own, so `handleSubmit`
     refuses every later submit. pep hit this and fixed it with `clearErrors()` at the top of submit
-    (`d196a49`). Small, and worth doing next.
+    (`d196a49`). Small, and worth doing next. **Fixed 2026-09-27, see below.**
 
 - 2026-09-27 — **a blank manual card mints an invitation again** (owner: "at least one should be
   created, as before"). Dropping fully-empty rows was right for a sheet and wrong for a card: the
@@ -82,6 +83,27 @@ difference: pep hid the Multiple usage type, and tourise keeps it.
   to hand out or print. Before this, such a card produced the API's own
   "The guests list field is required when usage type is single". Excel still drops blank rows, which
   are padding nobody typed (`other/05-blank-rows.xlsx`).
+- 2026-09-27: **a refused Create no longer locks the form** (admin `badda15`). Reproduced first: in
+  **Manual** mode, a guest whose email is already registered gets the red toast, and after fixing the
+  email, Create sends nothing and says nothing until a reload. The same stale error also showed under
+  the Excel dropzone after switching modes. Two findings shaped the fix:
+  - **pep's `d196a49` does not work.** It calls `clearErrors()` inside `submitForm`, which
+    `handleSubmit` never reaches while the stale error exists. Replayed against react-hook-form 7.79
+    with `createFormControl`: pep's placement stays locked, clearing before `handleSubmit` goes
+    through. pep-v2 still has the bug.
+  - **Only Manual mode locked.** In Excel mode the upload box's `Controller` registers `guests_list`,
+    so its errors clear themselves on the next submit.
+
+  The form now clears errors in `onSubmit` before `handleSubmit` validates, and clears `guests_list`'s
+  errors whenever the list is emptied (Fill mode, Usage type, Remove file).
+- 2026-09-27: **switching Fill mode asks first** (owner; admin `0ebd16b`). With typed guest cards or a
+  loaded file, the click is held back and a confirm dialog says what will be lost ("Switching to Excel
+  will delete the guests you entered" / "Switching to Manual will remove the file you uploaded").
+  Cancel leaves the mode and the guests as they were. An untouched card does not count: only its
+  language, or a phone holding just a country code, is treated as empty. The radio is put back inside
+  its own `onChange`, which react-hook-form runs before it publishes the value, so the other mode never
+  shows while the dialog is open.
+- 2026-09-27: still open from the list above: the form's orphaned **edit** mode.
 
 ## Decisions
 

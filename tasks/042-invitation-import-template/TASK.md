@@ -1,6 +1,7 @@
 # Task 042 — Invitation import: a sample Excel file, and phones in the form's shape
 
-- **Status:** `in-progress` — code written and gates green, uncommitted, awaiting the owner's review
+- **Status:** `done (code)`: pushed to `dev` on 2026-09-22 (backend `4be9a17`, admin `f3fe2d4`). The
+  import rules added on 2026-09-27 are on `feat/audit-logs-and-invitation-fixes`, not merged yet.
 - **Opened:** 2026-09-22
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -12,8 +13,8 @@ Invitations → Create → Fill mode **Excel** gets a **Download Excel sample** 
 dropzone. The file is built by the API on click: the owner's template, its **Title** dropdown
 filled with the titles active *right now*, plus per-invitation **CC Emails** and **BCC Emails**.
 Phones are stored as the registration form stores them (`+966501234567`). The sample asks for `+`
-and the country code, and the import also reads `050…` as Saudi, or a Country Code column when a
-file has one. A phone that can't be read as a real number shows red in the file while it's typed,
+and the country code, and the import read `050…` as Saudi (until 2026-09-27: no country is assumed
+any more, see the Log), or a Country Code column when a file has one. A phone that can't be read as a real number shows red in the file while it's typed,
 red in the admin preview straight after upload, and stops the import at Create.
 
 ## Scope
@@ -125,6 +126,41 @@ red in the admin preview straight after upload, and stops the import at Create.
 - 2026-09-22 — found, not ours: `composer qa`'s PHPStan step reports 5 `relationExistence` errors
   in `DashboardStatsController` / `RolesController`. They came in with backend `28da7a1` (Task 038),
   not this task.
+- 2026-09-27: **the import says what is wrong with a file before creating it.** Admin `fdec832`,
+  backend `92e0554`, on `feat/audit-logs-and-invitation-fixes`. Every problem is found when the file
+  lands and again at Create, and shown twice: the preview marks the cells red with a count beside the
+  record total, and Create opens a dialog (`import-problems-modal.tsx`) that groups each problem with
+  its rows. **The uploaded sheet is no longer cleared on a refusal**, and the column mapping survives.
+  The rules, all in the admin:
+  1. **Email format** of the guest's own column, which was never checked (the manual form was).
+     Shared with the manual form through `utils/email-list.ts` `isEmailAddress`, and tightened: a comma
+     or a space inside an address is refused, since both reached the mailer.
+  2. **Duplicates** within the file, case-insensitive, both rows of a pair named.
+  3. **CC / BCC** lists valid, and **never the guest's own address** (team): in BCC that is a second
+     copy the guest cannot tell is one. Also enforced on the manual form and the Update info modal.
+  4. **Already registered**, asked of `/guests/check-emails-list` (it answers with the addresses it did
+     *not* find). A failed lookup warns and lets the server decide; it never blocks.
+  5. **Cell length** against the `varchar(255)` columns, which used to come back as a raw driver 500.
+  6. **1000 rows** to a file (owner), mirrored by `guests_list` `max:1000` in the API.
+- 2026-09-27: **phones assume no country any more** (owner). `050…`, `50 123 …` and `(050) 123-…` are
+  refused: they name no country, and reading them as Saudi filed a UAE or Egyptian guest under the
+  wrong one, valid-looking and unreachable. Accepted: `+966…`, `00966…`, bare digits that are a whole
+  international number (what Excel leaves when it eats the `+`), or a national number with a Country
+  Code column beside it. This deliberately differs from the site's phone field, which has a flag the
+  guest picked; `utils/normalize-imported-phone.ts` says so at the top.
+- 2026-09-27: the notes above the dropzone became a list of these rules, then were put in plainer
+  words at the owner's request (admin `2597735`, `7e9115b`): "All guests in the file go into the
+  category you chose above", "The same guest email can't be used twice in one collection", the
+  already-registered rule moved beside it, and "No more than 1000 guests in one import". The last
+  replaced "a longer list is split into several collections", which read as if the page splits a file;
+  it does not, a file over 1000 is refused. The sample's step 5 said the same and now matches it
+  (backend `4b55d36`, rebuilt with `excel_import_fixes/tools/make-template.php`, every other cell
+  unchanged). An empty cell in the problems dialog reads `-` like every other table (admin `73d76a3`).
+- 2026-09-27: test files: `excel_import_fixes/test-cases/` is regrouped into `phone/`, `email/`,
+  `backend/` (files the admin passes and the API then refuses or quietly changes) and `other/`, each
+  with its own README. `backend/01` and `02` are now caught in the admin. Still open from that set: a
+  UUID-shaped title that exists nowhere is a raw 500 (`backend/04`), an unknown title is dropped in
+  silence (`03`), and a mapped Category or QR Code URL column is ignored (`06`).
 
 ## Decisions
 
@@ -133,8 +169,11 @@ red in the admin preview straight after upload, and stops the import at Create.
 - **Active titles only**, in their `order` (owner, 2026-09-22).
 - **An unreadable phone blocks the import** (owner, 2026-09-22), matching the manual form, which
   refuses one too.
-- A national number is read as **Saudi** unless Country Code says otherwise: the default the admin's
-  and the site's phone fields use.
+- ~~A national number is read as **Saudi** unless Country Code says otherwise.~~ **Replaced on
+  2026-09-27 (owner): no country is assumed.** A national number needs a Country Code column.
+- **One file carries at most 1000 guests** (owner, 2026-09-27), in the admin and in the API.
+- **The guest's own address is never in their CC or BCC** (team, 2026-09-27).
+- **The already-registered lookup warns when it fails**, and the server's own check decides.
 - **Phone is two columns** (owner, 2026-09-22), not one: people pick a country instead of typing a
   code, and the number stays the way they write it.
 - **Country Code offers the phone field's countries, not the Countries table** (owner, 2026-09-22).

@@ -1,6 +1,6 @@
 # Task 044 — An invitation always prefills, and never locks
 
-- **Status:** `in-progress` — code written and gates green, uncommitted, awaiting the owner's review
+- **Status:** `done (code)`: pushed to `dev` on 2026-09-23 (admin `8fdb871`)
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** admin
@@ -44,6 +44,9 @@ their invitation finds their details already filled in, and can always correct t
   invitation holds, and the Request an Invitation category form has its own switch.
 - 2026-09-23 — gates: admin `yarn type-check`, eslint, prettier, `yarn build` green. No backend
   change, so no PHP gate to run.
+- 2026-09-27: the duplicate-emails popup that was on hold from this request is covered by Task 042's
+  import problems dialog: duplicates within a file are listed with both rows of each pair, and the
+  uploaded sheet is no longer cleared (admin `fdec832`).
 
 ## Decisions
 
