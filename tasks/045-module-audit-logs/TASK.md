@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress`: titles + invitations built, gates green, committed to `feat/audit-logs-and-invitation-fixes` (not merged). The blueprint below is now measured rather than predicted.
+- **Status:** `in-progress`: titles + invitations built, gates green, merged to `dev` on 2026-09-28 (backend PR #20, admin PR #23), not yet on `main`. The blueprint below is now measured rather than predicted.
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -284,6 +284,10 @@ map that resolves any referenced id to a name at read time.
   both repos (owner), since it also carries the invitation import work (admin `fdec832`, backend
   `92e0554`), and pushed under the new name. The old name is still on GitHub, three commits behind. The
   owner merges the whole branch to `dev` once the remaining work is done.
+- 2026-09-28: **merged to `dev`** (backend PR #20, admin PR #23) with everything else on
+  `feat/audit-logs-and-invitation-fixes`, after merging `origin/dev` in (the Sponsors / Speakers
+  dashboards; the only conflict was keys appended to `translations/{en,ar}/web.json`, both kept). The
+  merged backend `dev` passes 924 tests. Not on `main` yet. See Sequencing for Task 041.
 
 ## Decisions
 
@@ -324,9 +328,13 @@ recommendation stands for the **merge**, not the build — 041 should land befor
 or the two should be reviewed together. The exposure here is narrow while it is one low-risk module
 (titles carry no PII), and grows with every module added.
 
+**Then (2026-09-28):** the owner merged it to `dev` before task 041, together with the invitations
+module and the work of tasks 042, 043, 046 and 047 on the same branch. So the second copy of
+invitation data in `audit_logs` is on `dev` while 041 is still `todo`; 041's review should include it.
+
 ## Definition of Done
 
-- [ ] Code merged to `dev` in the relevant sub-app(s)
+- [x] Code merged to `dev` in the relevant sub-app(s)
 - [ ] EN + AR translations in the same commit (if any user-facing strings)
 - [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check`
       + `yarn build` + `yarn check:rbac`)

@@ -1,7 +1,7 @@
 # Task 042 — Invitation import: a sample Excel file, and phones in the form's shape
 
 - **Status:** `done (code)`: pushed to `dev` on 2026-09-22 (backend `4be9a17`, admin `f3fe2d4`). The
-  import rules added on 2026-09-27 are on `feat/audit-logs-and-invitation-fixes`, not merged yet.
+  import rules added on 2026-09-27 were merged to `dev` on 2026-09-28 (backend PR #20, admin PR #23), not yet on `main`.
 - **Opened:** 2026-09-22
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -184,7 +184,7 @@ red in the admin preview straight after upload, and stops the import at Create.
 
 ## Definition of Done
 
-- [ ] Code merged to `dev` in the relevant sub-app(s)
+- [x] Code merged to `dev` in the relevant sub-app(s)
 - [x] EN + AR translations in the same commit (`web:download_excel_sample`, `web:phone_as_saved`, `web:phones_to_fix`, `web:bcc_emails_list`, `validation:excel_invalid_phones`, `validation:bcc_emails_list`, `validation:excel_invalid_cc_bcc`)
 - [x] Quality gate green (backend `pint --test` + `php artisan test`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
 - [ ] Docs updated (this TASK.md set to `done`; index row updated; any drift fixed)

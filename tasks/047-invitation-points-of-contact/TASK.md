@@ -1,7 +1,7 @@
 # Task 047: Points of contact on an invitation
 
-- **Status:** `done (code)`: committed and pushed on `feat/audit-logs-and-invitation-fixes`
-  (backend `73b3d9c`, admin `ca0cd74`), not merged to `dev`. Owner browser review pending. **Production
+- **Status:** `done (code)`: backend `73b3d9c`, admin `ca0cd74`, merged to `dev` on 2026-09-28
+  (backend PR #20, admin PR #23), not yet on `main`. Owner browser review pending. **Production
   needs migration `2026_09_27_000001_add_points_of_contact_to_invitations_table`.**
 - **Opened:** 2026-09-27
 - **Owner:** unassigned
@@ -83,7 +83,7 @@ office manager or an assistant. Up to three, each a **name, a phone and an email
 
 ## Definition of Done
 
-- [ ] Code merged to `dev` in the relevant sub-app(s)
+- [x] Code merged to `dev` in the relevant sub-app(s)
 - [x] EN + AR translations in the same commit
 - [x] Quality gate green (backend `pint --test` + `php artisan test`; admin `yarn type-check` + `yarn check:rbac`; `yarn build` pending)
 - [ ] Docs updated (this TASK.md set to `done`; index row updated)

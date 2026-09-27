@@ -1,7 +1,7 @@
 # Task 043 — The guest list is the quantity
 
 - **Status:** `done (code)`: pushed to `dev` on 2026-09-23 (backend `5dde1ea`, admin `699fd6a`). The
-  2026-09-27 follow-ups are on `feat/audit-logs-and-invitation-fixes`, not merged yet.
+  2026-09-27 follow-ups were merged to `dev` on 2026-09-28 (backend PR #20, admin PR #23), not yet on `main`.
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -118,7 +118,7 @@ difference: pep hid the Multiple usage type, and tourise keeps it.
 
 ## Definition of Done
 
-- [ ] Code merged to `dev` in the relevant sub-app(s)
+- [x] Code merged to `dev` in the relevant sub-app(s)
 - [x] EN + AR translations in the same commit (`web:add_guest`, `web:remove_guest`; three removed)
 - [x] Quality gate green (backend `pint --test` + `php artisan test`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
 - [ ] Docs updated (this TASK.md set to `done`; index row updated)

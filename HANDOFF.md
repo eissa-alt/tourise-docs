@@ -3,7 +3,24 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-28 (latest): Task 047, points of contact on an invitation. Backend + admin on
+**2026-09-28 (latest): `feat/audit-logs-and-invitation-fixes` is MERGED to `dev`** (backend PR #20
+`4538f94`, admin PR #23 `1673610`): Task 045 (audit logs), the Task 042 / 043 follow-ups, Task 046 (bulk
+actions and permission boxes) and Task 047 (points of contact). **Not on `main`, so not on production.**
+- Before the admin PR, `origin/dev` (Sponsors / Speakers dashboards) was merged into the branch; the
+  only conflict was keys appended at the end of `translations/{en,ar}/web.json`, both kept. The merged
+  backend `dev` passes 924 tests.
+- **When `dev` goes to `main`:** three migrations (`2026_09_24_000001_create_audit_logs_table`,
+  `2026_09_26_000001_add_created_by_to_invitation_collections`,
+  `2026_09_27_000001_add_points_of_contact_to_invitations_table`), and **tell the team first**: the new
+  Invitations boxes (Send, Update Bulk, Send Bulk, Extract) start unticked, so only Super Admins can send
+  until each role is edited. The dev server needs the same migrations and role edits now.
+- Merged before Task 041 (security wave, still `todo`), against Task 045's Sequencing: 041's review
+  should now include `audit_logs`.
+- The branch and the old `feat/module-audit-logs` can be deleted on GitHub.
+- Found, left alone: `photo_consent` is declared twice in both admin `web.json` files (the second
+  wins: "Photo consent").
+
+**2026-09-28: Task 047, points of contact on an invitation. Backend + admin on
 `feat/audit-logs-and-invitation-fixes`, committed and pushed (backend `73b3d9c`, admin `ca0cd74`),
 NOT merged to `dev`.**
 - Up to three per invitation, each a name, phone and email, every field optional. **Reference data
