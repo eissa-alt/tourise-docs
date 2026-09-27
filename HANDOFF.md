@@ -3,7 +3,42 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-27 (latest) — Task 045: one audit trail for every module. Titles + invitations built on
+**2026-09-27 (latest): the invitation import checks everything before Create, the collection's bulk
+actions are rebuilt, and Invitations gets a permission box per action. Tasks 042/043 follow-ups + Task
+046, on `feat/audit-logs-and-invitation-fixes` in backend + admin. Pushed, NOT merged to `dev`: the
+owner merges the whole branch once its work is done.**
+- **The branch** was renamed from `feat/module-audit-logs` (it carries Task 045 too). The old name is
+  still on GitHub, three commits behind, until the owner deletes it.
+- **Import (Task 042):** email format, duplicates, CC/BCC never the guest's own address, already
+  registered, cell length and **1000 rows** are all checked before Create and listed in one dialog; the
+  sheet is no longer cleared on a refusal. **Phones assume no country any more** (owner): `050…` needs
+  `+966` or a Country Code column. Admin `fdec832`, backend `92e0554`; notes and sample step 5 in plain
+  words, admin `2597735` `7e9115b`, backend `4b55d36`.
+- **Invitations form (Task 043):** a refused Create no longer locks the form (admin `badda15`). pep's
+  `d196a49` fix never runs, so **pep-v2 still has this bug**. Switching Fill mode now asks before
+  throwing guests away (admin `0ebd16b`).
+- **Bulk actions (Task 046):** one compact list for the three More-menu dialogs; **Update invitations
+  (bulk)** replaces Change category with the edit screen's settings through a new `update-bulk`, which
+  (unlike the `category-bulk` it replaces) stays inside the collection and the admin's categories;
+  **Extract** asks only for its channel's template, keeps each guest's language unless one is picked,
+  and counts what moved. Backend `c40bea7` `1c0799b`, admin `dd61464` `d283ff7`.
+- **Permissions (Task 046):** Invitations gains **Send**, **Update Bulk**, **Send Bulk** and
+  **Extract**, and loses **Delete**. Backend `965dfbc`, admin `658d051`.
+- **⚠️ Before production:** roles start **unticked** (owner's choice), so after deploy only Super Admins
+  can send, update in bulk or extract until each role is edited. **Tell the team first.** No migration
+  from today's work; Task 045's two still apply.
+- **⚠️ Before the merge:** `origin/dev` has the Sponsors / Speakers dashboard (2026-09-24/26). Merging
+  it into the branch is clean in the backend and conflicts only in admin `translations/{en,ar}/web.json`,
+  where both sides added keys. Task 045's Sequencing still recommends merging after Task 041.
+- **Still open:** Dignitary Parties' sending stays on `invitations.create` (Task 039, Open); the
+  invitation form's orphaned edit mode (Task 043); `send-reminder-by-emails-list` has no admin caller;
+  a failed invitation email leaves `invitation_emails.error_message` empty, the reason only in
+  `failed_jobs`; locally the seven `tourise.com` SMTP accounts are refused by the provider (`550 5.7.1`),
+  which is Task 036's warning reproduced. `yarn build` not run today: the dev server held `.next`.
+- Gates: backend 901 tests, `pint --test` clean, PHPStan at the 6 errors that predate this work; admin
+  type-check, eslint, prettier, `check:rbac` green.
+
+**2026-09-27 — Task 045: one audit trail for every module. Titles + invitations built on
 `feat/audit-logs-and-invitation-fixes` (renamed from `feat/module-audit-logs`) in backend + admin. Committed and pushed under the new name, NOT merged to `dev`.**
 - **`audit_logs`** — one polymorphic table for every module, written only through
   `AuditLog::record()`: the `Auditable` trait for model edits, controllers directly for actions that
