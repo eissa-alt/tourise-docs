@@ -3,7 +3,21 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-27 (latest): the invitation import checks everything before Create, the collection's bulk
+**2026-09-28 (latest): Task 047, points of contact on an invitation. Backend + admin on
+`feat/audit-logs-and-invitation-fixes`, committed and pushed (backend `73b3d9c`, admin `ca0cd74`),
+NOT merged to `dev`.**
+- Up to three per invitation, each a name, phone and email, every field optional. **Reference data
+  only**: nothing is sent to them, and they stay on the invitation (not on the guest, not on the public
+  link). Edited in **Update info** only.
+- Manual card: **Add POC**, and Guest language moved into the card header. Excel: nine columns in the
+  sample after BCC, checked in the preview and at Create; any heading starting "POC" maps only to a POC
+  field. Exports: POC columns at the end, before Created At.
+- **⚠️ Production needs migration `2026_09_27_000001_add_points_of_contact_to_invitations_table`**,
+  on top of Task 045's two.
+- Gates: backend 912 tests, `pint --test` clean, PHPStan at its 6 older errors; admin type-check,
+  eslint, prettier, `check:rbac` green. Owner browser pass pending.
+
+**2026-09-27: the invitation import checks everything before Create, the collection's bulk
 actions are rebuilt, and Invitations gets a permission box per action. Tasks 042/043 follow-ups + Task
 046, on `feat/audit-logs-and-invitation-fixes` in backend + admin. Pushed, NOT merged to `dev`: the
 owner merges the whole branch once its work is done.**
