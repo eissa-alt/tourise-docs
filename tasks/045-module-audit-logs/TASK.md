@@ -1,10 +1,10 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress` — titles + invitations built, gates green, committed to `feat/module-audit-logs` (not merged). The blueprint below is now measured rather than predicted.
+- **Status:** `in-progress`: titles + invitations built, gates green, committed to `feat/audit-logs-and-invitation-fixes` (not merged). The blueprint below is now measured rather than predicted.
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
-- **Branch(es):** `feat/module-audit-logs` in `tourise-backend` + `tourise-admin`, off `dev`
+- **Branch(es):** `feat/audit-logs-and-invitation-fixes` (was `feat/module-audit-logs`) in `tourise-backend` + `tourise-admin`, off `dev`
 
 ## Goal
 
@@ -280,6 +280,10 @@ map that resolves any referenced id to a name at read time.
   sheet. Found and fixed on the way: a single-use invitation could have its number of uses raised,
   turning one guest's personal link into a shared one. 13 tests; 882 total. Backend `4dece91`, admin
   `3fb9632`.
+- 2026-09-27: branch renamed `feat/module-audit-logs` → `feat/audit-logs-and-invitation-fixes` in
+  both repos (owner), since it also carries the invitation import work (admin `fdec832`, backend
+  `92e0554`), and pushed under the new name. The old name is still on GitHub, three commits behind. The
+  owner merges the whole branch to `dev` once the remaining work is done.
 
 ## Decisions
 

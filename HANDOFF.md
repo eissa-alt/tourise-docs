@@ -4,7 +4,7 @@
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
 **2026-09-27 (latest) — Task 045: one audit trail for every module. Titles + invitations built on
-`feat/module-audit-logs` in backend + admin. Committed, NOT merged to `dev`, NOT pushed.**
+`feat/audit-logs-and-invitation-fixes` (renamed from `feat/module-audit-logs`) in backend + admin. Committed and pushed under the new name, NOT merged to `dev`.**
 - **`audit_logs`** — one polymorphic table for every module, written only through
   `AuditLog::record()`: the `Auditable` trait for model edits, controllers directly for actions that
   write no model. `history_logs` is untouched and **guests stay on it**.
