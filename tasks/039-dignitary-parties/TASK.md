@@ -107,6 +107,19 @@ forwards a link.
 - **Not covered:** the admin's own *create/edit guest* form for a dignitary has no party section (use
   *Invite someone*); a registration re-opened through the complete-data link does not send
   invitations (the section is hidden there).
+- **To do later (owner, 2026-09-27): move this page's sending onto `invitations.send`.** On
+  `feat/audit-logs-and-invitation-fixes` the Invitations permissions gained their own boxes:
+  **Send** (one invitation), **Send Bulk**, **Update Bulk** and **Extract**, with roles starting
+  unticked. This page was deliberately left as it was, so its sending still rides on
+  **`invitations.create`**:
+  - `POST /admin/dignitary-parties/invitations/{invitation}/send` (Send / Resend) needs `create`.
+  - `POST /admin/dignitary-parties/{guest}/invite` (*Invite someone*, which creates the invitation
+    and emails it at once) needs `create`.
+
+  So an admin with Send but not Create cannot send from here, and one with Create but not Send
+  still can. When this is picked up: gate Send / Resend on `invitations.send`; decide whether
+  *Invite someone* needs `create` and `send` together, since it does both; hide the buttons to match;
+  and update the permissions line under **Decisions** above.
 
 ## Definition of Done
 
