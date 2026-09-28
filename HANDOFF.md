@@ -3,7 +3,24 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-28 (latest): `feat/audit-logs-and-invitation-fixes` is MERGED to `dev`** (backend PR #20
+**2026-09-29 (latest): Task 048 scoped, not started. `main` has the audit / import / bulk / POC work
+(merged 2026-09-28, backend PR #21, admin PR #24), NOT yet deployed.**
+- **Deploy of that `main`:** three migrations (`2026_09_24_000001`, `2026_09_26_000001`,
+  `2026_09_27_000001`), refresh cached routes/config, restart queue workers, and **tell the team first**
+  that the new Invitations boxes (Send, Update Bulk, Send Bulk, Extract) start unticked.
+- **`dev` is ahead of `main` with امتنان's work of 2026-09-28:** a notification bell (backend `2ef2856`,
+  admin `9af581d`, two migrations run only on the owner's local DB), two API-only invitation actions
+  (add people / move to collection), test emails going only to the team, and a restyled dashboard
+  export (new dependency `xlsx-js-style`, run `yarn install`). **Do not merge `dev` to `main` until Task
+  048 has replaced that bell.**
+- **Task 048** ([TASK.md](tasks/048-admin-activity-notifications/TASK.md)): admin notifications as the
+  audit trail per admin, eleven decisions recorded. Name `AdminActivity`; no `/me/` routes; nothing
+  shared with seating or the push-notification module. **Parked:** add people / move to collection,
+  with ten gaps and one open question ([PARKED-ADD-AND-MOVE.md](tasks/048-admin-activity-notifications/PARKED-ADD-AND-MOVE.md)).
+- Test files: `excel_import_fixes/test-cases/` is phone / email / other (01-06) / poc, and
+  `test-cases-rawand/` is the same set with Rawand's inboxes (`tools/make-test-cases-rawand.php`).
+
+**2026-09-28: `feat/audit-logs-and-invitation-fixes` is MERGED to `dev`** (backend PR #20
 `4538f94`, admin PR #23 `1673610`): Task 045 (audit logs), the Task 042 / 043 follow-ups, Task 046 (bulk
 actions and permission boxes) and Task 047 (points of contact). **Not on `main`, so not on production.**
 - Before the admin PR, `origin/dev` (Sponsors / Speakers dashboards) was merged into the branch; the
