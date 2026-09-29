@@ -8,8 +8,10 @@ pushed, NOT merged to `dev`.**
 - **What:** امتنان's bell is out, and the new one (**Admin notifications**) is the audit trail seen per
   admin: the modules ticked in the role, that module's view, the admin's categories, never their own
   actions, the last 30 days, read / unread. Routes `/admin/activity`; tables `admin_activity_cursors` +
-  `admin_activity_reads`; nothing on `admins`. Backend `191593c` `c80a5d2` `e687507` `855c78d`, admin
-  `13979fa` `86961aa` `8e357bb` `648b23c` (the bell's look, after the owner's review). Backend 962 tests, Pint clean, PHPStan at its 6 older errors; admin
+  `admin_activity_reads`; nothing on `admins`. Backend `191593c` `c80a5d2` `e687507` `855c78d`, then
+  a merge of `dev` (`a1e0a46`: امتنان's `8f6fca8` landed while PR #22 was open; her way of naming a bulk
+  send's collection kept, her call to the old bell dropped). Admin `13979fa` `86961aa` `8e357bb`
+  `648b23c` (the bell's look, after the owner's review). Backend 963 tests, Pint clean, PHPStan at its 6 older errors; admin
   type-check, eslint, `check:rbac` green, `yarn build` not run (the dev server held `.next`).
 - **Two more owner decisions** ([TASK.md](tasks/048-admin-activity-notifications/TASK.md) 12, 13): a
   bulk send / bulk update now names its collection (so it also shows in that collection's trail), and an

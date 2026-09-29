@@ -1,7 +1,7 @@
 # Task 048: Admin notifications (AdminActivity), the audit trail as a bell
 
 - **Status:** `done (code)`: built on 2026-09-29 on `feat/admin-activity` in backend (`191593c`
-  `c80a5d2` `e687507` `855c78d`) and admin (`13979fa` `86961aa` `8e357bb` `648b23c`), committed, **not pushed,
+  `c80a5d2` `e687507` `855c78d`, merge of `dev` `a1e0a46`) and admin (`13979fa` `86961aa` `8e357bb` `648b23c`), committed, **not pushed,
   not merged to `dev`**. Owner browser pass pending. **Production needs three migrations**
   (`2026_09_29_000003` to `000005`, see *Deploy*). امتنان to be told their bell was replaced.
 - **Opened:** 2026-09-29
@@ -96,6 +96,11 @@ does.
    `/api/proxy` to `.../api/admin`, so `/admin/me/notifications` became `/api/admin/admin/me/...` and
    404'd, which the bell swallowed. Its links also pointed at `/invitations-collection/details/{id}`,
    which is not a page.
+9. **Merged with `dev` (`a1e0a46`, 2026-09-29).** امتنان pushed `8f6fca8` to `dev` while PR #22 was
+   open: her bell's "invitations sent" event, with the bulk send's row naming its collection. The merge
+   keeps her way of finding that collection (from the invitations actually sent, none when they span
+   more than one) over `c80a5d2`'s (from the URL), drops her call to the old bell and its tests, and adds
+   a test for the two-collection case.
 
 ## Deploy
 
@@ -157,8 +162,8 @@ being removed plus its two migrations.
 - **Merge order:** `dev` still carries امتنان's bell until `feat/admin-activity` is merged into it; it
   must not reach `main` first.
 - **`send-bulk` is not scoped** (found, not fixed): it sends whatever invitation ids it is given, from
-  any collection and whatever the admin's categories. Its audit row now names the collection in the
-  URL, which is where the admin always calls it from. For Task 041.
+  any collection and whatever the admin's categories. Its audit row names the collection the sent
+  invitations belong to, and none when they span more than one. For Task 041.
 - **Guests are not in `audit_logs`** (Task 045 kept them on `history_logs`), so a Guests box later is
   not "a box and nothing else": the feed would need guests audited, or to read `history_logs`.
 - **The unread count runs every minute per open tab.** It is one indexed count on `audit_logs` (plus two
