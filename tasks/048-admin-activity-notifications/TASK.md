@@ -1,7 +1,7 @@
 # Task 048: Admin notifications (AdminActivity), the audit trail as a bell
 
 - **Status:** `done (code)`: built on 2026-09-29 on `feat/admin-activity` in backend (`191593c`
-  `c80a5d2` `e687507` `855c78d`) and admin (`13979fa` `86961aa` `8e357bb`), committed, **not pushed,
+  `c80a5d2` `e687507` `855c78d`) and admin (`13979fa` `86961aa` `8e357bb` `648b23c`), committed, **not pushed,
   not merged to `dev`**. Owner browser pass pending. **Production needs three migrations**
   (`2026_09_29_000003` to `000005`, see *Deploy*). امتنان to be told their bell was replaced.
 - **Opened:** 2026-09-29
@@ -175,7 +175,8 @@ being removed plus its two migrations.
   (12 and 13 above). Backend: the first bell out (`191593c`), bulk rows name their collection
   (`c80a5d2`), the role box and read-state tables (`e687507`), the feed and its four routes
   (`855c78d`). Admin: the first bell out (`13979fa`), the role section (`86961aa`), the bell
-  (`8e357bb`). 21 `AdminActivityTest` tests, `InvitationAddAndMoveTest` (the parked actions' 6 tests,
+  (`8e357bb`), then its look after the owner's review (`648b23c`: grouped by day, an icon per action in
+  the trail's colours, the record in bold, sized down one step at the owner's choice). 21 `AdminActivityTest` tests, `InvitationAddAndMoveTest` (the parked actions' 6 tests,
   moved out of the first bell's file). Backend 962 tests, `pint --test` clean, PHPStan at its 6 older
   errors; admin type-check, eslint, prettier, `check:rbac` green. `yarn build` not run: the owner's dev
   server held `.next`. Owner's local DB: امتنان's two migrations rolled back; the three new ones not

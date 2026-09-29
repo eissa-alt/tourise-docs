@@ -9,7 +9,7 @@ pushed, NOT merged to `dev`.**
   admin: the modules ticked in the role, that module's view, the admin's categories, never their own
   actions, the last 30 days, read / unread. Routes `/admin/activity`; tables `admin_activity_cursors` +
   `admin_activity_reads`; nothing on `admins`. Backend `191593c` `c80a5d2` `e687507` `855c78d`, admin
-  `13979fa` `86961aa` `8e357bb`. Backend 962 tests, Pint clean, PHPStan at its 6 older errors; admin
+  `13979fa` `86961aa` `8e357bb` `648b23c` (the bell's look, after the owner's review). Backend 962 tests, Pint clean, PHPStan at its 6 older errors; admin
   type-check, eslint, `check:rbac` green, `yarn build` not run (the dev server held `.next`).
 - **Two more owner decisions** ([TASK.md](tasks/048-admin-activity-notifications/TASK.md) 12, 13): a
   bulk send / bulk update now names its collection (so it also shows in that collection's trail), and an
