@@ -3,7 +3,18 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-29 (latest): Task 048 MERGED to `dev`** (backend PR #22 `46ee2b8`, admin PR #25 `bf34baf`),
+**2026-09-29 (latest, evening): Task 048 follow-ups.**
+- **The list is ready before the bell opens** (team feedback): admin `d3b46d1`, on `dev` (pushed by the
+  owner).
+- **Admin notifications move from Roles to the admin create/edit form** (the team's ask, decision 14 in
+  [TASK.md](tasks/048-admin-activity-notifications/TASK.md)), on `feat/admin-activity-per-admin`: backend
+  `3392b13`, admin `f3b23f4`, **not pushed**. New migration `2026_09_29_000006` (run it locally too).
+  **`main` has the Roles version: merge this to `dev` and `main` before the production pull.** Nobody gets
+  the bell until it is ticked on their admin form, Super Admins included.
+- Frontend: `dev` = `main` + امتنان's 5 media commits of today (the N/A note); `main` not updated,
+  waiting on the owner.
+
+**2026-09-29: Task 048 MERGED to `dev`** (backend PR #22 `46ee2b8`, admin PR #25 `bf34baf`),
 **not on `main`, not deployed.** `dev` no longer carries امتنان's bell, so nothing from it blocks `dev` →
 `main` any more. Admin `yarn build` green (run in a separate worktree while the dev server held `.next`).
 - **What:** امتنان's bell is out, and the new one (**Admin notifications**) is the audit trail seen per

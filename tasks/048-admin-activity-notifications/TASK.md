@@ -5,6 +5,9 @@
   `855c78d` + merge of `dev` `a1e0a46`; admin `13979fa` `86961aa` `8e357bb` `648b23c`. **Production
   needs three migrations** (`2026_09_29_000003` to `000005`, see *Deploy*). Team testing next;
   امتنان to be told their bell was replaced.
+  **Follow-up on `feat/admin-activity-per-admin`** (backend `3392b13`, admin `f3b23f4`, not pushed):
+  the team asked to set it per admin on the admin form instead of per role (decision 14). `main`
+  still has the Roles version: merge the follow-up before the production pull.
 - **Opened:** 2026-09-29
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -26,8 +29,8 @@ does.
 | # | Decision |
 |---|---|
 | 1 | **Every audited action notifies**: created, updated, sent, sent in bulk, updated in bulk, moved (Extract), exported. Not a short list. |
-| 2 | A **new section in the role editor**, "Admin notifications", with **one box per module**: Invitations (collections + invitations) for now; later Titles, Guests and others. A notification reaches an admin only if their role can also **view** that module, and the admin's **category restrictions** apply (a restricted admin never hears about a collection outside their categories). |
-| 3 | **No separate "bell" box.** The bell shows whenever at least one box in "Admin notifications" is ticked. |
+| 2 | A **new section in the role editor**, "Admin notifications", with **one box per module**: Invitations (collections + invitations) for now; later Titles, Guests and others. A notification reaches an admin only if their role can also **view** that module, and the admin's **category restrictions** apply (a restricted admin never hears about a collection outside their categories). | *Superseded by 14: set per admin, on the admin form.*
+| 3 | **No separate "bell" box.** The bell shows whenever at least one box in "Admin notifications" is ticked. *Now: the bell shows when the admin hears about at least one module (ticked for them, and viewable by their role).* |
 | 4 | **An admin's own actions never notify them.** |
 | 5 | The bell covers **the last 30 days**, read or unread. Older events drop out of the bell and stay in the record history and the audit trail. When an admin first gets access, earlier events show **as already read**, so nobody starts with hundreds unread. |
 | 6 | **Bell dropdown only** for now: newest first, "load more" within the 30 days, **Mark all as read**, and each line opens the record it is about. A full notifications page can come later. |
@@ -38,12 +41,13 @@ does.
 | 11 | **Keep it apart from seating.** No shared tables, endpoints, controllers, or columns on `admins`. |
 | 12 | **A bulk send and a bulk update record their collection** as the audit row's subject (owner, 2026-09-29, while building), so the category rule can place them. Forward-only. It also puts them in the trail opened from that collection, which never showed them. |
 | 13 | **A row that names no collection** (an export of the whole collections list, of collections with their invitations, or of the audit trail) **reaches everyone with the box**, restricted or not (owner, 2026-09-29): the line shows no record, so nobody sees past their categories. |
+| 14 | **Set per admin, on the admin create/edit form, not per role** (the team's ask, owner, 2026-09-29, after the merge to `dev`). Two admins in the same role can want different things, and the form already holds the categories the bell follows. Stored in `admin_activity_subscriptions` (admin + module), still nothing on `admins` (11 holds). A ticked module counts only where the role can view it. **Super Admins are no exception**: a module has to be ticked for them too, which answers the team's question of whether they can turn it off. The form has Select all, and greys out a module the chosen role cannot view. |
 
 ## Naming and routes
 
 | Piece | Name |
 |---|---|
-| Role section (feature id) | `admin_activity`, labelled **"Admin notifications"** (EN + AR), box `invitations` |
+| Where it is set | the admin create/edit form, section **"Admin notifications"**, one box per module (decision 14; was a role section `admin_activity` until then) |
 | Controller | `AdminActivityController` |
 | Service | `AdminActivityFeed`: builds one admin's feed from `audit_logs` |
 | Tables | `admin_activity_cursors` (read up to, per admin per module), `admin_activity_reads` (lines opened one by one); nothing on `admins` |
@@ -104,15 +108,24 @@ does.
    a test for the two-collection case.
 10. **Merged to `dev`** by the owner on GitHub the same day: backend PR #22 (`46ee2b8`), admin PR #25
    (`bf34baf`). `dev` no longer carries امتنان's bell, so the bell no longer blocks `dev` → `main`.
+11. **The list is ready before the bell opens** (team feedback: it took a moment to show). Admin
+   `d3b46d1`, pushed to `dev` by the owner: fetched in the background when the bell appears and whenever
+   the unread count changes; refreshed quietly on open and every minute while open.
+12. **Moved from Roles to the admin form** (decision 14), on `feat/admin-activity-per-admin`: backend
+   `3392b13` (the subscriptions table, `admin_activity` saved on admin create/edit and read on show,
+   `GET /admin/admins/activity-modules` for the form, `get-profile` returns the modules the admin will
+   hear, the bell's routes answer 403 to an admin who hears none, the catalogue section removed); admin
+   `f3b23f4` (the form section, the header reads the profile, Roles back to what it was). 969 backend
+   tests; a role that had the old box keeps a stale key that nothing reads.
 
 ## Deploy
 
 - **Migrations:** `2026_09_29_000003_drop_the_replaced_admin_notifications` (does nothing on
   production), `2026_09_29_000004_create_admin_activity_tables`,
-  `2026_09_29_000005_add_feature_created_at_index_to_audit_logs`. On top of Task 045's and 047's three.
-- **Roles start without the box.** Only Super Admins get the bell until a role ticks **Admin
-  notifications → Invitations** (together with Invitations → View). Super Admins get every box, so every
-  Super Admin hears everything the others do, and cannot turn it off.
+  `2026_09_29_000005_add_feature_created_at_index_to_audit_logs`, and with the follow-up
+  `2026_09_29_000006_create_admin_activity_subscriptions_table`. On top of Task 045's and 047's three.
+- **Nobody gets the bell until it is ticked for them** on their admin form (**Admin notifications →
+  Invitations**), Super Admins included, and their role needs **Invitations → View**.
 - Refresh cached routes and config.
 
 ## Why the existing "notification" code is not renamed (owner asked, 2026-09-29)
