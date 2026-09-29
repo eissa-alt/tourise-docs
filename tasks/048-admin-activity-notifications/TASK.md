@@ -1,9 +1,10 @@
 # Task 048: Admin notifications (AdminActivity), the audit trail as a bell
 
-- **Status:** `done (code)`: built on 2026-09-29 on `feat/admin-activity` in backend (`191593c`
-  `c80a5d2` `e687507` `855c78d`, merge of `dev` `a1e0a46`) and admin (`13979fa` `86961aa` `8e357bb` `648b23c`), committed, **not pushed,
-  not merged to `dev`**. Owner browser pass pending. **Production needs three migrations**
-  (`2026_09_29_000003` to `000005`, see *Deploy*). امتنان to be told their bell was replaced.
+- **Status:** `done (code)`: **merged to `dev` on 2026-09-29** (backend PR #22 `46ee2b8`, admin PR
+  #25 `bf34baf`), not on `main`. Built on `feat/admin-activity`: backend `191593c` `c80a5d2` `e687507`
+  `855c78d` + merge of `dev` `a1e0a46`; admin `13979fa` `86961aa` `8e357bb` `648b23c`. **Production
+  needs three migrations** (`2026_09_29_000003` to `000005`, see *Deploy*). Team testing next;
+  امتنان to be told their bell was replaced.
 - **Opened:** 2026-09-29
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -101,6 +102,8 @@ does.
    keeps her way of finding that collection (from the invitations actually sent, none when they span
    more than one) over `c80a5d2`'s (from the URL), drops her call to the old bell and its tests, and adds
    a test for the two-collection case.
+10. **Merged to `dev`** by the owner on GitHub the same day: backend PR #22 (`46ee2b8`), admin PR #25
+   (`bf34baf`). `dev` no longer carries امتنان's bell, so the bell no longer blocks `dev` → `main`.
 
 ## Deploy
 
@@ -159,8 +162,7 @@ being removed plus its two migrations.
 
 - **Task 041** (security wave) has not run; the feed shows guest names from `audit_logs`, which 041
   should review together with Task 045.
-- **Merge order:** `dev` still carries امتنان's bell until `feat/admin-activity` is merged into it; it
-  must not reach `main` first.
+- **Merge order:** settled. `dev` no longer carries امتنان's bell (merged 2026-09-29).
 - **`send-bulk` is not scoped** (found, not fixed): it sends whatever invitation ids it is given, from
   any collection and whatever the admin's categories. Its audit row names the collection the sent
   invitations belong to, and none when they span more than one. For Task 041.
@@ -184,14 +186,14 @@ being removed plus its two migrations.
   the trail's colours, the record in bold, sized down one step at the owner's choice). 21 `AdminActivityTest` tests, `InvitationAddAndMoveTest` (the parked actions' 6 tests,
   moved out of the first bell's file). Backend 962 tests, `pint --test` clean, PHPStan at its 6 older
   errors; admin type-check, eslint, prettier, `check:rbac` green. `yarn build` not run: the owner's dev
-  server held `.next`. Owner's local DB: امتنان's two migrations rolled back; the three new ones run
+  server held `.next` (run later in a separate worktree: green). Owner's local DB: امتنان's two migrations rolled back; the three new ones run
   since, and the owner has reviewed the bell in the browser.
 
 ## Definition of Done
 
-- [ ] Code merged to `dev` in the relevant sub-app(s)
+- [x] Code merged to `dev` in the relevant sub-app(s) (backend PR #22, admin PR #25)
 - [x] EN + AR translations in the same commit
-- [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`): all green except `yarn build`, not run while the dev server held `.next`
+- [x] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`): `yarn build` run on 2026-09-29 in a separate worktree, since the dev server held `.next`
 - [x] امتنان's bell removed, including a migration dropping its two tables/columns
 - [x] Docs updated (this TASK.md set to `done (code)`; index row updated)
 - [x] Mobile contract checked: only `/api/admin` routes touched (the push module's `/mobile/notifications` and `/admin/notifications` untouched)

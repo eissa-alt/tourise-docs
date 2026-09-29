@@ -3,8 +3,9 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-29 (latest): Task 048 built on `feat/admin-activity` in backend + admin. Committed, NOT
-pushed, NOT merged to `dev`.**
+**2026-09-29 (latest): Task 048 MERGED to `dev`** (backend PR #22 `46ee2b8`, admin PR #25 `bf34baf`),
+**not on `main`, not deployed.** `dev` no longer carries امتنان's bell, so nothing from it blocks `dev` →
+`main` any more. Admin `yarn build` green (run in a separate worktree while the dev server held `.next`).
 - **What:** امتنان's bell is out, and the new one (**Admin notifications**) is the audit trail seen per
   admin: the modules ticked in the role, that module's view, the admin's categories, never their own
   actions, the last 30 days, read / unread. Routes `/admin/activity`; tables `admin_activity_cursors` +
@@ -19,8 +20,8 @@ pushed, NOT merged to `dev`.**
 - **Owner's local DB:** امتنان's two migrations were rolled back (`--step=2`, alone in batch 3) before
   their files were deleted; the three new ones (`2026_09_29_000003` to `000005`) have since run there
   (batch 3). The owner has seen the bell in the browser and chose its look (admin `648b23c`).
-- **Next:** push the branch and open PRs into `dev`; tell امتنان their bell was replaced; owner browser
-  pass; `yarn build` on the admin. Once merged, the bell no longer blocks `dev` → `main`.
+- **Next:** team testing (the owner shares a WhatsApp summary); tell امتنان their bell was replaced
+  (her local DB loses its table and column on her next `php artisan migrate`).
 - **Deploy, when it goes:** three more migrations (the drop does nothing on production), refresh cached
   routes; **roles start without the box**, so only Super Admins get the bell until a role ticks Admin
   notifications → Invitations. Every Super Admin hears everything the others do.
