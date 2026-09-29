@@ -15,8 +15,8 @@ pushed, NOT merged to `dev`.**
   bulk send / bulk update now names its collection (so it also shows in that collection's trail), and an
   export of a whole list reaches everyone with the box.
 - **Owner's local DB:** امتنان's two migrations were rolled back (`--step=2`, alone in batch 3) before
-  their files were deleted. The three new migrations (`2026_09_29_000003` to `000005`) have **not** been
-  run: `php artisan migrate` before trying the bell locally.
+  their files were deleted; the three new ones (`2026_09_29_000003` to `000005`) have since run there
+  (batch 3). The owner has seen the bell in the browser and chose its look (admin `648b23c`).
 - **Next:** push the branch and open PRs into `dev`; tell امتنان their bell was replaced; owner browser
   pass; `yarn build` on the admin. Once merged, the bell no longer blocks `dev` → `main`.
 - **Deploy, when it goes:** three more migrations (the drop does nothing on production), refresh cached

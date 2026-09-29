@@ -179,8 +179,8 @@ being removed plus its two migrations.
   the trail's colours, the record in bold, sized down one step at the owner's choice). 21 `AdminActivityTest` tests, `InvitationAddAndMoveTest` (the parked actions' 6 tests,
   moved out of the first bell's file). Backend 962 tests, `pint --test` clean, PHPStan at its 6 older
   errors; admin type-check, eslint, prettier, `check:rbac` green. `yarn build` not run: the owner's dev
-  server held `.next`. Owner's local DB: امتنان's two migrations rolled back; the three new ones not
-  run yet.
+  server held `.next`. Owner's local DB: امتنان's two migrations rolled back; the three new ones run
+  since, and the owner has reviewed the bell in the browser.
 
 ## Definition of Done
 
