@@ -46,14 +46,13 @@ are recounted; a shared-link (multiple) collection refuses added people.
 
 **Both**
 
-8. **Their audit rows are written through the old bell** (`AdminNotifier::record(...)`, actions
-   `people_added` and `moved_to_collection`). When Task 048 removes the bell they become plain
-   `AuditLog::record()` calls. The admin also has **no labels** for these two audit actions
-   (`audit_action_people_added`, `audit_action_moved_to_collection`), or colours in
-   `audit-log-entries.tsx`, so they would show as raw codes in the audit trail.
-9. **Their 4 tests live in the bell's test file** (`AdminNotificationsTest`: people can be added; an
-   added invitation takes the collection's own settings; people can be moved; a used invitation does
-   not move). They move to their own file when the bell goes.
+8. **Mostly done in Task 048 (2026-09-29).** Their rows are now written by plain
+   `AuditLog::record()` (same actions and payloads), and the admin has EN + AR labels for
+   `audit_action_people_added` and `audit_action_moved_to_collection`. **Still missing:** colours for
+   the two in `audit-log-entries.tsx`'s `ACTION_STYLES` (they fall back to grey).
+9. **Done in Task 048 (2026-09-29).** There were 6 tests, not 4 (also: a shared-link collection refuses
+   extra people; moving into the same collection is refused). They are in
+   `tests/Feature/InvitationAddAndMoveTest.php`, and the two that checked the bell check the audit row.
 10. **No admin screens.**
 
 ## Open question when this is picked up

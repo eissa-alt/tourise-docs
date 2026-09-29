@@ -1,11 +1,14 @@
 # Task 048: Admin notifications (AdminActivity), the audit trail as a bell
 
-- **Status:** `todo`: scoped and agreed with the owner on 2026-09-29, no code yet. Next: build on a
-  branch off `dev`, after telling امتنان that their bell is being replaced.
+- **Status:** `done (code)`: built on 2026-09-29 on `feat/admin-activity` in backend (`191593c`
+  `c80a5d2` `e687507` `855c78d`) and admin (`13979fa` `86961aa` `8e357bb`), committed, **not pushed,
+  not merged to `dev`**. Owner browser pass pending. **Production needs three migrations**
+  (`2026_09_29_000003` to `000005`, see *Deploy*). امتنان to be told their bell was replaced.
 - **Opened:** 2026-09-29
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
-- **Branch(es):** to be created off `dev`
+- **Branch(es):** `feat/admin-activity` in `tourise-backend` + `tourise-admin`, off `dev` (`115fc5e` /
+  `eabddbc`)
 - **Parked alongside:** [PARKED-ADD-AND-MOVE.md](PARKED-ADD-AND-MOVE.md), the two invitation actions
   that arrived in the same commit as امتنان's bell.
 
@@ -32,6 +35,8 @@ does.
 | 9 | **Naming: `AdminActivity`**, free in tourise and pep-v2. Plain "Activity" is kept free for a real future module (and is what `spatie/laravel-activitylog` calls its model). |
 | 10 | **No `/me/` routes** (owner dislikes them). The feed's routes sit under the feature's own path and always answer for the logged-in admin. |
 | 11 | **Keep it apart from seating.** No shared tables, endpoints, controllers, or columns on `admins`. |
+| 12 | **A bulk send and a bulk update record their collection** as the audit row's subject (owner, 2026-09-29, while building), so the category rule can place them. Forward-only. It also puts them in the trail opened from that collection, which never showed them. |
+| 13 | **A row that names no collection** (an export of the whole collections list, of collections with their invitations, or of the audit trail) **reaches everyone with the box**, restricted or not (owner, 2026-09-29): the line shows no record, so nobody sees past their categories. |
 
 ## Naming and routes
 
@@ -40,11 +45,11 @@ does.
 | Role section (feature id) | `admin_activity`, labelled **"Admin notifications"** (EN + AR), box `invitations` |
 | Controller | `AdminActivityController` |
 | Service | `AdminActivityFeed`: builds one admin's feed from `audit_logs` |
-| Tables | prefixed `admin_activity_…` (per-admin read state; nothing on `admins`) |
+| Tables | `admin_activity_cursors` (read up to, per admin per module), `admin_activity_reads` (lines opened one by one); nothing on `admins` |
 | Routes | `GET /admin/activity` (list, paged), `GET /admin/activity/unread-count`, `PATCH /admin/activity/{id}/read`, `POST /admin/activity/read-all` |
-| Admin | `components/layout/admin-activity-bell.tsx`, strings `admin_activity_*` |
+| Admin | `components/layout/admin-activity-bell.tsx`, strings `admin_activity_*`; role labels `perm_feature_admin_activity`, `perm_hint_admin_activity` |
 
-## Design (to confirm in code)
+## Design (built; see *What changed while building* where they differ)
 
 - **Read from the audit trail; store only read state.** No delivery row is copied per admin when
   something happens. Each request works out the admin's feed from `audit_logs` (their modules, their
@@ -59,6 +64,48 @@ does.
   serves `(feature, created_at)` with the 30-day lookback.
 - **Wording:** each line is rendered from the audit action and subject in EN and AR, reusing the
   audit trail's labels (`audit_action_*`) so the two never disagree.
+
+## What changed while building (2026-09-29)
+
+1. **The cursor is per admin per module**, not per admin. It is created the first time that admin's
+   bell asks about the module, at that moment. Decision 5 then holds for a module added later too:
+   ticking Titles next year does not arrive as a month of unread Titles lines.
+2. **`as_of`.** The list returns when its first page was served. Later pages send it back so they do
+   not shift while lines arrive, and **Mark all as read** sends it so a line that came in after the bell
+   opened, and was never on screen, stays unread. Mark all as read also deletes the one-by-one marks
+   the cursor then covers, so `admin_activity_reads` stays small.
+3. **The catalogue's "every feature has `view`" rule.** `admin_activity`'s boxes are modules, and there
+   is no page to view (decision 3: no bell box). Nothing in the code relied on `view` being present
+   (page access and `admin.can` take any action); only `AdminPermissionsTest` did. It now checks
+   instead that each `admin_activity` box is a real feature.
+4. **A line carries no payload and no token**: the action, who, the record, the collection it sits in
+   (id + current name), a count, the export scope, read or not. The audit payloads hold names and emails
+   the line does not need.
+5. **Where a line opens:** its collection (`/invitations/details/{id}`). An invitation's line opens the
+   collection it sits in, since its own screen is an edit form and the bell also reaches view-only
+   admins. A line with no collection opens the Invitations list.
+6. **The collection's `created` row is no longer edited after it is written.** امتنان's `store` looked
+   the row up again and rewrote its payload to add a count; the count is already there
+   (`total_invites`). Extract's row is back to what Task 045 wrote (the `from`/`to` names were for her
+   sentence, and the trail already names both collections from their ids).
+7. **امتنان's two migrations were rolled back on the owner's local DB** (`migrate:rollback --step=2`,
+   2026-09-29, they were alone in batch 3) before their files were deleted. `2026_09_29_000003` drops
+   the same table and column wherever they still exist (امتنان's DB, for one) and does nothing
+   elsewhere.
+8. **Found:** امتنان's bell never reached its API. The admin's Axios already calls through
+   `/api/proxy` to `.../api/admin`, so `/admin/me/notifications` became `/api/admin/admin/me/...` and
+   404'd, which the bell swallowed. Its links also pointed at `/invitations-collection/details/{id}`,
+   which is not a page.
+
+## Deploy
+
+- **Migrations:** `2026_09_29_000003_drop_the_replaced_admin_notifications` (does nothing on
+  production), `2026_09_29_000004_create_admin_activity_tables`,
+  `2026_09_29_000005_add_feature_created_at_index_to_audit_logs`. On top of Task 045's and 047's three.
+- **Roles start without the box.** Only Super Admins get the bell until a role ticks **Admin
+  notifications → Invitations** (together with Invitations → View). Super Admins get every box, so every
+  Super Admin hears everything the others do, and cannot turn it off.
+- Refresh cached routes and config.
 
 ## Why the existing "notification" code is not renamed (owner asked, 2026-09-29)
 
@@ -107,7 +154,15 @@ being removed plus its two migrations.
 
 - **Task 041** (security wave) has not run; the feed shows guest names from `audit_logs`, which 041
   should review together with Task 045.
-- **Merge order:** `dev` currently carries امتنان's bell (see above); it must not reach `main` first.
+- **Merge order:** `dev` still carries امتنان's bell until `feat/admin-activity` is merged into it; it
+  must not reach `main` first.
+- **`send-bulk` is not scoped** (found, not fixed): it sends whatever invitation ids it is given, from
+  any collection and whatever the admin's categories. Its audit row now names the collection in the
+  URL, which is where the admin always calls it from. For Task 041.
+- **Guests are not in `audit_logs`** (Task 045 kept them on `history_logs`), so a Guests box later is
+  not "a box and nothing else": the feed would need guests audited, or to read `history_logs`.
+- **The unread count runs every minute per open tab.** It is one indexed count on `audit_logs` (plus two
+  subqueries for a restricted admin); worth an `EXPLAIN` on production data after deploy.
 
 ## Log
 
@@ -116,12 +171,21 @@ being removed plus its two migrations.
   a per-admin setting on `admins` rather than role access, and sat one letter away from the push
   module's `AdminNotificationController`. Its 18 tests passed. Replaced by this design; the two
   invitation actions in the same commit are parked (see the parked file).
+- 2026-09-29: **built** on `feat/admin-activity`, off `dev`. Two more decisions asked one at a time
+  (12 and 13 above). Backend: the first bell out (`191593c`), bulk rows name their collection
+  (`c80a5d2`), the role box and read-state tables (`e687507`), the feed and its four routes
+  (`855c78d`). Admin: the first bell out (`13979fa`), the role section (`86961aa`), the bell
+  (`8e357bb`). 21 `AdminActivityTest` tests, `InvitationAddAndMoveTest` (the parked actions' 6 tests,
+  moved out of the first bell's file). Backend 962 tests, `pint --test` clean, PHPStan at its 6 older
+  errors; admin type-check, eslint, prettier, `check:rbac` green. `yarn build` not run: the owner's dev
+  server held `.next`. Owner's local DB: امتنان's two migrations rolled back; the three new ones not
+  run yet.
 
 ## Definition of Done
 
 - [ ] Code merged to `dev` in the relevant sub-app(s)
-- [ ] EN + AR translations in the same commit
-- [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
-- [ ] امتنان's bell removed, including a migration dropping its two tables/columns
-- [ ] Docs updated (this TASK.md set to `done`; index row updated)
-- [ ] Mobile contract checked: only `/api/admin` routes touched
+- [x] EN + AR translations in the same commit
+- [ ] Quality gate green (backend `pint --test` + `phpstan` + `php artisan test`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`): all green except `yarn build`, not run while the dev server held `.next`
+- [x] امتنان's bell removed, including a migration dropping its two tables/columns
+- [x] Docs updated (this TASK.md set to `done (code)`; index row updated)
+- [x] Mobile contract checked: only `/api/admin` routes touched (the push module's `/mobile/notifications` and `/admin/notifications` untouched)

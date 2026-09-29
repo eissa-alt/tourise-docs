@@ -3,7 +3,36 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-29 (latest): Task 048 scoped, not started. `main` has the audit / import / bulk / POC work
+**2026-09-29 (latest): Task 048 built on `feat/admin-activity` in backend + admin. Committed, NOT
+pushed, NOT merged to `dev`.**
+- **What:** امتنان's bell is out, and the new one (**Admin notifications**) is the audit trail seen per
+  admin: the modules ticked in the role, that module's view, the admin's categories, never their own
+  actions, the last 30 days, read / unread. Routes `/admin/activity`; tables `admin_activity_cursors` +
+  `admin_activity_reads`; nothing on `admins`. Backend `191593c` `c80a5d2` `e687507` `855c78d`, admin
+  `13979fa` `86961aa` `8e357bb`. Backend 962 tests, Pint clean, PHPStan at its 6 older errors; admin
+  type-check, eslint, `check:rbac` green, `yarn build` not run (the dev server held `.next`).
+- **Two more owner decisions** ([TASK.md](tasks/048-admin-activity-notifications/TASK.md) 12, 13): a
+  bulk send / bulk update now names its collection (so it also shows in that collection's trail), and an
+  export of a whole list reaches everyone with the box.
+- **Owner's local DB:** امتنان's two migrations were rolled back (`--step=2`, alone in batch 3) before
+  their files were deleted. The three new migrations (`2026_09_29_000003` to `000005`) have **not** been
+  run: `php artisan migrate` before trying the bell locally.
+- **Next:** push the branch and open PRs into `dev`; tell امتنان their bell was replaced; owner browser
+  pass; `yarn build` on the admin. Once merged, the bell no longer blocks `dev` → `main`.
+- **Deploy, when it goes:** three more migrations (the drop does nothing on production), refresh cached
+  routes; **roles start without the box**, so only Super Admins get the bell until a role ticks Admin
+  notifications → Invitations. Every Super Admin hears everything the others do.
+- **Corrections to the entry below** (found 2026-09-29): `dev` was ahead of `main` by the bell commit
+  only. The test-email fix and the dashboard export (`xlsx-js-style`) were already on `main` (backend
+  `55519bb` / `7a5945b`, admin `e602f1b`). **Frontend `main` is 3 commits ahead of `dev`** (امتنان's join
+  channel picker, `e4e2918` `782b2d1` `b08a884`, pushed straight to `main`): merge them back into `dev`.
+  Backend `fix/complete-data-from-the-form` (`1df39f5`, cut from `main`) is on neither.
+- **Found:** `yarn check:rbac` has been skipping its catalogue checks in this checkout (it looks for
+  `../alt-static-basecode-backend/`), so "green" covered the sidebar half only. `send-bulk` sends any
+  invitation ids, from any collection and whatever the admin's categories (for Task 041). امتنان's bell
+  never reached its API (its path doubled `/admin`).
+
+**2026-09-29 (earlier): Task 048 scoped, not started. `main` has the audit / import / bulk / POC work
 (merged 2026-09-28, backend PR #21, admin PR #24), NOT yet deployed.**
 - **Deploy of that `main`:** three migrations (`2026_09_24_000001`, `2026_09_26_000001`,
   `2026_09_27_000001`), refresh cached routes/config, restart queue workers, and **tell the team first**
