@@ -122,15 +122,18 @@ says so. No other fields are accepted — anything not on this list is ignored.
 | Code | Meaning |
 |---|---|
 | `201` | Filed. `{"data": {"id": "...", "duplicate": false}}` |
-| `200` | That address already has a request pending. `duplicate: true`, nothing new created. |
 | `401` | Key missing, unknown, or revoked. |
 | `404` | No category at that slug. |
 | `410` | The category exists but is closed. |
+| `409` | That address is already on file — nothing new created. `reason` is `already_registered` (already a guest) or `already_requested` (an earlier request, whatever its outcome). |
 | `422` | Validation failed — `errors` names the fields. |
 | `429` | Rate limited (60/min per key). |
 
-`duplicate: true` is a success, not an error — show the same thank-you. It
-exists so a double submit does not put the same person in the queue twice.
+`409` is an answer to show the applicant, not a fault to retry: tell them the
+address is already registered, or has already requested an invitation. It is
+checked against both the guest list and every earlier request, so one person is
+never in the queue twice. `duplicate` in the `201` body is always `false` and
+kept only so existing integrations do not break.
 
 ## 3. Email OTP
 
@@ -167,7 +170,7 @@ partner asks second.
 | Moment | What we send | When nothing goes out |
 |---|---|---|
 | Filed (`201`) | The holding email — it arrived, a decision is coming | Only if the request category names `submitted_email_template_id`. Otherwise silence. |
-| Duplicate (`200`) | Nothing; the earlier request stands | Always — a second submit sends no second email |
+| Already on file (`409`) | Nothing; the earlier record stands | Always — a repeat submit sends no email |
 | Accepted | The invitation itself, with the registration link, on that collection's channel (`SendInvitationEvent` / SMS / WhatsApp) | — |
 | Rejected | A rejection email | Only if the category names `rejection_email_template_id`. Rejecting used to be silent; it still is without one. |
 

@@ -202,15 +202,15 @@ Content-Type: application/json
 <thead><tr><th style="width:12%">Code</th><th>Meaning &middot; what to do</th></tr></thead>
 <tbody>
 <tr><td class="code">201</td><td>Filed. Show your thank-you.</td></tr>
-<tr><td class="code">200</td><td>Already pending for that address &mdash; <code>duplicate: true</code>, nothing new created. This is a success. Show the same thank-you; it stops a double submit putting one person in the queue twice.</td></tr>
 <tr><td class="code">401</td><td>Key missing, unknown or revoked. Not retryable &mdash; contact TOURISE.</td></tr>
 <tr><td class="code">404</td><td>No category at that slug. Check your spelling of the slug.</td></tr>
 <tr><td class="code">410</td><td>The category exists but is closed. Stop showing the form and say applications have closed.</td></tr>
+<tr><td class="code">409</td><td>That address is already on file &mdash; nothing new created. <code>reason</code> is <code>already_registered</code> (already a guest) or <code>already_requested</code> (an earlier request, whatever its outcome). Tell the applicant; do not retry.</td></tr>
 <tr><td class="code">422</td><td>Validation failed. <code>errors</code> names each field &mdash; show them against your inputs.</td></tr>
 <tr><td class="code">429</td><td>Rate limited (60/min per key). Back off and retry.</td></tr>
 </tbody></table>
-<div class="good"><div class="callout-h">Treat 200 and 201 the same</div>
-<p>Both mean the person is in the queue. Only 4xx is a failure worth showing the user an error for.</p></div>
+<div class="good"><div class="callout-h">409 is a message, not a fault</div>
+<p>Every address is checked against the guest list and every earlier request, so one person is never in the queue twice. Show the applicant why, and do not retry. <code>duplicate</code> in the 201 body is always <code>false</code>.</p></div>
 
 <h2 class="sec-top">Email verification (OTP)</h2>
 <p class="lead">A category can ask applicants to prove the address they typed, by entering a code emailed to it.
@@ -255,7 +255,7 @@ would rather the verification were ours, send people to the TOURISE form (option
 <thead><tr><th style="width:26%">Moment</th><th style="width:36%">What we send</th><th>When nothing goes out</th></tr></thead>
 <tbody>
 <tr><td><b>Filed</b> (201)</td><td>A holding email &mdash; it arrived and is waiting on a decision.</td><td>Only if the category names a template for it. Otherwise the applicant hears nothing yet.</td></tr>
-<tr><td><b>Duplicate</b> (200)</td><td>Nothing. The earlier request still stands.</td><td>Always &mdash; a second submit sends no second email.</td></tr>
+<tr><td><b>Already on file</b> (409)</td><td>Nothing. The earlier record still stands.</td><td>Always &mdash; a repeat submit sends no email.</td></tr>
 <tr><td><b>Accepted</b></td><td>Their invitation, with the link to register, on the channel that category uses.</td><td>&mdash;</td></tr>
 <tr><td><b>Rejected</b></td><td>A rejection email.</td><td>Only if the category names a template. Otherwise the request is closed silently.</td></tr>
 </tbody></table>
@@ -292,8 +292,11 @@ const res = await fetch(`${API_BASE}/request-an-invitation/press`, {
 
 const body = await res.json();
 
-<span class="c">// 200 = already pending, 201 = created. Both are a success.</span>
+<span class="c">// 201 = created.</span>
 if (res.ok) return showThankYou();
+
+<span class="c">// 409 = already a guest, or already requested — tell them which.</span>
+if (res.status === 409) return showAlreadyOnFile(body.reason);
 
 if (res.status === 422) return showFieldErrors(body.errors);
 if (res.status === 410) return showClosedMessage();
@@ -333,7 +336,7 @@ the TOURISE form (option A) needs none of it either.</p>
 <ol>
 <li><code>GET</code> the field list and confirm your form asks for everything in <code>mandatory_fields</code>.</li>
 <li>Submit once and confirm you get <code>201</code>.</li>
-<li>Submit the same address again and confirm you get <code>200</code> with <code>duplicate: true</code> &mdash; and that your UI treats it as success, not an error.</li>
+<li>Submit the same address again and confirm you get <code>409</code> with <code>reason: already_requested</code> &mdash; and that your UI tells the applicant, rather than showing a generic error.</li>
 <li>Submit with a missing required field and confirm you render the <code>422</code> errors against the right inputs.</li>
 <li>Submit with a deliberately wrong key and confirm you get <code>401</code> and show a sensible message.</li>
 <li>Check <code>with_email_otp</code>: if it is <code>true</code> and you file with a key, decide how you verify addresses yourself.</li>
