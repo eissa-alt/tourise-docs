@@ -1595,3 +1595,143 @@ gets a personal, single-use invitation stamped with `invitations.dignitary_guest
 **Landed:** backend `ea4844b`, admin `35b260e` + `1d3adcd`, frontend `fa457c7` — pushed to `dev`.
 Dev `migrate` + choosing the invitation email pending. Task log:
 [`tasks/039-dignitary-parties/TASK.md`](../tasks/039-dignitary-parties/TASK.md).
+
+> **D50 to D52 were recorded late (2026-09-30).** They were written on 2026-09-12 and 13 as D48 to D50
+> on the docs branch `feat/emails-and-category-filters`, which never merged, and are renumbered because
+> `main` had used D48 and D49 meanwhile. The "not pushed" notes are as written then: all four commits
+> named below are on `dev` and `main` (checked 2026-09-30).
+
+## D50 — 2026-09-12 — System emails are rows in `email_templates`, not blades
+
+**What:** the five emails the platform sends itself — admin login code, guest verification code,
+admin invite (also the admin password reset), admin login notification, root-admin login alert —
+stop being hardcoded blades under `resources/views/emails` and become rows with `type = 'system'`,
+found by a unique `system_key`. Migration `2026_09_12_000002` adds both columns and backfills every
+existing row to `event`. Seeded by `SystemEmailTemplatesSeeder` from the invitation template's own
+exported header and black footer, so system mail matches event mail exactly.
+
+**Durable decisions:**
+
+1. **One table, not a second.** The builder, `content_{lang}` / `editor_json_{lang}`, the editor's
+   load/save endpoints, send-test, attachments and clone all already work against `email_templates`;
+   a parallel table meant a parallel copy of each. The cost is one column plus a `type` filter on the
+   listing and on `selectList` — **the picker must never offer a system template**, since no category
+   can point at one.
+2. **`content_*` cannot be produced on the server.** The builder renders in the BROWSER
+   (`handleSave`, `email-editor-waypoint.tsx`) and posts pre-rendered HTML; the backend never parses
+   `editor_json_*`, which is write-only storage so the editor can reopen a template. The seeder
+   therefore writes *both* columns, and its hand-written `content_*` is superseded the first time a
+   template is opened and saved through the real renderer. **Anything that needs to change stored
+   HTML has to happen in the editor, or duplicate its renderer.**
+3. **Per-send values do not go through the guest resolver.** The code, an IP, a user agent exist only
+   at send time and belong to no guest; `EmailVariableResolver::resolve()` is built around a guest and
+   mints tokens as a side effect. `resolveSystem()` takes them as an argument and queries nothing.
+   `SYSTEM_VARIABLES` there is mirrored by `SYSTEM_VARIABLE_GROUPS` in the admin editor — **add to
+   both**, or the palette offers a variable nothing resolves.
+4. **A system template must not be cloneable or deactivatable.** `replicate()` copied `system_key`
+   into the copy and hit its unique index — a 500, not a refusal. Deactivating the login-code template
+   would have stopped every admin OTP with no error anywhere, recoverable only through the database.
+   Both now return 422. There is no delete route for email templates at all, so that path was already
+   closed. A missing or empty template **throws and names the seeder** rather than mailing a blank page.
+5. **The plain-text OTP twin stays a blade** (`password_reset_plain/{en,ar}`). The builder emits HTML
+   only, and dropping the text alternative of an OTP costs deliverability. It needs the code alone.
+6. **The base view stops injecting anything.** `emails/base/waypoint.blade.php` spliced a second
+   "Follow us" row plus an *unflagged* copyright line in before `</body>` on every send, so every
+   builder-built email went out with two footers at two widths (a 500px block under a 600px canvas).
+   It echoes `$content` and nothing else now. `Helpers::getSocialLinksForEmailTemplate()` went with it
+   at zero callers, taking an unguarded `EmailConfig::first()->with_social` along.
+7. **The social-links feature is now read by nothing.** Icons are image blocks in the builder.
+   `social_media_links`, `social_media_links_per_temp`, their controllers, their 10 routes and the
+   per-template `override_social_links` switch all remain — **deliberately**, because removing routes
+   touches the mobile contract (rule 4). Same for the `email_configs` columns `with_header`,
+   `with_footer`, `with_social`, `cta_color`, `background_*`, `poster_*`: unread, still present,
+   awaiting a cleanup task. **Do not treat their presence as evidence they do anything.**
+
+**Landed:** backend `c92ab56`, admin `1f0ee8e` — committed on `dev`, **not pushed**. 14 blade views
+deleted; `resources/views/emails/` is down to `base/waypoint.blade.php` and the plain-text twin.
+Gates on the merged tree (alongside the teammate's `f6e49ac`): pint + **641 tests**; phpstan unchanged
+at 5 pre-existing larastan false positives, verified against a pristine worktree. Admin `type-check` +
+`build` + `check:rbac` + eslint. EN + AR in the same commit. **Not mobile-facing** — no route added,
+removed or renamed. Dev DB migrated + seeded; **prod migrate + seed pending.** Task log:
+[`tasks/049-system-email-templates/TASK.md`](../tasks/049-system-email-templates/TASK.md).
+
+## D51 — 2026-09-12 — The email builder sets text direction and owns its link colour
+
+**What:** two defects in `email-editor-waypoint.tsx` that reached delivered mail, both fixed in the
+save pipeline rather than per template.
+
+**Durable decisions:**
+
+1. **Direction is derived from the language version, not authored.** `renderToStaticMarkup` emits a
+   bare `<html><body>` with no `dir`, so every Arabic template shipped LTR: bidi moved trailing
+   punctuation to the wrong end (`…الدخول:` arriving as `:…الدخول`) and any line mixing Arabic with a
+   latin word reordered. The save pass now stamps `dir="rtl" lang="ar"` (or `ltr`/`en`) on `<html>`,
+   and the canvas carries the same, so the preview shows what the recipient gets. An Arabic template
+   is RTL by definition — there is no setting for an author to get wrong. **Known gap:** a block of
+   pure English inside an RTL document still reorders (closed the next day by a per-block direction
+   control, admin `9e20a59`); a per-block Inherit/LTR/RTL control is the
+   answer, and `dir="auto"` is *not* (classic Outlook's Word engine ignores it, so it would look
+   right in Gmail and wrong in Outlook).
+2. **Bare domains and emails must be linked by us, or the client links them.** Gmail auto-linked
+   `TOURISE.COM` in the footer and painted it its own default blue — unreadable on black, in
+   production. `applyLinkColor` is **ported from `113-pif-directors-gathering`**, where this shipped
+   first, along with its `linkColor` root setting: it wraps bare domains/emails in explicit anchors
+   (tracking anchor/style/script depth so it never double-wraps) with an inner `<span>` repeating the
+   colour, because classic Outlook applies its own Hyperlink style and ignores colour on the `<a>`.
+   **Left unset, links inherit the colour around them** — which is what a white footer link on black
+   needs; a single document-wide colour would be wrong here, since white vanishes on the canvas.
+3. **⚠️ Both fixes apply ON SAVE.** A template authored before them keeps its broken bidi and its blue
+   auto-link until someone opens it in the editor and saves. There is no server-side renderer to
+   migrate stored HTML with (see D50 #2), so the catch-up is manual: **open each affected template
+   once per language.** Local templates are ~1KB seeded stubs and unaffected; the live invitation
+   template is production-only.
+
+**Landed:** admin `1f0ee8e` (with D50's admin half). Task log:
+[`tasks/049-system-email-templates/TASK.md`](../tasks/049-system-email-templates/TASK.md).
+
+## D52 — 2026-09-13 — Reply-To is a property of the SMTP account, not of the category
+
+**What:** guests reply to a category-specific address (`media@`, `vip@`) while every mail still
+leaves the one authenticated `no-reply@` mailbox. Two nullable columns on `smtp_configs`
+(`reply_to_address`, `reply_to_name`) and one `Config::set` in `DynamicSmtpService`.
+
+**Durable decisions:**
+
+1. **The column goes on `smtp_configs`, even though the requirement is per-category.** Every send
+   path in this app already resolves exactly one thing — `smtp_config_id` — and the per-category
+   choice is already wired through `categories.smtp_config_id` / `otp_smtp_config_id` (D27). So the
+   category-level UI the requirement seems to ask for **already exists**: clone the account, set a
+   different Reply-To, point the category at it. Putting the column on `categories` instead would
+   have needed a second resolution path plus a second **snapshot** column on `guest_emails` /
+   `automations` / `invitation_emails` to keep the promise migration `2026_07_20_000003` makes (a
+   later category edit must not retroactively change a queued row) — and would still have left
+   newsletters, invitations and admin mail with no Reply-To, because none of those are
+   category-scoped. **Cost accepted:** N rows share one mailbox's credentials, so a password
+   rotation edits N rows.
+2. **No Mailable, Notification or template knows this feature exists.** `MailManager::
+   setGlobalAddress()` reads `mail.reply_to` on the same line it reads `mail.from`, falling back to
+   the global key for any mailer that does not define its own — so setting `mail.reply_to` beside
+   the existing `mail.from` write reaches every one of the ~15 call sites at once. Verified against
+   the framework source and pinned by a test that asserts the header on a real built message, not
+   the config value.
+3. **⚠️ `mail.reply_to` is written on EVERY apply, null included — never conditionally.** Config
+   outlives a job in a long-lived queue worker. A write guarded by `if ($config->reply_to_address)`
+   would leave a Media Reply-To attached to the next job sent through an account without one:
+   replies to an unrelated email silently rerouted, with nothing in any log. `applyFallbackConfig()`
+   restores it from `$pristine` for the same reason. This is the same leak-across-jobs shape as the
+   memoised-mailer bug (D27) and the `env()`-under-`config:cache` bug (D971) — the third instance of
+   it in this one service, which is why all three now have a test.
+4. **Reply-To, not a per-category From.** Reply-To carries no SPF/DKIM obligation, so `media@` and
+   `vip@` need no DNS work; varying `From` per category would need each address authenticated and
+   would risk deliverability. The addresses must nonetheless be **real, monitored mailboxes** or
+   replies bounce.
+5. **OTP and admin system mail inherit the account they are pointed at** (owner decision) rather
+   than being force-suppressed in code. Consequence to remember: a Reply-To on the **default**
+   account also applies to admin login codes, admin invites and the two security alerts, since those
+   resolve through `applyDefaultIfAvailable()`.
+
+**Landed:** backend `ce437a7`, admin `69d734b` — committed on `dev` after owner review of the
+diff, **not pushed**. Gates: pint + **644 tests** (641 → 644); phpstan unchanged at 5 pre-existing
+larastan false positives, verified against a pristine worktree of `HEAD`. Admin `type-check` +
+`build` + `check:rbac`. EN + AR in the same change. **Not mobile-facing.** Task log: `main` records this work as
+[`tasks/036-category-reply-to-mailboxes/TASK.md`](../tasks/036-category-reply-to-mailboxes/TASK.md).
