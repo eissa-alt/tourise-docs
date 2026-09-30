@@ -36,14 +36,14 @@ Categories. A category that is switched off stops accepting posts.
 
 ## No backend of your own
 
-Four ways in, from no code at all to a key in the browser.
+Three ways in. The key is **server-to-server only**: sent from a browser it is
+refused with `403 not_allowed`.
 
 | | How | Key | CORS |
 |---|---|---|---|
 | **A** | **Link to our form** at `https://register.tourise.com/{lang}/request-an-invitation/{slug}` — we handle required fields, the email code, reCAPTCHA and the reply | none | none |
-| **B** | Their **server-side function** adds the key and forwards (recommended for their own form) | server-side | none |
-| **C** | **Key in browser JavaScript** — public, and understood as such | exposed | their origin must be allow-listed |
-| **D** | **Newsletter only**: `POST /api/newsletter/subscribe` takes a reCAPTCHA token instead of a key | none | their origin |
+| **B** | Their **server-side function** adds the key and forwards (the only way to use their own form) | server-side | none |
+| **C** | **Newsletter only**: `POST /api/newsletter/subscribe` takes a reCAPTCHA token instead of a key | none | their origin |
 
 Two things worth saying out loud when a partner asks:
 
@@ -54,8 +54,35 @@ Two things worth saying out loud when a partner asks:
   /api/request-an-invitation/{slug}` sits behind `request-api-key`; only the
   newsletter endpoint resolves either credential (`NewsletterController@subscribe`).
 
-What a leaked browser key can do: file a pending request, 60/min, nothing else.
-It cannot read, list, edit, accept or reject anything.
+A keyed call carrying `Origin` or `Sec-Fetch-Mode` — which every browser fetch
+does and a server client does not — is refused before the key is looked up
+(`VerifyInvitationRequestApiKey::fromBrowser`). The answer is a bare
+`403 not_allowed`: it does not say why, so it does not tell a prober which
+headers to strip. Keep the detection detail out of partner-facing docs. The keyed newsletter path
+applies the same rule; its reCAPTCHA path is for pages.
+
+### Double check: key + server IP
+
+Each key carries `allowed_ips` (single addresses or CIDR ranges, IPv4 or
+IPv6), set in Admin → Invitation requests → API keys. A keyed call must present
+a valid key **and** come from one of those addresses, or it gets the same bare
+`403 not_allowed`. A key with no addresses refuses everything — so every
+existing key needs its partner's IPs added before this ships.
+
+- The address is read from `CF-Connecting-IP`, falling back to the
+  connection address (`VerifyInvitationRequestApiKey::clientIp`). Not
+  `$request->ip()`: no proxy is trusted, so that is the load balancer.
+- **Known limit:** the origin still answers directly, not only through
+  Cloudflare, so someone reaching it directly can set `CF-Connecting-IP`
+  themselves. Until the origin is locked to Cloudflare's ranges the IP check
+  only holds against callers who go through Cloudflare. See the note in
+  `TrustProxies` and 041 H03.4-OPS.
+- A refusal from a wrong address is logged (`Partner API key used from a server
+  it is not allowed on`) with the key and the address, so an admin can see
+  what to add. Accepted calls record `last_used_ip`, shown in the admin list.
+
+A leaked key alone is no longer enough; with the address too it can still only
+file a pending request, 60/min, nothing else.
 
 ## 1. Read the field list
 
@@ -122,6 +149,7 @@ says so. No other fields are accepted — anything not on this list is ignored.
 | Code | Meaning |
 |---|---|
 | `201` | Filed. `{"data": {"id": "...", "duplicate": false}}` |
+| `403` | `reason: not_allowed`, message `Not allowed.` — deliberately no more. Internally: the key was sent from a browser. |
 | `401` | Key missing, unknown, or revoked. |
 | `404` | No category at that slug. |
 | `410` | The category exists but is closed. |
@@ -192,8 +220,8 @@ through this API, so a removal request comes to us.
   no browser to run a challenge in. Our own form still uses reCAPTCHA.
 - **`source` is set by us, not by the caller.** Anything filed with a key is
   recorded as coming from that site, and admin can see which.
-- **CORS**: if the form posts from the browser, the partner's origin must be in
-  `CORS_ALLOWED_ORIGINS` on the API. Posting from their server needs nothing.
+- **No CORS set-up for partners**: the key is refused from a browser, so
+  there is no origin to allow-list.
 - Rate limit is per key, so one partner cannot exhaust another's budget.
 
 

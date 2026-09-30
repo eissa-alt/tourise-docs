@@ -106,18 +106,19 @@ queue as one filed on the TOURISE site, under the category you were given.</p>
 <p>It is a single JSON <code>POST</code>. There is no SDK to install and nothing to embed.</p>
 
 <div class="box">
-<h4>Three things TOURISE gives you</h4>
+<h4>Three things TOURISE gives you &mdash; and one thing you give us</h4>
 <table>
 <tr><td class="k" style="width:34%">API base URL</td><td><code>https://&lt;api-host&gt;/api</code></td></tr>
 <tr><td class="k">Category slug</td><td>e.g. <code>press</code></td></tr>
 <tr><td class="k">API key</td><td><code>tri_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></td></tr>
 </table>
-<p class="legend" style="margin-top:2.5mm">The key is shown once when it is issued. If it is lost, TOURISE issues a new one &mdash; that is also how it is rotated.</p>
+<p class="legend" style="margin-top:2.5mm"><b>You give us:</b> the public IP address(es) of the server that will call the API &mdash; single addresses or a range such as <code>203.0.113.0/24</code>. The key works only from those addresses.</p>
+<p class="legend" style="margin-top:1.5mm">The key is shown once when it is issued. If it is lost, TOURISE issues a new one &mdash; that is also how it is rotated.</p>
 </div>
 
 <h2 class="sec-top">No backend of your own? Start here</h2>
-<p class="lead">Four ways to connect, from no code at all to a key in the browser. Pick one deliberately: an API key
-placed in browser JavaScript is visible to anyone who opens DevTools.</p>
+<p class="lead">Three ways to connect. The API key is <b>server-to-server only</b>: a call that carries it from a
+browser is refused, so it never belongs in page JavaScript.</p>
 
 <div class="opt">
 <div class="top"><span class="name">A &middot; Send people to the TOURISE form</span><span class="tag none">No key, no code</span></div>
@@ -133,29 +134,18 @@ Link or redirect instead.</p></div>
 </div>
 
 <div class="opt">
-<div class="top"><span class="name">B &middot; Call it from a small server-side function</span><span class="tag rec">Recommended for your own form</span></div>
-<p>Your form posts to your own endpoint; that endpoint adds the key and forwards it to TOURISE. One file on Vercel,
-Netlify, Cloudflare Workers or any host you already use. The key never reaches the browser, and there is no CORS
-setup at all.</p>
+<div class="top"><span class="name">B &middot; Call it from a small server-side function</span><span class="tag rec">The way to use your own form</span></div>
+<p>Your form posts to your own endpoint; that endpoint adds the key and forwards it to TOURISE. The key never
+reaches the browser, and there is no CORS setup at all. The server must call out from a <b>fixed public IP</b>
+that you give TOURISE &mdash; a VPS or cloud server, or serverless behind a static egress IP. Plain Vercel, Netlify
+or Cloudflare Workers functions change address and will be refused.</p>
 </div>
 
 <div class="opt">
-<div class="top"><span class="name">C &middot; Put the key in the browser</span><span class="tag eyes">Acceptable, with eyes open</span></div>
-<p>Works today. Treat the key as public and understand the blast radius:</p>
-<ul>
-<li>The key can <b>only create a pending request</b>. It cannot read, list, edit, accept or reject anything, and it reaches no other part of the system.</li>
-<li>It is rate limited to <b>60 requests per minute per key</b>.</li>
-<li>Worst case if it is copied: junk requests in the review queue. TOURISE revokes the key and issues a new one.</li>
-<li>Requests filed this way <b>skip the email verification code</b>, so nothing proves the address is real &mdash; see <i>Email verification</i>.</li>
-</ul>
-<p style="margin-bottom:0">Requires your exact origin on the API's allow-list &mdash; see <b>CORS</b>.</p>
-</div>
-
-<div class="opt">
-<div class="top"><span class="name">D &middot; The newsletter box, with no key</span><span class="tag none">Newsletter only</span></div>
+<div class="top"><span class="name">C &middot; The newsletter box, with no key</span><span class="tag none">Newsletter only</span></div>
 <p style="margin-bottom:0"><code>POST /api/newsletter/subscribe</code> takes a Google reCAPTCHA token <i>instead of</i> a key, which suits a page
 that can hold no secret. It needs TOURISE to share a site key registered for your domain. <b>Invitation requests have
-no such route</b> &mdash; that endpoint always requires a key, so use A, B or C for them.</p>
+no such route</b> &mdash; that endpoint always requires a key, so use A or B for them.</p>
 </div>
 
 <h2 class="sec-top">Step 1 &mdash; Read the field list</h2>
@@ -202,6 +192,7 @@ Content-Type: application/json
 <thead><tr><th style="width:12%">Code</th><th>Meaning &middot; what to do</th></tr></thead>
 <tbody>
 <tr><td class="code">201</td><td>Filed. Show your thank-you.</td></tr>
+<tr><td class="code">403</td><td>Not allowed. Check that the call is made from your server with your key.</td></tr>
 <tr><td class="code">401</td><td>Key missing, unknown or revoked. Not retryable &mdash; contact TOURISE.</td></tr>
 <tr><td class="code">404</td><td>No category at that slug. Check your spelling of the slug.</td></tr>
 <tr><td class="code">410</td><td>The category exists but is closed. Stop showing the form and say applications have closed.</td></tr>
@@ -220,7 +211,7 @@ Whether that applies to you depends on how you integrate.</p>
 <thead><tr><th style="width:36%">How you file the request</th><th>Does the code apply?</th></tr></thead>
 <tbody>
 <tr><td><b>The TOURISE form</b> (option A)</td><td>Yes, when the category has it on. We send the code, check it and file the request. Nothing for you to build.</td></tr>
-<tr><td><b>The partner API</b> with your key (B or C)</td><td><b>No.</b> The code is skipped, whatever the category says. Your key is the trust, and there is no inbox of the applicant's for your server to read. An <code>otp_token</code> sent with a key is ignored.</td></tr>
+<tr><td><b>The partner API</b> with your key (B)</td><td><b>No.</b> The code is skipped, whatever the category says. Your key is the trust, and there is no inbox of the applicant's for your server to read. An <code>otp_token</code> sent with a key is ignored.</td></tr>
 </tbody></table>
 
 <h3>What it looks like on the TOURISE form</h3>
@@ -274,36 +265,8 @@ about the visitor reaches us &mdash; we see no page views, no cookies and no IP 
 If you do keep one, say so in your own privacy notice &mdash; it is your form and your visitor. An applicant asking to
 be removed from the TOURISE queue should be passed to your TOURISE contact; you cannot delete through this API.</p>
 
-<h2 class="sec-top">Example &mdash; browser (option C)</h2>
-<pre><code><span class="c">// The key is visible to anyone who opens DevTools. See option B.</span>
-const res = await fetch(`${API_BASE}/request-an-invitation/press`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Api-Key': API_KEY,
-    },
-    body: JSON.stringify({
-        email: form.email,
-        first_name: form.firstName,
-        company: form.company,
-    }),
-});
-
-const body = await res.json();
-
-<span class="c">// 201 = created.</span>
-if (res.ok) return showThankYou();
-
-<span class="c">// 409 = already a guest, or already requested — tell them which.</span>
-if (res.status === 409) return showAlreadyOnFile(body.reason);
-
-if (res.status === 422) return showFieldErrors(body.errors);
-if (res.status === 410) return showClosedMessage();
-return showGenericError();</code></pre>
-
-<h2>Example &mdash; server-side function (option B)</h2>
-<pre><code><span class="c">// /api/request-invitation — Vercel / Netlify / Cloudflare function.
+<h2 class="sec-top">Example &mdash; server-side function (option B)</h2>
+<pre><code><span class="c">// /api/request-invitation — on your server (fixed outgoing IP).
 // The key stays here and never reaches the browser.</span>
 export default async function handler(req, res) {
     const upstream = await fetch(
@@ -319,18 +282,18 @@ export default async function handler(req, res) {
         }
     );
 
+    <span class="c">// 201 = created. 409 = already a guest, or already requested (body.reason
+    // says which). 422 = field errors. 410 = closed. Pass them on to your page.</span>
     const body = await upstream.json();
     res.status(upstream.status).json(body);
 }</code></pre>
 
-<h2>CORS</h2>
-<p>Only matters for option C. A browser refuses the call unless your exact origin is on the API allow-list. Send TOURISE
-the origins you post from, including scheme and any subdomain:</p>
-<pre><code>https://www.yourdomain.com
-https://yourdomain.com
-https://staging.yourdomain.com</code></pre>
-<p>Posting from your own server (option B) needs none of this &mdash; CORS is a browser rule and does not apply. Linking to
-the TOURISE form (option A) needs none of it either.</p>
+<h2>Server-to-server only</h2>
+<p>The key works only from your server, and only from the server IP addresses you gave TOURISE. A call made with
+it from a browser, or from any other address, is refused with <code>403</code>. If your server's outgoing address
+changes, send TOURISE the new one before you switch.
+Your page posts to your own server; your server adds the key and calls TOURISE. There is no CORS set-up to
+ask for.</p>
 
 <h2 class="sec-top">Before you go live</h2>
 <ol>
@@ -340,8 +303,9 @@ the TOURISE form (option A) needs none of it either.</p>
 <li>Submit with a missing required field and confirm you render the <code>422</code> errors against the right inputs.</li>
 <li>Submit with a deliberately wrong key and confirm you get <code>401</code> and show a sensible message.</li>
 <li>Check <code>with_email_otp</code>: if it is <code>true</code> and you file with a key, decide how you verify addresses yourself.</li>
+<li>Confirm TOURISE has your server&rsquo;s public outgoing IP address(es) &mdash; the address your calls leave from, which on a hosted function may be a range your provider publishes.</li>
 <li>Ask TOURISE to confirm the request appeared in the review queue.</li>
-<li>Option C only: confirm your production origin is on the CORS allow-list.</li>
+<li>Confirm the key lives only in your server&rsquo;s environment, never in anything shipped to the browser.</li>
 </ol>
 
 <h2>Good to know</h2>
@@ -393,5 +357,5 @@ first site to subscribe an address keeps the attribution &mdash; a later signup 
 originally came from.</p></div>
 
 <div class="foot-note">TOURISE 2027 &middot; Partner API &middot; Request an Invitation and Newsletter &middot; integration guide.<br>
-Questions, a new key, a reCAPTCHA site key, or a CORS origin to add &mdash; contact your TOURISE technical contact.</div>
+Questions, a new key, or a reCAPTCHA site key &mdash; contact your TOURISE technical contact.</div>
 </body></html>
