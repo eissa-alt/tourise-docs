@@ -94,7 +94,7 @@ table.keep { break-inside: avoid; }
   <div>
     <div class="eyebrow">Integration guide for partner websites</div>
     <h1>TOURISE 2027 &mdash; Partner API</h1>
-    <p class="sub">Request an Invitation &amp; Newsletter &middot; updated 26 September 2026</p>
+    <p class="sub">Request an Invitation &amp; Newsletter &middot; updated 1 October 2026</p>
   </div>
 </div>
 <div class="rule"></div>
@@ -148,7 +148,21 @@ that can hold no secret. It needs TOURISE to share a site key registered for you
 no such route</b> &mdash; that endpoint always requires a key, so use A or B for them.</p>
 </div>
 
-<h2 class="sec-top">Step 1 &mdash; Read the field list</h2>
+<h2 class="sec-top">Step 1 &mdash; Check your key, from your server</h2>
+<div class="ep"><span class="m">GET</span><span class="p">/api/partner/verify</span><span class="note">&middot; key required &middot; creates nothing</span></div>
+<p>The one call that proves your set-up end to end: the key, and the server it is sent from. Run it from the server
+that will file requests, as often as you like &mdash; nothing is created and nothing reaches the review queue.</p>
+<pre><code>GET /api/partner/verify
+X-Api-Key: tri_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+<span class="c">// 200 → { "status": "success", "data": { "valid": true, "site": "Your site name", ... } }
+// 401 → the key is missing, unknown or revoked
+// 403 → not allowed: see "Getting 403?" below</span></code></pre>
+<div class="warn"><div class="callout-h">A 200 from the field list does not test your key</div>
+<p>Step 2 is public and never reads the key, so it answers 200 whatever you send. Only this call, or a real
+<code>POST</code>, tells you the key and your server are accepted.</p></div>
+
+<h2>Step 2 &mdash; Read the field list</h2>
 <div class="ep"><span class="m">GET</span><span class="p">/api/request-an-invitation/{slug}</span><span class="note">&middot; public, no key needed</span></div>
 <p>Tells you which fields to render and which to require, so your form follows the category without a redeploy when
 TOURISE changes it.</p>
@@ -164,7 +178,7 @@ TOURISE changes it.</p>
 <p><code>null</code> means the category is not configured &mdash; nothing beyond <code>email</code> is required.
 <code>with_email_otp</code> says whether the TOURISE form asks for an emailed code; see <i>Email verification</i>.</p>
 
-<h2>Step 2 &mdash; File the request</h2>
+<h2>Step 3 &mdash; File the request</h2>
 <div class="ep"><span class="m post">POST</span><span class="p">/api/request-an-invitation/{slug}</span><span class="note">&middot; key required</span></div>
 <pre><code>POST /api/request-an-invitation/press
 X-Api-Key: tri_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -181,7 +195,7 @@ Content-Type: application/json
 <div class="good"><div class="callout-h">Success</div>
 <p><code>HTTP 201</code> &nbsp; <code>{ "status": "success", "data": { "id": "01a0…", "duplicate": false } }</code></p></div>
 
-<p><code>email</code> is always required. Everything else is required only if the category says so, and the list in Step 1 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored.</p>
+<p><code>email</code> is always required. Everything else is required only if the category says so, and the list in Step 2 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored.</p>
 
 <div class="note"><div class="callout-h">Countries are UUIDs</div>
 <p><code>country_of_residence</code> and <code>nationality</code> take the id from <code>GET /api/countries</code> &mdash; not
@@ -192,11 +206,11 @@ Content-Type: application/json
 <thead><tr><th style="width:12%">Code</th><th>Meaning &middot; what to do</th></tr></thead>
 <tbody>
 <tr><td class="code">201</td><td>Filed. Show your thank-you.</td></tr>
-<tr><td class="code">403</td><td>Not allowed. Check that the call is made from your server with your key.</td></tr>
 <tr><td class="code">401</td><td>Key missing, unknown or revoked. Not retryable &mdash; contact TOURISE.</td></tr>
+<tr><td class="code">403</td><td>Not allowed. Not retryable as is &mdash; see <i>Getting 403?</i> below.</td></tr>
 <tr><td class="code">404</td><td>No category at that slug. Check your spelling of the slug.</td></tr>
-<tr><td class="code">410</td><td>The category exists but is closed. Stop showing the form and say applications have closed.</td></tr>
 <tr><td class="code">409</td><td>That address is already on file &mdash; nothing new created. <code>reason</code> is <code>already_registered</code> (already a guest) or <code>already_requested</code> (an earlier request, whatever its outcome). Tell the applicant; do not retry.</td></tr>
+<tr><td class="code">410</td><td>The category exists but is closed. Stop showing the form and say applications have closed.</td></tr>
 <tr><td class="code">422</td><td>Validation failed. <code>errors</code> names each field &mdash; show them against your inputs.</td></tr>
 <tr><td class="code">429</td><td>Rate limited (60/min per key). Back off and retry.</td></tr>
 </tbody></table>
@@ -215,7 +229,7 @@ Whether that applies to you depends on how you integrate.</p>
 </tbody></table>
 
 <h3>What it looks like on the TOURISE form</h3>
-<p>Turned on per category in the TOURISE admin, and reported to you as <code>with_email_otp</code> in Step 1:</p>
+<p>Turned on per category in the TOURISE admin, and reported to you as <code>with_email_otp</code> in Step 2:</p>
 <ol>
 <li>The applicant types their email and asks for a code.</li>
 <li>TOURISE emails an 8-character code. Only one code is live per address &mdash; asking again replaces the previous one.</li>
@@ -258,7 +272,8 @@ request was received and they will hear when it is reviewed.</p></div>
 <h3>What TOURISE keeps</h3>
 <p>The request row: the fields you sent, the language, which partner site filed it, its status, and the reviewer's
 note. A newsletter opt-in is kept separately as a subscriber, attributed to your site the same way. Nothing else
-about the visitor reaches us &mdash; we see no page views, no cookies and no IP from your site.</p>
+about the visitor reaches us &mdash; we see no page views, no cookies and no visitor IP addresses. The only address we
+record is your server&rsquo;s, on your key, to show which address your last accepted call came from.</p>
 
 <h3>What you keep</h3>
 <p>Whatever you choose: the API needs no copy on your side, and the review queue is the record TOURISE works from.
@@ -294,16 +309,32 @@ it from a browser, or from any other address, is refused with <code>403</code>. 
 changes, send TOURISE the new one before you switch.
 Your page posts to your own server; your server adds the key and calls TOURISE. There is no CORS set-up to
 ask for.</p>
+<p>Any server language works &mdash; Node, PHP, Python, Java, .NET or plain <code>curl</code>. No special
+headers are needed beyond the ones in the examples.</p>
+
+<h3>Getting 403?</h3>
+<p>The answer is a bare <code>Not allowed.</code> on purpose. Check these, in order:</p>
+<ol>
+<li><b>The call leaves from your server</b>, not from a page, a browser extension or a tool running in the browser.</li>
+<li><b>It leaves from an address TOURISE has on your key.</b> The address that counts is the one the internet sees
+your server call from, which can differ from the machine's own address &mdash; behind a NAT gateway, a proxy, or
+over IPv6. If unsure, ask TOURISE which address your last call arrived from.</li>
+<li><b>You build the headers yourself.</b> Do not forward the headers of the request your page sent you
+(<code>headers: req.headers</code>) &mdash; send only <code>X-Api-Key</code>, <code>Content-Type</code> and
+<code>Accept</code>, as in the example above.</li>
+</ol>
+<p>Then run <code>GET /api/partner/verify</code> again: a <code>200</code> there means filing will be accepted too.</p>
 
 <h2 class="sec-top">Before you go live</h2>
 <ol>
+<li>Send TOURISE your server&rsquo;s public outgoing IP address(es), and wait for confirmation they are on your key.</li>
+<li>Call <code>GET /api/partner/verify</code> <b>from that server</b> and confirm you get <code>200</code>.</li>
 <li><code>GET</code> the field list and confirm your form asks for everything in <code>mandatory_fields</code>.</li>
 <li>Submit once and confirm you get <code>201</code>.</li>
 <li>Submit the same address again and confirm you get <code>409</code> with <code>reason: already_requested</code> &mdash; and that your UI tells the applicant, rather than showing a generic error.</li>
 <li>Submit with a missing required field and confirm you render the <code>422</code> errors against the right inputs.</li>
 <li>Submit with a deliberately wrong key and confirm you get <code>401</code> and show a sensible message.</li>
 <li>Check <code>with_email_otp</code>: if it is <code>true</code> and you file with a key, decide how you verify addresses yourself.</li>
-<li>Confirm TOURISE has your server&rsquo;s public outgoing IP address(es) &mdash; the address your calls leave from, which on a hosted function may be a range your provider publishes.</li>
 <li>Ask TOURISE to confirm the request appeared in the review queue.</li>
 <li>Confirm the key lives only in your server&rsquo;s environment, never in anything shipped to the browser.</li>
 </ol>
@@ -343,7 +374,8 @@ ago reads as though the first time never took.</p>
 <tr><td class="k">already_subscribed</td><td>Was already on the list</td><td>"You are already subscribed"</td></tr>
 <tr><td class="k">resubscribed</td><td>Had unsubscribed, now back</td><td>"Welcome back"</td></tr>
 </tbody></table>
-<p><code>401</code> for a missing, unknown or revoked key. <code>422</code> if the address is not a valid email.</p>
+<p><code>401</code> for a missing, unknown or revoked key. <code>403</code> when a call with the key is not allowed &mdash; the same rules as
+filing a request: from your server, from an address on your key. <code>422</code> if the address is not a valid email.</p>
 
 <div class="note"><div class="callout-h">About the token field</div>
 <p><code>token</code> comes back only when <code>state</code> is <code>subscribed</code> &mdash; a genuinely new address. It is a bearer

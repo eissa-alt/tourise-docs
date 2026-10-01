@@ -54,9 +54,11 @@ Two things worth saying out loud when a partner asks:
   /api/request-an-invitation/{slug}` sits behind `request-api-key`; only the
   newsletter endpoint resolves either credential (`NewsletterController@subscribe`).
 
-A keyed call carrying `Origin` or `Sec-Fetch-Mode` — which every browser fetch
-does and a server client does not — is refused before the key is looked up
-(`VerifyInvitationRequestApiKey::fromBrowser`). The answer is a bare
+A keyed call carrying `Origin` or `Sec-Fetch-Site` — which every browser sends
+and a server client does not — is refused before the key is looked up
+(`VerifyInvitationRequestApiKey::fromBrowser`). **Not `Sec-Fetch-Mode`:**
+Node's built-in fetch sends it from a server, and checking it refused every
+Node partner (fixed in backend #30). The answer is a bare
 `403 not_allowed`: it does not say why, so it does not tell a prober which
 headers to strip. Keep the detection detail out of partner-facing docs. The keyed newsletter path
 applies the same rule; its reCAPTCHA path is for pages.
