@@ -188,7 +188,8 @@ page: TOURISE can switch a category between the two.</p>
 <tr><td><code>"with_email_otp": true</code></td><td><b>Flow 2 &mdash; with a code</b></td><td>Two: send the code, then file the request with it.</td></tr>
 </tbody></table>
 
-<p class="legend">In the charts, each row is one step and the coloured cell is who acts:
+<p class="legend">Step 0 is optional in both: it only makes the answer arrive sooner, since filing and
+<code>send-code</code> run the same check anyway. In the charts, each row is one step and the coloured cell is who acts:
 <b class="lane-a">the applicant</b> on your page, <b class="lane-s">your server</b>, or
 <b class="lane-t">TOURISE</b>. Your page never talks to TOURISE directly.</p>
 
@@ -196,7 +197,8 @@ page: TOURISE can switch a category between the two.</p>
 <table class="flow">
 <thead><tr><th class="n">#</th><th>Applicant &middot; your page</th><th>Your server</th><th>TOURISE</th></tr></thead>
 <tbody>
-<tr><td class="n">1</td><td class="a">Fills in your form and presses <b>Submit</b>.<span class="to">&rarr; to your server</span></td><td></td><td></td></tr>
+<tr><td class="n">0</td><td class="a">Types their email. As they leave the field, your page asks your server.</td><td class="s">Checks it: <code>POST /request-an-invitation/{slug}/check-email</code>. On <code>409</code>, your page shows &ldquo;already registered&rdquo; under the field right away.</td><td class="t">Answers <code>200</code> or <code>409</code>. Creates and sends nothing.</td></tr>
+<tr><td class="n">1</td><td class="a">Fills in the rest of your form and presses <b>Submit</b>.<span class="to">&rarr; to your server</span></td><td></td><td></td></tr>
 <tr><td class="n">2</td><td></td><td class="s">Adds the key and files the request:<br><code>POST /request-an-invitation/{slug}</code><span class="to">&rarr; to TOURISE</span></td><td></td></tr>
 <tr><td class="n">3</td><td></td><td></td><td class="t">Checks the key and your server&rsquo;s IP, then the fields, then whether the address is already on file. Files it and answers <code>201</code>.<span class="to">&larr; back to your server</span></td></tr>
 <tr><td class="n">4</td><td class="a">Sees your thank-you.<span class="to">done</span></td><td class="s">Passes the result to your page.</td><td></td></tr>
@@ -210,7 +212,8 @@ page: TOURISE can switch a category between the two.</p>
 <table class="flow">
 <thead><tr><th class="n">#</th><th>Applicant &middot; your page</th><th>Your server</th><th>TOURISE</th></tr></thead>
 <tbody>
-<tr><td class="n">1</td><td class="a">Types their email and presses <b>Send code</b>.<span class="to">&rarr; to your server</span></td><td></td><td></td></tr>
+<tr><td class="n">0</td><td class="a">Types their email. As they leave the field, your page asks your server.</td><td class="s">Checks it: <code>POST /request-an-invitation/{slug}/check-email</code>. On <code>409</code>, your page shows &ldquo;already registered&rdquo; under the field right away.</td><td class="t">Answers <code>200</code> or <code>409</code>. Creates and sends nothing.</td></tr>
+<tr><td class="n">1</td><td class="a">Presses <b>Send code</b>.<span class="to">&rarr; to your server</span></td><td></td><td></td></tr>
 <tr><td class="n">2</td><td></td><td class="s">Asks TOURISE to send the code:<br><code>POST /request-an-invitation/{slug}/send-code</code><br><code>{ "email": "&hellip;", "lang": "en" }</code><span class="to">&rarr; to TOURISE</span></td><td></td></tr>
 <tr><td class="n">3</td><td></td><td></td><td class="t">Checks the key and your server&rsquo;s IP. <b>Emails the applicant an 8-character code</b> and answers <code>200</code> &mdash; without the code.<span class="to">&rarr; email to the applicant &middot; &larr; 200 to your server</span></td></tr>
 <tr><td class="n">3b</td><td></td><td class="stop">Instead of 3, gets <code>409</code>: the address is already on file and <b>no email was sent</b>. Show the message and stop here.</td><td></td></tr>
@@ -229,6 +232,22 @@ page: TOURISE can switch a category between the two.</p>
 <div class="note"><div class="callout-h">The code is between TOURISE and the applicant</div>
 <p>It goes from us straight to their inbox, and the only copy your server ever handles is the one the applicant types
 into your form. Never in the <code>send-code</code> response, never in a log of ours you can read.</p></div>
+
+<h3>Check the email as they type</h3>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/request-an-invitation/{slug}/check-email</span><span class="note">&middot; key required &middot; creates nothing</span></div>
+<pre><code>POST /api/request-an-invitation/press/check-email
+X-Api-Key: tri_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Content-Type: application/json
+
+{ "email": "sara@example.com" }
+
+<span class="c">// 200 → { "status": "success", "data": { "available": true } }
+// 409 → { "status": "failed", "reason": "already_registered" | "already_requested", "message": "…" }</span></code></pre>
+<ul>
+<li>Call it when the applicant <b>leaves the email field</b>, or after they stop typing for about half a second &mdash;
+not on every key press. It shares the 60-a-minute limit with your other calls.</li>
+<li>It is a hint for the form, not a reservation: always handle <code>409</code> on filing too.</li>
+</ul>
 
 <h3>Send the code</h3>
 <div class="ep"><span class="m post">POST</span><span class="p">/api/request-an-invitation/{slug}/send-code</span><span class="note">&middot; key required</span></div>
@@ -395,6 +414,7 @@ over IPv6. If unsure, ask TOURISE which address your last call arrived from.</li
 <li>Call <code>GET /api/partner/verify</code> <b>from that server</b> and confirm you get <code>200</code>.</li>
 <li><code>GET</code> the field list and confirm your form asks for everything in <code>mandatory_fields</code>.</li>
 <li>Submit once and confirm you get <code>201</code>.</li>
+<li>Type an address that already requested into your form and confirm <code>check-email</code> shows the message before submit.</li>
 <li>Submit the same address again and confirm you get <code>409</code> with <code>reason: already_requested</code> &mdash; and that your UI tells the applicant, rather than showing a generic error.</li>
 <li>Submit with a missing required field and confirm you render the <code>422</code> errors against the right inputs.</li>
 <li>Submit with a deliberately wrong key and confirm you get <code>401</code> and show a sensible message.</li>
