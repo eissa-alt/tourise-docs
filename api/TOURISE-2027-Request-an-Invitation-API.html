@@ -157,8 +157,53 @@ TOURISE changes it.</p>
     }
 }</code></pre>
 <p><code>null</code> means the category is not configured &mdash; nothing beyond <code>email</code> is required.
-<code>with_email_otp</code> is about the TOURISE-hosted form and does not apply to calls made with your key; see
-<i>Email verification</i>.</p>
+<code>with_email_otp</code> tells you which flow to build: <code>false</code> &rarr; file straight away;
+<code>true</code> &rarr; TOURISE emails the applicant a code first. Both are in <i>The two flows</i> below.</p>
+
+<h2 class="sec-top">The two flows</h2>
+<p class="lead">Pick by <code>with_email_otp</code> from Step 2. The code, when there is one, is sent by TOURISE
+straight to the applicant&rsquo;s inbox &mdash; it never passes through your server.</p>
+
+<div class="opt">
+<div class="top"><span class="name">Without a code</span><span class="tag none">with_email_otp: false</span></div>
+<ol style="margin-bottom:0">
+<li>The applicant fills in your form and submits it to your server.</li>
+<li>Your server files the request &mdash; <code>POST /api/request-an-invitation/{slug}</code> (Step 3).</li>
+<li><code>201</code> &rarr; show your thank-you. <code>409</code> &rarr; tell them the address is already on file.</li>
+</ol>
+</div>
+
+<div class="opt">
+<div class="top"><span class="name">With a code</span><span class="tag rec">with_email_otp: true</span></div>
+<ol style="margin-bottom:0">
+<li>The applicant types their email on your form and asks for a code.</li>
+<li>Your server asks TOURISE to send it &mdash; <code>POST /api/request-an-invitation/{slug}/send-code</code>.
+<b>TOURISE emails the applicant an 8-character code.</b> If the address is already on file you get <code>409</code>
+and no email is sent &mdash; tell them and stop here.</li>
+<li>The applicant reads the code from their inbox and types it into your form, with the rest of the fields.</li>
+<li>Your server files the request with the code as <code>otp_token</code> &mdash; Step 3.</li>
+<li><code>201</code> &rarr; thank-you. <code>422</code> with <code>reason: otp_invalid</code> &rarr; the code is wrong or was replaced;
+let them ask for a new one (back to 2).</li>
+</ol>
+</div>
+
+<h3>Send the code</h3>
+<div class="ep"><span class="m post">POST</span><span class="p">/api/request-an-invitation/{slug}/send-code</span><span class="note">&middot; key required</span></div>
+<pre><code>POST /api/request-an-invitation/press/send-code
+X-Api-Key: tri_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Content-Type: application/json
+
+{ "email": "sara@example.com", "lang": "en" }
+
+<span class="c">// 200 → { "status": "success", "data": { "otp_required": true } }   code emailed
+// 409 → already on file (reason says which) — no email sent
+// 401 / 403 / 404 / 410 / 422 / 429 → as in Step 3</span></code></pre>
+<ul>
+<li><code>lang</code> (<code>en</code> or <code>ar</code>) picks the language of the email. Defaults to <code>en</code>.</li>
+<li>The code is <b>never</b> in the response. Only the applicant sees it.</li>
+<li>One code is live per address: asking again replaces the previous one, which then stops working.</li>
+<li>The code works only for the address it was sent to, is not case-sensitive, and is spent when the request is filed.</li>
+</ul>
 
 <h2>Step 3 &mdash; File the request</h2>
 <div class="ep"><span class="m post">POST</span><span class="p">/api/request-an-invitation/{slug}</span><span class="note">&middot; key required</span></div>
@@ -171,13 +216,14 @@ Content-Type: application/json
     "first_name": "Sara",
     "last_name": "Idris",
     "company": "Partner Co",
-    "job_title": "Editor"
+    "job_title": "Editor",
+    "otp_token": "A1B2C3D4"      <span class="c">// only when with_email_otp is true</span>
 }</code></pre>
 <p><code>Authorization: Bearer &lt;key&gt;</code> is accepted as the same credential if that header is easier for your HTTP client.</p>
 <div class="good"><div class="callout-h">Success</div>
 <p><code>HTTP 201</code> &nbsp; <code>{ "status": "success", "data": { "id": "01a0…", "duplicate": false } }</code></p></div>
 
-<p><code>email</code> is always required. Everything else is required only if the category says so, and the list in Step 2 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored.</p>
+<p><code>email</code> is always required. Everything else is required only if the category says so, and the list in Step 2 is the live answer &mdash; it follows the category without a redeploy. Any field not on that list is ignored, apart from <code>otp_token</code>.</p>
 
 <div class="note"><div class="callout-h">Countries are UUIDs</div>
 <p><code>country_of_residence</code> and <code>nationality</code> take the id from <code>GET /api/countries</code> &mdash; not
@@ -193,20 +239,19 @@ Content-Type: application/json
 <tr><td class="code">404</td><td>No category at that slug. Check your spelling of the slug.</td></tr>
 <tr><td class="code">409</td><td>That address is already on file &mdash; nothing new created. <code>reason</code> is <code>already_registered</code> (already a guest) or <code>already_requested</code> (an earlier request, whatever its outcome). Tell the applicant; do not retry.</td></tr>
 <tr><td class="code">410</td><td>The category exists but is closed. Stop showing the form and say applications have closed.</td></tr>
-<tr><td class="code">422</td><td>Validation failed. <code>errors</code> names each field &mdash; show them against your inputs.</td></tr>
+<tr><td class="code">422</td><td>Validation failed. <code>errors</code> names each field &mdash; show them against your inputs.
+With <code>reason: otp_invalid</code>: the code is missing, wrong or was replaced &mdash; let the applicant ask for a new one.</td></tr>
 <tr><td class="code">429</td><td>Rate limited (60/min per key). Back off and retry.</td></tr>
 </tbody></table>
 <div class="good"><div class="callout-h">409 is a message, not a fault</div>
 <p>Every address is checked against the guest list and every earlier request, so one person is never in the queue twice. Show the applicant why, and do not retry. <code>duplicate</code> in the 201 body is always <code>false</code>.</p></div>
 
 <h2 class="sec-top">Email verification (OTP)</h2>
-<p class="lead">Requests filed with your key are not asked for an email code, whatever the category&rsquo;s
-<code>with_email_otp</code> says. Your key and your server address are the trust, so there is nothing to send and
-nothing to build. An <code>otp_token</code> sent with the key is ignored.</p>
-<div class="warn"><div class="callout-h">The address is yours to check</div>
-<p>Because no code is sent, nothing on our side proves the applicant owns the address they typed. If that matters to
-you, validate it on your own form before you file the request &mdash; an accepted request sends the invitation to
-that address.</p></div>
+<p class="lead">Turned on per category by TOURISE, and reported as <code>with_email_otp</code> in Step 2. When it
+is on, a request filed without a valid code is refused &mdash; follow <i>With a code</i> in <i>The two flows</i>.</p>
+<div class="good"><div class="callout-h">Why the code comes from us</div>
+<p>TOURISE sends it and checks it, so the applicant proves they own the address without your server ever holding the
+proof. The invitation, if the request is accepted, goes to that same address.</p></div>
 
 <h2 class="sec-top">After the request is filed</h2>
 <p class="lead">Who talks to the applicant next, and what each side keeps.</p>
@@ -215,6 +260,7 @@ that address.</p></div>
 <table class="keep">
 <thead><tr><th style="width:26%">Moment</th><th style="width:36%">What we send</th><th>When nothing goes out</th></tr></thead>
 <tbody>
+<tr><td><b>Code requested</b> (send-code)</td><td>The 8-character code, from TOURISE.</td><td>Never when the address is already on file (409).</td></tr>
 <tr><td><b>Filed</b> (201)</td><td>A holding email &mdash; it arrived and is waiting on a decision.</td><td>Only if the category names a template for it. Otherwise the applicant hears nothing yet.</td></tr>
 <tr><td><b>Already on file</b> (409)</td><td>Nothing. The earlier record still stands.</td><td>Always &mdash; a repeat submit sends no email.</td></tr>
 <tr><td><b>Accepted</b></td><td>Their invitation, with the link to register, on the channel that category uses.</td><td>&mdash;</td></tr>
@@ -222,7 +268,7 @@ that address.</p></div>
 </tbody></table>
 <div class="warn"><div class="callout-h">Ask before you word your thank-you</div>
 <p>Whether the holding email exists is a setting on your category, not a promise of the API. Ask TOURISE which of
-the four above are switched on for you. If there is no holding email, do not write "check your inbox" &mdash; say the
+the moments above are switched on for you. If there is no holding email, do not write "check your inbox" &mdash; say the
 request was received and they will hear when it is reviewed.</p></div>
 
 <h3>What TOURISE keeps</h3>
@@ -236,8 +282,27 @@ record is your server&rsquo;s, on your key, to show which address your last acce
 If you do keep one, say so in your own privacy notice &mdash; it is your form and your visitor. An applicant asking to
 be removed from the TOURISE queue should be passed to your TOURISE contact; you cannot delete through this API.</p>
 
-<h2 class="sec-top">Example &mdash; your server-side endpoint</h2>
-<pre><code><span class="c">// /api/request-invitation — on your server (fixed outgoing IP).
+<h2 class="sec-top">Example &mdash; your server-side endpoints</h2>
+<p>Two small endpoints on your server. The second is all you need for a category without a code.</p>
+<pre><code><span class="c">// POST /api/request-invitation/send-code — only for a category with a code.</span>
+export async function sendCode(req, res) {
+    const upstream = await fetch(
+        `${process.env.TOURISE_API_BASE}/request-an-invitation/press/send-code`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Api-Key': process.env.TOURISE_API_KEY,
+            },
+            body: JSON.stringify({ email: req.body.email, lang: req.body.lang }),
+        }
+    );
+    <span class="c">// 200 = code emailed. 409 = already on file (body.reason). Pass it on.</span>
+    res.status(upstream.status).json(await upstream.json());
+}</code></pre>
+<pre><code><span class="c">// POST /api/request-invitation — on your server (fixed outgoing IP).
+// Forward otp_token with the rest of the form when the category has a code.
 // The key stays here and never reaches the browser.</span>
 export default async function handler(req, res) {
     const upstream = await fetch(
@@ -290,7 +355,7 @@ over IPv6. If unsure, ask TOURISE which address your last call arrived from.</li
 <li>Submit the same address again and confirm you get <code>409</code> with <code>reason: already_requested</code> &mdash; and that your UI tells the applicant, rather than showing a generic error.</li>
 <li>Submit with a missing required field and confirm you render the <code>422</code> errors against the right inputs.</li>
 <li>Submit with a deliberately wrong key and confirm you get <code>401</code> and show a sensible message.</li>
-<li>Decide how your form checks the applicant&rsquo;s email address &mdash; no code is sent for requests filed with the key.</li>
+<li>If <code>with_email_otp</code> is <code>true</code>: call <code>send-code</code>, confirm the email arrives, file with the code and get <code>201</code>. Then file with a wrong code and confirm you show the <code>otp_invalid</code> message.</li>
 <li>Ask TOURISE to confirm the request appeared in the review queue.</li>
 <li>Confirm the key lives only in your server&rsquo;s environment, never in anything shipped to the browser.</li>
 </ol>
