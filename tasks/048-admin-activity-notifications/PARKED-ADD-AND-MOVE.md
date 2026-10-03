@@ -1,5 +1,10 @@
 # Parked: add people to a collection, move invitations into a collection
 
+> **Done: picked up as [Task 050](../050-add-people-and-move/TASK.md) on 2026-09-30** and merged to
+> `dev` and `main` the same day. All ten gaps below are closed, the open question was answered (the
+> same input as Create), and both actions have a screen and their own permission box. Kept as the
+> record of what was found; read Task 050 for what was built.
+
 **Status: parked by the owner on 2026-09-29.** Both are wanted, but neither is finished, so they are
 held and not built on until picked up. They arrived in امتنان's backend commit `2ef2856` (2026-09-28)
 together with the bell that [Task 048](TASK.md) replaces. They are **API only**: the admin has no

@@ -1735,3 +1735,50 @@ diff, **not pushed**. Gates: pint + **644 tests** (641 → 644); phpstan unchang
 larastan false positives, verified against a pristine worktree of `HEAD`. Admin `type-check` +
 `build` + `check:rbac`. EN + AR in the same change. **Not mobile-facing.** Task log: `main` records this work as
 [`tasks/036-category-reply-to-mailboxes/TASK.md`](../tasks/036-category-reply-to-mailboxes/TASK.md).
+
+## D53: 2026-09-30: No app rate limit is keyed on the shared IP; anonymous traffic is metered at the edge
+
+**What:** the app no longer limits anonymous callers by IP, except on the endpoints that spend money
+or take credentials. `TrustProxies` trusts no proxies, so `$request->ip()` is the NAT gateway or the
+load balancer for every visitor, and a limit keyed on it is **one bucket for the whole site**.
+Volumetric protection for anonymous traffic is Cloudflare's and nginx's, which see real client IPs.
+
+**How it got here, in two steps:**
+
+1. **2026-09-16, backend `30a298b`** (ported from 122-gfeai-v2 `b5316d0` + `9cb1fa6`): `public-api`
+   and `store-guest-api` detached from their routes. `public-api` at 30 a minute had capped the
+   entire site at 30 page loads a minute (`/join/{category}` calls `verify-category` server-side on
+   every render), and `store-guest-api` the whole event at 30 sign-ups a minute.
+2. **2026-09-30, backend `a32901d` + `62d676c`** (PR #26 to `dev`, #27 to `main`): the three limits
+   still keyed that way.
+   - **`throttle:api`**, on every route: signed in, it stays a real budget of 500 a minute per person
+     (keyed by id). Anonymous, it was one 500-a-minute bucket for every visitor together (the
+     registration pages, both submits, the request form, the app's sign-in), and is now
+     `Limit::none()`.
+   - **The newsletter preferences page**, detached. A large send could fill its site-wide bucket with
+     real subscribers, and it guarded nothing: the token is 48 random characters, and the same token
+     already opens `/newsletter/unsubscribe` with no limit.
+   - **`/newsletter/subscribe`**, detached from `partner-request-api`. That limiter reads the key the
+     `request-api-key` middleware sets, but this route resolves its key in the controller, so the
+     limit only ever saw the shared IP. Our own signup box carries reCAPTCHA. The partner routes keep
+     60 a minute **per key**, and the limiter's IP fallback is gone.
+   - **`sensitive-api` raised from 300 to 600 a minute** (owner). Still keyed by IP, so it is a
+     site-wide ceiling, sized for the whole event's OTP sends, uploads and admin sign-ins in one
+     minute.
+
+**What is still limited:** `sensitive-api` (admin login, login confirmation, OTP resend, forgot and
+reset password; guest email, phone and WhatsApp verification; both uploads; `mobile/identity`),
+`partner-request-api` (per partner key), and `throttle:api` for signed-in callers. The unused
+definitions (`public-api`, `store-guest-api`, `newsletter-preferences-api`) stay registered with
+notes, so they can be reattached. `tests/Feature/RateLimitingTest.php` pins what is limited and
+what is not.
+
+**Why:** a limit on the shared IP does not slow an attacker down. It answers 429 to real guests when
+traffic is high, which is exactly when the event needs the site up.
+
+**Depends on (open with devops):** that Cloudflare and nginx rate limits are actually on, and that the
+origin cannot be reached around Cloudflare. Neither is confirmed in this repo.
+
+**Reattach per-IP limits when:** the app can see real client IPs, which is Task 041 **B16** (H03.4,
+`TrustProxies` headers). B16's write-up in `tasks/041-security-port-wave-1/ITEMS.md` describes
+`public-api` at 30 a minute, which predates step 1.

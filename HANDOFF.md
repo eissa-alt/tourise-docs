@@ -3,7 +3,69 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-09-29 (latest, evening): Task 048 follow-ups.**
+**2026-10-01 (latest): everything is on `main`, nothing new deployed.** `dev` and `main` hold the same
+code in backend, admin and frontend (`main` only adds the PR merge commits). Gate on backend `dev`
+`833b493`: `pint --test` clean, PHPStan at its 6 older errors, **1014 tests pass**; admin `type-check`
+and `check:rbac` green.
+
+- **Since the entry below (2026-09-29):**
+  - **Task 048 follow-up**, set per admin on the admin form (decision 14), and the list preload fix:
+    on `dev` and `main` 2026-09-30 (backend PRs #24 / #25, admin PRs #27 / #29). This corrects the entry
+    below: it is pushed, and `main` no longer has the Roles version.
+  - **Rate limits, [D53](decisions/LEDGER.md):** no app limit keyed on the shared IP any more.
+    Anonymous traffic has no app limit; `sensitive-api` is 600 a minute site-wide. Backend `a32901d` +
+    `62d676c` (PRs #26 / #27). Relies on Cloudflare and nginx, which is not confirmed (below).
+  - **[Task 050](tasks/050-add-people-and-move/TASK.md), Add people and Move to collection:** the
+    actions parked in Task 048, finished with a screen each and their own boxes; each invitation now
+    says who added it. On `dev` and `main` 2026-09-30 (backend PRs #28 / #29, admin PRs #30 / #31).
+    TASK.md written late, 2026-10-01.
+  - **امتنان's partner API work**, merged to backend `main` by ialmutairi on 2026-10-01 (PRs #30 to
+    #32): allowed server IPs per key (backend `858c0ed`, admin `4c38427`, migration
+    `2026_09_30_000001`), server-to-server only (`cf9ec65`), the email code for a partner's own form
+    (`send-code`, `e04ea87`), and a live email check (`check-email`, `833b493`). All three partner
+    routes need the key and the server IP. Her docs: `api/REQUEST-AN-INVITATION-PARTNER-API.md` and
+    the PDF.
+  - **Frontend `dev` merged to `main`** by ialmutairi (PR #12, 2026-10-01). That ships امتنان's
+    `4d6dc7c`: the request form checks the email against guests and earlier requests, through the
+    **public** `/invitation-requests/check-unique` (open item 1).
+  - **Branches:** the owner's 8 merged branches deleted on 2026-09-30, three more on 2026-10-01
+    (backend `feat/add-people-and-move`, `fix/rate-limits-off-the-shared-ip`; admin
+    `feat/add-people-and-move`). Everything left on GitHub is امتنان's and unmerged: backend
+    `feat/email-magic-link` (9 commits), `fix/complete-data-from-the-form` (1), `feat/social-channels`
+    (1); admin `feat/social-channels` (5), `feat/email-magic-link` (1); frontend `feat/email-magic-link`
+    (8), `feat/social-channels` (3), `feat/equipment-na-hint` (1), `photo-check` (2, superseded on
+    purpose).
+- **Deploy, when it goes (all on `main`):**
+  - Migrations: `2026_09_24_000001` (audit_logs) and `2026_09_26_000001` (collections `created_by`),
+    Task 045; `2026_09_27_000001` (points of contact), Task 047; `2026_09_29_000003` to `000006`, Task
+    048; `2026_09_30_000001` (API key allowed IPs), امتنان; `2026_09_30_000002` (invitations
+    `created_by`), Task 050. Task 049's migrate + seed + template re-save is still listed as pending
+    in its TASK.md.
+  - Refresh cached routes and config, restart the queue workers.
+  - **Tell the team first:** the new boxes start unticked (Invitations → Send, Update Bulk, Send Bulk,
+    Extract from Task 046; Add people, Move from Task 050), the bell is ticked per admin on the admin
+    form (Task 048), and the audit history is forward-only (Task 045).
+- **Before a frontend deploy:** social channels are half-shipped. Frontend `main` sends only
+  `social_channels`, but backend `main` does not have `7585b67` (on امتنان's `feat/social-channels`),
+  so LinkedIn, Instagram and X save as null. Merge the backend and admin halves (they carry a
+  migration) or hold the frontend. Check what production runs first.
+- **Open, on hold by the owner (2026-09-30):**
+  1. Public `POST /invitation-requests/check-unique` (backend `c212d74`): no auth, no reCAPTCHA,
+     answers "already registered" or "already requested" for any email. **A**: remove it (now also
+     means reverting frontend `4d6dc7c` on `main`); **B**: keep it behind reCAPTCHA. The partner's
+     `check-email` is not this hole: it needs a key and the server IP.
+  2. Old public `POST /guests/check-unique` (Task 041 **B11**): the caller picks any column, and
+     `mode=edit` with a guest id returns the guest row.
+  3. Lint: 82 errors, all in `scripts/*.mjs` (admin 63, frontend 19).
+  4. Devops: are Cloudflare and nginx rate limits on (D53)? Can the origin be reached around
+     Cloudflare (the allowed-IPs check trusts `CF-Connecting-IP`)?
+  5. Tell امتنان: her bell was replaced, six of her merged branches were deleted on 2026-09-30, and
+     item 1.
+- **Audit logs next:** 2 of 46 permission features are audited (titles, invitations). The 34 left,
+  in three groups, are in [Task 045's log](tasks/045-module-audit-logs/TASK.md) (2026-10-01). The
+  owner picks the next module.
+
+**2026-09-29 (evening): Task 048 follow-ups.**
 - **The list is ready before the bell opens** (team feedback): admin `d3b46d1`, on `dev` (pushed by the
   owner).
 - **Admin notifications move from Roles to the admin create/edit form** (the team's ask, decision 14 in

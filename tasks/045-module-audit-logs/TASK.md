@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress`: titles + invitations built, gates green, merged to `dev` on 2026-09-28 (backend PR #20, admin PR #23), not yet on `main`. The blueprint below is now measured rather than predicted.
+- **Status:** `in-progress`: titles + invitations built, gates green, merged to `dev` on 2026-09-28 (backend PR #20, admin PR #23) and to `main` the same night (backend PR #21, admin PR #24), not deployed. The blueprint below is now measured rather than predicted. **2 of 46 permission features audited**; what is left is in the Log (2026-10-01).
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -288,6 +288,32 @@ map that resolves any referenced id to a name at read time.
   `feat/audit-logs-and-invitation-fixes`, after merging `origin/dev` in (the Sponsors / Speakers
   dashboards; the only conflict was keys appended to `translations/{en,ar}/web.json`, both kept). The
   merged backend `dev` passes 924 tests. Not on `main` yet. See Sequencing for Task 041.
+- 2026-09-28: **on `main` too** (backend PR #21, admin PR #24), the same night. Not deployed.
+- 2026-09-29/30: two tasks built on the table. [Task 048](../048-admin-activity-notifications/TASK.md)
+  reads the admin bell from `audit_logs`. [Task 050](../050-add-people-and-move/TASK.md) adds
+  `moved_out_of_collection` / `extracted_out_of_collection` rows on the collection the invitations
+  left, lists `invitation_ids` on a move so an invitation's History shows it (hidden from every reader
+  by `AuditLog::shownPayload()`), and adds `invitations.created_by` / `created_via`.
+- 2026-10-01: **coverage measured: 2 of the 46 permission features write to `audit_logs`** (titles,
+  invitations). Three keep their own logs by decision (guests and invitation requests on
+  `history_logs`, seating on `seating_audit_logs`) and seven are read-only (dashboard, scans, guest
+  drafts, the four delivery and print logs). **34 have write routes and no trail**, in three groups:
+  - *Access and messaging* (10): admins_management (admins + roles), emails_templates, sms_templates,
+    whatsapp_templates, smtp_configs, sms_config, whatsapp_config, emails_config, categories,
+    newsletter. Secrets (passwords, API keys) need excluding, template bodies are large, and the
+    bypasses are `CategoriesController.php:873` (bulk update) and `:718` (raw insert), three
+    `is_default` resets each in the SMS and WhatsApp provider configs, and the queued newsletter send.
+  - *Event content* (21): sessions, workshops, speakers, sponsors, speaker and sponsor labels,
+    publications, media_center, event_days, conference, notifications, countries, areas, gates,
+    meeting_rooms, hotels, rooms, guest_statuses, traveling_status, badges, automation. Mostly the
+    blueprint alone; bypasses at `BadgesController.php:433` and `AdminMeetingRoomController.php:178`.
+  - *Guest-adjacent* (3): e_visa, guest_logistics, scanning. They write through `GuestsController`,
+    and guests stay on `history_logs`; the event-night fields are excluded by design. Needs a decision
+    before any code.
+
+  **A seventh step to the blueprint, from Task 048:** a module reaches the bell only once it is in
+  `AdminActivityFeed::MODULES` with its own scope. Today that is `invitations` alone, so titles are
+  audited but never reach the bell.
 
 ## Decisions
 

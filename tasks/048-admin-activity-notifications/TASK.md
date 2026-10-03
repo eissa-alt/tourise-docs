@@ -1,20 +1,22 @@
 # Task 048: Admin notifications (AdminActivity), the audit trail as a bell
 
 - **Status:** `done (code)`: **merged to `dev` on 2026-09-29** (backend PR #22 `46ee2b8`, admin PR
-  #25 `bf34baf`), not on `main`. Built on `feat/admin-activity`: backend `191593c` `c80a5d2` `e687507`
-  `855c78d` + merge of `dev` `a1e0a46`; admin `13979fa` `86961aa` `8e357bb` `648b23c`. **Production
-  needs three migrations** (`2026_09_29_000003` to `000005`, see *Deploy*). Team testing next;
-  امتنان to be told their bell was replaced.
-  **Follow-up on `feat/admin-activity-per-admin`** (backend `3392b13`, admin `f3b23f4`, not pushed):
-  the team asked to set it per admin on the admin form instead of per role (decision 14). `main`
-  still has the Roles version: merge the follow-up before the production pull.
+  #25 `bf34baf`), **on `main` the same day** (backend PR #23, admin PR #26), **not deployed**. Built on
+  `feat/admin-activity`: backend `191593c` `c80a5d2` `e687507` `855c78d` + merge of `dev` `a1e0a46`;
+  admin `13979fa` `86961aa` `8e357bb` `648b23c`. **Production needs four migrations**
+  (`2026_09_29_000003` to `000006`, see *Deploy*). Team testing next; امتنان to be told their bell
+  was replaced.
+  **Follow-up, set per admin on the admin form (decision 14):** backend `3392b13`, admin `f3b23f4`,
+  **merged to `dev` and `main` on 2026-09-30** (backend PRs #24 / #25, admin PRs #27 / #29), with the
+  list preload fix `d3b46d1`. `main` no longer has the Roles version.
 - **Opened:** 2026-09-29
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
 - **Branch(es):** `feat/admin-activity` in `tourise-backend` + `tourise-admin`, off `dev` (`115fc5e` /
   `eabddbc`)
 - **Parked alongside:** [PARKED-ADD-AND-MOVE.md](PARKED-ADD-AND-MOVE.md), the two invitation actions
-  that arrived in the same commit as امتنان's bell.
+  that arrived in the same commit as امتنان's bell. **Done since as
+  [Task 050](../050-add-people-and-move/TASK.md)** (2026-09-30).
 
 ## Goal
 
@@ -201,6 +203,9 @@ being removed plus its two migrations.
   errors; admin type-check, eslint, prettier, `check:rbac` green. `yarn build` not run: the owner's dev
   server held `.next` (run later in a separate worktree: green). Owner's local DB: امتنان's two migrations rolled back; the three new ones run
   since, and the owner has reviewed the bell in the browser.
+- 2026-09-30: the per-admin follow-up (decision 14, migration `2026_09_29_000006`) and the list preload
+  fix merged to `dev` and `main` (backend PRs #24 / #25, admin PRs #27 / #29). The parked actions
+  picked up and finished as [Task 050](../050-add-people-and-move/TASK.md). Still not deployed.
 
 ## Definition of Done
 
