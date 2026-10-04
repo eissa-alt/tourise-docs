@@ -1782,3 +1782,32 @@ origin cannot be reached around Cloudflare. Neither is confirmed in this repo.
 **Reattach per-IP limits when:** the app can see real client IPs, which is Task 041 **B16** (H03.4,
 `TrustProxies` headers). B16's write-up in `tasks/041-security-port-wave-1/ITEMS.md` describes
 `public-api` at 30 a minute, which predates step 1.
+
+## D54: 2026-10-04: A guest filter never reaches past the admin's access, including filters that compare guests
+
+**What:** the guest listing's filters (`App\Support\GuestFilters`) only narrow the query. Who may see
+which guests (the admin's categories and statuses) is applied by the caller and ANDed on. Two rules
+keep a filter from reaching past that:
+
+1. **An OR inside a filter is always grouped**: `$guests->where(fn ($q) => $q->...->orWhere(...))`.
+   Ungrouped, SQL binds AND tighter than OR, so the access condition attached to one branch only. The
+   **Empty** filter (`where_null`) showed an admin limited to some categories every category in the
+   event until 2026-09-13 (backend `cdfbc5b`, امتنان; test in `GuestAccessScopeTest`). Every other OR
+   in `GuestFilters` was checked on 2026-10-04 and is grouped.
+2. **A filter that compares a guest with others counts only the guests the caller may see.** The
+   **Duplicates** filter (`where_duplicate`) counted twins across the whole event: the rows stayed in
+   scope, but a limited admin's guest was flagged by a twin in a category they cannot open, which also
+   told them the twin existed. `GuestFilters::apply()` now takes an optional `visible` scope from its
+   caller, used only by such subqueries; the listing and the dashboard both pass
+   `GuestAccessScope::apply()` (backend `949007a`, 2026-10-04). Super admins are unchanged.
+
+The same holds for values picked in the panel: with Status and Category as multi-selects
+(2026-10-04), a limited admin keeps only the picked categories they may see, and picking none of those
+returns nothing.
+
+**Why:** reported as critical in several projects (owner, 2026-10-04). Both shapes come with this
+listing, so every clone that carries it has them.
+
+**How to apply:** a new filter in `GuestFilters` groups its ORs, and any subquery that counts or compares
+guests adds `->when($visible, $visible)`. Carry `cdfbc5b` and `949007a` to the clones. **Not empty**
+(`where_not_null`) has no OR and was never affected; it is pinned by a test all the same.

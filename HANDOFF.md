@@ -3,7 +3,43 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-01 (latest): everything is on `main`, nothing new deployed.** `dev` and `main` hold the same
+**2026-10-04 (latest): admins and roles audited, guest filters, and backend on production.** `dev` = `main`
+in backend, admin and frontend (backend PR #36 `7cfc6bf`, admin PR #36 `d5cd63f`). Backend gate on `dev`:
+`pint --test` clean, PHPStan at its 6 older errors, **1035 tests pass**; admin `type-check`, ESLint,
+Prettier and `check:rbac` green (`yarn build` not run locally).
+
+- **Production backend pulled `7cfc6bf` on 2026-10-04, from `b4da1d7`.** `b4da1d7` is the 2026-10-01
+  `main`, so the backend of Tasks 045 to 050 was **already on production** before this pull; the
+  "not deployed" notes below and in those tasks are stale on that point. This pull brought no migration
+  and no `composer.lock` change. Admin production pull: not confirmed here.
+- **[Task 045](tasks/045-module-audit-logs/TASK.md) module 3, admins_management** (backend PR #33, admin
+  PR #33): History per row and an Audit trail on the Admins and Roles screens, each screen its own trail.
+  Rows read in words: a password change is "Password changed: Yes", a role's permissions are the boxes
+  added and removed, ids are names. The trail export now names every id for all modules. Roles need
+  **Admins Management → Record History / Audit Trail** ticked (tell the team first). 3 of 46 modules done.
+- **Owner decisions of 2026-10-03** (in Task 045): log the admin's action at the click (jobs only
+  deliver); no per-click id; the per-admin report waits until the modules are done; the collection
+  counter rows stay.
+- **Admin form** (same PRs): phone hidden on the form and the Admins list, optional on the API; an email,
+  or a first + last name, another admin has is refused on create and update and checked while typing
+  (`POST /admin/admins/check-unique`). Two admins who already share a name can still be edited.
+- **Guests: Status and Category filters are multi-selects** (backend `57c5125`, admin `f385d8c`, PR #35).
+  A limited admin keeps only the picked categories they may see.
+- **Security, [D54](decisions/LEDGER.md):** the **Duplicates** filter counted twins across every guest,
+  so a limited admin's guest was flagged by a twin they cannot see. Fixed straight on `dev` (backend
+  `949007a`). With the **Empty** fix of 2026-09-13 (`cdfbc5b`), all three data-quality filters respect
+  the admin's access. Reported as critical in other projects: carry both commits to the clones.
+- **Dashboard:** the "Pending requests" tile reads "Invitation requests" (admin `ecfb388`, straight on
+  `dev`); the number still counts requests waiting for a decision.
+- **Rule:** never the GitHub CLI; the owner opens PRs from plain compare links (`docs/ai/AI_RULES.md`
+  must-not 13, docs `453749c`).
+- **Branches:** `feat/audit-admins-management` and `feat/guests-multiselect-filters` are merged and can be
+  deleted (local + GitHub, backend and admin) on the owner's word.
+- **Still open:** the two public email lookups (`/invitation-requests/check-unique`, `/guests/check-unique`
+  B11); social channels half-shipped (backend `7585b67` unmerged); lint in `scripts/*.mjs`; devops on the
+  edge rate limits (D53). Next: the team's notes of 2026-10-04.
+
+**2026-10-01: everything is on `main`, nothing new deployed.** `dev` and `main` hold the same
 code in backend, admin and frontend (`main` only adds the PR merge commits). Gate on backend `dev`
 `833b493`: `pint --test` clean, PHPStan at its 6 older errors, **1014 tests pass**; admin `type-check`
 and `check:rbac` green.

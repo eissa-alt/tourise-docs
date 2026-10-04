@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress`: titles + invitations built, gates green, merged to `dev` on 2026-09-28 (backend PR #20, admin PR #23) and to `main` the same night (backend PR #21, admin PR #24), not deployed. The blueprint below is now measured rather than predicted. **2 of 46 permission features audited**; what is left is in the Log (2026-10-01).
+- **Status:** `in-progress`: **3 of 46 permission features audited** (titles, invitations, and since 2026-10-04 admins_management). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management merged to `dev` on 2026-10-04 (PR #33 in both) and to `main` the same day (PR #36 in both). **Backend on production since 2026-10-04** (pulled `7cfc6bf`). The blueprint below is measured on three modules; what is left is in the Log (2026-10-01, minus admins_management).
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -254,6 +254,37 @@ not the wiring.
 Step 6 generalised on the way: a single `CATEGORY_ID_FIELDS` set became `AuditLabels`, a column → model
 map that resolves any referenced id to a name at read time.
 
+### Measured against module 3 (admins_management, 2026-10-04)
+
+The blueprint held again: no migration, and `Admin` and `Role` needed only the trait, a label and their
+exclusions. What it added:
+
+1. **A row reads in words, never ids or JSON** (owner, 2026-10-04). The trait gained an optional
+   `prepareAuditFields()` hook, run before `$auditExcept`, so a model can reshape what a row says. A
+   password set by another admin becomes `password_changed: Yes`, never the value or the hash; a
+   role's whole permission matrix becomes `boxes_added` / `boxes_removed` ("Titles: View", named as
+   the role editor names them). `AuditLabels` gained `category_ids` and `guest_status_ids`.
+2. **One feature, two screens.** Admins and roles share the `admins_management` grants, but each
+   screen opens its own trail (`/admin/admins/logs`, `/admin/roles/logs`); an export of a trail is
+   tagged with its `kind` so it shows in the trail it was taken from.
+3. **Exclusions:** `password`, `remember_token`, `preferences` (each admin's own display settings),
+   `area_id` and `gate_id` (set by the gate-scan screen on event night), `email_verified_at`; `is_super`
+   on roles. Resend invite writes its own `invite_resent` row, never the token.
+4. **Writes from other modules land here too.** Saving a category rewrites the `category_ids` of the
+   admins it is assigned to; that query loaded ids only, so it now loads names for the row's label.
+
+**Fixed on the way, for every module:**
+- **The trail sheet named only `cat_list`.** A category, template, role or "created by" showed as a raw
+  id in the sheet while the popup showed its name. `AuditLogsExport` now uses `AuditLabels::for()`.
+- **An empty entry in a list read as a stray comma** (an admin's "No-Value" guest status, saved as
+  null). It now reads "No-Value" on screen and in the sheet.
+- **`AuditLog::record()` asked the guard for the admin from inside model events.** Outside a request
+  that made the guard pick up whatever bearer token it last saw; once creating admins was audited, four
+  tests answered requests as the wrong admin. It now records only an admin the request has already
+  signed in (`auth()->hasUser()`); production rows are unchanged.
+
+Not in the bell: `AdminActivityFeed::MODULES` is still `invitations` alone.
+
 ## Log
 
 - 2026-09-23 — opened. Team asked for invitation-collection logs; owner widened to every module and
@@ -314,6 +345,21 @@ map that resolves any referenced id to a name at read time.
   **A seventh step to the blueprint, from Task 048:** a module reaches the bell only once it is in
   `AdminActivityFeed::MODULES` with its own scope. Today that is `invitations` alone, so titles are
   audited but never reach the bell.
+- 2026-10-03: **design review** against the question a client will ask, "every action of admin X, from
+  a date to a date, or from day one". The table answers it (`(admin_id, created_at)` index, actor
+  snapshots, admins are blocked and never deleted); what is missing is a screen, and day one is the
+  deploy date. Laravel has no audit trail of its own; `spatie/laravel-activitylog` and
+  `owen-it/laravel-auditing` both support Laravel 12, but neither logs mass updates, raw `DB::table()`
+  writes or queued work, and neither gives the screens, so this design stays. **Correction to the
+  Design section:** Spatie was rejected above for logging "full dirty attributes by default"; both
+  packages can be set to log changed fields only with exclusions, so that reason is weaker than
+  written. The other reasons stand. Four owner decisions, in *Decisions* below: the per-admin report
+  is deferred, jobs stay out of the audit, no per-click id, and the collection counter rows stay.
+- 2026-10-04: **module 3, admins_management**, built and merged to `dev` (backend PR #33, admin PR #33):
+  see *Measured against module 3*. The same day the owner split the trail per screen (admins / roles)
+  and the "No-Value" fix followed; `dev` went to `main` (PR #36 in both) and the backend was pulled to
+  production (`7cfc6bf`, from `b4da1d7`; no migration). Backend 1035 tests. **33 modules left** of the
+  2026-10-01 list. After deploy, roles need **Admins Management → Record History / Audit Trail** ticked.
 
 ## Decisions
 
@@ -342,6 +388,21 @@ map that resolves any referenced id to a name at read time.
   working credential in a table that outlives the record.
 - **Per-module trails are scoped** (2026-09-27). The trail opened from one collection shows that
   collection and its invitations — rows, action filter and export alike — not the whole module.
+- **Log the admin's action at the click; jobs only deliver** (owner, 2026-10-03). `sent` / `sent_bulk`
+  are written in the request. Carrying the admin into queued jobs was planned and dropped: job progress
+  (a campaign's status) must not appear under an admin's name or in the bell. A newsletter send will log
+  `sent` in its controller, the same way.
+- **No per-click id** (owner, 2026-10-03). A click writes one row per collection it touches, and each
+  row says what happened. Its only payoff would be a grouping screen and the per-admin report.
+- **The per-admin, cross-module report is deferred** until the modules are done (owner, 2026-10-03).
+  The table already stores what it needs.
+- **The collection counter rows stay** (owner, 2026-10-03). `total_invites` is recounted on add,
+  move, extract, accepted request and dignitary invite, and each writes an "Updated: Total invites" row
+  that repeats the action row (one bell line per accept). Harmless noise; once deployed the rows stay.
+- **A row never shows an id or JSON** (owner, 2026-10-04), on screen or in the sheet: ids resolve
+  through `AuditLabels`, and a model reshapes what cannot (`prepareAuditFields()`).
+- **One pair of grants, one trail per screen** (owner, 2026-10-04), where one feature covers two
+  screens (admins and roles).
 
 ## Sequencing
 
