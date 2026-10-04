@@ -51,6 +51,16 @@ Same as the other event-platform repos, with three extra considerations:
 13. **History log + automation hook** — emit a `HistoryLog`; if there's an event other parts should react to, wire a listener/automation.
 14. **Push notification?** — go through `AppNotification` + `NotificationRecipient` + `DeviceToken`. Don't call providers directly.
 
+## Pull requests
+
+- Work on a feature branch off `dev`, created with `--no-track` so a plain push can never land on `dev`.
+- Push the branch, then hand the owner one plain compare link per repo touched, nothing prefilled:
+  - `https://github.com/eissa-alt/tourise-backend/compare/dev...<branch>`
+  - `https://github.com/eissa-alt/tourise-admin/compare/dev...<branch>`
+  - `https://github.com/eissa-alt/tourise-frontend/compare/dev...<branch>`
+- The owner opens and merges the PR on GitHub. **Never use the GitHub CLI (`gh`)**: do not run it, look for
+  it, or suggest installing it (owner, 2026-10-04; [AI_RULES.md](AI_RULES.md) must-not 13).
+
 ## Common AI tasks
 
 | Task | Where to look first |

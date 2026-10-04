@@ -28,6 +28,10 @@ Binding rules for any AI agent operating in this repo.
 10. **Do not widen TypeScript to `any`** to silence build errors.
 11. **Do not leave `console.log` / `dd()` / `dump()`** in committed code.
 12. **Do not branch on `user.type === 'super'`** in new code. Move toward `checkActionPermission()`.
+13. **Do not use the GitHub CLI (`gh`).** Do not run it, look for it, or suggest installing it (owner,
+    2026-10-04). Pull requests are opened by the owner on GitHub: push the branch, then give one plain
+    compare link per repo, `https://github.com/eissa-alt/<repo>/compare/dev...<branch>`, with nothing
+    prefilled. See *Pull requests* in [CURRENT_WORKFLOW.md](CURRENT_WORKFLOW.md).
 
 ## When in doubt
 
