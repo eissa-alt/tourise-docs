@@ -3,7 +3,7 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-05 (latest): admin and role escalation closed, Roles split; all of it on `main`.** Backend gate
+**2026-10-05 (latest): admin and role escalation closed, Roles split; on `main` and production.** Backend gate
 on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), **1051 tests pass**; admin
 `type-check` and `check:rbac` green.
 
@@ -30,10 +30,11 @@ on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), 
   dignitary parties all refuse or skip an address already invited; the admin warns while typing and in the
   Excel preview. Backend `36a325c` (PR #39), admin `eb4b772` (PR #40). No migration. Team guide with 13 checks:
   `client/ONE_INVITATION_PER_EMAIL/`.
-- **`dev` = `main`:** all of the above merged on 2026-10-05 (backend PR #40 `fc77007`, admin PR #38
-  `e1c58ca`); frontend unchanged. Backend production is on `7cfc6bf` (2026-10-04). Deploy needs both
-  migrations (`2026_10_04_000001`, `000002`), backend and admin together, then refresh routes and restart
-  the queue.
+- **`dev` = `main`, and on production:** all of the above merged on 2026-10-05 (backend PR #40 `fc77007`,
+  admin PR #38 `e1c58ca`; frontend unchanged) and pushed to production by the owner the same day, after
+  backend `7cfc6bf`. Not confirmed here: the exact SHAs on the servers, the admin side, and that both
+  migrations (`2026_10_04_000001`, `000002`) ran. After the deploy: refresh routes, restart the queue,
+  tell the team, then tick the Roles boxes.
 - **Branches:** `feat/admin-escalation-guards` and `feat/unique-invitation-email` merged and deleted (backend +
   admin); `feat/request-category-public-form` (امتنان's) is merged in both repos and left for her.
 - **Still open:** the public email lookups (`/invitation-requests/check-unique` A/B, `/guests/check-unique`
