@@ -1846,3 +1846,36 @@ this). Backend `379f74f` (PR #38), admin `91244e2` (PR #39).
 
 **Open (owner, on hold):** admins with the **same** role can manage each other (equal counts as within);
 a Super Admin's name still shows as the actor on rows about admins others can see.
+
+## D56: 2026-10-05: One invitation per email, across every collection
+
+**What:** an email can have only one invitation in the system, in any collection and **whatever its state**
+(used, sent or inactive). `Invitation::alreadyInvited($emails, $exceptId)` answers it, comparing trimmed and
+lower-cased on both sides, and every path that gives an invitation an email asks it (owner's two decisions,
+2026-10-05: any state blocks, and all paths):
+
+- **Create and Add people** refuse an address already invited anywhere, or repeated inside the batch
+  ("These emails are already invited: …" / "These emails appear more than once: …", under `guests_list`).
+- **Editing an invitation** refuses a changed email that another invitation has; the rest of an invitation is
+  never refused over its own address.
+- **`check-unique`** checks every collection (an edit excludes itself), and `POST /admin/invitations/check-emails-list`
+  returns the invited ones of a list, for the admin's manual cards and Excel preview.
+- **Accepting an invitation request** for an invited address is refused (409, "This email is already
+  invited."); the request stays pending, and bulk accept lists it as failed.
+- **Dignitary parties:** someone already invited is skipped when a dignitary names them (they appear in the
+  first dignitary's party only); the team's Invite is refused (422). The same dignitary re-naming the same person
+  in the same role still gets their invitation back.
+- **Move** is unchanged: it moves the same invitation. Messages never name the other collection.
+
+**Why:** the team asked (2026-10-05) that an email invited in one collection not be invited again in another.
+Even inside one collection the server only checked Add people and Move; Create and editing an email were checked
+in the browser alone. No data clean-up: production invitations are test data (owner).
+
+**How to apply:** any new way of creating an invitation, or changing its email, asks `alreadyInvited()`.
+Tests: `InvitationEmailUniqueTest` (6) and one in `DignitaryPartiesTest`, all failing on the code before.
+Backend `36a325c` (PR #39), admin `eb4b772` (PR #40). Team guide: `client/ONE_INVITATION_PER_EMAIL/`.
+
+**Open:** the public request form and the partner API check registered guests and earlier requests only, not
+invitations, so someone already invited can still **submit** a request (only accepting it is refused). Stopping it
+at the form means a public lookup on invitations, so decide it together with the open public email lookups
+(`/invitation-requests/check-unique`, `/guests/check-unique`, Task 041 B11).

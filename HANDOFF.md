@@ -25,10 +25,19 @@ on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), 
 - **Request categories can switch off their public form** (امتنان: backend `8ec42f0`, PR #37; admin
   `4bb0389`, PR #37 merged by the owner). Off: our page answers "not found", the partner API keeps serving
   the slug. Migration `2026_10_04_000001`. Its `main` merge was put on hold by the owner.
+- **One invitation per email, [D56](decisions/LEDGER.md)** (team note, 2026-10-05): an email can have only one
+  invitation, in any collection and any state. Create, Add people, editing an email, accepting a request and
+  dignitary parties all refuse or skip an address already invited; the admin warns while typing and in the
+  Excel preview. Backend `36a325c` (PR #39), admin `eb4b772` (PR #40). No migration. Team guide with 13 checks:
+  `client/ONE_INVITATION_PER_EMAIL/`.
 - **`dev` is ahead of `main`** by all of the above; backend production is on `7cfc6bf` (2026-10-04).
   Deploy needs both migrations (`2026_10_04_000001`, `000002`), backend and admin together.
-- **Branches:** `feat/admin-escalation-guards` (backend + admin) is merged and can be deleted on the owner's
-  word; `feat/request-category-public-form` (امتنان's) is merged in both repos and left for her.
+- **Branches:** `feat/admin-escalation-guards` and `feat/unique-invitation-email` merged and deleted (backend +
+  admin); `feat/request-category-public-form` (امتنان's) is merged in both repos and left for her.
+- **Still open:** the public email lookups (`/invitation-requests/check-unique` A/B, `/guests/check-unique`
+  B11), and with them **D56's open point**: the public request form and the partner API do not check
+  invitations, so someone already invited can still submit a request (accepting it is refused). Also on hold:
+  equal-role admins managing each other (D55); social channels half-shipped; lint in `scripts/*.mjs`.
 
 **2026-10-04 admins and roles audited, guest filters, and backend on production.** `dev` = `main`
 in backend, admin and frontend (backend PR #36 `7cfc6bf`, admin PR #36 `d5cd63f`). Backend gate on `dev`:
