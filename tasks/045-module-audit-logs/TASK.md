@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress`: **4 of 47 permission features audited** (titles, invitations, admins_management, and `roles`, split from admins_management on 2026-10-05). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management merged to `dev` and `main` on 2026-10-04 (PRs #33, then #36); the roles split merged to `dev` on 2026-10-05 (backend PR #38, admin PR #39), not on `main`. **Backend on production up to 2026-10-04** (pulled `7cfc6bf`). The blueprint below is measured on three modules; what is left is in the Log (2026-10-01, minus admins_management).
+- **Status:** `in-progress`: **5 of 47 permission features audited** (titles, invitations, admins_management, roles, categories). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management to `dev` and `main` on 2026-10-04 (PRs #33, then #36); the roles split on 2026-10-05 (backend PR #38, admin PR #39; `main` via backend PR #40, admin PR #38); **categories merged to `dev` on 2026-10-05 (PR #41 in both), not on `main`**. Production: backend up to the 2026-10-05 `main` (pushed by the owner that day). The blueprint below is measured on four modules; what is left is in the Log (2026-10-01, minus admins_management and categories).
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -285,6 +285,37 @@ exclusions. What it added:
 
 Not in the bell: `AdminActivityFeed::MODULES` is still `invitations` alone.
 
+### Measured against module 4 (categories, 2026-10-05)
+
+The blueprint held again: no migration, the trait and a label on `Category`, three routes, two grants
+and the listing. A category keeps most of its settings as JSON, and that is where the work was:
+
+1. **One line per setting, never JSON.** `prepareAuditFields()` turns `notification_settings` into
+   `<event>_<channel>` (on / off) and `<event>_<channel>_template`, `status_config` into
+   `status_<event>`, and the four field lists (`optional_fields`, `mandatory_fields`,
+   `mandatory_fields_admin`, `extra_guest_mandatory_fields`) into `<list>_added` / `<list>_removed`.
+   A new category's row lists what it was set up with, not sixty empty fields and switches.
+2. **The trait gained `auditOriginal()`**, so a line made up from a JSON column keeps its "before". It
+   defaults to `getOriginal()`, so the earlier modules are unchanged. `AuditLabels` gained
+   `REFERENCE_PATTERNS`, matched by name (`_email_template`, `_sms_template`, `_whatsapp_template`,
+   `status_on_`), beside its exact columns, and the category's own references: its templates, its
+   SMTP / SMS / WhatsApp accounts and the accept-to category. The SMS and WhatsApp accounts now read as
+   names on invitations too.
+3. **Exclusions:** `linkedin_client_secret` (a change reads "Linkedin client secret changed: Yes",
+   never the value) and `share_poster_url` (it follows the poster). Posters read as `[file]`, the way a
+   guest's files do (ledger D14).
+4. **A setting never saved and one switched off are the same setting.** The form sends every
+   notification switch, off unless set, and older categories stored none. Without this, saving such a
+   category unchanged wrote twelve "(empty) -> No" lines (found by the owner while testing).
+5. **The module's own bypasses**, as module 2 predicted: the bulk social-media update was one query and
+   logged nothing, so it now saves each category and each one's History shows it; the export is logged;
+   the admin access picker writes `admin_access_changed` on the category ("Admins with access", before
+   and after the save); a clone writes one `cloned` row with `cloned_from`.
+6. **Fixed on the way:** a new or cloned category joins every title's category list quietly
+   (`updateQuietly()`), so the titles trail no longer gains one "Updated" row per title.
+
+Categories are not in the bell either.
+
 ## Log
 
 - 2026-09-23 — opened. Team asked for invitation-collection logs; owner widened to every module and
@@ -369,6 +400,14 @@ Not in the bell: `AdminActivityFeed::MODULES` is still `invitations` alone.
   Super Admin or the Super Admin role, and those records' History answers "not found". 47 features now, 4
   audited.
 
+- 2026-10-05: **module 4, categories**, built, tested by the owner and merged to `dev` (backend PR #41
+  `7a46ff1`, admin PR #41 `ba380e7`), not on `main`: see *Measured against module 4*. The owner's tests
+  changed four things before the merge: a clone reads "Cloned from <category>"; a save that changes
+  nothing writes nothing; a list's removed entries read in the From column; admin access reads as the
+  whole list before and after. Backend 1072 tests. No migration; after deploy, roles need
+  **Categories -> Record History / Audit Trail** ticked. **5 of 47 features audited, 32 left** of the
+  2026-10-01 list.
+
 ## Decisions
 
 - **Depth: who did what + what changed** (owner, 2026-09-23) — field-level diffs, not an action spine.
@@ -411,6 +450,18 @@ Not in the bell: `AdminActivityFeed::MODULES` is still `invitations` alone.
   through `AuditLabels`, and a model reshapes what cannot (`prepareAuditFields()`).
 - **One pair of grants, one trail per screen** (owner, 2026-10-04), where one feature covers two
   screens (admins and roles).
+- **A clone is one `cloned` row naming its source** (owner, 2026-10-05), not a "Created" row listing
+  every copied setting: the copy starts with the original's settings, so the source says more. The copy
+  is saved quietly; the admin access it inherits keeps its own row.
+- **A category's admin access reads as the whole list, before and after** (owner, 2026-10-05):
+  "Admins with access: A, B -> A", as the "Grant access to admins" picker shows it. Admins the editor
+  may not change appear on both sides, unchanged.
+- **Super Admins stay out of that list** (owner, 2026-10-05). They see every guest whatever is ticked,
+  and stay out of sight of other admins (D55), so ticking one shows only in their own History under
+  Admins. Offered and declined: taking them out of the picker, or showing them to Super Admins only.
+- **A list's removed entries read in the From column** (2026-10-05): "Mandatory fields removed: email ->
+  (empty)", so a removed line never reads like an added one. Roles' "Boxes removed" keep the older
+  layout ("(empty) -> Titles: Update"), already on production.
 
 ## Sequencing
 

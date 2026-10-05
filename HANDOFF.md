@@ -3,7 +3,23 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-05 (latest): admin and role escalation closed, Roles split; on `main` and production.** Backend gate
+**2026-10-05 (latest, afternoon): categories audit trail on `dev`** ([Task 045](tasks/045-module-audit-logs/TASK.md)
+module 4). Backend gate on `dev`: `pint --test` clean, PHPStan at its 5 errors, **1072 tests pass**; admin
+`type-check`, `check:rbac`, ESLint and Prettier green (`yarn build` not run: a dev server was up).
+
+- **Categories have History per row and an Audit trail**, behind the new **Categories -> Record History /
+  Audit Trail** boxes (roles start unticked). Every setting reads in words: one line per notification
+  event and channel, one per status, and the field lists as added / removed. The LinkedIn secret and the
+  poster files never reach a row.
+- **Admin access** on a category reads as "Admins with access" before and after the save; Super Admins
+  stay out of that list (owner). **A clone** reads "Cloned from <category>". The bulk social-media
+  update and the export are logged, and a new category no longer writes one titles row per title.
+- **Merged by the owner:** backend PR #41 (`7a46ff1`), admin PR #41 (`ba380e7`). **Not on `main`.**
+  Deploy: no migration; tick the two boxes after. Branch `feat/audit-categories` deleted in both repos.
+- **5 of 47 features audited, 32 left** (Task 045 log, 2026-10-01). Still open as below: the public email
+  lookups and D56's open point, equal-role admins (D55), social channels, lint in `scripts/*.mjs`.
+
+**2026-10-05 (morning): admin and role escalation closed, Roles split; on `main` and production.** Backend gate
 on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), **1051 tests pass**; admin
 `type-check` and `check:rbac` green.
 
