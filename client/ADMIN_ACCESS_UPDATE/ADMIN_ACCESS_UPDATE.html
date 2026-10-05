@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · Admin access update</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · Admin access update"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+li > ul, li > ol { margin: 1.4mm 0 0 0; }
+strong { color: #111; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.4pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFBFD; }
+td.num, th.num { width: 8mm; text-align: center; font-weight: 700; }
+td.num { color: #3C0DEB; }
+td.check { width: 20mm; }
+th.check { width: 20mm; }
+</style></head><body><div class="head"><div class="eyebrow">Admin access update</div><h1>Admin access update</h1><p class="sub">Safer admins and roles in the TOURISE 2027 admin. 5 October 2026.</p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+<h2>1. In short</h2>
+<p>Until now, an admin who was allowed to <strong>manage admins</strong> could give themselves more power, all the way up to Super Admin, and could take over a Super Admin's account. That is now closed.</p>
+<ul><li><strong>Nobody can raise themselves.</strong></li><li><strong>Nobody can give more than they have.</strong></li><li><strong>The Super Admin is out of reach of everyone else.</strong></li><li><strong>Roles became a separate permission</strong>, so a client can manage admins without being able to edit roles.</li></ul>
+<div class="callout"><p><strong>What you need to do:</strong> nothing for existing admins; nobody has to be deleted or re-created. After the update reaches production, a Super Admin ticks the new <strong>Roles</strong> boxes on the roles that should be able to edit roles.</p></div>
+<p><strong>Status (5 October 2026):</strong> on the development version for testing. It reaches production with the next release.</p>
+<h2>2. What was wrong</h2>
+<p>An admin whose role had only <strong>Admins Management</strong> (view, create, update) could do all of this:</p>
+<table><thead><tr><th class="num">#</th><th>What they could do</th><th>Why it mattered</th></tr></thead><tbody><tr><td class="num">1</td><td>See every Super Admin and the Super Admin role</td><td>They should not even know who they are</td></tr><tr><td class="num">2</td><td>Create a new Super Admin with a password they chose</td><td>A hidden back door into the system</td></tr><tr><td class="num">3</td><td>Reset the real Super Admin's password</td><td>Take over the most powerful account</td></tr><tr><td class="num">4</td><td>Block a Super Admin (with the Block box)</td><td>Lock the owners out</td></tr><tr><td class="num">5</td><td>Tick every permission on their own role</td><td>Become all-powerful without being Super Admin</td></tr><tr><td class="num">6</td><td>Give themselves the Super Admin role</td><td>Promote themselves in one click</td></tr><tr><td class="num">7</td><td>Add any admin, themselves included, to a category's "Admin access"</td><td>See guests outside their own area</td></tr><tr><td class="num">8</td><td>Keep working for up to 6 hours after being blocked</td><td>Blocking was not immediate</td></tr></tbody></table>
+<p>We confirmed each of these on a test copy before fixing them, and each one now has an automatic test that fails if it ever comes back.</p>
+<h2>3. The new rules</h2>
+<ol><li><strong>The Super Admin is out of reach.</strong> Only a Super Admin can see, edit, block or assign Super Admins or the Super Admin role. For everyone else they are not in the lists, not in the role picker and not in the audit trails.</li><li><strong>You can only give what you have.</strong><ul><li>In the role editor you only see, and can only tick, the permissions you hold yourself.</li><li>You can only give an admin a role that is not stronger than yours. The role picker shows only those.</li><li>You can only edit admins whose role is not stronger than yours.</li><li>The guest access you give (categories and statuses) cannot be wider than your own.</li></ul></li><li><strong>Nobody raises themselves.</strong> On your own record your role, guest access and status are locked. Your name, email and password stay editable. You cannot edit or delete the role you hold.</li><li><strong>Category "Admin access" follows the same rules.</strong> It lists only admins you may manage, never yourself, and saving a category leaves the admins you cannot see untouched.</li><li><strong>Blocking is immediate.</strong> A blocked admin is logged out on the spot.</li></ol>
+<div class="callout"><p><strong>Example.</strong> If all the permissions are 1, 2, 3, 4 and 5, and a client manager holds 1, 2 and 3, they can create admins with the roles 1-2-3, 1-2 or 1. They can never give a role with 4 or 5, and never the Super Admin role.</p></div>
+<h2>4. Roles is now its own permission</h2>
+<p>Before, one permission (Admins Management) covered both the Admins screen and the Roles screen. Now they are separate:</p>
+<table><thead><tr><th>The person holds</th><th>Create admins</th><th>Create or edit roles</th></tr></thead><tbody><tr><td>Admins Management only</td><td>Yes, with the roles that exist</td><td>No</td></tr><tr><td>Roles only</td><td>No</td><td>Yes, within their own permissions</td></tr><tr><td>Both</td><td>Yes</td><td>Yes</td></tr></tbody></table>
+<p>The new <strong>Roles</strong> boxes are View, Create, Update, Delete, Record History and Audit Trail. They <strong>start unticked</strong>: after the update, only Super Admins can open Roles until a Super Admin ticks Roles on a role.</p>
+<h2>5. What each person sees after the update</h2>
+<ul><li><strong>Super Admin:</strong> everything, exactly as before.</li><li><strong>An admin manager</strong> (Admins Management): the admins and roles not stronger than theirs. No Super Admins, no Roles screen unless they also hold Roles.</li><li><strong>A role editor</strong> (Roles): the Roles screen, offering only the permissions they hold. No Edit or Delete on the role they hold themselves.</li><li><strong>Everyone, on their own record:</strong> role, guest access and status are greyed out, with a note that another admin can change them. No Block on their own row.</li></ul>
+<h2>6. After the update: a short checklist for a Super Admin</h2>
+<ol><li><strong>Tell the team</strong> that the Roles screen is Super Admin only until the new boxes are ticked.</li><li><strong>Tick Roles</strong> (View, Create, Update, Delete) on the roles that should edit roles.</li><li><strong>Check who holds the Super Admin role.</strong> Before this fix anyone with Admins Management could have made one.</li><li><strong>Check roles with Admins Management or Roles,</strong> and any role with suspiciously many permissions.</li><li><strong>Check that managers have the guest access they will hand out.</strong> A manager can only give access they have themselves.</li></ol>
+<h2>7. Questions and answers</h2>
+<p><strong>Do we need to delete and re-create admins?</strong> No. Existing admins keep their roles, passwords and access. The rules apply when someone changes an admin or a role from now on.</p>
+<p><strong>Will anyone lose access?</strong> Only one thing: editing roles, for anyone who is not a Super Admin, until Roles is ticked on their role.</p>
+<p><strong>Why can't I change my own role or access?</strong> So that nobody can raise themselves. Another admin with the right permissions can change it for you.</p>
+<p><strong>Can two managers with the same role manage each other?</strong> Yes, for now: "the same" counts as "not stronger". Whether to allow it is still open.</p>
+<p><strong>Is any history lost?</strong> No. Changes to roles recorded before the split now show in the Roles audit trail.</p>
+<h2>8. For developers</h2>
+<ul><li><strong>The rule-book:</strong> <code>app/Support/AdminHierarchy.php</code> (<code>isSuper</code>, <code>visibleAdmins</code>, <code>visibleRoles</code>, <code>roleWithin</code>, <code>mayManage</code>, <code>scopeWithin</code>, <code>grantsCategory</code>, <code>boxesBeyond</code>). Any new endpoint that creates or changes an admin, a role or an admin's guest access must ask it (ledger D55, AI_RULES must-do 8).</li><li><strong>Applied in:</strong> <code>AdminsController</code> (list, show, create, update, block, resend invite), <code>RolesController</code> (list, picker, catalogue, create, update, delete), <code>CategoriesController</code> (assignable admins, "assigned admins" on create and update), <code>AuditLogsController</code> (Super Admin rows hidden from other viewers).</li><li><strong>Roles split:</strong> catalogue feature <code>roles</code>; the Roles routes, catalogue and trails sit under it; <code>/admin/roles/select</code> (the admin form's picker) stays on <code>admins_management</code>.</li><li><strong>Migration:</strong> <code>2026_10_04_000002_move_role_audit_rows_to_the_roles_feature</code> refiles role audit rows from <code>admins_management</code> to <code>roles</code>. Only the <code>feature</code> column changes.</li><li><strong>Tests:</strong> <code>tests/Feature/AdminHierarchyTest.php</code> (11). The first 9 fail on the code before the fix. Backend 1051 tests pass.</li><li><strong>Commits:</strong> backend <code>379f74f</code> (PR #38), admin <code>91244e2</code> (PR #39), both on <code>dev</code>.</li><li><strong>Deploy:</strong> <code>php artisan migrate</code>, refresh cached routes, then tick Roles as in section 6.</li></ul></body></html>

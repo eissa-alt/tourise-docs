@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · Admin access update: test cases</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · Admin access test cases"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+li > ul, li > ol { margin: 1.4mm 0 0 0; }
+strong { color: #111; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.4pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFBFD; }
+td.num, th.num { width: 8mm; text-align: center; font-weight: 700; }
+td.num { color: #3C0DEB; }
+td.check { width: 20mm; }
+th.check { width: 20mm; }
+</style></head><body><div class="head"><div class="eyebrow">Admin access update</div><h1>Admin access update: test cases</h1><p class="sub">How to check the new admin and role rules in the TOURISE 2027 admin. 5 October 2026.</p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+<h2>How to use this</h2>
+<ul><li><strong>Who:</strong> anyone on the team. No technical knowledge needed.</li><li><strong>Where:</strong> the test (development) admin, not production.</li><li><strong>Time:</strong> about 20 minutes.</li><li><strong>How:</strong> follow each step and compare with the expected result. Write <strong>Pass</strong> or <strong>Fail</strong> in the last column. For a Fail, send the case number and a screenshot.</li></ul>
+<div class="callout"><p>Use a normal browser window for the Super Admin and a <strong>private (incognito) window</strong> for the other test admins, so you can stay logged in as both.</p></div>
+<h2>Before you start (as Super Admin)</h2>
+<ol><li>In <strong>Roles</strong>, create three roles:<ul><li><strong>Client Manager:</strong> Admins Management (View, Create, Update, Block), Categories (View, Update), Titles (View)</li><li><strong>Desk:</strong> Titles (View)</li><li><strong>Stronger:</strong> Titles (View, Update)</li></ul></li><li>In <strong>Admins</strong>, create three admins:<ul><li><strong>Client</strong>, role <em>Client Manager</em>, Data scope: one category, for example <em>Media</em></li><li><strong>Desk User</strong>, role <em>Desk</em>, category <em>Media</em></li><li><strong>Strong User</strong>, role <em>Stronger</em>, category <em>Media</em></li></ul></li><li>Log in as <strong>Client</strong> in a private window.</li></ol>
+<h2>A. As the client manager (Client)</h2>
+<table><thead><tr><th class="num">#</th><th>Steps</th><th>Expected result</th><th class="check">Pass / Fail</th></tr></thead><tbody><tr><td class="num">1</td><td>Look at the sidebar</td><td>There is <strong>no Roles</strong> link</td><td class="check"></td></tr><tr><td class="num">2</td><td>Open <strong>Admins</strong></td><td>Desk User and Strong User are listed. <strong>No Super Admin</strong> appears</td><td class="check"></td></tr><tr><td class="num">3</td><td>Click <strong>New admin</strong> and open the role picker</td><td><strong>Desk</strong> and <strong>Client Manager</strong> are offered (and any other role with only permissions Client has). <strong>No Super Admin, no Stronger</strong></td><td class="check"></td></tr><tr><td class="num">4</td><td>Create an admin with role <em>Desk</em> and category <em>Media</em></td><td><strong>Saved</strong></td><td class="check"></td></tr><tr><td class="num">5</td><td>Create an admin with a category other than <em>Media</em></td><td>Refused: "This gives access to guests you cannot see yourself."</td><td class="check"></td></tr><tr><td class="num">6</td><td>Open <strong>your own</strong> record (Client) to edit</td><td>Role, Status and Data scope are <strong>greyed out</strong>, with a note that another admin can change them</td><td class="check"></td></tr><tr><td class="num">7</td><td>On your own record, change your first name and save</td><td><strong>Saved</strong></td><td class="check"></td></tr><tr><td class="num">8</td><td>In the Admins list, look at your own row</td><td>There is <strong>no Block</strong> action</td><td class="check"></td></tr><tr><td class="num">9</td><td>Edit <strong>Strong User</strong>, set a new password, save</td><td>Refused: "This admin has permissions you do not have."</td><td class="check"></td></tr><tr><td class="num">10</td><td><strong>Block</strong> Strong User</td><td>Refused with the same message</td><td class="check"></td></tr><tr><td class="num">11</td><td>Log in as <strong>Desk User</strong> in another browser, then as Client <strong>block</strong> Desk User</td><td>Desk User is <strong>logged out</strong> on their next click</td><td class="check"></td></tr><tr><td class="num">12</td><td>Open a <strong>category</strong>, go to <strong>Admin access</strong></td><td>Desk User (and the admin from step 4) are offered. <strong>Not</strong> you, not Strong User, not a Super Admin</td><td class="check"></td></tr><tr><td class="num">13</td><td>Save that category</td><td>Strong User and you <strong>keep</strong> your access to it</td><td class="check"></td></tr><tr><td class="num">14</td><td>Type the Roles page address in the browser (<code>/en/roles</code>)</td><td>The page does <strong>not</strong> open</td><td class="check"></td></tr></tbody></table>
+<h2>B. Roles (as Super Admin, tick Roles View, Create and Update on <em>Client Manager</em>; then back as Client)</h2>
+<table><thead><tr><th class="num">#</th><th>Steps</th><th>Expected result</th><th class="check">Pass / Fail</th></tr></thead><tbody><tr><td class="num">15</td><td>Look at the sidebar</td><td>The <strong>Roles</strong> link now shows</td><td class="check"></td></tr><tr><td class="num">16</td><td>Click <strong>Create role</strong></td><td>Only <strong>your own</strong> permissions are offered: Admins Management, Roles, Categories and Titles (View)</td><td class="check"></td></tr><tr><td class="num">17</td><td>Look at the <em>Client Manager</em> row in the Roles list</td><td>There is <strong>no Edit</strong> and <strong>no Delete</strong> (it is your own role)</td><td class="check"></td></tr><tr><td class="num">18</td><td>Open the <em>Stronger</em> role and save it</td><td>Refused: "This role has permissions you do not have."</td><td class="check"></td></tr><tr><td class="num">19</td><td>Look for the <strong>Super Admin</strong> role</td><td>It is <strong>not</strong> in the list</td><td class="check"></td></tr></tbody></table>
+<h2>C. As Super Admin (nothing should change)</h2>
+<table><thead><tr><th class="num">#</th><th>Steps</th><th>Expected result</th><th class="check">Pass / Fail</th></tr></thead><tbody><tr><td class="num">20</td><td>Open <strong>Admins</strong> and <strong>Roles</strong></td><td>Everything is visible, Super Admin included</td><td class="check"></td></tr><tr><td class="num">21</td><td>Edit any admin or role, block and unblock an admin</td><td>Everything <strong>works</strong> as before</td><td class="check"></td></tr></tbody></table>
+<h2>Reporting</h2>
+<p>Send the case number, what you saw, and a screenshot to the admin team. If everything passes, reply "All 21 pass".</p></body></html>
