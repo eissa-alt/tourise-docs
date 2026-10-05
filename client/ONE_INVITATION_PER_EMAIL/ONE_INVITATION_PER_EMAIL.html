@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · One invitation per email</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · One invitation per email"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+li > ul, li > ol { margin: 1.4mm 0 0 0; }
+strong { color: #111; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.4pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFBFD; }
+td.num, th.num { width: 8mm; text-align: center; font-weight: 700; }
+td.num { color: #3C0DEB; }
+td.check { width: 20mm; }
+th.check { width: 20mm; }
+</style></head><body><div class="head"><div class="eyebrow">Invitations</div><h1>One invitation per email</h1><p class="sub">A guest's email can now have only one invitation, across every collection, in the TOURISE 2027 admin. 5 October 2026.</p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+<h2>1. In short</h2>
+<p>Until now the same email could be invited again in a <strong>different</strong> collection, and even inside one collection the check only worked in some screens. Now an email can have <strong>only one invitation in the whole system</strong>, whatever state that invitation is in (used, sent or inactive). The rule applies everywhere an invitation is made: the invitation screens, accepting invitation requests, and dignitary parties.</p>
+<div class="callout"><p><strong>What you need to do:</strong> nothing. To invite someone who already has an invitation into another collection, <strong>move</strong> their invitation (More, then Move to collection) or edit it, instead of creating a new one.</p></div>
+<p><strong>Status (5 October 2026):</strong> on the development version for testing; it reaches production with the next release. No clean-up is needed: the invitations on production today are test data.</p>
+<h2>2. What changed in the invitation screens</h2>
+<table><thead><tr><th>Where</th><th>Before</th><th>Now</th></tr></thead><tbody><tr><td>Create a collection (manual cards)</td><td>Duplicates checked only between the cards on screen</td><td>Each card is checked <strong>while typing</strong> against every invitation: "This email already has an invitation"</td></tr><tr><td>Create a collection (Excel)</td><td>Duplicates checked only inside the file</td><td>Rows already invited turn <strong>red</strong>, the preview counts them, and Create lists them in the problems dialog with the registered ones</td></tr><tr><td>Add people</td><td>Refused only if already in the same collection</td><td>Refused if already invited <strong>anywhere</strong></td></tr><tr><td>Edit one invitation's email</td><td>Checked only in the same collection, and only in the browser</td><td>A new email is refused if any other invitation has it. Editing the rest of an invitation is never blocked</td></tr><tr><td>Move to collection</td><td>Moves the same invitation</td><td>Unchanged: a move never creates a second invitation</td></tr></tbody></table>
+<p>Messages never name the other collection, so an admin limited to some categories does not learn about collections they cannot see.</p>
+<h2>3. Effects on invitation requests</h2>
+<ul><li><strong>Accepting a request whose email already has an invitation is refused</strong> with "This email is already invited." The request <strong>stays pending</strong>, so the reviewer can reject it, or fix the existing invitation first.</li><li><strong>Bulk accept</strong> handles the others normally and lists the refused ones as failed, with the same reason.</li><li><strong>The public request form and the partner API do not check invitations.</strong> They refuse an email that is already a registered guest or already requested, as before, but a person an admin has already invited can still <strong>submit</strong> a request. It is only refused when someone tries to accept it. Stopping it at the form would be a separate change (the public email lookups are already an open security question).</li></ul>
+<h2>4. Effects on dignitary parties</h2>
+<ul><li><strong>A dignitary naming someone who already has an invitation</strong> (in their own registration form): that person is <strong>skipped quietly</strong>. The dignitary's registration still succeeds, and the person keeps the invitation they already have.</li><li><strong>Two dignitaries naming the same person:</strong> only the first one creates an invitation. The person appears in <strong>the first dignitary's party only</strong>, because a party lists the invitations made on that dignitary's behalf.</li><li><strong>"Invite someone" on the Dignitary page</strong> (by the team): refused with "This email is already invited."</li><li><strong>The same dignitary naming the same person again</strong> in the same role still returns their existing invitation, so a re-send works as before.</li></ul>
+<h2>5. What to check</h2>
+<p>Use the test (development) admin. Write <strong>Pass</strong> or <strong>Fail</strong> in the last column.</p>
+<table><thead><tr><th class="num">#</th><th>Steps</th><th>Expected result</th><th class="check">Pass / Fail</th></tr></thead><tbody><tr><td class="num">1</td><td>Create collection <strong>A</strong> with a guest <code>test1@example.com</code></td><td>Saved</td><td class="check"></td></tr><tr><td class="num">2</td><td>Create collection <strong>B</strong>; on a manual card type <code>TEST1@example.com</code></td><td>Red under the field: "This email already has an invitation". Create is refused</td><td class="check"></td></tr><tr><td class="num">3</td><td>In one Create, use the same new email on two cards</td><td>"Duplicate email"</td><td class="check"></td></tr><tr><td class="num">4</td><td>Create <strong>B</strong> from an Excel file that includes <code>test1@example.com</code></td><td>That row is red, the preview says "1 already invited", Create opens the problems dialog</td><td class="check"></td></tr><tr><td class="num">5</td><td><strong>Add people</strong> to an existing collection with <code>test1@example.com</code></td><td>Refused</td><td class="check"></td></tr><tr><td class="num">6</td><td>Open another invitation, change its email to <code>test1@example.com</code></td><td>Refused</td><td class="check"></td></tr><tr><td class="num">7</td><td>Edit that invitation's company only, keep its email</td><td>Saved</td><td class="check"></td></tr><tr><td class="num">8</td><td><strong>Move</strong> invitations from one collection to another</td><td>Works as before</td><td class="check"></td></tr><tr><td class="num">9</td><td>File an invitation request with <code>test1@example.com</code>, then <strong>Accept</strong> it</td><td>Refused: "This email is already invited." The request stays pending</td><td class="check"></td></tr><tr><td class="num">10</td><td><strong>Bulk accept</strong> that request with another one</td><td>The other is accepted; this one is listed as failed with the same reason</td><td class="check"></td></tr><tr><td class="num">11</td><td>On the <strong>Dignitary</strong> page, Invite someone with <code>test1@example.com</code></td><td>Refused: "This email is already invited."</td><td class="check"></td></tr><tr><td class="num">12</td><td>Register a dignitary who names <code>test1@example.com</code> in their party</td><td>Registration succeeds; no new invitation for test1</td><td class="check"></td></tr><tr><td class="num">13</td><td>Do any of the above with a brand-new email</td><td>Works normally</td><td class="check"></td></tr></tbody></table>
+<h2>6. For developers</h2>
+<ul><li><strong>The rule:</strong> <code>Invitation::alreadyInvited($emails, $exceptId)</code> (trimmed and lower-cased on both sides, any state, any collection).</li><li><strong>Applied in:</strong> <code>InvitationsController</code> (<code>store</code> and <code>addGuests</code> through <code>refuseInvitedEmails()</code>, which also refuses repeats inside the batch; <code>update</code> checks a changed email; <code>check-unique</code> checks every collection; new <code>POST /admin/invitations/check-emails-list</code>), <code>AdminInvitationRequestsController::accept</code> (409), <code>DignitaryParty::invite</code> (skip) and <code>DignitaryPartiesController::invite</code> (422).</li><li><strong>Admin:</strong> <code>invitations-form.tsx</code> (manual cards, Excel preview and problems dialog, import note), <code>table-add-info-modal.tsx</code> (edit). EN + AR.</li><li><strong>Tests:</strong> <code>InvitationEmailUniqueTest</code> (6) and one in <code>DignitaryPartiesTest</code>, all failing on the code before. Backend 1058 tests pass.</li><li><strong>Commits:</strong> backend <code>36a325c</code> (PR #39), admin <code>eb4b772</code> (PR #40), on <code>dev</code>. No migration.</li></ul></body></html>
