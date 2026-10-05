@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress`: **3 of 46 permission features audited** (titles, invitations, and since 2026-10-04 admins_management). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management merged to `dev` on 2026-10-04 (PR #33 in both) and to `main` the same day (PR #36 in both). **Backend on production since 2026-10-04** (pulled `7cfc6bf`). The blueprint below is measured on three modules; what is left is in the Log (2026-10-01, minus admins_management).
+- **Status:** `in-progress`: **4 of 47 permission features audited** (titles, invitations, admins_management, and `roles`, split from admins_management on 2026-10-05). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management merged to `dev` and `main` on 2026-10-04 (PRs #33, then #36); the roles split merged to `dev` on 2026-10-05 (backend PR #38, admin PR #39), not on `main`. **Backend on production up to 2026-10-04** (pulled `7cfc6bf`). The blueprint below is measured on three modules; what is left is in the Log (2026-10-01, minus admins_management).
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -360,6 +360,14 @@ Not in the bell: `AdminActivityFeed::MODULES` is still `invitations` alone.
   and the "No-Value" fix followed; `dev` went to `main` (PR #36 in both) and the backend was pulled to
   production (`7cfc6bf`, from `b4da1d7`; no migration). Backend 1035 tests. **33 modules left** of the
   2026-10-01 list. After deploy, roles need **Admins Management → Record History / Audit Trail** ticked.
+
+- 2026-10-05: **roles became their own audited feature.** With the admin / role escalation fix (ledger
+  D55) roles split from `admins_management` into `roles`: `Role::$auditFeature` is `roles`, the Roles trail,
+  its export and each role's History sit behind `roles,audit_trail` / `roles,record_history`, and the rows
+  written under `admins_management` since 2026-10-04 were refiled by migration `2026_10_04_000002` (only the
+  `feature` column changes). For anyone but a Super Admin, the Admins and Roles trails leave out rows about a
+  Super Admin or the Super Admin role, and those records' History answers "not found". 47 features now, 4
+  audited.
 
 ## Decisions
 

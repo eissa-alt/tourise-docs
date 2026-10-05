@@ -13,6 +13,8 @@ Binding rules for any AI agent operating in this repo.
 7. **Quality gate before any push:**
    - Backend: `php artisan test --filter <FeatureTest>` for the touched area.
    - Each touched Next app: `yarn type-check` + `yarn production`.
+8. **Anything that creates or changes an admin, a role, or an admin's guest access asks `App\Support\AdminHierarchy`**
+   (ledger D55): no Super Admin reached by anyone else, nobody grants more than they hold, nobody raises themselves.
 
 ## Must not
 

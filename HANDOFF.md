@@ -3,7 +3,34 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-04 (latest): admins and roles audited, guest filters, and backend on production.** `dev` = `main`
+**2026-10-05 (latest): admin and role escalation closed, Roles split; `dev` ahead of `main`.** Backend gate
+on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), **1051 tests pass**; admin
+`type-check` and `check:rbac` green.
+
+- **Security, [D55](decisions/LEDGER.md):** an admin holding only Admins Management could see and take over
+  Super Admins and promote themselves; saving a category could widen any admin's guest access, theirs
+  included. Now one rule-book, `App\Support\AdminHierarchy`: Super Admins out of sight and reach of
+  everyone else, nobody grants more than they hold, nobody raises themselves, blocking logs out at once.
+  **Roles is its own permission** (`roles`), so a client can create admins with existing roles without
+  editing roles. Backend `379f74f` (PR #38, `7f411a0`), admin `91244e2` (PR #39, `12e47dc`), 2026-10-05.
+  **Deploy:** `migrate` (`2026_10_04_000002`, refiles role audit rows), refresh routes; the Roles boxes start
+  **unticked**, so tell the team, then tick Roles where people should edit roles. A one-time review after
+  deploy is worth it (who holds Super Admin, roles with Admins Management / Roles, managers' guest access);
+  the owner may want a read-only report command for it later. On hold: equal-role peers managing each other.
+- **Team notes of 2026-10-04 evening, straight on `dev`:** the dashboard's "No reply" reads **Pending**
+  ("قيد الانتظار", the owner's choice despite the guest status of the same name; admin `aa5641d`); a
+  **Search** box on Guests over names (EN + AR), email, phone, Reg ID, company and job title (backend
+  `f81c75d`, admin `a22734c`), with an (i) naming the fields, the same (i) on Invitation Requests (a new
+  `hint` on shared listing filters), Created at at normal width, and a compact date picker.
+- **Request categories can switch off their public form** (امتنان: backend `8ec42f0`, PR #37; admin
+  `4bb0389`, PR #37 merged by the owner). Off: our page answers "not found", the partner API keeps serving
+  the slug. Migration `2026_10_04_000001`. Its `main` merge was put on hold by the owner.
+- **`dev` is ahead of `main`** by all of the above; backend production is on `7cfc6bf` (2026-10-04).
+  Deploy needs both migrations (`2026_10_04_000001`, `000002`), backend and admin together.
+- **Branches:** `feat/admin-escalation-guards` (backend + admin) is merged and can be deleted on the owner's
+  word; `feat/request-category-public-form` (امتنان's) is merged in both repos and left for her.
+
+**2026-10-04 admins and roles audited, guest filters, and backend on production.** `dev` = `main`
 in backend, admin and frontend (backend PR #36 `7cfc6bf`, admin PR #36 `d5cd63f`). Backend gate on `dev`:
 `pint --test` clean, PHPStan at its 6 older errors, **1035 tests pass**; admin `type-check`, ESLint,
 Prettier and `check:rbac` green (`yarn build` not run locally).

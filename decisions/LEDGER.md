@@ -1811,3 +1811,38 @@ listing, so every clone that carries it has them.
 **How to apply:** a new filter in `GuestFilters` groups its ORs, and any subquery that counts or compares
 guests adds `->when($visible, $visible)`. Carry `cdfbc5b` and `949007a` to the clones. **Not empty**
 (`where_not_null`) has no OR and was never affected; it is pinned by a test all the same.
+
+## D55: 2026-10-05: Nobody raises themselves or reaches a Super Admin; Roles is its own permission
+
+**What:** who may manage whom lives in one place, `App\Support\AdminHierarchy`, and every screen that
+changes an admin, a role or an admin's guest access asks it (Admins, Roles, Categories' "assigned
+admins", the admins and roles audit trails):
+
+1. **A Super Admin is out of reach.** Only a Super Admin sees, edits, blocks or assigns Super Admins or
+   the Super Admin role. For everyone else they are left out of lists and pickers and answer "not found".
+2. **Nobody grants more than they hold.** A role is *within* an admin when every box on it is a box that
+   admin has. An admin only ticks boxes they hold, assigns roles within theirs (the role picker offers
+   only those), and edits admins whose role is within theirs. Guest access given (categories and
+   statuses, ANDed; an empty side is open while the other is set, both empty is no access) stays within
+   the giver's own.
+3. **Nobody raises themselves.** Their own role, guest access and status are refused, as is editing or
+   deleting the role they hold. Their own name, email and password stay editable.
+4. **Blocking revokes the admin's sessions at once.**
+5. **Roles split from `admins_management`** into a `roles` feature (view, create, update, delete,
+   record_history, audit_trail), so a client can create admins with the roles that exist without
+   editing roles. The admin form's role picker stays on `admins_management`. The new boxes start
+   **unticked** (owner's choice): after deploy only Super Admins edit roles until a role is given them.
+   Role audit rows are refiled under `roles` (migration `2026_10_04_000002`).
+
+**Why:** reported by the team on 2026-10-04 and proved with a probe: an admin holding only Admins
+Management (view, create, update) could see the Super Admins, create a new Super Admin, reset the real
+Super Admin's password, tick every box on their own role and promote themselves to Super Admin. Saving a
+category could add any admin, themselves included, to that category's guest access.
+
+**How to apply:** any new endpoint that creates or changes an admin, a role, or an admin's guest access
+asks `AdminHierarchy` (`visibleAdmins`, `visibleRoles`, `roleWithin`, `mayManage`, `scopeWithin`,
+`grantsCategory`, `boxesBeyond`). Tests: `AdminHierarchyTest` (11; the first 9 fail on the code before
+this). Backend `379f74f` (PR #38), admin `91244e2` (PR #39).
+
+**Open (owner, on hold):** admins with the **same** role can manage each other (equal counts as within);
+a Super Admin's name still shows as the actor on rows about admins others can see.
