@@ -3,7 +3,7 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-05 (latest): admin and role escalation closed, Roles split; `dev` ahead of `main`.** Backend gate
+**2026-10-05 (latest): admin and role escalation closed, Roles split; all of it on `main`.** Backend gate
 on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), **1051 tests pass**; admin
 `type-check` and `check:rbac` green.
 
@@ -24,14 +24,16 @@ on `dev`: `pint --test` clean, PHPStan at **5** errors (one fewer than before), 
   `hint` on shared listing filters), Created at at normal width, and a compact date picker.
 - **Request categories can switch off their public form** (امتنان: backend `8ec42f0`, PR #37; admin
   `4bb0389`, PR #37 merged by the owner). Off: our page answers "not found", the partner API keeps serving
-  the slug. Migration `2026_10_04_000001`. Its `main` merge was put on hold by the owner.
+  the slug. Migration `2026_10_04_000001`. Held off `main` at first, it went with the 2026-10-05 merge.
 - **One invitation per email, [D56](decisions/LEDGER.md)** (team note, 2026-10-05): an email can have only one
   invitation, in any collection and any state. Create, Add people, editing an email, accepting a request and
   dignitary parties all refuse or skip an address already invited; the admin warns while typing and in the
   Excel preview. Backend `36a325c` (PR #39), admin `eb4b772` (PR #40). No migration. Team guide with 13 checks:
   `client/ONE_INVITATION_PER_EMAIL/`.
-- **`dev` is ahead of `main`** by all of the above; backend production is on `7cfc6bf` (2026-10-04).
-  Deploy needs both migrations (`2026_10_04_000001`, `000002`), backend and admin together.
+- **`dev` = `main`:** all of the above merged on 2026-10-05 (backend PR #40 `fc77007`, admin PR #38
+  `e1c58ca`); frontend unchanged. Backend production is on `7cfc6bf` (2026-10-04). Deploy needs both
+  migrations (`2026_10_04_000001`, `000002`), backend and admin together, then refresh routes and restart
+  the queue.
 - **Branches:** `feat/admin-escalation-guards` and `feat/unique-invitation-email` merged and deleted (backend +
   admin); `feat/request-category-public-form` (امتنان's) is merged in both repos and left for her.
 - **Still open:** the public email lookups (`/invitation-requests/check-unique` A/B, `/guests/check-unique`
