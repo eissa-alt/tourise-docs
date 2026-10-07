@@ -1,6 +1,6 @@
 # Task 045 — Audit logs for every module
 
-- **Status:** `in-progress`: **5 of 47 permission features audited** (titles, invitations, admins_management, roles, categories). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management to `dev` and `main` on 2026-10-04 (PRs #33, then #36); the roles split on 2026-10-05 (backend PR #38, admin PR #39; `main` via backend PR #40, admin PR #38); **categories merged to `dev` on 2026-10-05 (PR #41 in both), not on `main`**. Production: backend up to the 2026-10-05 `main` (pushed by the owner that day). The blueprint below is measured on four modules; what is left is in the Log (2026-10-01, minus admins_management and categories).
+- **Status:** `in-progress`: **6 of 47 permission features audited** (titles, invitations, admins_management, roles, categories, guest_statuses). Titles + invitations merged to `dev` and `main` on 2026-09-28 (backend PRs #20 / #21, admin PRs #23 / #24); admins_management to `dev` and `main` on 2026-10-04 (PRs #33, then #36); the roles split on 2026-10-05 (backend PR #38, admin PR #39; `main` via backend PR #40, admin PR #38); **categories merged to `dev` on 2026-10-05 (PR #41 in both) and guest_statuses on 2026-10-07 (PR #42 in both); both on `main` on 2026-10-07 (PR #43 in both), not deployed**. Production: backend up to the 2026-10-05 `main` (pushed by the owner that day). The blueprint below is measured on four modules, and guest_statuses needed nothing beyond it; what is left is in the Log (2026-10-01, minus admins_management, categories and guest_statuses).
 - **Opened:** 2026-09-23
 - **Owner:** —
 - **Sub-app(s):** backend + admin
@@ -407,6 +407,17 @@ Categories are not in the bell either.
   whole list before and after. Backend 1072 tests. No migration; after deploy, roles need
   **Categories -> Record History / Audit Trail** ticked. **5 of 47 features audited, 32 left** of the
   2026-10-01 list.
+
+- 2026-10-07: **module 5, guest_statuses**, merged to `dev` by the owner (backend PR #42 `6003325`, admin
+  PR #42 `4fe1c03`; built 2026-10-05 as backend `76a40ca`, admin `6e88ee6`), and to `main` the same day
+  with module 4 (backend PR #43 `5f1d3b9`, admin PR #43 `c16458c`); not deployed. The blueprint
+  alone: the trait and `$auditFeature` on `GuestStatus`, the two boxes, three routes (the trail, its
+  export, one status's History) and the listing's History icon and Audit trail button. No bypasses: every
+  write goes through the model, so create, edit, block and delete are recorded with no controller change.
+  No module export to log (the feature has none; the trail's own export is logged), no exclusions, no new
+  strings. A delete is real: the row keeps the status's name and its History still opens. Not in the
+  bell. Backend 1078 tests. No migration; after deploy, roles need **Guest Statuses -> Record History /
+  Audit Trail** ticked. **6 of 47 features audited, 31 left** of the 2026-10-01 list.
 
 ## Decisions
 

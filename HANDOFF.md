@@ -3,7 +3,32 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-05 (latest, afternoon): categories audit trail on `dev`** ([Task 045](tasks/045-module-audit-logs/TASK.md)
+**2026-10-07 (latest): guest statuses audit trail on `dev` and `main`** ([Task 045](tasks/045-module-audit-logs/TASK.md)
+module 5). `dev` and `main` are the branch's own tree in backend and admin, so the branch's gate of 2026-10-05 holds:
+backend `pint --test` clean, PHPStan at its 5 errors, **1078 tests pass**; admin `type-check`, `check:rbac`,
+ESLint and Prettier green (`yarn build` not run: a dev server was up).
+
+- **Guest statuses have History per row and an Audit trail**, behind the new **Guest Statuses -> Record
+  History / Audit Trail** boxes (roles start unticked). Create, edit, block and delete are recorded; a
+  deleted status keeps its name in the trail and its History still opens. The blueprint alone: no
+  bypasses, no module export, no exclusions, no new strings.
+- **Merged by the owner 2026-10-07:** backend PR #42 (`6003325`), admin PR #42 (`4fe1c03`), from backend
+  `76a40ca`, admin `6e88ee6`. **On `main` the same day** with the categories trail (backend PR #43
+  `5f1d3b9`, admin PR #43 `c16458c`): `dev` = `main` in backend, admin and frontend. **Not deployed.**
+  Deploy: no migration; tick **Categories** and **Guest Statuses -> Record History / Audit Trail** after.
+- **Branches:** `feat/audit-guest-statuses` (backend `76a40ca`, admin `6e88ee6`) and امتنان's
+  `feat/request-category-public-form` (backend `8ec42f0`, admin `4bb0389`) deleted, each head checked inside
+  `dev` and `main` first. Left on GitHub, all امتنان's and unmerged: `feat/email-magic-link` (backend 9,
+  admin 1, frontend 8), `feat/social-channels` (backend 1, admin 5, frontend 3),
+  `fix/complete-data-from-the-form` (backend 1), `feat/equipment-na-hint` (frontend 1, reverted out of `dev`
+  on 09-29), `photo-check` (frontend 2, superseded on purpose).
+- **6 of 47 features audited, 31 left** (Task 045 log, 2026-10-01). Still open: `POST /guests/check-unique`
+  (Task 041 B11, live on production), `POST /invitation-requests/check-unique` (A remove, or B reCAPTCHA)
+  and D56's open point, equal-role admins (D55), social channels half-shipped, lint in `scripts/*.mjs`, the
+  categories listing showing clone / activate / block / bulk update without permission checks (the backend
+  still enforces them), devops on the edge rate limits (D53).
+
+**2026-10-05 (afternoon): categories audit trail on `dev`** ([Task 045](tasks/045-module-audit-logs/TASK.md)
 module 4). Backend gate on `dev`: `pint --test` clean, PHPStan at its 5 errors, **1072 tests pass**; admin
 `type-check`, `check:rbac`, ESLint and Prettier green (`yarn build` not run: a dev server was up).
 
