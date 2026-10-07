@@ -1,6 +1,7 @@
 # Task 051: Nominations
 
-- **Status:** `in-progress`: design agreed with the owner on 2026-10-07, build started the same day.
+- **Status:** `in-progress`: design agreed with the owner on 2026-10-07; built and pushed the same day on
+  `feat/nominations` (backend `851dc05`, admin `6ef82c7` + `c418096`), **not merged**. Not tested in a browser yet.
 - **Opened:** 2026-10-07
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -91,9 +92,34 @@ roles that need them. No `.env` change.
   when the mail server accepts; it never stores a provider message id and has no import. Invitations track
   through the Mailtrap webhook, which handles only delivery, open and click and keeps no times. Decisions 1
   to 9 taken one at a time; build started on `feat/nominations`.
+- 2026-10-07: built and pushed on `feat/nominations` in both repos (see *Built*). Not merged, not tried in
+  a browser; the local database needs `php artisan migrate` first.
 - 2026-10-07: found on the way, not this task: the newsletter's click tracker
   (`/api/newsletter/track/click/{token}?url=`) redirects to any valid address, even with a token that matches
   nothing, so it can launder a phishing link. Not in Task 041's list.
+
+## Built (2026-10-07, `feat/nominations`)
+
+- **Backend `851dc05`:** the four migrations (`2026_10_07_000001` to `000004`), models `NominationTemplate`,
+  `NominationBatch`, `Nominee`, `NominationEmail`; `NominationsController` (batches, import, check-emails,
+  nominees, send, dashboard, export, sample) and `NominationTemplatesController`; job `SendNominationEmails`
+  (chunks of 50, one try, a refused send writes its reason); `SendNominationEmailNotification` with the
+  metadata headers; `NominationVariableResolver`; `NominationImportWorkbook`; `NominationsExport`. The third
+  branch in `AfterEmailSentListener` and the step in `MailtrapWebhookController`. 26 routes under
+  `/api/admin/nominations`. 27 tests.
+- **Found while building:** Mailtrap's event times are Unix seconds; read without the app's timezone they
+  were stored three hours early (`Asia/Riyadh`). A worker that dies leaves a nominee Queued, which the
+  double-click guard would block for ever: a send waiting over 15 minutes may now be replaced, and the
+  stuck email is closed so a late worker cannot send it as well.
+- **Admin `6ef82c7`:** the newsletter's four template screens take a `TemplateModule` setting (paths,
+  titles, tabs, the builder's variables); the newsletter's is the default and its pages are unchanged.
+- **Admin `c418096`:** Operations > Nominations: Batches, New batch (mapping, red cells, problems
+  dialog, sample), a batch's page (filters, Send, polling while queued, sends per nominee, edit / delete
+  before the first email, settings, export, History), Dashboard, Templates; the builder's `nomination`
+  palette; sidebar link and `inferFeatureId` rule; 61 EN + AR strings.
+- **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1105 tests pass**; admin
+  `type-check`, ESLint, Prettier and `check:rbac` green (40 links); every new page compiles on the dev server
+  (`yarn build` not run: a dev server was up).
 
 ## Definition of Done
 
