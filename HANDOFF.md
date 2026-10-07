@@ -3,7 +3,7 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-07 (latest, afternoon): Nominations merged to `dev`, not on `main`**
+**2026-10-07 (latest, afternoon): Nominations on `dev` and `main`, not deployed**
 ([Task 051](tasks/051-nominations/TASK.md)). A new section under Operations for the client's own list (not
 guests, not invitees): Excel import in batches, its own EN / AR templates, each email followed through the
 Mailtrap webhook, a dashboard, an export. Nine owner decisions in the TASK.md; the opt-out link and the
@@ -11,8 +11,8 @@ webhook lock-down are on hold.
 
 - **Merged by the owner:** backend PR #44 (`6709fdb`), admin PR #44 (`a5c5ead`), from backend `851dc05` +
   `0e9f105` (the sample's headings centred), admin `6ef82c7` + `c418096`. Gates: backend Pint clean, PHPStan 5,
-  **1105 tests pass**; admin type-check, ESLint, Prettier, `check:rbac` green. `dev` is ahead of `main` in
-  backend and admin by this task only. Rawand's manual test files: `excel_import_fixes/test-cases-rawand/nominations/`.
+  **1105 tests pass**; admin type-check, ESLint, Prettier, `check:rbac` green. On `main` the same afternoon
+  (backend PR #45 `2ff2082`, admin PR #45 `857fe06`): `dev` = `main` in backend, admin and frontend. Rawand's manual test files: `excel_import_fixes/test-cases-rawand/nominations/`.
 - **Touches shared code in three places:** `AfterEmailSentListener` (a third branch), `MailtrapWebhookController`
   (nomination events before its filter; guest and invitation handling unchanged, a test proves it), and the
   newsletter's template screens (a `TemplateModule` setting, newsletter unchanged).

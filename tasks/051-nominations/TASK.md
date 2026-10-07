@@ -1,7 +1,7 @@
 # Task 051: Nominations
 
-- **Status:** `done (code)`: **merged to `dev` on 2026-10-07** (backend PR #44 `6709fdb`, admin PR #44 `a5c5ead`),
-  not on `main`, not deployed. Built the same day on `feat/nominations` (backend `851dc05` + `0e9f105`, admin
+- **Status:** `done (code)`: **merged to `dev` and `main` on 2026-10-07** (backend PR #44 `6709fdb` then #45
+  `2ff2082`, admin PR #44 `a5c5ead` then #45 `857fe06`), not deployed. Built the same day on `feat/nominations` (backend `851dc05` + `0e9f105`, admin
   `6ef82c7` + `c418096`).
 - **Opened:** 2026-10-07
 - **Owner:** unassigned
@@ -99,7 +99,8 @@ roles that need them. No `.env` change.
   (owner); centred vertically, backend `0e9f105`. Manual test files for Rawand built in
   `excel_import_fixes/test-cases-rawand/nominations/` (16 files, README of expected results) by
   `excel_import_fixes/tools/make-nomination-cases-rawand.php`, checked with `simulate-nominations.js`.
-- 2026-10-07: **merged to `dev` by the owner** (backend PR #44 `6709fdb`, admin PR #44 `a5c5ead`). Not on `main`.
+- 2026-10-07: **merged to `dev` by the owner** (backend PR #44 `6709fdb`, admin PR #44 `a5c5ead`), and to `main`
+  the same afternoon (backend PR #45 `2ff2082`, admin PR #45 `857fe06`). Not deployed.
 - 2026-10-07: found on the way, not this task: the newsletter's click tracker
   (`/api/newsletter/track/click/{token}?url=`) redirects to any valid address, even with a token that matches
   nothing, so it can launder a phishing link. Not in Task 041's list.
