@@ -3,7 +3,39 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-07 (latest, afternoon): Nominations on `dev` and `main`, not deployed**
+**2026-10-07 (latest, evening): the social channels picker reverted on the public site, on `dev` and `main`,
+not deployed.** Frontend only; backend and admin unchanged.
+
+- **Why:** امتنان's picker (frontend `e4e2918`, `782b2d1`, `b08a884`, straight to `main` on 2026-09-28) is live
+  on production, but its backend half (`7585b67`) is still on her `feat/social-channels`. The media, speaker and
+  TOURISE private forms post one `social_channels` list that no backend reads, so every LinkedIn, Instagram and X
+  account given since that frontend went live was saved empty, with no error to the guest. Those accounts cannot
+  be recovered.
+- **Owner's call: revert the frontend**, rather than ship her backend and admin halves (they carry a migration).
+  Frontend `630b6ba`: the three forms, the social handle inputs, `utils/social-handles.ts` and the translations
+  are back exactly as before 2026-09-28, so the forms post `linkedin`, `instagram` and `x_handle` again, which
+  backend `main` saves and admin `main` shows. `interfaces/guest.tsx` keeps the later `request_category_id`
+  (`4d6dc7c`). Gate: `type-check`, ESLint, Prettier and `yarn build` green. PR #13 to `dev` (`6953493`), PR #14
+  to `main` (`08a4b16`).
+- **The note under the three fields** is one short line, the team's wording: "Enter your username or paste the
+  link to your profile." / "أدخل اسم المستخدم، أو الصق رابط حسابك." The form still keeps only the username from a
+  pasted link. Frontend `e844db6`, PR #15 to `dev` (`bd4fa79`), PR #16 to `main` (`87b6853`).
+- **Deploy:** the frontend alone, no backend or admin step. Until it goes, production keeps the picker and keeps
+  losing accounts. The team's check query for registrations with empty accounts:
+  `~/Projects/ALT/127-tourise/social-handles-check/media-without-social-handles.sql` (outside the repos).
+- **When the picker ships for real:** revert `630b6ba` (or re-apply the three commits) together with the backend
+  and admin halves. Backend `7585b67` merges cleanly onto `dev`; the admin half conflicts only in the two
+  `web.json` files. Tell امتنان her frontend `feat/social-channels` sits on top of the reverted commits.
+- **State on 2026-10-08:** `dev` = `main` (same code) in backend, admin and frontend; all repos clean, local =
+  GitHub. Production was last confirmed on the 2026-10-05 `main`, so the categories and guest statuses audit
+  trails, Nominations (backend + admin) and this revert (frontend) all wait for a deploy. Merged branches to
+  delete on the owner's word, local and GitHub: `feat/nominations` (backend, admin), `fix/revert-social-channels`
+  and `fix/social-handle-hint` (frontend).
+- **Still open:** as in the entries below, except "social channels half-shipped", closed in code by this revert
+  and waiting for the deploy. Also an open offer: LinkedIn, Instagram and X in the admin's Empty / Not empty
+  filters on Guests.
+
+**2026-10-07 (afternoon): Nominations on `dev` and `main`, not deployed**
 ([Task 051](tasks/051-nominations/TASK.md)). A new section under Operations for the client's own list (not
 guests, not invitees): Excel import in batches, its own EN / AR templates, each email followed through the
 Mailtrap webhook, a dashboard, an export. Nine owner decisions in the TASK.md; the opt-out link and the
