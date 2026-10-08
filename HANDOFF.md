@@ -3,7 +3,26 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-07 (latest, evening): the social channels picker reverted on the public site, on `dev` and `main`,
+**2026-10-08 (latest): Nominations CC and BCC per nominee, pushed on `feat/nomination-copies`, not merged**
+([Task 051](tasks/051-nominations/TASK.md) decision 10).
+
+- **What:** the import takes two optional columns, CC Emails and BCC Emails, several addresses to a cell, as
+  invitations carry their own. Checked in the preview and again on the server: addresses only, 255 characters
+  at most, never the nominee's own (a copy may be another nominee's). Edit nominee has both fields, the batch
+  screen shows them under the email, the export and the sample have both after Email. Locked after the first
+  send, like the rest.
+- **Tracking:** a Mailtrap event moves the nominee only when it names their own address, so a copy opened or
+  bounced does not change their status.
+- **Commits:** backend `4dac3da` (migration `2026_10_08_000001`, `App\Rules\EmailList`, 4 new tests), admin
+  `9eb2924` (EN + AR). Gates: backend Pint clean, PHPStan at its 5 errors, **1109 tests pass**; admin
+  `type-check`, ESLint, Prettier, `check:rbac` and `yarn build` green. Not tried in a browser.
+- **Before trying it locally:** `php artisan migrate` on the backend. **Deploy:** the migration goes with the
+  rest of Nominations (nothing of Task 051 is on production yet). After it, one real send with a CC to see
+  how Mailtrap reports copies.
+- **Open:** Rawand's nomination test files have no CC / BCC cases yet (they still import: columns map by
+  heading).
+
+**2026-10-07 (evening): the social channels picker reverted on the public site, on `dev` and `main`,
 not deployed.** Frontend only; backend and admin unchanged.
 
 - **Why:** امتنان's picker (frontend `e4e2918`, `782b2d1`, `b08a884`, straight to `main` on 2026-09-28) is live
