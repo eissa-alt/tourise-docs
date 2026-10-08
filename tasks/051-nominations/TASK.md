@@ -180,6 +180,13 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   screen's filters, like `/guests/select-ids`), Clear selection, Send to everyone not sent yet, Send to selected.
   "Select this page" removed. **Failed** also leaves the status filter, the tiles and the count columns (the
   screens follow Delivery, Open and Click); a refused send still reads Failed on the nominee's own row.
+- **Polish (owner), backend `13ae617`, admin `a0119f3`:** the listings' meta carries `from` / `to` (the footer
+  read "showing 0 To 0"); Edit is the listings' `SquarePen` icon; the automation picker's checkboxes; `pb-6`
+  below the last table on the three pages.
+- **Queue check limit, admin `4dbc653`:** while emails are queued the batch page refreshes every 5 s, for two
+  minutes at most; then "N email(s) still waiting in the queue. If this lasts, the queue worker is not running."
+  with a Refresh button. Found locally: `QUEUE_CONNECTION=database` and no `queue:work`, so one queued email kept
+  the page refreshing for ever.
 
 ## Definition of Done
 

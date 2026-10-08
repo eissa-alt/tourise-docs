@@ -28,6 +28,9 @@
 - **Selection bar like Automation, Create (backend `6ec789f`, admin `57853bf`):** under the filters, Total
   selected, Select all matching (new admin-only `nominee-ids` route), Clear selection, the two Send buttons.
   Failed hidden too (filter, tiles, columns); the row still shows it.
+- **Polish and the queue check (backend `13ae617`, admin `a0119f3`, `4dbc653`):** footer "showing 1 To 6", the
+  edit icon, checkbox style, room below the tables; the batch page stops refreshing a stuck queue after two
+  minutes and says so. **Locally, sending needs `php artisan queue:work`** (the queue is `database`).
 - **Test files:** the owner's own set is `excel_import_fixes/test-cases/nominations/` (19 files, CC / BCC in `17`
   to `19`). **Open:** Rawand's set is still the seven-column build (it still imports: columns map by heading).
 
