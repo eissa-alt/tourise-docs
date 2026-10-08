@@ -31,6 +31,7 @@ import the list from Excel in batches, email it with the section's own templates
 | 8 | **The Mailtrap webhook lock-down is on hold** ("we will check it later"). The webhook takes any request today, with no secret or signature; nominations ship on it as it is. |
 | 9 | **Edit or delete a nominee, or delete a batch, only while nothing has been sent to them.** Deleting frees the address for a corrected re-import; after the first send the nominee stays. |
 | 10 | **CC and BCC per nominee, from the Excel** (2026-10-08; the options were the template, each nominee, both, or the send dialog). Two optional columns, CC Emails and BCC Emails, several addresses to a cell, as invitations carry their own (Task 042). Never the nominee's own address; a copy may be another nominee's. Locked after the first send with the rest of the nominee's details. |
+| 11 | **The screens show what Delivery, Open and Click report** (2026-10-08). The Mailtrap webhook stays on those three events, so Bounced leaves every Nominations screen (status filter, tiles, bounce rate, bounce type, the "Bounced or failed" columns, which now count Failed). Failed stays: it is the mail server refusing the send. The backend still records a bounce if Mailtrap ever sends one. |
 
 ## Design
 
