@@ -9,12 +9,13 @@
 - **What:** the import takes two optional columns, CC Emails and BCC Emails, several addresses to a cell, as
   invitations carry their own. Checked in the preview and again on the server: addresses only, 255 characters
   at most, never the nominee's own (a copy may be another nominee's). Edit nominee has both fields, the batch
-  screen shows them under the email, the export and the sample have both after Email. Locked after the first
-  send, like the rest.
+  screen shows them under the email. In the sample and the export they sit just before Language (owner): Title,
+  First Name, Last Name, Email, Company, Phone, CC Emails, BCC Emails, Language. Locked after the first send,
+  like the rest.
 - **Tracking:** a Mailtrap event moves the nominee only when it names their own address, so a copy opened or
   bounced does not change their status.
-- **Commits:** backend `4dac3da` (migration `2026_10_08_000001`, `App\Rules\EmailList`, 4 new tests), admin
-  `9eb2924` (EN + AR). Gates: backend Pint clean, PHPStan at its 5 errors, **1109 tests pass**; admin
+- **Commits:** backend `4dac3da` (migration `2026_10_08_000001`, `App\Rules\EmailList`, 4 new tests) and
+  `f5e91b6` (column order), admin `9eb2924` (EN + AR) and `08336a5` (column order). Gates: backend Pint clean, PHPStan at its 5 errors, **1109 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` and `yarn build` green. Not tried in a browser.
 - **Before trying it locally:** `php artisan migrate` on the backend. **Deploy:** the migration goes with the
   rest of Nominations (nothing of Task 051 is on production yet). After it, one real send with a CC to see
