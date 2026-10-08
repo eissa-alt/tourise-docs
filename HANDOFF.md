@@ -23,6 +23,8 @@
   how Mailtrap reports copies.
 - **Bounced hidden (decision 11, admin `856492f`):** the Mailtrap webhook stays on Delivery, Open and Click, so
   the Nominations screens no longer show Bounced; "Bounced or failed" columns read Failed.
+- **Bug fixed (admin `20cd89c`):** a batch opened filtered to English (the Language filter read the page's
+  `/en/`), and Reset reloaded for ever. The filter is `nominee_lang` in the URL now and starts empty.
 - **Test files:** the owner's own set is `excel_import_fixes/test-cases/nominations/` (19 files, CC / BCC in `17`
   to `19`). **Open:** Rawand's set is still the seven-column build (it still imports: columns map by heading).
 
