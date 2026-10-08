@@ -15,7 +15,8 @@
 - **Tracking:** a Mailtrap event moves the nominee only when it names their own address, so a copy opened or
   bounced does not change their status.
 - **Commits:** backend `4dac3da` (migration `2026_10_08_000001`, `App\Rules\EmailList`, 4 new tests) and
-  `f5e91b6` (column order), admin `9eb2924` (EN + AR) and `08336a5` (column order). Gates: backend Pint clean, PHPStan at its 5 errors, **1109 tests pass**; admin
+  `f5e91b6` (column order), admin `9eb2924` (EN + AR), `08336a5` (column order) and `6d79032` ("Before you
+  upload" notes on New batch, the invitation import's that apply, EN + AR). Gates: backend Pint clean, PHPStan at its 5 errors, **1109 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` and `yarn build` green. Not tried in a browser.
 - **Before trying it locally:** `php artisan migrate` on the backend. **Deploy:** the migration goes with the
   rest of Nominations (nothing of Task 051 is on production yet). After it, one real send with a CC to see

@@ -4,7 +4,7 @@
   `2ff2082`, admin PR #44 `a5c5ead` then #45 `857fe06`), not deployed. Built the same day on `feat/nominations` (backend `851dc05` + `0e9f105`, admin
   `6ef82c7` + `c418096`).
 - **Follow-up, 2026-10-08:** CC and BCC per nominee (decision 10) on `feat/nomination-copies`, backend `4dac3da`
-  + `f5e91b6`, admin `9eb2924` + `08336a5`, pushed, **not merged**.
+  + `f5e91b6`, admin `9eb2924` + `08336a5` + `6d79032`, pushed, **not merged**.
 - **Opened:** 2026-10-07
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -153,6 +153,10 @@ After it: one real send with a CC, to see that only the nominee's own events mov
 - **Column order (owner, same day), backend `f5e91b6`, admin `08336a5`:** CC Emails and BCC Emails sit just
   before Language, in the sample, the export and the import's column picker: Title, First Name, Last Name,
   Email, Company, Phone, CC Emails, BCC Emails, Language.
+- **"Before you upload" notes (owner, same day), admin `6d79032`:** New batch lists the invitation import's
+  notes that hold for a batch, reworded: the sample and the column matching, one row one nominee (blank rows
+  ignored), the same email not twice in a batch, an address already in another batch refused, the nominee not
+  in their own CC or BCC, the phone format, 1,000 at most. EN + AR.
 - **Admin `9eb2924`:** New batch maps the two columns by heading and checks them as the invitation import does
   (`isEmailList`, `listIncludesEmail`), red cells and the problems dialog; Edit nominee has both fields; the
   batch screen shows the copies small under the email. EN + AR: `nominee_cc`, `nominee_bcc`,
