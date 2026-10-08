@@ -21,8 +21,10 @@
 - **Before trying it locally:** `php artisan migrate` on the backend. **Deploy:** the migration goes with the
   rest of Nominations (nothing of Task 051 is on production yet). After it, one real send with a CC to see
   how Mailtrap reports copies.
-- **Open:** Rawand's nomination test files have no CC / BCC cases yet (they still import: columns map by
-  heading).
+- **Bounced hidden (decision 11, admin `856492f`):** the Mailtrap webhook stays on Delivery, Open and Click, so
+  the Nominations screens no longer show Bounced; "Bounced or failed" columns read Failed.
+- **Test files:** the owner's own set is `excel_import_fixes/test-cases/nominations/` (19 files, CC / BCC in `17`
+  to `19`). **Open:** Rawand's set is still the seven-column build (it still imports: columns map by heading).
 
 **2026-10-07 (evening): the social channels picker reverted on the public site, on `dev` and `main`,
 not deployed.** Frontend only; backend and admin unchanged.

@@ -4,7 +4,7 @@
   `2ff2082`, admin PR #44 `a5c5ead` then #45 `857fe06`), not deployed. Built the same day on `feat/nominations` (backend `851dc05` + `0e9f105`, admin
   `6ef82c7` + `c418096`).
 - **Follow-up, 2026-10-08:** CC and BCC per nominee (decision 10) on `feat/nomination-copies`, backend `4dac3da`
-  + `f5e91b6`, admin `9eb2924` + `08336a5` + `6d79032`, pushed, **not merged**.
+  + `f5e91b6`, admin `9eb2924` + `08336a5` + `6d79032`; Bounced hidden (decision 11), admin `856492f`; pushed, **not merged**.
 - **Opened:** 2026-10-07
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -164,6 +164,13 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   `problem_copy_is_the_nominee`, `validation:copy_is_the_nominee`.
 - **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1109 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` and `yarn build` green.
+
+## Built (2026-10-08, decision 11)
+
+- **Admin `856492f`:** Bounced out of the status filter (`NOMINEE_STATUSES`), the batch page's tiles (six now),
+  the dashboard's tiles and bounce rate, the bounce type under a status and in a nominee's emails; the batch
+  list's and the dashboard's "Bounced or failed" columns read Failed. Type-check and ESLint green. Backend
+  unchanged: `NominationEmail` still maps bounce events, unused while the webhook sends none.
 
 ## Definition of Done
 
