@@ -25,6 +25,9 @@
   the Nominations screens no longer show Bounced; "Bounced or failed" columns read Failed.
 - **Bug fixed (admin `20cd89c`):** a batch opened filtered to English (the Language filter read the page's
   `/en/`), and Reset reloaded for ever. The filter is `nominee_lang` in the URL now and starts empty.
+- **Selection bar like Automation, Create (backend `6ec789f`, admin `57853bf`):** under the filters, Total
+  selected, Select all matching (new admin-only `nominee-ids` route), Clear selection, the two Send buttons.
+  Failed hidden too (filter, tiles, columns); the row still shows it.
 - **Test files:** the owner's own set is `excel_import_fixes/test-cases/nominations/` (19 files, CC / BCC in `17`
   to `19`). **Open:** Rawand's set is still the seven-column build (it still imports: columns map by heading).
 
