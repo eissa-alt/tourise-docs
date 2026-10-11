@@ -3,8 +3,10 @@
 - **Status:** `done (code)`: **merged to `dev` and `main` on 2026-10-07** (backend PR #44 `6709fdb` then #45
   `2ff2082`, admin PR #44 `a5c5ead` then #45 `857fe06`), not deployed. Built the same day on `feat/nominations` (backend `851dc05` + `0e9f105`, admin
   `6ef82c7` + `c418096`).
-- **Follow-up, 2026-10-08:** CC and BCC per nominee (decision 10) on `feat/nomination-copies`, backend `4dac3da`
-  + `f5e91b6`, admin `9eb2924` + `08336a5` + `6d79032`; Bounced hidden (decision 11), admin `856492f`; language filter fix, admin `20cd89c`; selection bar, backend `6ec789f`, admin `57853bf`; pushed, **not merged**.
+- **Follow-up, 2026-10-08:** CC and BCC per nominee (decision 10), Bounced and Failed hidden (decision 11) and the
+  batch page fixes, built on `feat/nomination-copies` (backend `4dac3da` to `13ae617`, admin `9eb2924` to
+  `4d1b68a`), **merged to `dev` and `main` the same day** (backend PR #46 `70c0e9a` then #47 `144390c`, admin
+  PR #46 `685c8b5` then #47 `34cf691`). Not deployed.
 - **Opened:** 2026-10-07
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -119,6 +121,8 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   `feat/nomination-copies` (see *Built*), not merged, not tried in a browser; the local database needs
   `php artisan migrate`. Rawand's test files still have the seven columns (they map by heading, so they still
   import); no CC / BCC cases yet.
+- 2026-10-08: merged to `dev` (PR #46) and `main` (PR #47) in backend and admin by the owner. Rawand's test set
+  rebuilt with the CC / BCC cases.
 
 ## Built (2026-10-07, `feat/nominations`)
 

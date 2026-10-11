@@ -3,8 +3,31 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-08 (latest): Nominations CC and BCC per nominee, pushed on `feat/nomination-copies`, not merged**
-([Task 051](tasks/051-nominations/TASK.md) decision 10).
+**2026-10-12 (latest): everything is merged, `dev` = `main` in backend, admin and frontend, nothing new
+deployed.** Nothing new since 2026-10-08; local backend and admin back on `dev`.
+
+- **Merged by the owner 2026-10-08:** `feat/nomination-copies` to `dev` (backend PR #46 `70c0e9a`, admin PR #46
+  `685c8b5`), then `dev` to `main` (PR #47: backend `144390c`, admin `34cf691`). The entry below is that work.
+- **Waiting for a deploy** (production last confirmed on the 2026-10-05 `main`):
+  - **Frontend, most urgent:** the social channels revert and the shorter hint (2026-10-07 evening, below).
+    Until it goes, live registrations save LinkedIn, Instagram and X empty.
+  - **Backend + admin:** Nominations (Task 051: the four tables and `2026_10_08_000001`), and the categories and
+    guest statuses audit trails (Task 045 modules 4 and 5).
+  - **After it:** `migrate`, refresh cached routes (new `nominee-ids`), restart the queue workers, tick the
+    Nominations, Categories and Guest Statuses boxes on the roles that need them. The Mailtrap webhook stays on
+    Delivery, Open and Click (decision 11). Then one real Nominations send with a CC.
+- **Merged branches to delete, on the owner's word:** `feat/nominations` and `feat/nomination-copies` (backend
+  and admin, local and GitHub), frontend `fix/revert-social-channels` and `fix/social-handle-hint`. امتنان's
+  unmerged branches stay.
+- **Owner's answers pending:** does the batch page's Language filter work now (not confirmed after the flicker
+  fix); should a nominee's envelope (their emails) show only after a first send; rebuild `test-cases-rawand.zip`
+  (still 2026-09-28, no Nominations files).
+- **Still on hold:** the public email lookups (Task 041 B11, `/invitation-requests/check-unique`) and D56's open
+  point; equal-role admins (D55); the newsletter click tracker's open redirect; the Nominations opt-out and webhook
+  lock-down; 31 audit modules left; lint in `scripts/*.mjs`; devops on the edge rate limits (D53).
+
+**2026-10-08: Nominations CC and BCC per nominee, and the batch page fixes, on `dev` and `main` the same day**
+(PRs #46 and #47; [Task 051](tasks/051-nominations/TASK.md) decisions 10 and 11).
 
 - **What:** the import takes two optional columns, CC Emails and BCC Emails, several addresses to a cell, as
   invitations carry their own. Checked in the preview and again on the server: addresses only, 255 characters
@@ -32,7 +55,7 @@
   edit icon, checkbox style, room below the tables; the batch page stops refreshing a stuck queue after two
   minutes and says so. **Locally, sending needs `php artisan queue:work`** (the queue is `database`).
 - **Test files:** the owner's own set is `excel_import_fixes/test-cases/nominations/` (19 files, CC / BCC in `17`
-  to `19`). **Open:** Rawand's set is still the seven-column build (it still imports: columns map by heading).
+  to `19`); Rawand's `test-cases-rawand/nominations/` rebuilt the same way, both checked file by file.
 
 **2026-10-07 (evening): the social channels picker reverted on the public site, on `dev` and `main`,
 not deployed.** Frontend only; backend and admin unchanged.
