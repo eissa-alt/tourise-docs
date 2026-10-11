@@ -3,7 +3,23 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest): everything is merged, `dev` = `main` in backend, admin and frontend, nothing new
+**2026-10-12 (latest, later): Newsletter import built, on `feat/newsletter-import`, not merged**
+([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) part 1).
+
+- **What:** Subscribers, **Import subscribers** (newsletter Create box): the client's sheet in the nominations
+  import's flow (mapping by heading, red cells, problems dialog, notes, Download Excel sample), an optional list
+  (default list otherwise). Every row a new subscriber, subscribed, source **Imported** (new label and Source
+  filter option). An address already in the newsletter refuses the file whatever its source and status (owner:
+  the same rule as the other imports); 1,000 rows at most.
+- **Commits:** backend `408c7a0` (3 admin-only routes, `NewsletterImportWorkbook`, 8 tests), admin `0442232`
+  (EN + AR). Gates: backend Pint clean, PHPStan 5, **1118 tests pass**; admin `type-check`, ESLint, Prettier,
+  `check:rbac`, `yarn build` green. Not tried in a browser. No migration; deploy: refresh routes.
+- **Next, part 2 (Mailtrap tracking for newsletter emails):** two owner questions first: keep our own open pixel
+  and click redirect or let Mailtrap track alone; which Mailtrap stream production newsletters use.
+- **Links:** backend `https://github.com/eissa-alt/tourise-backend/compare/dev...feat/newsletter-import`, admin
+  `https://github.com/eissa-alt/tourise-admin/compare/dev...feat/newsletter-import`.
+
+**2026-10-12: everything is merged, `dev` = `main` in backend, admin and frontend, nothing new
 deployed.** Nothing new since 2026-10-08; local backend and admin back on `dev`.
 
 - **Merged by the owner 2026-10-08:** `feat/nomination-copies` to `dev` (backend PR #46 `70c0e9a`, admin PR #46
