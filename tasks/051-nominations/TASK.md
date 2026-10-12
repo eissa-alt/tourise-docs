@@ -231,7 +231,10 @@ After it: one real send with a CC, to see that only the nominee's own events mov
 ## Built (2026-10-12, `fix/nominations-opened-filter-includes-clicked`, decision 14)
 
 - **Backend `a5ce813`:** `applyNomineeFilters` adds `clicked` when `opened` is picked (the list, Select all matching, the
-  export). 1 new test; 1148 pass. No admin change. Pushed, not merged.
+  export). 1 new test; 1148 pass. No admin change. Merged to `dev` 2026-10-12 (backend PR #60 `ae3246a`), not on `main`.
+- **Checked against the owner's export of Nomination Reminder Batch 1** (2026-10-12): 167 Delivered, 58 Opened, 30
+  Clicked, 48 Not delivered, one email each; Opened tile 88 = 58 + 30, no open counted twice. 11 of the 30 clickers
+  have no open time (images off), the click proves the open.
 
 ## Definition of Done
 
