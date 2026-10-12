@@ -3,8 +3,8 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, late night): Newsletter Add subscriber and Delete subscribers, pushed on
-`feat/newsletter-add-and-delete-subscriber` (backend `a6c4d35`, admin `e4cec83`), not merged**
+**2026-10-12 (latest, late night): Newsletter Add subscriber and Delete subscribers, merged to
+`dev` (backend PR #58 `a3df1dc`, admin PR #57 `f52063f`), not on `main`**
 ([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) decisions 12 and 13). Two new boxes, roles start without
 them; Delete is meant for Super Admin only (it reverses Task 040 for that box). No migration.
 
