@@ -156,7 +156,7 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
   new box. `NewsletterAddAndDeleteSubscriberTest`, 4 tests; 1147 pass.
 - **Admin `e4cec83`:** `add-subscriber-modal.tsx`, the Add subscriber button (TopSection `customAction`), the Actions
   column with Delete and its confirm, "Added manually" in the Source filter and column. EN + AR.
-- Merged to `dev` 2026-10-12 (backend PR #58, admin PR #57), not on `main`. No migration. Roles start without either
+- Merged to `dev` 2026-10-12 (backend PR #58, admin PR #57) and to `main` (backend PR #59, admin PR #58), not deployed. No migration. Roles start without either
   box (Super Admin has every box).
 
 ## Definition of Done

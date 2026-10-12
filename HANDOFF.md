@@ -4,7 +4,8 @@
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
 **2026-10-12 (latest, late night): Newsletter Add subscriber and Delete subscribers, merged to
-`dev` (backend PR #58 `a3df1dc`, admin PR #57 `f52063f`), not on `main`**
+`dev` (backend PR #58 `a3df1dc`, admin PR #57 `f52063f`) and to `main` (backend PR #59 `93a024b`, admin PR #58
+`98974e2`), not deployed**
 ([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) decisions 12 and 13). Two new boxes, roles start without
 them; Delete is meant for Super Admin only (it reverses Task 040 for that box). No migration.
 
