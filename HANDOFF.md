@@ -27,7 +27,8 @@ admin `0b08ab9`)** ([Task 051](tasks/051-nominations/TASK.md) decision 12).
 - **Commits:** backend `dd45025` (migration `2026_10_12_000004`, command, tests: 1138 pass), admin `07ea268`
   (EN + AR). Not tried in a browser.
 - **After deploy:** `migrate`, then for the 48 reminder emails that failed before the webhook listened:
-  `php artisan nominations:import-mailtrap-failures <the Mailtrap CSV> --dry-run`, check, then run it without.
+  `php artisan nominations:import-mailtrap-failures --dry-run`, check, then run it without. The 48 rows live in the
+  command (backend `3febb79` on `feat/mailtrap-failures-in-command`, owner 2026-10-12): no CSV to copy to the server.
 - **Links:** backend `https://github.com/eissa-alt/tourise-backend/compare/dev...feat/nominations-not-delivered`,
   admin `https://github.com/eissa-alt/tourise-admin/compare/dev...feat/nominations-not-delivered`.
 

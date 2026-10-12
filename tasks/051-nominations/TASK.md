@@ -201,7 +201,7 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   failure. Rows and the emails list carry `problem` and `problem_reason`; the filter's `not_delivered` finds Failed;
   counts `delayed`, `not_delivered`, `not_delivered_rate`. Export: "Problem reported at", "Problem", "Problem
   reason". Migration `2026_10_12_000004` (the column; `bounced` nominees read again). Command
-  `nominations:import-mailtrap-failures {csv} [--dry-run]`: matches by Mailtrap Message ID or address and send time,
+  `nominations:import-mailtrap-failures [--dry-run]`: matches by Mailtrap Message ID or address and send time,
   skips what is already marked. Tests: 1138 pass, PHPStan at its 5.
 - **Admin `07ea268`:** the two statuses (filter, badges), `NomineeProblem` under the status on rows and in a
   nominee's emails, a Not delivered tile (batch page, dashboard with its rate) and column (batches list, dashboard),
@@ -209,7 +209,9 @@ After it: one real send with a CC, to see that only the nominee's own events mov
 - **The 48 (owner's export `~/Projects/ALT/127-tourise/mailtap/email_logs_export_1791800511.csv`, reminder of
   2026-10-11):** 20 domains that do not exist (one typo, `srilanka.travelv`), 10 servers dropping the connection, 7
   Office 365 "Access denied", 9 mailboxes that do not exist, 2 temporary DNS timeouts, 3 refused by policy. On the
-  server after deploy: `php artisan nominations:import-mailtrap-failures <csv> --dry-run`, then without it.
+  server after deploy: `php artisan nominations:import-mailtrap-failures --dry-run`, then without it. The owner asked
+  (2026-10-12) for no file to copy: the command keeps the 48 rows itself (Message ID, Sent at, address, ESP Response;
+  backend `3febb79`), so it needs no CSV.
 
 ## Definition of Done
 
