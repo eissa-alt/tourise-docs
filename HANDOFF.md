@@ -3,8 +3,19 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, night): Nominations Not delivered and Delivery delayed, on `feat/nominations-not-delivered`,
-not merged** ([Task 051](tasks/051-nominations/TASK.md) decision 12).
+**2026-10-12 (latest, later night): the same for the Newsletter, on `feat/newsletter-not-delivered`, not merged**
+([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) decision 11).
+
+- **What:** campaign recipients read Not delivered (bounce, reject, or our server refusing) or Delivery delayed
+  (soft bounce, suspension), with Mailtrap's words under the status; a Not delivered count on the campaign page,
+  the Campaigns list, the dashboard and the export. Backend `b8711c2` (migration `2026_10_12_000005`, 1140 tests),
+  admin `7cf2fb0`.
+- **Mailtrap:** create the **Bulk** webhook with Delivery, Open, Click, Bounce, Soft Bounce, Reject, Suspension.
+- **Links:** backend `https://github.com/eissa-alt/tourise-backend/compare/dev...feat/newsletter-not-delivered`,
+  admin `https://github.com/eissa-alt/tourise-admin/compare/dev...feat/newsletter-not-delivered`.
+
+**2026-10-12 (night): Nominations Not delivered and Delivery delayed, merged to `dev` (PR #50: backend `10c4830`,
+admin `0b08ab9`)** ([Task 051](tasks/051-nominations/TASK.md) decision 12).
 
 - **What:** a bounce or a reject reads **Not delivered**, a soft bounce or a suspension **Delivery delayed** (cleared
   by a later delivery), a send our own server refused reads Not delivered too; under each status, what happened and

@@ -49,6 +49,7 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 | 7 | **The newsletter's own SMTP account, on a Newsletter, Settings tab** (not on the list edit: a campaign need not use a list). Stored as `smtp_configs.is_newsletter_default`, one at most. A send uses the account picked, else the newsletter's, else the system default. The owner will create a `live.smtp.mailtrap.io` and a `bulk.smtp.mailtrap.io` account and set the bulk one. |
 | 9 | **Settings is a box of its own** (Newsletter, Settings, owner 2026-10-12): changing the sending account needs it, not Update; the tab shows only with it; reading the account stays on the section (the Send dialog opens on it). Roles start without it. |
 | 10 | **The Newsletter boxes follow the tabs** (option B, owner 2026-10-12): `subscribers_view`, `subscribers_import`, `subscribers_export`, `subscribers_add_to_list`, `dashboard_view`, `lists_view`, `lists_manage`, `campaigns_view`, `campaigns_send`, `campaigns_export`, `templates_view`, `templates_manage`, `settings`. Each tab shows with its view box, each button with its own. The old boxes (view, export, create, update, delete, send) are **taken off every role, not converted** ("nvm about the existing one"): roles are ticked again by hand. Template and list names, and the sending account, stay readable to the whole section (pickers and the Send dialog need them). |
+| 11 | **Not delivered and Delivery delayed for newsletter emails too** (owner, 2026-10-12, before `main`), with Nominations' rules (task 051 decision 12): bounce or reject final, soft bounce or suspension retrying until a delivery clears it, a refused send reads Not delivered. The Bulk webhook is created with Delivery, Open, Click, Bounce, Soft Bounce, Reject, Suspension. |
 | 8 | **One-click unsubscribe header** (RFC 8058, `List-Unsubscribe` + `List-Unsubscribe-Post`), which Gmail and Yahoo expect from bulk senders; a POST to the API's unsubscribe address unsubscribes without a page. |
 
 ## Design, part 1 (import)
@@ -86,7 +87,8 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
   migration `2026_10_12_000003` takes the old ones off, so until then only Super Admins see Newsletter. Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
   `bulk.smtp.mailtrap.io`) and choose the bulk one on Newsletter, Settings; in Mailtrap add a **Bulk** stream
   webhook to `https://api-register.tourise.com/api/webhooks/mailtrap/bulk` (payload JSON, area Email Sending,
-  stream "Bulk (excludes campaigns)", domain tourise.com, events Delivery, Open, Click), **after** the backend is
+  stream "Bulk (excludes campaigns)", domain tourise.com, events Delivery, Open, Click, Bounce, Soft Bounce,
+  Reject, Suspension), **after** the backend is
   deployed (the address does not exist before); keep the Transactional webhook as it is; check open and click tracking
   is on for the sending domain. Then one real send to see the numbers move. The webhook takes any request
   (Task 051 decision 8, lock-down on hold); the bulk address is the same handler.
@@ -133,6 +135,16 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
   `12683b3`, `useNewsletterBox` / `NewsletterNoAccess`, `TemplateModule.boxes`, 12 box labels EN + AR).
 - **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1127 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` green; `yarn build` not run (dev server up).
+
+## Built (2026-10-12, `feat/newsletter-not-delivered`, decision 11)
+
+- **Backend `b8711c2`:** migration `2026_10_12_000005` (recipients `bounced_at`, `bounce_type`, `bounce_reason`;
+  campaigns `not_delivered_count`); `NewsletterCampaignRecipient` stages `delayed` / `not_delivered`, `whereStages`,
+  `problemType()` / `problemReason()`, the bounce handling in `recordMailtrapEvent`; the campaign page's rows, the
+  dashboard and the Campaigns export count Not delivered. 1140 tests pass, PHPStan at its 5.
+- **Admin `7cf2fb0`:** the two stages on the campaign page (filter, badge, the Nominations reason line), a Not
+  delivered tile, a column on Campaigns, a tile on the dashboard. EN + AR. Local demo data
+  (`excel_import_fixes/tools/make-newsletter-demo-data.php`) gains one of each; run it after `migrate`.
 
 ## Definition of Done
 
