@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · Nominations and Newsletter: in short</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · Nominations and Newsletter, in short"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+li > ul, li > ol { margin: 1.4mm 0 0 0; }
+strong { color: #111; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.4pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFBFD; }
+td.num, th.num { width: 8mm; text-align: center; font-weight: 700; }
+td.num { color: #3C0DEB; }
+td.check { width: 20mm; }
+th.check { width: 20mm; }
+</style></head><body><div class="head"><div class="eyebrow">Nominations · Newsletter</div><h1>Nominations and Newsletter: in short</h1><p class="sub">The main changes in the TOURISE 2027 admin, 12 October 2026. Details and checks: "Nominations and Newsletter update".</p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+<h2>1. Two new email statuses</h2>
+<p>Both sections now follow each email as Mailtrap reports it: <strong>Sent</strong>, <strong>Delivered</strong>, <strong>Opened</strong>, <strong>Clicked</strong>, and two new ones. Under each new one, a short line gives the receiving server's reason.</p>
+<table><thead><tr><th>Status</th><th>What it means</th></tr></thead><tbody><tr><td><strong>Delivery delayed</strong></td><td>The recipient's server asked Mailtrap to try later. Mailtrap keeps retrying; it may still arrive.</td></tr><tr><td><strong>Not delivered</strong></td><td>The email will not arrive: the address or domain does not exist, or the server refused it.</td></tr></tbody></table>
+<h2>2. Nominations</h2>
+<ul><li><strong>CC and BCC for each nominee</strong>, from two new Excel columns just before Language. Several addresses per cell, separated by commas; never the nominee's own address.</li><li><strong>Not delivered and Delivery delayed</strong> on the batch page, the batches list, the dashboard, a nominee's email history and the export, each with its reason.</li><li><strong>The 48 reminder emails of 11 October</strong> that never arrived are now marked Not delivered, with their reasons. Most are domains or mailboxes that do not exist.</li><li><strong>A steadier batch page:</strong> a selection bar (Select all matching, Send to selected), the Language filter no longer hides Arabic nominees, and no more endless refresh.</li></ul>
+<h2>3. Newsletter</h2>
+<ul><li><strong>Import subscribers from Excel:</strong> source Imported, subscribed, 1,000 per file. An address already in the newsletter refuses the file.</li><li><strong>Real tracking:</strong> delivery, opens, clicks, Not delivered and Delivery delayed reported by Mailtrap, and a <strong>page for each campaign</strong> listing every recipient with their status and reason.</li><li><strong>Settings tab</strong> to choose the newsletter's sending account; <strong>Search</strong> on Subscribers; <strong>Export</strong> on Campaigns; <strong>one-click unsubscribe</strong> in Gmail and Yahoo.</li><li><strong>Access tab by tab:</strong> 13 role boxes, one to see each tab and one for each button.</li></ul>
+<div class="callout"><p><strong>What you need to do:</strong> if you manage roles, tick the new Newsletter boxes on every role that uses the section. Until then only Super Admins see the Newsletter.</p></div>
+</body></html>
