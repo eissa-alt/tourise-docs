@@ -47,6 +47,7 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 | 5 | **Mailtrap alone tracks opens and clicks** (option A): new emails carry no own pixel and no rewritten links. The old open and click links keep answering emails already sent; the click link redirects only for a token one of our emails carried (it was an open redirect). |
 | 6 | **Newsletter events from either Mailtrap stream**, transactional or bulk; guest, invitation and nomination emails stay transactional only. A second webhook address, `/api/webhooks/mailtrap/bulk`, for the bulk stream's webhook. |
 | 7 | **The newsletter's own SMTP account, on a Newsletter, Settings tab** (not on the list edit: a campaign need not use a list). Stored as `smtp_configs.is_newsletter_default`, one at most. A send uses the account picked, else the newsletter's, else the system default. The owner will create a `live.smtp.mailtrap.io` and a `bulk.smtp.mailtrap.io` account and set the bulk one. |
+| 9 | **Settings is a box of its own** (Newsletter, Settings, owner 2026-10-12): changing the sending account needs it, not Update; the tab shows only with it; reading the account stays on the section (the Send dialog opens on it). Roles start without it. |
 | 8 | **One-click unsubscribe header** (RFC 8058, `List-Unsubscribe` + `List-Unsubscribe-Post`), which Gmail and Yahoo expect from bulk senders; a POST to the API's unsubscribe address unsubscribes without a page. |
 
 ## Design, part 1 (import)
@@ -80,7 +81,8 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 - **Part 1:** no migration. Refresh cached routes (three new). Roles that should import need the newsletter
   **Create** box.
 - **Part 2:** `migrate` (`2026_10_12_000001` smtp_configs, `2026_10_12_000002` recipients), refresh routes,
-  restart the queue workers. Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
+  restart the queue workers. Tick **Newsletter, Settings** on the roles that choose the account (Super Admin
+  has it). Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
   `bulk.smtp.mailtrap.io`) and choose the bulk one on Newsletter, Settings; in Mailtrap add a **Bulk** stream
   webhook (Delivery, Open, Click) to `https://<api>/api/webhooks/mailtrap/bulk`; check open and click tracking
   is on for the sending domain. Then one real send to see the numbers move. The webhook takes any request
@@ -120,6 +122,8 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 - **Admin `14b61e5`:** `newsletter-campaign-details.tsx` and `/newsletter/campaigns/[id]`,
   `newsletter-settings.tsx` and `/newsletter/settings` (a sixth tab), the Campaigns list (link, Delivered, no
   Failed), the Send dialog's preselection, the SMTP picker's and the SMTP list's "Newsletter" mark. EN + AR.
+- **Then:** the toolbar buttons in the admin's own sizes (admin `c7ea5ee`); the Settings box, decision 9
+  (backend `8b005df`, admin `97a1cf8`).
 - **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1127 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` green; `yarn build` not run (dev server up).
 

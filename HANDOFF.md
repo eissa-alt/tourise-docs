@@ -15,6 +15,9 @@
 - **Commits:** backend `80fb2cd` (2 migrations, 9 tests), admin `14b61e5` (EN + AR). Gates: backend Pint clean,
   PHPStan 5, **1127 tests pass**; admin `type-check`, ESLint, Prettier, `check:rbac` green, `yarn build` not run
   (dev server up). Not tried in a browser.
+- **Settings box (decision 9):** Newsletter, Settings has its own box in Roles (backend `8b005df`, admin
+  `97a1cf8`); tick it where people should choose the sending account. Toolbar buttons in the admin's sizes
+  (admin `c7ea5ee`). Test files: `excel_import_fixes/test-cases/newsletter/` and Rawand's, 15 each.
 - **Locally:** `php artisan migrate` (two migrations), then Newsletter, Settings.
 - **Deploy:** migrate, refresh routes, restart the queue workers. Then the owner: create the `live` and `bulk`
   Mailtrap SMTP accounts, pick the bulk one on Newsletter, Settings, add a Bulk stream webhook (Delivery, Open,
