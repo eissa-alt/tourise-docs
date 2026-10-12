@@ -39,3 +39,9 @@ listings (owner, 2026-09-21: "remove Delete action in subscriber or template in 
 - [ ] Quality gate green — `tsc --noEmit` + eslint green; `yarn production` not run
 - [x] Docs updated (this TASK.md; index row; HANDOFF)
 - [x] Mobile contract checked — no `routes/api.php` change
+
+## Later
+
+- 2026-10-12: the owner brought Delete back on Subscribers for one new box, `subscribers_delete`, meant for Super
+  Admin only, to clear test addresses ([Task 052](../052-newsletter-import-and-tracking/TASK.md) decision 13).
+  Templates still have no Delete.

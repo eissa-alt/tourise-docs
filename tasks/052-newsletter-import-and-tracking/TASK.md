@@ -50,6 +50,8 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 | 9 | **Settings is a box of its own** (Newsletter, Settings, owner 2026-10-12): changing the sending account needs it, not Update; the tab shows only with it; reading the account stays on the section (the Send dialog opens on it). Roles start without it. |
 | 10 | **The Newsletter boxes follow the tabs** (option B, owner 2026-10-12): `subscribers_view`, `subscribers_import`, `subscribers_export`, `subscribers_add_to_list`, `dashboard_view`, `lists_view`, `lists_manage`, `campaigns_view`, `campaigns_send`, `campaigns_export`, `templates_view`, `templates_manage`, `settings`. Each tab shows with its view box, each button with its own. The old boxes (view, export, create, update, delete, send) are **taken off every role, not converted** ("nvm about the existing one"): roles are ticked again by hand. Template and list names, and the sending account, stay readable to the whole section (pickers and the Send dialog need them). |
 | 11 | **Not delivered and Delivery delayed for newsletter emails too** (owner, 2026-10-12, before `main`), with Nominations' rules (task 051 decision 12): bounce or reject final, soft bounce or suspension retrying until a delivery clears it, a refused send reads Not delivered. The Bulk webhook is created with Delivery, Open, Click, Bounce, Soft Bounce, Reject, Suspension. |
+| 12 | **Add subscriber, one at a time** (owner 2026-10-12, to try the bulk sending with test addresses): a button beside Import subscribers, a new box `subscribers_add`. Subscribed, source `manual` ("Added manually", its own Source group), in the chosen active list or the default one; an address already in the newsletter is refused, as the import refuses it. |
+| 13 | **Delete subscribers, a box of its own** (owner 2026-10-12, to clear the test addresses; meant for Super Admin only). Reverses task 040 for that box only: the row Delete comes back, the existing DELETE route moves from the import box to `subscribers_delete`. The subscriber and their list memberships go; their rows in sent campaigns stay, so the numbers do not change. |
 | 8 | **One-click unsubscribe header** (RFC 8058, `List-Unsubscribe` + `List-Unsubscribe-Post`), which Gmail and Yahoo expect from bulk senders; a POST to the API's unsubscribe address unsubscribes without a page. |
 
 ## Design, part 1 (import)
@@ -145,6 +147,16 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 - **Admin `7cf2fb0`:** the two stages on the campaign page (filter, badge, the Nominations reason line), a Not
   delivered tile, a column on Campaigns, a tile on the dashboard. EN + AR. Local demo data
   (`excel_import_fixes/tools/make-newsletter-demo-data.php`) gains one of each; run it after `migrate`.
+
+
+## Built (2026-10-12, `feat/newsletter-add-and-delete-subscriber`, decisions 12 and 13)
+
+- **Backend `a6c4d35`:** `subscribers_add` and `subscribers_delete` in the catalog; `NewsletterSubscriber::SOURCE_MANUAL` and
+  its group; `AdminNewsletterController::storeSubscriber` (`POST /admin/newsletter/subscribers`); the DELETE route on the
+  new box. `NewsletterAddAndDeleteSubscriberTest`, 4 tests; 1147 pass.
+- **Admin `e4cec83`:** `add-subscriber-modal.tsx`, the Add subscriber button (TopSection `customAction`), the Actions
+  column with Delete and its confirm, "Added manually" in the Source filter and column. EN + AR.
+- Pushed, not merged. No migration. Roles start without either box (Super Admin has every box).
 
 ## Definition of Done
 
