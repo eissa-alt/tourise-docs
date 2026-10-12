@@ -6,7 +6,9 @@
 **2026-10-12 (latest): `dev` merged to `main` in both apps (backend PR #53 `df6bfc2`, admin PR #52 `7f379a3`).**
 `main` now carries PRs #48 to #52: newsletter import (Task 052 part 1), newsletter tracking, Settings and boxes by tab
 (part 2), Not delivered and Delivery delayed for Nominations (Task 051 decision 12) and the Newsletter (Task 052
-decision 11), and the Mailtrap failures command with its 48 rows inside (backend PR #52, `3febb79`). Not deployed.
+decision 11), and the Mailtrap failures command with its 48 rows inside (backend PR #52, `3febb79`). **Backend on
+production 2026-10-12:** the owner ran the command there, dry run then real: 48 marked Not delivered, 0 already, 0
+not found. Still to confirm: admin and frontend deployed, Newsletter boxes ticked, Bulk webhook and bulk SMTP set.
 
 - **Deploy:** backend, admin, and the frontend (its social channels revert of 2026-10-07 is still waiting).
 - **On the server:** `php artisan migrate` (`2026_10_12_000001` to `000005`), refresh the route cache, restart the

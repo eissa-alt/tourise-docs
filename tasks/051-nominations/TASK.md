@@ -207,11 +207,13 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   nominee's emails, a Not delivered tile (batch page, dashboard with its rate) and column (batches list, dashboard),
   Delivery delayed noted under Sent. EN + AR.
 - **The 48 (owner's export `~/Projects/ALT/127-tourise/mailtap/email_logs_export_1791800511.csv`, reminder of
-  2026-10-11):** 20 domains that do not exist (one typo, `srilanka.travelv`), 10 servers dropping the connection, 7
-  Office 365 "Access denied", 9 mailboxes that do not exist, 2 temporary DNS timeouts, 3 refused by policy. On the
+  2026-10-11):** 16 domains that do not exist (one typo, `srilanka.travelv`), 10 servers dropping the connection, 10
+  mailboxes that do not exist or are disabled (one the placeholder `name@email.com`), 7 Office 365 "Access denied", 3
+  refused by policy, 2 temporary DNS timeouts (recounted 2026-10-12; the first count added up to 51). On the
   server after deploy: `php artisan nominations:import-mailtrap-failures --dry-run`, then without it. The owner asked
   (2026-10-12) for no file to copy: the command keeps the 48 rows itself (Message ID, Sent at, address, ESP Response;
   backend `3febb79`), so it needs no CSV.
+- **Run on production 2026-10-12** by the owner: dry run 48 / 0 / 0, then the real run, 48 marked Not delivered.
 
 ## Definition of Done
 
