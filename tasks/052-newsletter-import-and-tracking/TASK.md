@@ -1,7 +1,8 @@
 # Task 052: Newsletter import and Mailtrap tracking
 
-- **Status:** `in-progress`: part 1 (import) built on `feat/newsletter-import`, backend `408c7a0`, admin
-  `0442232`, pushed, not merged. Part 2 (tracking) not started; two owner questions open.
+- **Status:** `in-progress`: part 1 (import) **merged to `dev`** (PR #48: backend `1c3bc83`, admin `41782f5`),
+  not on `main`. Part 2 (Mailtrap tracking) built on `feat/newsletter-tracking`, backend `80fb2cd`, admin
+  `14b61e5`, pushed, not merged.
 - **Opened:** 2026-10-12
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -43,6 +44,10 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 | 2 | **An imported subscriber is source `imported`, status subscribed.** |
 | 3 | **An address already in the newsletter refuses the file**, whatever its source (a form, the website, an earlier import) and status (subscribed or not), as the other imports refuse theirs: red in the preview with its status and source, listed in the problems dialog, and refused again by the server. The team cleans the file by hand. So an import never changes an existing subscriber, and never subscribes again someone who left. |
 | 4 | **1,000 rows per import**, as the invitation and nomination imports. |
+| 5 | **Mailtrap alone tracks opens and clicks** (option A): new emails carry no own pixel and no rewritten links. The old open and click links keep answering emails already sent; the click link redirects only for a token one of our emails carried (it was an open redirect). |
+| 6 | **Newsletter events from either Mailtrap stream**, transactional or bulk; guest, invitation and nomination emails stay transactional only. A second webhook address, `/api/webhooks/mailtrap/bulk`, for the bulk stream's webhook. |
+| 7 | **The newsletter's own SMTP account, on a Newsletter, Settings tab** (not on the list edit: a campaign need not use a list). Stored as `smtp_configs.is_newsletter_default`, one at most. A send uses the account picked, else the newsletter's, else the system default. The owner will create a `live.smtp.mailtrap.io` and a `bulk.smtp.mailtrap.io` account and set the bulk one. |
+| 8 | **One-click unsubscribe header** (RFC 8058, `List-Unsubscribe` + `List-Unsubscribe-Post`), which Gmail and Yahoo expect from bulk senders; a POST to the API's unsubscribe address unsubscribes without a page. |
 
 ## Design, part 1 (import)
 
@@ -57,25 +62,36 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
   `POST /admin/newsletter/subscribers/check-emails`, `GET /admin/newsletter/subscribers/import-template`.
   Admin-only, nothing the mobile app calls. No migration: `source` is a free string.
 
-## Part 2 (tracking), to settle before building
+## Design, part 2 (tracking)
 
-- Our own open pixel and click redirect: keep them, or let Mailtrap track opens and clicks alone (which would
-  also close the open redirect).
-- Which Mailtrap stream production newsletters use: transactional (the webhook already listens) or bulk (a
-  second webhook in Mailtrap, and the controller accepting bulk events for newsletter emails only).
-- Then, as Task 051: metadata headers on each email, the message id stored by `AfterEmailSentListener`, events
-  recorded per recipient with times and matched to the recipient's own address, counts from the rows, a
-  Delivered column, and a page per campaign listing its recipients. One migration (message id, event log).
+- **Sending:** each email carries the metadata headers (`notification-newsletter-email`, the recipient's id);
+  `AfterEmailSentListener` stores Mailtrap's message id on the recipient. A recipient reads **Sent** until
+  Mailtrap reports the delivery (it used to read Delivered as soon as our SMTP server took it).
+- **Webhook:** `NewsletterCampaignRecipient::recordMailtrapEvent` records delivery, open and click with their
+  times, only for the recipient's own address, once per event id; an open or click fills a missing delivery.
+  The campaign's delivered / opened / clicked counts move once per recipient.
+- **Admin:** a page per campaign (tiles for recipients, sent, delivered, opened, clicked; every recipient with
+  their stage and times, filtered by email and stage); the Campaigns list gains Delivered and loses Failed (the
+  Nominations screens' rule, decision 11 of Task 051); Newsletter, Settings; the Send dialog opens on the
+  newsletter's account; the SMTP picker and the SMTP list mark it "Newsletter".
 
-## Deploy (part 1)
+## Deploy
 
-No migration, no `.env` change. Refresh cached routes (three new). Roles that should import need the
-newsletter **Create** box.
+- **Part 1:** no migration. Refresh cached routes (three new). Roles that should import need the newsletter
+  **Create** box.
+- **Part 2:** `migrate` (`2026_10_12_000001` smtp_configs, `2026_10_12_000002` recipients), refresh routes,
+  restart the queue workers. Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
+  `bulk.smtp.mailtrap.io`) and choose the bulk one on Newsletter, Settings; in Mailtrap add a **Bulk** stream
+  webhook (Delivery, Open, Click) to `https://<api>/api/webhooks/mailtrap/bulk`; check open and click tracking
+  is on for the sending domain. Then one real send to see the numbers move. The webhook takes any request
+  (Task 051 decision 8, lock-down on hold); the bulk address is the same handler.
 
 ## Log
 
 - 2026-10-12: opened. Findings above; decisions 1 to 4 taken one at a time; part 1 built on
   `feat/newsletter-import`.
+- 2026-10-12: part 1 merged to `dev` by the owner (PR #48). Decisions 5 to 8; part 2 built on
+  `feat/newsletter-tracking`. Not tried in a browser; `yarn build` not run (a dev server was up).
 
 ## Built (2026-10-12, `feat/newsletter-import`)
 
@@ -90,6 +106,22 @@ newsletter **Create** box.
   listing and the import), the Source filter's Imported option, the form header's `import` mode. EN + AR.
 - **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1118 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` (40 links) and `yarn build` green. Not tried in a browser.
+
+## Built (2026-10-12, `feat/newsletter-tracking`)
+
+- **Backend `80fb2cd`:** the two migrations; `NewsletterSender` (headers, no pixel or rewritten links, Sent until
+  delivered, the account picked / newsletter / system default, the test send through the newsletter's account);
+  `NewsletterCampaignRecipient` (`NOTIFICATION_TYPE`, `STAGES`, `stage()`, `whereStages()`,
+  `recordMailtrapEvent()`); `AfterEmailSentListener` newsletter branch; `MailtrapWebhookController` (newsletter
+  from either stream) and the bulk route; `NewsletterController::unsubscribeOneClick` and the click link's
+  check; `AdminNewsletterController` settings, `campaignRecipients`, the newsletter account on a send, the SMTP
+  name on a campaign, `from` / `to` in listing meta; `SMTPConfig::newsletterDefault()`, the flag in the resource
+  and the select list. `NewsletterTrackingTest`, 9 tests; `NewsletterUnsubscribeTest` expects Sent.
+- **Admin `14b61e5`:** `newsletter-campaign-details.tsx` and `/newsletter/campaigns/[id]`,
+  `newsletter-settings.tsx` and `/newsletter/settings` (a sixth tab), the Campaigns list (link, Delivered, no
+  Failed), the Send dialog's preselection, the SMTP picker's and the SMTP list's "Newsletter" mark. EN + AR.
+- **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1127 tests pass**; admin
+  `type-check`, ESLint, Prettier, `check:rbac` green; `yarn build` not run (dev server up).
 
 ## Definition of Done
 

@@ -3,7 +3,27 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, later): Newsletter import built, on `feat/newsletter-import`, not merged**
+**2026-10-12 (latest, evening): Newsletter tracking built, on `feat/newsletter-tracking`, not merged**
+([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) part 2; part 1, the import, is on `dev` since PR #48).
+
+- **What:** newsletter emails followed through the Mailtrap webhook as nomination emails are: Sent until
+  Mailtrap reports the delivery, then delivery, open and click per recipient with times. Mailtrap alone tracks
+  opens and clicks (no own pixel or rewritten links; the old click link redirects only for a real recipient).
+  Newsletter events accepted from the transactional and bulk streams; new `/api/webhooks/mailtrap/bulk`. A page
+  per campaign listing its recipients; Delivered on the Campaigns list. A **Settings** tab picks the newsletter's
+  SMTP account (the Send dialog opens on it). One-click unsubscribe headers for bulk sending.
+- **Commits:** backend `80fb2cd` (2 migrations, 9 tests), admin `14b61e5` (EN + AR). Gates: backend Pint clean,
+  PHPStan 5, **1127 tests pass**; admin `type-check`, ESLint, Prettier, `check:rbac` green, `yarn build` not run
+  (dev server up). Not tried in a browser.
+- **Locally:** `php artisan migrate` (two migrations), then Newsletter, Settings.
+- **Deploy:** migrate, refresh routes, restart the queue workers. Then the owner: create the `live` and `bulk`
+  Mailtrap SMTP accounts, pick the bulk one on Newsletter, Settings, add a Bulk stream webhook (Delivery, Open,
+  Click) to `/api/webhooks/mailtrap/bulk`, check open and click tracking is on for the domain, and do one real
+  send.
+- **Links:** backend `https://github.com/eissa-alt/tourise-backend/compare/dev...feat/newsletter-tracking`, admin
+  `https://github.com/eissa-alt/tourise-admin/compare/dev...feat/newsletter-tracking`.
+
+**2026-10-12 (later): Newsletter import built, on `feat/newsletter-import`, merged to `dev` (PR #48)**
 ([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) part 1).
 
 - **What:** Subscribers, **Import subscribers** (newsletter Create box): the client's sheet in the nominations
