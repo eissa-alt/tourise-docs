@@ -4,7 +4,7 @@
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
 **2026-10-12 (latest, night): Nominations "Delete sent batches" box, merged to `dev` (backend PR #56 `b2747b6`, admin
-PR #55 `414f0aa`), not on `main`** ([Task 051](tasks/051-nominations/TASK.md) decision 13). A new box
+PR #55 `414f0aa`) and to `main` (backend PR #57 `54d7d51`, admin PR #56 `20d2b96`), not deployed** ([Task 051](tasks/051-nominations/TASK.md) decision 13). A new box
 deletes a batch after its send, with its nominees and email rows; for clearing test batches, given to Super Admin
 only. No migration; after deploy nothing to tick (Super Admin has every box).
 

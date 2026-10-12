@@ -223,7 +223,8 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   nominees with the batch, audit row adds `emails`. The route checks the section only. 2 new tests; 1143 pass.
 - **Admin `7104b4c`:** Delete shows on a sent batch with the new box; its own confirm (nominees and their email history go
   for good); "still being sent" message. EN + AR, the box label "Delete sent batches".
-- **Merged to `dev` 2026-10-12** (backend PR #56, admin PR #55), not on `main`.
+- **Merged to `dev` 2026-10-12** (backend PR #56, admin PR #55) and to `main` the same night (backend PR #57, admin
+  PR #56). Not deployed.
 
 ## Definition of Done
 
