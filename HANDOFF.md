@@ -3,7 +3,15 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, late night): Newsletter Add subscriber and Delete subscribers, merged to
+**2026-10-12 (latest, deploy): backend on production at `a42a1e4`** (pulled by the owner from `df6bfc2`, then
+config / route / cache clear and `queue:restart`; no migration). It carries Task 053 (3-day session), Task 051
+decisions 13 and 14 (Delete sent batches, the Opened filter with Clicked) and Task 052 decisions 12 and 13 (Add
+subscriber, Delete subscribers). Admin deploy not confirmed: until then the cookie still ends after 6 hours and the
+new buttons do not show. Then: delete the two test batches (dashboard should read 303 / 303 / 255 / 88 / 30 / 48).
+Open: Mailtrap's Bulk stream adds its own unsubscribe footer and List-Unsubscribe header (support asked, or send
+newsletters through the Transactional account); whether a password change should end an admin's other sessions.
+
+**2026-10-12 (late night): Newsletter Add subscriber and Delete subscribers, merged to
 `dev` (backend PR #58 `a3df1dc`, admin PR #57 `f52063f`) and to `main` (backend PR #59 `93a024b`, admin PR #58
 `98974e2`), not deployed**
 ([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) decisions 12 and 13). Two new boxes, roles start without
