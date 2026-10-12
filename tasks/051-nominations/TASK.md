@@ -216,7 +216,6 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   backend `3febb79`), so it needs no CSV.
 - **Run on production 2026-10-12** by the owner: dry run 48 / 0 / 0, then the real run, 48 marked Not delivered.
 
-
 ## Built (2026-10-12, `feat/nominations-delete-sent-batch`, decision 13)
 
 - **Backend `a4c0951`:** `delete_sent` in `AdminPermissions::CATALOG`; `destroyBatch` checks the box itself (Delete before a
@@ -224,6 +223,7 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   nominees with the batch, audit row adds `emails`. The route checks the section only. 2 new tests; 1143 pass.
 - **Admin `7104b4c`:** Delete shows on a sent batch with the new box; its own confirm (nominees and their email history go
   for good); "still being sent" message. EN + AR, the box label "Delete sent batches".
+- **Merged to `dev` 2026-10-12** (backend PR #56, admin PR #55), not on `main`.
 
 ## Definition of Done
 

@@ -1,7 +1,7 @@
 # Task 053: Admin session of 3 days
 
-- **Status:** `done (code)`: **merged to `dev` on 2026-10-12** (backend PR #54 `053c538`, admin PR #53 `4af0cd1`),
-  not on `main`, not deployed.
+- **Status:** `done (code)`: **merged to `dev` and `main` on 2026-10-12** (backend PR #54 `053c538`, admin PR #53
+  `4af0cd1`), not deployed.
 - **Opened:** 2026-10-12
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
