@@ -3,7 +3,12 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, evening): admin session of 3 days, merged to `dev` (backend PR #54 `053c538`, admin PR #53
+**2026-10-12 (latest, night): Nominations "Delete sent batches" box, pushed on `feat/nominations-delete-sent-batch`
+(backend `a4c0951`, admin `7104b4c`), not merged** ([Task 051](tasks/051-nominations/TASK.md) decision 13). A new box
+deletes a batch after its send, with its nominees and email rows; for clearing test batches, given to Super Admin
+only. No migration; after deploy nothing to tick (Super Admin has every box).
+
+**2026-10-12 (evening): admin session of 3 days, merged to `dev` (backend PR #54 `053c538`, admin PR #53
 `4af0cd1`), not on `main`** ([Task 053](tasks/053-admin-session-three-days/TASK.md)). An admin stays signed in 3 days
 from login instead of 6 hours: `Admin::TOKEN_LIFETIME_DAYS` for the token, `AUTH_MAX_AGE_SECONDS` for the cookie;
 deploy both together. Open question to the owner: should a password change end the admin's other sessions

@@ -35,6 +35,7 @@ import the list from Excel in batches, email it with the section's own templates
 | 10 | **CC and BCC per nominee, from the Excel** (2026-10-08; the options were the template, each nominee, both, or the send dialog). Two optional columns, CC Emails and BCC Emails, several addresses to a cell, as invitations carry their own (Task 042). Never the nominee's own address; a copy may be another nominee's. Locked after the first send with the rest of the nominee's details. |
 | 11 | **The screens show what Delivery, Open and Click report** (2026-10-08). The Mailtrap webhook stays on those three events, so Bounced leaves every Nominations screen (status filter, tiles, bounce rate, bounce type, the "Bounced or failed" columns, which now count Failed). Failed stays: it is the mail server refusing the send. The backend still records a bounce if Mailtrap ever sends one. |
 | 12 | **Not delivered and Delivery delayed** (2026-10-12, replaces decision 11 for failures). Mailtrap showed 48 reminder emails "Not Delivered" that the admin read as Sent: the Transactional webhook did not send failures. The owner ticked Bounce, Soft Bounce, Reject and Suspension (Spam Complaint and Unsubscribe stay off). A bounce or a reject is **Not delivered** (final); a soft bounce or a suspension is **Delivery delayed** (Mailtrap still retrying; a later delivery clears it). A send our own server refused (Failed) reads Not delivered too. Under each status, what happened and Mailtrap's words. The 48 earlier failures come in from Mailtrap's Email Logs CSV with a one-off command. |
+| 13 | **"Delete sent batches", a box of its own** (2026-10-12, to clear test batches; the owner gives it to Super Admin only). It deletes a batch emails were already sent from, with its nominees and their email rows; the Delete box keeps decision 9 (before the first send). Never while a send is under way. Templates and the audit trail stay; the audit row keeps the name and the numbers of nominees and emails. Roles start without it. |
 
 ## Design
 
@@ -214,6 +215,15 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   (2026-10-12) for no file to copy: the command keeps the 48 rows itself (Message ID, Sent at, address, ESP Response;
   backend `3febb79`), so it needs no CSV.
 - **Run on production 2026-10-12** by the owner: dry run 48 / 0 / 0, then the real run, 48 marked Not delivered.
+
+
+## Built (2026-10-12, `feat/nominations-delete-sent-batch`, decision 13)
+
+- **Backend `a4c0951`:** `delete_sent` in `AdminPermissions::CATALOG`; `destroyBatch` checks the box itself (Delete before a
+  send, Delete sent batches after), refuses while a nominee is Queued for under 15 minutes, deletes the emails and
+  nominees with the batch, audit row adds `emails`. The route checks the section only. 2 new tests; 1143 pass.
+- **Admin `7104b4c`:** Delete shows on a sent batch with the new box; its own confirm (nominees and their email history go
+  for good); "still being sent" message. EN + AR, the box label "Delete sent batches".
 
 ## Definition of Done
 
