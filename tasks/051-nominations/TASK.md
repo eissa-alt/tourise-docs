@@ -34,6 +34,7 @@ import the list from Excel in batches, email it with the section's own templates
 | 9 | **Edit or delete a nominee, or delete a batch, only while nothing has been sent to them.** Deleting frees the address for a corrected re-import; after the first send the nominee stays. |
 | 10 | **CC and BCC per nominee, from the Excel** (2026-10-08; the options were the template, each nominee, both, or the send dialog). Two optional columns, CC Emails and BCC Emails, several addresses to a cell, as invitations carry their own (Task 042). Never the nominee's own address; a copy may be another nominee's. Locked after the first send with the rest of the nominee's details. |
 | 11 | **The screens show what Delivery, Open and Click report** (2026-10-08). The Mailtrap webhook stays on those three events, so Bounced leaves every Nominations screen (status filter, tiles, bounce rate, bounce type, the "Bounced or failed" columns, which now count Failed). Failed stays: it is the mail server refusing the send. The backend still records a bounce if Mailtrap ever sends one. |
+| 12 | **Not delivered and Delivery delayed** (2026-10-12, replaces decision 11 for failures). Mailtrap showed 48 reminder emails "Not Delivered" that the admin read as Sent: the Transactional webhook did not send failures. The owner ticked Bounce, Soft Bounce, Reject and Suspension (Spam Complaint and Unsubscribe stay off). A bounce or a reject is **Not delivered** (final); a soft bounce or a suspension is **Delivery delayed** (Mailtrap still retrying; a later delivery clears it). A send our own server refused (Failed) reads Not delivered too. Under each status, what happened and Mailtrap's words. The 48 earlier failures come in from Mailtrap's Email Logs CSV with a one-off command. |
 
 ## Design
 
@@ -191,6 +192,24 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   minutes at most; then "N email(s) still waiting in the queue. If this lasts, the queue worker is not running."
   with a Refresh button. Found locally: `QUEUE_CONNECTION=database` and no `queue:work`, so one queued email kept
   the page refreshing for ever.
+
+## Built (2026-10-12, `feat/nominations-not-delivered`, decision 12)
+
+- **Backend `dd45025`:** `Nominee::DELAYED` / `NOT_DELIVERED` (the old `bounced` gone; Failed kept and counted as
+  Not delivered); `NominationEmail` maps bounce / reject (final) and soft bounce / suspension (`TEMPORARY`, cleared
+  by a delivery), keeps `bounce_reason`, `problemType()` / `problemReason()`; a spam complaint is no longer a
+  failure. Rows and the emails list carry `problem` and `problem_reason`; the filter's `not_delivered` finds Failed;
+  counts `delayed`, `not_delivered`, `not_delivered_rate`. Export: "Problem reported at", "Problem", "Problem
+  reason". Migration `2026_10_12_000004` (the column; `bounced` nominees read again). Command
+  `nominations:import-mailtrap-failures {csv} [--dry-run]`: matches by Mailtrap Message ID or address and send time,
+  skips what is already marked. Tests: 1138 pass, PHPStan at its 5.
+- **Admin `07ea268`:** the two statuses (filter, badges), `NomineeProblem` under the status on rows and in a
+  nominee's emails, a Not delivered tile (batch page, dashboard with its rate) and column (batches list, dashboard),
+  Delivery delayed noted under Sent. EN + AR.
+- **The 48 (owner's export `~/Projects/ALT/127-tourise/mailtap/email_logs_export_1791800511.csv`, reminder of
+  2026-10-11):** 20 domains that do not exist (one typo, `srilanka.travelv`), 10 servers dropping the connection, 7
+  Office 365 "Access denied", 9 mailboxes that do not exist, 2 temporary DNS timeouts, 3 refused by policy. On the
+  server after deploy: `php artisan nominations:import-mailtrap-failures <csv> --dry-run`, then without it.
 
 ## Definition of Done
 

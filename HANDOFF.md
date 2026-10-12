@@ -3,7 +3,22 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, evening): Newsletter tracking built, on `feat/newsletter-tracking`, not merged**
+**2026-10-12 (latest, night): Nominations Not delivered and Delivery delayed, on `feat/nominations-not-delivered`,
+not merged** ([Task 051](tasks/051-nominations/TASK.md) decision 12).
+
+- **What:** a bounce or a reject reads **Not delivered**, a soft bounce or a suspension **Delivery delayed** (cleared
+  by a later delivery), a send our own server refused reads Not delivered too; under each status, what happened and
+  Mailtrap's words (e.g. "Bounce · 550 5.1.1 User unknown"). Not delivered tile and column; export columns.
+- **Mailtrap (done by the owner):** the Transactional webhook also sends Bounce, Soft Bounce, Reject, Suspension.
+- **Commits:** backend `dd45025` (migration `2026_10_12_000004`, command, tests: 1138 pass), admin `07ea268`
+  (EN + AR). Not tried in a browser.
+- **After deploy:** `migrate`, then for the 48 reminder emails that failed before the webhook listened:
+  `php artisan nominations:import-mailtrap-failures <the Mailtrap CSV> --dry-run`, check, then run it without.
+- **Links:** backend `https://github.com/eissa-alt/tourise-backend/compare/dev...feat/nominations-not-delivered`,
+  admin `https://github.com/eissa-alt/tourise-admin/compare/dev...feat/nominations-not-delivered`.
+
+**2026-10-12 (evening): Newsletter tracking, merged to `dev` (PR #49: backend `4e422cc`, admin `cde0665`), not on
+`main`**
 ([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) part 2; part 1, the import, is on `dev` since PR #48).
 
 - **What:** newsletter emails followed through the Mailtrap webhook as nomination emails are: Sent until
