@@ -48,6 +48,7 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 | 6 | **Newsletter events from either Mailtrap stream**, transactional or bulk; guest, invitation and nomination emails stay transactional only. A second webhook address, `/api/webhooks/mailtrap/bulk`, for the bulk stream's webhook. |
 | 7 | **The newsletter's own SMTP account, on a Newsletter, Settings tab** (not on the list edit: a campaign need not use a list). Stored as `smtp_configs.is_newsletter_default`, one at most. A send uses the account picked, else the newsletter's, else the system default. The owner will create a `live.smtp.mailtrap.io` and a `bulk.smtp.mailtrap.io` account and set the bulk one. |
 | 9 | **Settings is a box of its own** (Newsletter, Settings, owner 2026-10-12): changing the sending account needs it, not Update; the tab shows only with it; reading the account stays on the section (the Send dialog opens on it). Roles start without it. |
+| 10 | **The Newsletter boxes follow the tabs** (option B, owner 2026-10-12): `subscribers_view`, `subscribers_import`, `subscribers_export`, `subscribers_add_to_list`, `dashboard_view`, `lists_view`, `lists_manage`, `campaigns_view`, `campaigns_send`, `campaigns_export`, `templates_view`, `templates_manage`, `settings`. Each tab shows with its view box, each button with its own. The old boxes (view, export, create, update, delete, send) are **taken off every role, not converted** ("nvm about the existing one"): roles are ticked again by hand. Template and list names, and the sending account, stay readable to the whole section (pickers and the Send dialog need them). |
 | 8 | **One-click unsubscribe header** (RFC 8058, `List-Unsubscribe` + `List-Unsubscribe-Post`), which Gmail and Yahoo expect from bulk senders; a POST to the API's unsubscribe address unsubscribes without a page. |
 
 ## Design, part 1 (import)
@@ -81,8 +82,8 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
 - **Part 1:** no migration. Refresh cached routes (three new). Roles that should import need the newsletter
   **Create** box.
 - **Part 2:** `migrate` (`2026_10_12_000001` smtp_configs, `2026_10_12_000002` recipients), refresh routes,
-  restart the queue workers. Tick **Newsletter, Settings** on the roles that choose the account (Super Admin
-  has it). Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
+  restart the queue workers. **Then tick the new Newsletter boxes on every role that uses the section**:
+  migration `2026_10_12_000003` takes the old ones off, so until then only Super Admins see Newsletter. Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
   `bulk.smtp.mailtrap.io`) and choose the bulk one on Newsletter, Settings; in Mailtrap add a **Bulk** stream
   webhook (Delivery, Open, Click) to `https://<api>/api/webhooks/mailtrap/bulk`; check open and click tracking
   is on for the sending domain. Then one real send to see the numbers move. The webhook takes any request
@@ -123,7 +124,11 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
   `newsletter-settings.tsx` and `/newsletter/settings` (a sixth tab), the Campaigns list (link, Delivered, no
   Failed), the Send dialog's preselection, the SMTP picker's and the SMTP list's "Newsletter" mark. EN + AR.
 - **Then:** the toolbar buttons in the admin's own sizes (admin `c7ea5ee`); the Settings box, decision 9
-  (backend `8b005df`, admin `97a1cf8`).
+  (backend `8b005df`, admin `97a1cf8`); a Search box on Subscribers over first and last name, email and company,
+  as Guests have, the export searching alike (backend `b2057fe`, admin `f90417c`); the boxes by tab, decision 10,
+  with migration `2026_10_12_000003`, a Campaigns export (`GET /admin/newsletter/campaigns/export`,
+  `NewsletterCampaignsExport`) and the catalog rule widened to per-tab `*_view` boxes (backend `cef1584`, admin
+  `12683b3`, `useNewsletterBox` / `NewsletterNoAccess`, `TemplateModule.boxes`, 12 box labels EN + AR).
 - **Gates:** backend `pint --test` clean, PHPStan at its 5 older errors, **1127 tests pass**; admin
   `type-check`, ESLint, Prettier, `check:rbac` green; `yarn build` not run (dev server up).
 

@@ -18,7 +18,12 @@
 - **Settings box (decision 9):** Newsletter, Settings has its own box in Roles (backend `8b005df`, admin
   `97a1cf8`); tick it where people should choose the sending account. Toolbar buttons in the admin's sizes
   (admin `c7ea5ee`). Test files: `excel_import_fixes/test-cases/newsletter/` and Rawand's, 15 each.
-- **Locally:** `php artisan migrate` (two migrations), then Newsletter, Settings.
+- **Boxes by tab (decision 10, backend `cef1584`, admin `12683b3`):** the Newsletter boxes are now one set per
+  tab (13 boxes), every tab and button follows its own; the old boxes are taken off every role by migration
+  `2026_10_12_000003`, not converted: **tick the new boxes on each role after deploying.** Also a Search box on
+  Subscribers (backend `b2057fe`, admin `f90417c`) and a Campaigns export.
+- **Locally:** `php artisan migrate` (three migrations), then Newsletter, Settings. Demo data for checking:
+  `excel_import_fixes/tools/make-newsletter-demo-data.php` (`NEWSLETTER_DEMO=clean` removes it).
 - **Deploy:** migrate, refresh routes, restart the queue workers. Then the owner: create the `live` and `bulk`
   Mailtrap SMTP accounts, pick the bulk one on Newsletter, Settings, add a Bulk stream webhook (Delivery, Open,
   Click) to `/api/webhooks/mailtrap/bulk`, check open and click tracking is on for the domain, and do one real
