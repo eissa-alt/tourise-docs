@@ -3,7 +3,10 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, later night): the same for the Newsletter, on `feat/newsletter-not-delivered`, not merged**
+**2026-10-12 (latest, later night): the same for the Newsletter, merged to `dev` (PR #51: backend `d5e7078`, admin
+`9a203cb`)**. `dev` is now ahead of `main` by PRs #48 to #51 (newsletter import, tracking and boxes, Nominations and
+Newsletter Not delivered); nothing of it on `main` or production yet. Local backend and admin on `dev`, all
+migrations run.
 ([Task 052](tasks/052-newsletter-import-and-tracking/TASK.md) decision 11).
 
 - **What:** campaign recipients read Not delivered (bounce, reject, or our server refusing) or Delivery delayed
