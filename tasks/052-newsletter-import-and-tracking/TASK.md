@@ -85,7 +85,9 @@ webhook (delivery, open, click) instead of counting "delivered" when our SMTP se
   restart the queue workers. **Then tick the new Newsletter boxes on every role that uses the section**:
   migration `2026_10_12_000003` takes the old ones off, so until then only Super Admins see Newsletter. Then, by the owner: create the SMTP accounts (`live.smtp.mailtrap.io`,
   `bulk.smtp.mailtrap.io`) and choose the bulk one on Newsletter, Settings; in Mailtrap add a **Bulk** stream
-  webhook (Delivery, Open, Click) to `https://<api>/api/webhooks/mailtrap/bulk`; check open and click tracking
+  webhook to `https://api-register.tourise.com/api/webhooks/mailtrap/bulk` (payload JSON, area Email Sending,
+  stream "Bulk (excludes campaigns)", domain tourise.com, events Delivery, Open, Click), **after** the backend is
+  deployed (the address does not exist before); keep the Transactional webhook as it is; check open and click tracking
   is on for the sending domain. Then one real send to see the numbers move. The webhook takes any request
   (Task 051 decision 8, lock-down on hold); the bulk address is the same handler.
 
