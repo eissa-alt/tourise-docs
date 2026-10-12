@@ -36,6 +36,7 @@ import the list from Excel in batches, email it with the section's own templates
 | 11 | **The screens show what Delivery, Open and Click report** (2026-10-08). The Mailtrap webhook stays on those three events, so Bounced leaves every Nominations screen (status filter, tiles, bounce rate, bounce type, the "Bounced or failed" columns, which now count Failed). Failed stays: it is the mail server refusing the send. The backend still records a bounce if Mailtrap ever sends one. |
 | 12 | **Not delivered and Delivery delayed** (2026-10-12, replaces decision 11 for failures). Mailtrap showed 48 reminder emails "Not Delivered" that the admin read as Sent: the Transactional webhook did not send failures. The owner ticked Bounce, Soft Bounce, Reject and Suspension (Spam Complaint and Unsubscribe stay off). A bounce or a reject is **Not delivered** (final); a soft bounce or a suspension is **Delivery delayed** (Mailtrap still retrying; a later delivery clears it). A send our own server refused (Failed) reads Not delivered too. Under each status, what happened and Mailtrap's words. The 48 earlier failures come in from Mailtrap's Email Logs CSV with a one-off command. |
 | 13 | **"Delete sent batches", a box of its own** (2026-10-12, to clear test batches; the owner gives it to Super Admin only). It deletes a batch emails were already sent from, with its nominees and their email rows; the Delete box keeps decision 9 (before the first send). Never while a send is under way. Templates and the audit trail stay; the audit row keeps the name and the numbers of nominees and emails. Roles start without it. |
+| 14 | **The Opened filter finds those who clicked too** (owner 2026-10-12, option B; the team wanted no extra number on screen). The tile counted 87 (opened and clicked, a click is an open), the filter 58 (stopped at Opened). Picking Opened now adds Clicked, as Not delivered adds Failed. Clicked alone still finds only the clickers. |
 
 ## Design
 
@@ -225,6 +226,12 @@ After it: one real send with a CC, to see that only the nominee's own events mov
   for good); "still being sent" message. EN + AR, the box label "Delete sent batches".
 - **Merged to `dev` 2026-10-12** (backend PR #56, admin PR #55) and to `main` the same night (backend PR #57, admin
   PR #56). Not deployed.
+
+
+## Built (2026-10-12, `fix/nominations-opened-filter-includes-clicked`, decision 14)
+
+- **Backend `a5ce813`:** `applyNomineeFilters` adds `clicked` when `opened` is picked (the list, Select all matching, the
+  export). 1 new test; 1148 pass. No admin change. Pushed, not merged.
 
 ## Definition of Done
 
