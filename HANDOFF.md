@@ -3,7 +3,13 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest): `dev` merged to `main` in both apps (backend PR #53 `df6bfc2`, admin PR #52 `7f379a3`).**
+**2026-10-12 (latest, evening): admin session of 3 days, merged to `dev` (backend PR #54 `053c538`, admin PR #53
+`4af0cd1`), not on `main`** ([Task 053](tasks/053-admin-session-three-days/TASK.md)). An admin stays signed in 3 days
+from login instead of 6 hours: `Admin::TOKEN_LIFETIME_DAYS` for the token, `AUTH_MAX_AGE_SECONDS` for the cookie;
+deploy both together. Open question to the owner: should a password change end the admin's other sessions
+(recommended yes; today it does not).
+
+**2026-10-12 (earlier): `dev` merged to `main` in both apps (backend PR #53 `df6bfc2`, admin PR #52 `7f379a3`).**
 `main` now carries PRs #48 to #52: newsletter import (Task 052 part 1), newsletter tracking, Settings and boxes by tab
 (part 2), Not delivered and Delivery delayed for Nominations (Task 051 decision 12) and the Newsletter (Task 052
 decision 11), and the Mailtrap failures command with its 48 rows inside (backend PR #52, `3febb79`). **Backend on
