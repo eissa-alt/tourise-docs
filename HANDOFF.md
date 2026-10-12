@@ -3,7 +3,22 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, later night): the same for the Newsletter, merged to `dev` (PR #51: backend `d5e7078`, admin
+**2026-10-12 (latest): `dev` merged to `main` in both apps (backend PR #53 `df6bfc2`, admin PR #52 `7f379a3`).**
+`main` now carries PRs #48 to #52: newsletter import (Task 052 part 1), newsletter tracking, Settings and boxes by tab
+(part 2), Not delivered and Delivery delayed for Nominations (Task 051 decision 12) and the Newsletter (Task 052
+decision 11), and the Mailtrap failures command with its 48 rows inside (backend PR #52, `3febb79`). Not deployed.
+
+- **Deploy:** backend, admin, and the frontend (its social channels revert of 2026-10-07 is still waiting).
+- **On the server:** `php artisan migrate` (`2026_10_12_000001` to `000005`), refresh the route cache, restart the
+  queue workers; then `php artisan nominations:import-mailtrap-failures --dry-run` (expect 48 / 0 / 0), then without
+  `--dry-run`.
+- **Admin, Roles:** tick the 13 Newsletter boxes (the old ones are cleared by `000003`), plus the Nominations,
+  Categories and Guest Statuses boxes still waiting.
+- **Mailtrap:** create the **Bulk** webhook (`https://api-register.tourise.com/api/webhooks/mailtrap/bulk`, JSON,
+  Email Sending, stream "Bulk (excludes campaigns)", domain tourise.com; Delivery, Open, Click, Bounce, Soft Bounce,
+  Reject, Suspension); add the bulk SMTP account and pick it on Newsletter, Settings; send one test newsletter.
+
+**2026-10-12 (later night): the same for the Newsletter, merged to `dev` (PR #51: backend `d5e7078`, admin
 `9a203cb`)**. `dev` is now ahead of `main` by PRs #48 to #51 (newsletter import, tracking and boxes, Nominations and
 Newsletter Not delivered); nothing of it on `main` or production yet. Local backend and admin on `dev`, all
 migrations run.
@@ -28,7 +43,7 @@ admin `0b08ab9`)** ([Task 051](tasks/051-nominations/TASK.md) decision 12).
   (EN + AR). Not tried in a browser.
 - **After deploy:** `migrate`, then for the 48 reminder emails that failed before the webhook listened:
   `php artisan nominations:import-mailtrap-failures --dry-run`, check, then run it without. The 48 rows live in the
-  command (backend `3febb79` on `feat/mailtrap-failures-in-command`, owner 2026-10-12): no CSV to copy to the server.
+  command (backend `3febb79`, PR #52, owner 2026-10-12): no CSV to copy to the server.
 - **Links:** backend `https://github.com/eissa-alt/tourise-backend/compare/dev...feat/nominations-not-delivered`,
   admin `https://github.com/eissa-alt/tourise-admin/compare/dev...feat/nominations-not-delivered`.
 
