@@ -3,7 +3,15 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-13 (latest): Next.js 15.5.27 in frontend and admin (pentest M-001), on `dev`, not on `main`.**
+**2026-10-13 (latest, late): reCAPTCHA on the two public email lookups (pentest M-005, O-001), on `dev`, not
+on `main`.** Backend `b628d48` (PR #67, `0551bb5`), frontend `487dd43` (PR #18, `c963cf4`). The owner chose B: the
+"already registered" message stays; each lookup needs a fresh reCAPTCHA token; no token gives 403. **Deploy the
+frontend before the backend**, or the live forms stop at the email field. All five Haboob findings now have their
+code on `dev`; the response to STA is drafted (`security/pentest-2026-09/PENTEST_RESPONSE`). `dev` vs `main`: backend
+2 fixes (B11/B12, reCAPTCHA), frontend 2 (Next, reCAPTCHA), admin 1 (Next). Next: Task 041 B3 + B10 (the public
+forgot-password builds the admin reset link from the caller's `back_link`, and links never expire).
+
+**2026-10-13: Next.js 15.5.27 in frontend and admin (pentest M-001), on `dev`, not on `main`.**
 Frontend `242552d` (PR #17, `bf50d34`), admin `be036e9` (PR #63, `a05e04a`). Closes the eight CVEs Haboob listed
 (fixed in 15.5.21) plus the August and September Next.js security releases. `sharp` 0.35.5 comes with it and needs
 **Node 20.9+** on both servers: check `node -v` before deploying. Deploy each app: `git status` (a modified or
