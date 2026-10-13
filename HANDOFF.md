@@ -3,7 +3,13 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-13 (latest): API error statuses fixed (Task 041 B9, pentest M-002), on `dev` and `main`, not
+**2026-10-13 (latest): `check-unique` email only, email code tied to its address (Task 041 B11 + B12, pentest
+M-003 + M-004), on `dev`, not on `main`.** Backend `d5453ef`, PR #66 (`895f320`). `/api/guests/check-unique`
+(public and admin) takes `type: email` only, ignores case, never returns the guest; registration refuses a code
+sent to another address. No migration, no frontend or admin change. Next: `dev` to `main`
+(`https://github.com/eissa-alt/tourise-backend/compare/main...dev`), then one backend deploy carries B9 and this.
+
+**2026-10-13: API error statuses fixed (Task 041 B9, pentest M-002), on `dev` and `main`, not
 deployed.** Backend `c8a1885`, PR #64 to `dev` (`927df77`), PR #65 to `main` (`969b2fd`). With production's
 `.env` now at `APP_DEBUG=false`, the old handler answered every 401, 403, 422 and 405 as 500; now they keep their
 status, and a 5xx or anything unexpected stays a bare "Internal server error.". New `ApiErrorHandlingTest` (10);
