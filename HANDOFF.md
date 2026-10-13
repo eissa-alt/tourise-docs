@@ -3,7 +3,16 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-13 (latest): `check-unique` email only, email code tied to its address (Task 041 B11 + B12, pentest
+**2026-10-13 (latest): Next.js 15.5.27 in frontend and admin (pentest M-001), on `dev`, not on `main`.**
+Frontend `242552d` (PR #17, `bf50d34`), admin `be036e9` (PR #63, `a05e04a`). Closes the eight CVEs Haboob listed
+(fixed in 15.5.21) plus the August and September Next.js security releases. `sharp` 0.35.5 comes with it and needs
+**Node 20.9+** on both servers: check `node -v` before deploying. Deploy each app: `git status` (a modified or
+deleted `yarn.lock` must be restored with `git checkout -- yarn.lock`), `git pull`, `yarn install --frozen-lockfile`,
+`yarn production`, restart PM2 (both frontend sets). Not tried in a browser. Next 16 (16.3.8 LTS or a 16.4 patch)
+is a task of its own, not opened yet. Now `dev` is one fix ahead of `main` in all three apps; the owner holds the
+`main` merges for now.
+
+**2026-10-13: `check-unique` email only, email code tied to its address (Task 041 B11 + B12, pentest
 M-003 + M-004), on `dev`, not on `main`.** Backend `d5453ef`, PR #66 (`895f320`). `/api/guests/check-unique`
 (public and admin) takes `type: email` only, ignores case, never returns the guest; registration refuses a code
 sent to another address. No migration, no frontend or admin change. Next: `dev` to `main`
