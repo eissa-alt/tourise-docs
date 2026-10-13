@@ -120,6 +120,7 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 ## Log
 
 - 2026-09-21 — opened by the cross-project security review; 23 items selected for this project.
+- 2026-10-13: Haboob's pentest for STA (tested 14 and 15 Sep 2026) found three of these items independently: **B11** is its M-003 and M-005, **B12** its M-004, and its M-002 (debug output on production) needs **B9** before `APP_DEBUG` can go off. Nothing closed yet. Triage and tracker: [security/](../../security/README.md), [PENTEST_TRIAGE](../../security/pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md).
 
 ## Definition of Done
 

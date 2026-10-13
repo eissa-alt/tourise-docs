@@ -21,6 +21,7 @@ Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` 
 | [design/](design/THEME.md) | The Tourise 2027 theme — tokens, field anatomy, layout, the reusable components in `components/theme`, and the traps that cost time. **Read before building any new form or screen.** |
 | [mobile/](mobile/) | The mobile API contract (PDF + HTML twin). **Read before touching `routes/api.php`.** |
 | [client/](client/) | Guides for the event team, each a PDF with its HTML source: the step-by-step admin **tutorial** (screenshots, 24 lessons), the short **user guide**, the **admin access update** (what changed for admins and roles, ledger D55, with its test cases), and **one invitation per email** (what changed, the effects on invitation requests and dignitary parties, and what to check), and the **Nominations and Newsletter update** (the two new email statuses and their reasons, Nominations CC and BCC, the 48 reminder failures, the Newsletter import, tracking, campaign page, Settings and boxes by tab, 18 checks), with a one-page **in short** version. |
+| [security/](security/README.md) | Security assessments and the **tracker** of every finding (status, owner, commits). First: Haboob's pentest for STA, September 2026, [triaged](security/pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md) 2026-10-13. Reports are md + HTML + PDF in the TOURISE 2027 theme ([workflow](security/REPORT_GENERATION_WORKFLOW.md)). Confidential; assessors' own reports stay out of git. |
 
 ## Start here
 

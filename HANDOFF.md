@@ -3,7 +3,21 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-13 (latest): dashboard request insights by Imtinan, merged to `dev` (backend PR #62 `0ef8445`, admin
+**2026-10-13 (latest): new `security/` folder, Haboob's pentest for STA triaged.** Haboob tested
+`register.tourise.com` from outside on 14 and 15 Sep 2026: 5 findings, all Medium. Checked against the code, all
+open; the [triage](security/pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md) has the verdicts and the order of
+work, the [tracker](security/README.md) the status of each. The original PDF stays outside git
+(`127-tourise/security_docs/`); its password is never written in the docs.
+
+- **Most urgent:** production ran with `APP_DEBUG=true` during the test (stack traces, the database's internal
+  address and name). Not re-checked since. But debug cannot simply go off: the error handler would turn every
+  401/403/422 into a 500 until Task 041 B9 ships (and L9, the mobile 401 check).
+- **Code:** M-003 = Task 041 B11 (`/api/guests/check-unique` queries any column, no rate limit since 2026-09-30),
+  M-004 = B12 (email code not tied to the email), M-001 Next.js 15.5.19 to 15.5.27 in frontend and admin.
+- **Owner's decision:** M-005, email enumeration, on both check-unique routes (A remove, B reCAPTCHA, C generic
+  message).
+
+**2026-10-13: dashboard request insights by Imtinan, merged to `dev` (backend PR #62 `0ef8445`, admin
 PRs #59 `4db1e5c` and #61 `c21725d`) and to `main` (backend PR #63 `9016c02`, admin PR #62 `8bc0012`), not
 deployed.** No task of its own; the closest plan is [Task 038](tasks/038-dashboard-report-filters/TASK.md) ("top
 companies"). `dev` = `main` again in backend, admin and frontend.
