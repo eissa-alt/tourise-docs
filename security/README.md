@@ -14,14 +14,15 @@ commit as the fix (code SHAs per repo) or the decision.
 | ID | Finding | Source | Severity | Track | Status | Owner | Commits | Detail |
 |---|---|---|---|---|---|---|---|---|
 | M-001 | Outdated Next.js, 15.5.19 in frontend and admin | Haboob 2026-09 | Medium | CODE | **OPEN** | dev | | [triage 4.1](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#41-m-001--outdated-nextjs) |
-| M-002 | Debug output on production; handler turns 4xx into 500 once debug is off | Haboob 2026-09 | Medium | OPS + CODE | **OPEN** | dev, devops | | [triage 4.2](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#42-m-002--improper-error-handling) |
+| M-002 | Debug output on production; handler turns 4xx into 500 once debug is off | Haboob 2026-09 | Medium | OPS + CODE | **IN PROGRESS**: `APP_DEBUG=false` in the production `.env` (owner, 2026-10-13); config cache to confirm; B9 handler fix open and now urgent | dev, devops | | [triage 4.2](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#42-m-002--improper-error-handling) |
 | M-003 | `/api/guests/check-unique` queries any column; `mode=edit` returns the guest | Haboob 2026-09 | Medium | CODE | **OPEN** | dev | | [triage 4.3](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#43-m-003--database-column-names-disclosed) |
 | M-004 | Email OTP not tied to the email registered | Haboob 2026-09 | Medium | CODE | **OPEN** | dev | | [triage 4.4](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#44-m-004--otp-bypass) |
 | M-005 | Email enumeration on `/api/guests/check-unique` | Haboob 2026-09 | Medium | DECISION | **OPEN** | owner | | [triage 4.5](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#45-m-005--user-enumeration) |
 | O-001 | Email enumeration on `/api/invitation-requests/check-unique` (added 2026-09-30, after the test) | Ours | Medium | DECISION | **OPEN** | owner | | [triage 4.5](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#45-m-005--user-enumeration) |
+| O-002 | CORS on `/api/*` allows any site if `CORS_ALLOWED_ORIGINS` is unset (the config's fallback is `*`) | Team WhatsApp 2026-09-13 | Low | OPS | **TO CONFIRM**: set on production on 2026-09-14 (Haboob's headers show only `register.tourise.com`); check the `.env` lists only the site and the admin | devops | | [triage 4.2](pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md#42-m-002--improper-error-handling) |
 
 **IDs.** An assessor's finding keeps its own ID (Haboob's `M-001-072` is written `M-001`). Our own
-findings are `O-001`, `O-002`, and so on. **Status:** OPEN, IN PROGRESS, FIXED (with commits),
+findings are `O-001`, `O-002`, and so on. **Status:** OPEN, TO CONFIRM, IN PROGRESS, FIXED (with commits),
 DEPLOYED, CLOSED (no change, with the reason), DISPUTED.
 
 ### Tracks

@@ -10,8 +10,9 @@ work, the [tracker](security/README.md) the status of each. The original PDF sta
 (`127-tourise/security_docs/`); its password is never written in the docs.
 
 - **Most urgent:** production ran with `APP_DEBUG=true` during the test (stack traces, the database's internal
-  address and name). Not re-checked since. But debug cannot simply go off: the error handler would turn every
-  401/403/422 into a 500 until Task 041 B9 ships (and L9, the mobile 401 check).
+  address and name; also reported in the team WhatsApp on 2026-09-13). **Now `false` in the production `.env`**
+  (owner, 2026-10-13; confirm `php artisan config:show app.debug`). Side effect, live now: the error handler
+  answers every 401/403/422 as 500 (94 of 1,153 tests fail with debug off). Task 041 B9 is the first fix.
 - **Code:** M-003 = Task 041 B11 (`/api/guests/check-unique` queries any column, no rate limit since 2026-09-30),
   M-004 = B12 (email code not tied to the email), M-001 Next.js 15.5.19 to 15.5.27 in frontend and admin.
 - **Owner's decision:** M-005, email enumeration, on both check-unique routes (A remove, B reCAPTCHA, C generic
