@@ -124,6 +124,16 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 - 2026-10-13: **B9 done** (with M03-BACKEND), backend `c8a1885` on `fix/api-error-status-codes`, merged to `dev` (PR #64, `927df77`) and `main` (PR #65, `969b2fd`); not deployed. Ported from pep-v2 `c0db55d` + `c9688b4`; the 503 stays masked (P0.5). `ApiErrorHandlingTest` 10 tests; suite 1,163 pass with `APP_DEBUG` on and off (94 failed off before). Urgent because production's `.env` had just gone to `APP_DEBUG=false`. L9 (mobile 401 confirmation) still open; with debug off the app got 500 until this ships, so the fix restores the documented 401.
 - 2026-10-13: **B11 and B12 done**, backend `d5453ef` on `fix/check-unique-and-otp-email`, merged to `dev` (PR #66, `895f320`); not on `main`, not deployed. B11: `checkUnique` takes `type: email` only (both callers, public forms and admin, send nothing else), compares trimmed and lower-cased, never returns the record. B12: `GuestsController::emailOtpFor()` matches code and email (trim + lowercase) at submit and at clean-up; no flow changes the email between request and submit except a person editing the field, who is then rightly refused; `email-confirmation` left token-only (UI step, the frontend sends no email there). Mobile `verifyOtp` already matched the email. `GuestCheckUniqueTest` 7, `GuestEmailOtpTest` 4; suite 1,174 pass with `APP_DEBUG` on and off.
 - 2026-10-13: **B15 and B19 done**, tests only, backend `4298986` merged to `dev` (PR #68, `38ed495`). B15: this project never had the forced-500 hooks (`RWYI82IWDG`, `IUFRP3GYZ4ISPUEU` grep clean); `InvitationVerifyTest` (ported from pep-v2, plus `verify-status-token`) pins that no token value is special-cased. B19: B9's handler (`c8a1885`) already keeps the throttle headers, so a 429 has `Retry-After` again; the outer `throttle:api` is unlimited for anonymous callers (since `a32901d`), the only ones an inner limiter meters, so the 429 reports the blocking limiter. `ThrottleResponseTest` pins both and fails on the pre-B9 handler.
+- 2026-10-13: **B3 done** on `security/wave-1` (not pushed): backend `ff18643`, admin `990251c`. The admin setup/reset link is built from `config('app.admin_url')` (`ADMIN_PANEL_URL`) via `Admin::setupLink()` on all three senders (forgot-password, create in invite mode, resend invite); `back_link` no longer read or sent; links expire after `auth.admin_invite_ttl_hours` (48), a null `created_at` counts as expired. Resend now passes `?lang=`. `AdminInviteLinkTest` (8, 7 fail on the old code); suite 1,192 pass with debug on and off. Deploy notes in the checklist below.
+
+## Deploy checklist (security/wave-1)
+
+Collected item by item, for the day `security/wave-1` is merged and deployed. Tell the owner before deploying.
+
+- **B3 (admin setup link):**
+  1. Add `ADMIN_PANEL_URL=https://admin-register.tourise.com` to the production backend `.env`, then `php artisan config:cache`. Unset, every reset and invite link points at localhost.
+  2. On production, before deploying: `SELECT email FROM admin_invites WHERE created_at IS NULL OR created_at < NOW() - INTERVAL 48 HOUR`. Those links stop working on deploy; tell those admins to ask for a new one.
+  3. Deploy the backend first, then the admin (the old backend requires `back_link`).
 
 ## Definition of Done
 
