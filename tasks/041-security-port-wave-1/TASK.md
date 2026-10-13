@@ -129,6 +129,7 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 - 2026-10-13: **B4 done** on `security/wave-1` (not pushed): frontend `bee9156`. The share page and the success modal render the category share text as a React child in a `whitespace-pre-wrap` div instead of `dangerouslySetInnerHTML`; `toHtml` removed. No `dangerouslySetInnerHTML` left in the public site. The write-rule half (PHASE-1b) stays separate. type-check, ESLint, Prettier, build green.
 - 2026-10-14: **B8 done** on `security/wave-1` (not pushed): backend `440ab07`. New `App\Exports\Concerns\TextSafeValueBinder` (ported from pep-v2 7544e4f + 7ded37b); all 32 exports extend it, the 31 untyped `bindValue` overrides declare `: bool`, in one commit. Confirmed live before the fix: `GuestsExport` wrote a guest company `=HYPERLINK(...)` as a formula. No export writes its own formulas; the 4 import workbooks already write user data as explicit strings. `ExportClassesAreLoadableTest` (2) and `ExportFormulaInjectionTest` (4); suite 1,206 pass with debug on and off.
 - 2026-10-14: **B13 done** on `security/wave-1` (not pushed): backend `ec1d184`, admin `eafe3f4`. The conference upload refuses SVG (`mimes:png,jpg,jpeg,webp`) and stores the file under `extension()` (from the content) instead of the client's extension; both holes confirmed on the old code (SVG accepted, a PNG named `evil.html` stored as `.html`). The admin's two pickers no longer offer SVG. ConferenceTest updated (+2); suite 1,208 pass with debug on and off.
+- 2026-10-14: **B7 done** on `security/wave-1` (not pushed): backend `0f3213e`. `App\Rules\ReCaptcha` ported from pep-v2: score below `min_score` (0.3) refused while `enforce_score` is on (default, kept by the owner), optional hostname and action checks, fails closed (no secret, Google unreachable after 2 retries, error status, unreadable answer), POST, no `remoteip` (shared IP, B16). One `recaptcha.verify` info line per check, error lines per failure. `messages.recaptcha_required` added in EN and AR (it never existed). phpunit pins `GOOGLE_RECAPTCHA_SECRET`; the 15 Google fakes return a score. `tests/Unit/ReCaptchaRuleTest` (16, 8 fail on the old rule); suite 1,224 pass with debug on and off.
 
 ## Deploy checklist (security/wave-1)
 
@@ -142,6 +143,12 @@ Collected item by item, for the day `security/wave-1` is merged and deployed. Te
 - **B4 (share text):** nothing required. Optional check first: `SELECT slug FROM categories WHERE share_text_en REGEXP '[<>]' OR share_text_ar REGEXP '[<>]'`; any HTML in a share text will show as literal tags after deploy.
 - **B8 (exports):** after deploying, download and open 2 or 3 exports from the admin (guests, invitations, the dashboard). The tests guard against the class-load crash, but every export changed.
 - **B13 (conference uploads):** nothing required. Existing files keep serving; tell the team new logos and icons must be PNG, JPG or WebP (icons PNG or WebP), no SVG.
+- **B7 (reCAPTCHA score):** enforcing by default (owner's call, 2026-10-14).
+  1. Safe start: `GOOGLE_RECAPTCHA_ENFORCE_SCORE=false` for the first days, read the scores, then `true` (or remove the line) and `php artisan config:cache`. Skipped, real users and admins with a low score are refused from day one.
+  2. Recommended: `GOOGLE_RECAPTCHA_HOSTNAMES=register.tourise.com,admin-register.tourise.com`.
+  3. `GOOGLE_RECAPTCHA_SECRET` must be set (as today); without it everything is refused, with a `recaptcha.misconfigured` error line.
+  4. `LOG_LEVEL` must be `info` or `debug` to get the per-check `recaptcha.verify` lines; optional `LOG_CHANNEL=daily` so `laravel.log` does not grow forever.
+  5. Reading the logs, from the backend folder: refusals `grep 'recaptcha.verify' storage/logs/laravel.log | grep -v '"verdict":"pass"'`; errors `grep -E 'recaptcha\.(unreachable|upstream_error|malformed_response|misconfigured)' storage/logs/laravel.log`; scores `grep -o '"score":[0-9.]*' storage/logs/laravel.log | sort | uniq -c`.
 
 ## Definition of Done
 
