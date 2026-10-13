@@ -3,7 +3,15 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-13 (latest): new `security/` folder, Haboob's pentest for STA triaged.** Haboob tested
+**2026-10-13 (latest): API error statuses fixed (Task 041 B9, pentest M-002), on `dev` and `main`, not
+deployed.** Backend `c8a1885`, PR #64 to `dev` (`927df77`), PR #65 to `main` (`969b2fd`). With production's
+`.env` now at `APP_DEBUG=false`, the old handler answered every 401, 403, 422 and 405 as 500; now they keep their
+status, and a 5xx or anything unexpected stays a bare "Internal server error.". New `ApiErrorHandlingTest` (10);
+suite 1,163 pass with debug on and off. No migration. **Deploy the backend**, then `config:cache`, `route:cache`,
+`queue:restart`, `config:show app.debug` (false); check `/api/admin/roles/select` gives 401 and `/api/upload` 405
+with no `file` or `trace`. Merged branch `fix/api-error-status-codes` kept until the owner says.
+
+**2026-10-13: new `security/` folder, Haboob's pentest for STA triaged.** Haboob tested
 `register.tourise.com` from outside on 14 and 15 Sep 2026: 5 findings, all Medium. Checked against the code, all
 open; the [triage](security/pentest-2026-09/PENTEST_TRIAGE/PENTEST_TRIAGE.md) has the verdicts and the order of
 work, the [tracker](security/README.md) the status of each. The original PDF stays outside git
