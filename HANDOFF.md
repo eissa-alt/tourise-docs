@@ -3,7 +3,26 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-12 (latest, deploy): backend on production at `a42a1e4`** (pulled by the owner from `df6bfc2`, then
+**2026-10-13 (latest): dashboard request insights by Imtinan, merged to `dev` (backend PR #62 `0ef8445`, admin
+PRs #59 `4db1e5c` and #61 `c21725d`) and to `main` (backend PR #63 `9016c02`, admin PR #62 `8bc0012`), not
+deployed.** No task of its own; the closest plan is [Task 038](tasks/038-dashboard-report-filters/TASK.md) ("top
+companies"). `dev` = `main` again in backend, admin and frontend.
+
+- **What:** the dashboard filter bar gains a source switch, All / Invitation Requests / Invitations. All keeps
+  every chart; with one picked, the page shows only that one's chart. Under them, a new section: the count per day
+  and the 15 companies with the most people, each as a chart or a table (one switch for both), over the source
+  picked. The Excel export follows the switch. A company is one row however it was typed ("Aramco", "ARAMCO "); a
+  blank company is left out. An invitation made by accepting a request counts once, as the request, so All is the
+  other two added together.
+- **Access:** new `GET /admin/dashboard/invitation-requests/insights` behind the existing `dashboard` and
+  `invitation_requests_status` boxes; the Invitations and All views also need `invitations_categories_status` and
+  follow the admin's category scope. No new box to tick.
+- **Commits:** backend `95df8cb` (11 tests, rerun locally 2026-10-13: pass), admin `76eafd1` and `c9c7fc9` (EN +
+  AR). No migration, no lock file change. Not tried in a browser.
+- **Deploy:** backend, refresh the route cache (the new route 404s on a stale one); admin, a build. Locally both
+  pulled to `dev` 2026-10-13; the local backend has no route cache, nothing to run.
+
+**2026-10-12 (deploy): backend on production at `a42a1e4`** (pulled by the owner from `df6bfc2`, then
 config / route / cache clear and `queue:restart`; no migration). It carries Task 053 (3-day session), Task 051
 decisions 13 and 14 (Delete sent batches, the Opened filter with Clicked) and Task 052 decisions 12 and 13 (Add
 subscriber, Delete subscribers). Admin deploy not confirmed: until then the cookie still ends after 6 hours and the
