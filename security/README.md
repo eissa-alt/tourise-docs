@@ -58,3 +58,34 @@ folder is the record per assessment.
   theme: see [REPORT_GENERATION_WORKFLOW.md](REPORT_GENERATION_WORKFLOW.md). The `.md` is the source;
   regenerate the other two whenever it changes.
 - **No em dashes** in these documents, as everywhere in this project.
+
+## How we ship a security fix
+
+The method behind Task 041, written down so the next fix (or the next project) works the same way
+(Task 041 B22). Each rule comes from something that went wrong in pep-v2 or nearly did here.
+
+1. **Check the problem exists here before copying a fix.** Another project's document may describe
+   a fix that was never built, built differently, or later undone. Read this project's code first.
+   *B15: pep-v2's two debug hooks were never in Tourise, so only the regression test was needed.
+   B21: pep-v2's plan named the fix but never built it, so Tourise wrote its own.*
+2. **Say how sure we are.** Mark each claim as proven by the code, proven by a test (and that the
+   test fails on the old code), or only checkable on the server. *APP_DEBUG cannot be proven from
+   outside since B9: it is read on the server (`php artisan config:show app.debug`).*
+3. **Deploy order: whoever sends the new thing ships first.** When a fix changes what the API
+   expects, the client that starts sending it goes out before the backend that starts requiring
+   it. *reCAPTCHA on the email lookups (M-005): frontend first, or the live forms stop at the email
+   field.* The reverse holds when the backend stops requiring something: *B3: backend first, since
+   the old backend requires `back_link`.* Write the order in the deploy checklist.
+4. **Run the suite with debug off too.** `APP_DEBUG=false php artisan test` as well as the normal
+   run, every time. *B9: 94 tests passed only because debug was on, which hid that production
+   answered 401, 403 and 422 as 500.*
+5. **One owner per security header.** Before an app sets a header, check whether the server in
+   front already sends it (`curl -sI`). Two copies either conflict or are enforced together. *B20:
+   the edge sends X-Frame-Options, nosniff and Referrer-Policy, so the app sets only CSP and
+   Permissions-Policy.*
+6. **Query existing data before tightening a rule.** A stricter rule on a field that already holds
+   data can break every later save of that record, or change what users see. *B4: before deploying,
+   check whether any share text contains `<` or `>`.*
+
+And for every fix: a test that fails on the old code, the full suite green both ways, the server
+steps in the Task 041 deploy checklist, and `scripts/post-deploy-security-check.sh` after deploy.

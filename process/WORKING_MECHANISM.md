@@ -56,6 +56,11 @@ Code merged to `dev` · EN+AR translations same commit · quality gate green · 
 index updated · mobile contract checked if `routes/api.php` changed · no `console.log`/`dd()`/`dump()`,
 no widened `any`, no unrelated reformatting.
 
+## Security fixes
+
+Six rules on top of the above (check before porting, say how sure, deploy order, tests with debug
+off, one owner per header, query data before tightening): [security/README.md](../security/README.md#how-we-ship-a-security-fix).
+
 ## Anti-patterns (don't)
 
 Feature flags / dual code paths / "legacy fallback" · porting cyan's `DynamicFormRenderer` (PIF keeps
