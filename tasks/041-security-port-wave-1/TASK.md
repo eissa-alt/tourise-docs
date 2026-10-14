@@ -134,6 +134,7 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 - 2026-10-14: **B17 done** on `security/wave-1` (not pushed): backend `6433674`. `/api/health` returns `status` and `timestamp` only; `app` and `env` removed; `timestamp` kept for the mobile contract. `HealthEndpointTest` (4, from pep-v2; 2 fail on the old route); suite 1,231 pass with debug on and off.
 - 2026-10-14: **B18 done** on `security/wave-1` (not pushed): backend `04df4ac`. `config/session.php` `'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local')`; the old setting followed `isSecure()`, false behind the load balancer, so neither cookie was flagged. `SessionCookieSecureTest` (4, from pep-v2); suite 1,235 pass with debug on and off.
 - 2026-10-14: **L4 done** on `security/wave-1` (not pushed): backend `de0c44e`. Owner chose option B over the task's production guard: store reviewers test against production, and the owner confirmed `MOBILE_DEMO_EMAIL`/`MOBILE_DEMO_OTP` are not set and there is no mobile cycle yet. `MobileAuthController::isDemoLogin()` (both spots): both settings set, address matches, code at least 12 characters (shorter is refused and logged as `mobile.demo_login_refused`), `hash_equals`, every use logged as `mobile.demo_login`. `MobileDemoLoginTest` (5); suite 1,240 pass with debug on and off.
+- 2026-10-14: **B6 done** on `security/wave-1` (not pushed): admin `1970795`. `isSelfOriginatedWrite()` in `utils/server/proxy.ts`; the proxy refuses POST/PUT/PATCH/DELETE not from the panel (403) and bodies that are not JSON or multipart (415, empty bodies exempt per pep-v2 047d31f); logout guarded too. Checked against a running build pointed at a dead API port: panel writes pass, same-site/cross-site/foreign/origin-less writes 403, form-encoded 415. No admin test runner, so no automated test.
 
 ## Deploy checklist (security/wave-1)
 
@@ -156,6 +157,7 @@ Collected item by item, for the day `security/wave-1` is merged and deployed. Te
 - **B17 (/api/health):** ask devops whether an uptime monitor checks the body for `app` or `env`; if so, change it before deploying. A check on `200` or `"status":"ok"` is unaffected.
 - **B18 (session cookie):** the production `.env` must not have a blank `SESSION_SECURE_COOKIE=` line (falsy, strips the flag); absent or `true` is fine.
 - **L4 (mobile demo login):** nothing today (not set). For a store review later: set `MOBILE_DEMO_EMAIL` and a random `MOBILE_DEMO_OTP` of 12+ characters (never a value written in the repo), `config:cache`, and clear both after the review. Uses show as `mobile.demo_login` in `laravel.log`.
+- **B6 (admin write guard):** on staging, click a save, an upload, an export, a delete and a toggle button before going live. Writes answering 403 there mean the server in front of the admin does not pass the real `Host` header (devops).
 
 ## Definition of Done
 
