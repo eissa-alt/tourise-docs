@@ -132,6 +132,7 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 - 2026-10-14: **B7 done** on `security/wave-1` (not pushed): backend `0f3213e`. `App\Rules\ReCaptcha` ported from pep-v2: score below `min_score` (0.3) refused while `enforce_score` is on (default, kept by the owner), optional hostname and action checks, fails closed (no secret, Google unreachable after 2 retries, error status, unreadable answer), POST, no `remoteip` (shared IP, B16). One `recaptcha.verify` info line per check, error lines per failure. `messages.recaptcha_required` added in EN and AR (it never existed). phpunit pins `GOOGLE_RECAPTCHA_SECRET`; the 15 Google fakes return a score. `tests/Unit/ReCaptchaRuleTest` (16, 8 fail on the old rule); suite 1,224 pass with debug on and off.
 - 2026-10-14: **B5 done** on `security/wave-1` (not pushed): backend `541ca60`. `AdminsSelectResources` returns `id` and `trim(first last)` only, no email; route left ungated (the area form's gate-operator dropdown needs it without `admins_management`). Leak confirmed on the old code. `AdminsSelectTest` (3, from pep-v2); suite 1,227 pass with debug on and off.
 - 2026-10-14: **B17 done** on `security/wave-1` (not pushed): backend `6433674`. `/api/health` returns `status` and `timestamp` only; `app` and `env` removed; `timestamp` kept for the mobile contract. `HealthEndpointTest` (4, from pep-v2; 2 fail on the old route); suite 1,231 pass with debug on and off.
+- 2026-10-14: **B18 done** on `security/wave-1` (not pushed): backend `04df4ac`. `config/session.php` `'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local')`; the old setting followed `isSecure()`, false behind the load balancer, so neither cookie was flagged. `SessionCookieSecureTest` (4, from pep-v2); suite 1,235 pass with debug on and off.
 
 ## Deploy checklist (security/wave-1)
 
@@ -152,6 +153,7 @@ Collected item by item, for the day `security/wave-1` is merged and deployed. Te
   4. `LOG_LEVEL` must be `info` or `debug` to get the per-check `recaptcha.verify` lines; optional `LOG_CHANNEL=daily` so `laravel.log` does not grow forever.
   5. Reading the logs, from the backend folder: refusals `grep 'recaptcha.verify' storage/logs/laravel.log | grep -v '"verdict":"pass"'`; errors `grep -E 'recaptcha\.(unreachable|upstream_error|malformed_response|misconfigured)' storage/logs/laravel.log`; scores `grep -o '"score":[0-9.]*' storage/logs/laravel.log | sort | uniq -c`.
 - **B17 (/api/health):** ask devops whether an uptime monitor checks the body for `app` or `env`; if so, change it before deploying. A check on `200` or `"status":"ok"` is unaffected.
+- **B18 (session cookie):** the production `.env` must not have a blank `SESSION_SECURE_COOKIE=` line (falsy, strips the flag); absent or `true` is fine.
 
 ## Definition of Done
 
