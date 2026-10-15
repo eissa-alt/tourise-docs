@@ -3,7 +3,29 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-13 (latest, late): reCAPTCHA on the two public email lookups (pentest M-005, O-001), on `dev`, not
+**2026-10-15 (latest): Task 041 security wave 1 code complete, waiting for release.** 22 of 23 items done or
+closed, one at a time with the owner checking each (2026-10-14 to 10-15).
+
+- **On `security/wave-1`** (backend, admin, frontend; pushed as backup, **not merged**): B3 admin setup link from
+  `ADMIN_PANEL_URL`, 48 h expiry; B10 forgot-password queued, 5 an hour per address; B4 share text as text; B8 Excel
+  formulas as text (all 32 exports); B13 no SVG, stored extension from content; B7 reCAPTCHA score, fails closed;
+  B5 admin dropdown without emails; B17 `/api/health` without app/env; B18 Secure cookies; L4 demo login needs a
+  12+ character code; B6 admin proxy refuses cross-site writes; B20 CSP and Permissions-Policy; B21 guest status in
+  use answers 409; L3 full `id|secret` tokens only; L14 `scripts/post-deploy-security-check.sh`. Backend suite
+  1,255 pass with debug on and off. Commits per item in the Task 041 Log.
+- **B16** (real visitor IP) built and **parked on its own branch** `security/b16-trusted-proxies` (backend, frontend)
+  by the owner until a full test environment exists; inert until devops sets `TRUSTED_PROXIES`.
+- **L9** closed without code (no mobile cycle yet; message kept in TASK.md). **B22** written into
+  `security/README.md` ("How we ship a security fix").
+- **To release:** test on staging, merge `security/wave-1` then `dev` to `main`, and follow
+  [security/RELEASE_RUNBOOK_WAVE_1](security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.md) (pdf beside it):
+  `.env` (`ADMIN_PANEL_URL` required, reCAPTCHA observation mode), Node 20.9+, queue worker, **frontend, then
+  backend, then admin**, then the check script. No migration. Then the STA response with the release date, and
+  ask Haboob to retest.
+- **pep-v2:** a note of six fixes to port back is committed locally in pep-v2's docs
+  (`security/PORT_BACK_FROM_TOURISE.md`), not pushed.
+
+**2026-10-13 (late): reCAPTCHA on the two public email lookups (pentest M-005, O-001), on `dev`, not
 on `main`.** Backend `b628d48` (PR #67, `0551bb5`), frontend `487dd43` (PR #18, `c963cf4`). The owner chose B: the
 "already registered" message stays; each lookup needs a fresh reCAPTCHA token; no token gives 403. **Deploy the
 frontend before the backend**, or the live forms stop at the email field. All five Haboob findings now have their
