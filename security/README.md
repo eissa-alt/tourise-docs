@@ -47,6 +47,8 @@ Task 041 item, the fix is one piece of work: record it in both places and keep t
 (M-003 is B11, M-004 is B12, M-002 needs B9 first). Task 041 stays the plan for its own items; this
 folder is the record per assessment.
 
+**Releasing it:** [RELEASE_RUNBOOK_WAVE_1](RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.md) ([pdf](RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.pdf)): the server and `.env` steps, the deploy order and the checks after, for the pentest fixes and Task 041 wave 1 together.
+
 ## Rules
 
 - **Assessors' reports stay out of git.** They are confidential to the client and the assessor.

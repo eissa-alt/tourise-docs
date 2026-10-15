@@ -1,6 +1,6 @@
 # Task 041 — Security port, wave 1 (from 123-pif-pep-v2)
 
-- **Status:** `todo`
+- **Status:** `code complete, waiting for release` (2026-10-15): 22 of 23 done or closed, B16 built and parked on its own branch
 - **Opened:** 2026-09-21
 - **Owner:** —
 - **Sub-app(s):** backend + admin + frontend
@@ -148,6 +148,8 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 ## Deploy checklist (security/wave-1)
 
 Collected item by item, for the day `security/wave-1` is merged and deployed. Tell the owner before deploying.
+
+**The whole release, in order (frontend, backend, admin), with the commands:** [security/RELEASE_RUNBOOK_WAVE_1](../../security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.md) ([pdf](../../security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.pdf)). The notes below are the per-item detail behind it.
 
 **After every backend deploy:** `scripts/post-deploy-security-check.sh` from the backend folder (default origin `https://api-register.tourise.com`); every line must be OK, then `php artisan config:show app.debug` must print `false`.
 

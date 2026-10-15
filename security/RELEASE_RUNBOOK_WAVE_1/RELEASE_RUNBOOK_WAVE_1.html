@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · Release runbook: security wave 1</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · Release runbook, security wave 1"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.meta { font-size: 8.4pt; color: #8A90A0; margin: 2.5mm 0 0 0; }
+.meta strong { color: #4A4F5A; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+strong { color: #111; }
+a { color: #3C0DEB; text-decoration: none; }
+.nw { white-space: nowrap; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; overflow-wrap: anywhere; }
+.ascii { background: #F7F8FB; border: 1px solid #E2E6EE; border-radius: 2mm; padding: 3mm 4mm;
+  font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.4pt; white-space: pre-wrap;
+  color: #212121; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout.warn { background: #FFF7ED; border-left-color: #FF9B3C; }
+.callout.danger { background: #FFF1F5; border-left-color: #FF0A5A; }
+.callout p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.2pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; overflow-wrap: break-word; }
+tr:nth-child(even) td { background: #FAFBFD; }
+.pill { display: inline-block; font-size: 7.2pt; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  padding: .5mm 2mm; border-radius: 1mm; white-space: nowrap; background: #F1F3F8; color: #5A606C; }
+.pill-critical { background: #FFE3EC; color: #C2003F; }
+.pill-high     { background: #FFEBD9; color: #B0560A; }
+.pill-medium   { background: #FFF4D6; color: #8A6100; }
+.pill-low      { background: #EFF3FF; color: #3C0DEB; }
+.pill-open     { background: #FFF1F5; color: #C2003F; }
+.pill-decision { background: #FFF7ED; color: #9A5B0A; }
+.pill-partial  { background: #FFF4D6; color: #8A6100; }
+.pill-fixed, .pill-closed, .pill-verified { background: #E3F8F1; color: #0E7A5F; }
+.pill-code, .pill-ops { background: #F3F0FF; color: #3C0DEB; }
+</style></head><body><div class="head"><div class="eyebrow">Security · Release runbook</div><h1>Release runbook: security wave 1</h1><p class="sub">What to do on the production servers when the security work (Task 041 wave 1 and the pentest fixes) is merged to main and deployed.</p><p class="meta">Classification: <strong>CONFIDENTIAL / TLP:AMBER</strong> &nbsp;·&nbsp; Written: <strong>2026-10-15</strong> &nbsp;·&nbsp; Applies to: <strong>main after security/wave-1 and dev are merged</strong></p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+<h2>1. In short</h2>
+<p>This release carries the fixes from Haboob's pentest (<span class="nw">M-001</span> to <span class="nw">M-005</span>) and Task 041 wave 1. It needs <strong>no database migration</strong> and <strong>no new Composer package</strong>. The frontend and the admin move to <strong>Next.js 15.5.27</strong>, so both need <code>yarn install</code> and Node 20.9 or later.</p>
+<div class="callout warn"><p><strong>Order matters: frontend, then backend, then admin.</strong> The frontend must send the reCAPTCHA token before the backend requires it, and the backend must stop requiring <code>back_link</code> before the admin stops sending it.</p></div>
+<p><strong>Not in this release:</strong> B16 (<code>TRUSTED_PROXIES</code>, the real visitor IP) stays on its own branch, <code>security/b16-trusted-proxies</code>, until it is tested and devops has confirmed the origin is reachable only through Cloudflare.</p>
+<h2>2. Before deploying</h2>
+<h3>Backend .env</h3>
+<p>Add or change:</p>
+<div class="ascii">ADMIN_PANEL_URL=https://admin-register.tourise.com
+GOOGLE_RECAPTCHA_ENFORCE_SCORE=false
+GOOGLE_RECAPTCHA_HOSTNAMES=register.tourise.com,admin-register.tourise.com
+LOG_LEVEL=info
+LOG_CHANNEL=daily</div>
+<table><thead><tr><th>Setting</th><th>Why</th><th>Needed</th></tr></thead><tbody><tr><td><code>ADMIN_PANEL_URL</code></td><td>Admin reset and invite links are built from it (B3). Unset, they point at localhost</td><td><strong>Required</strong></td></tr><tr><td><code>GOOGLE_RECAPTCHA_ENFORCE_SCORE=false</code></td><td>Observation mode for the first days: scores are logged, nobody is refused for a low score (B7)</td><td>Recommended start</td></tr><tr><td><code>GOOGLE_RECAPTCHA_HOSTNAMES</code></td><td>A token made on another site with our key is refused (B7)</td><td>Recommended</td></tr><tr><td><code>LOG_LEVEL=info</code></td><td>Only if it is <code>warning</code> or <code>error</code> today: otherwise the score lines are not written</td><td>Check</td></tr><tr><td><code>LOG_CHANNEL=daily</code></td><td>One log file a day, kept 14 days, so <code>laravel.log</code> does not grow forever</td><td>Optional</td></tr></tbody></table>
+<p>Check, no change expected:</p>
+<table><thead><tr><th>Setting</th><th>Must be</th></tr></thead><tbody><tr><td><code>APP_DEBUG</code></td><td><code>false</code></td></tr><tr><td><code>GOOGLE_RECAPTCHA_SECRET</code></td><td>set (without it every registration and admin login is refused)</td></tr><tr><td><code>CORS_ALLOWED_ORIGINS</code></td><td>the admin and the public site only</td></tr><tr><td><code>SESSION_SECURE_COOKIE</code></td><td>absent, or <code>true</code>; never a blank <code>SESSION_SECURE_COOKIE=</code> line</td></tr><tr><td><code>MOBILE_DEMO_EMAIL</code>, <code>MOBILE_DEMO_OTP</code></td><td>not set</td></tr><tr><td><code>TRUSTED_PROXIES</code></td><td>not set (B16 is not in this release)</td></tr></tbody></table>
+<h3>Checks on the servers</h3>
+<ol><li><code>node -v</code> on the frontend and admin servers: <strong>20.9 or later</strong>.</li><li><code>git status</code> in the frontend and admin: <code>yarn.lock</code> unmodified (if not, <code>git checkout -- yarn.lock</code>).</li><li>The backend <strong>queue worker</strong> is running: forgot-password emails now go through it (B10).</li><li>Admin links that will stop working (they now last 48 hours, B3); tell these admins to ask for a new one: <code>SELECT email FROM admin_invites WHERE created_at IS NULL OR created_at &lt; NOW() - INTERVAL 48 HOUR</code></li><li><code>curl -sI https://api-register.tourise.com/api/health</code>: the server in front must <strong>not</strong> send its own <code>Content-Security-Policy</code> or <code>Permissions-Policy</code> (the app now sends them, B20).</li><li>Ask devops whether an uptime monitor reads <code>app</code> or <code>env</code> from <code>/api/health</code> (both are removed, B17).</li><li>Optional: share texts with HTML, which will now show as literal tags (B4): <code>SELECT slug FROM categories WHERE share_text_en REGEXP '[&lt;&gt;]' OR share_text_ar REGEXP '[&lt;&gt;]'</code></li></ol>
+<h2>3. Deploy</h2>
+<h3>Frontend first</h3>
+<div class="ascii">git pull
+yarn install --frozen-lockfile
+yarn production
+pm2 restart tourise-frontend tourise-frontend-cluster</div>
+<p>Restart both process sets, or one keeps serving the old build.</p>
+<h3>Then the backend</h3>
+<div class="ascii">git pull
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan event:clear
+php artisan queue:restart</div>
+<p><code>migrate</code> has nothing to run in this release; it is there out of habit and is harmless.</p>
+<h3>Then the admin</h3>
+<div class="ascii">git pull
+yarn install --frozen-lockfile
+yarn production
+pm2 restart &lt;admin process&gt;</div>
+<h2>4. Right after deploying</h2>
+<ol><li>From the backend folder: <code>scripts/post-deploy-security-check.sh</code>. <strong>Every line must say OK.</strong></li><li><code>php artisan config:show app.debug</code> prints <code>false</code>.</li><li>Admin, click through: a save, an upload, an export, a delete and a toggle button. A 403 means the server in front of the admin does not pass the real <code>Host</code> header (B6, devops).</li><li>Forgot-password: the email arrives, and its link starts with <code>https://admin-register.tourise.com/</code>.</li><li>Downloads: the guests, invitations and dashboard exports open; a PDF, a badge and a calendar file open (B8, B20).</li><li>Public site: one registration form through to the photo step; the email field check works (<span class="nw">M-005</span>).</li><li>Tell the team: conference logos and icons are now PNG, JPG or WebP only, no SVG (B13).</li></ol>
+<h2>5. A few days later</h2>
+<ol><li>Read the reCAPTCHA scores: <code>grep -o '"score":[0-9.]*' storage/logs/laravel.log | sort | uniq -c</code></li><li>Refusals and errors, if any: <code>grep 'recaptcha.verify' storage/logs/laravel.log | grep -v '"verdict":"pass"'</code> and <code>grep -E 'recaptcha\.(unreachable|upstream_error|malformed_response|misconfigured)' storage/logs/laravel.log</code></li><li>If real users score well above 0.3: <code>GOOGLE_RECAPTCHA_ENFORCE_SCORE=true</code>, then <code>php artisan config:cache</code>.</li><li>Put the release date into the response to STA (<code>security/pentest-2026-09/PENTEST_RESPONSE</code>), send it, and ask Haboob to retest.</li></ol>
+<h2>6. Where the detail is</h2>
+<table><thead><tr><th>What</th><th>Where</th></tr></thead><tbody><tr><td>Each item, its commits and its own deploy note</td><td><code>tasks/041-security-port-wave-1/TASK.md</code> (Log, Deploy checklist)</td></tr><tr><td>The pentest findings and their status</td><td><code>security/README.md</code> (tracker)</td></tr><tr><td>The response to STA and Haboob</td><td><code>security/pentest-2026-09/PENTEST_RESPONSE</code></td></tr></tbody></table>
+</body></html>
