@@ -42,8 +42,11 @@ doc-only sibling.
 
 ## Quality gate (before any push)
 
-- **Backend:** `./vendor/bin/pint --test` + `php artisan test --filter <FeatureTest>`
-- **Admin / Frontend:** `yarn type-check` + `yarn production`
+- **Backend:** `composer qa` (= `pint --test` + `phpstan analyse` + `php artisan test`), or the parts. For a
+  security fix, also `APP_DEBUG=false php artisan test` (see [Security fixes](#security-fixes)).
+- **Admin / Frontend:** `yarn type-check` + `yarn build` (+ `yarn check:rbac` on admin). `yarn build` is a plain
+  `next build` that needs no `.env`; `yarn production` wraps a gitignored `.env.production` and is local-only.
+  Don't build while a dev server is running: they share `.next`.
 
 > **Pre-commit hook (admin / frontend):** each Next app has a husky + `lint-staged` pre-commit hook
 > that runs `eslint --fix` / `prettier --write` on staged files — so formatting stays clean even for
