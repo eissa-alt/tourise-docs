@@ -17,7 +17,7 @@ Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` 
 | [tasks/](tasks/) | The work-log axis — one folder per task. [tasks/README.md](tasks/README.md) explains how to open one. |
 | [decisions/](decisions/LEDGER.md) | Append-only ledger of durable, cross-task locked decisions (`D1…Dn`). |
 | [upgrades/](upgrades/README.md) | Upgrade records + portable migration playbooks/runbooks (the Parts 1–5 initiative). |
-| [process/](process/WORKING_MECHANISM.md) | How we work — branching, commit format, task flow, quality gate, Definition of Done. Also [SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md) (local run), [QUEUE_SETUP_PROD.md](process/QUEUE_SETUP_PROD.md) (prod queue worker + scheduler, md + pdf) + [CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md) (spin up a new project from this baseline). |
+| [process/](process/WORKING_MECHANISM.md) | How we work — branching, commit format, task flow, quality gate, Definition of Done. Also [SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md) (local run), [QUEUE_SETUP_PROD.md](process/QUEUE_SETUP_PROD.md) (prod queue worker + scheduler, md + pdf), [BACKEND_DEPLOY.md](process/BACKEND_DEPLOY.md) (every backend deploy, as `www-data`, md + pdf) + [CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md) (spin up a new project from this baseline). |
 | [design/](design/THEME.md) | The Tourise 2027 theme — tokens, field anatomy, layout, the reusable components in `components/theme`, and the traps that cost time. **Read before building any new form or screen.** |
 | [mobile/](mobile/) | The mobile API contract (PDF + HTML twin). **Read before touching `routes/api.php`.** |
 | [client/](client/) | Guides for the event team, each a PDF with its HTML source: the step-by-step admin **tutorial** (screenshots, 24 lessons), the short **user guide**, the **admin access update** (what changed for admins and roles, ledger D55, with its test cases), and **one invitation per email** (what changed, the effects on invitation requests and dignitary parties, and what to check), and the **Nominations and Newsletter update** (the two new email statuses and their reasons, Nominations CC and BCC, the 48 reminder failures, the Newsletter import, tracking, campaign page, Settings and boxes by tab, 18 checks), with a one-page **in short** version. |
@@ -30,6 +30,7 @@ Layout follows the shared **ALT axis-foldered** convention (same as `cyan-docs` 
 - **Setting up / running locally (or after a `git pull`) →** [process/SETUP_AND_UPDATE.md](process/SETUP_AND_UPDATE.md).
 - **Picking up / starting work →** [process/WORKING_MECHANISM.md](process/WORKING_MECHANISM.md) + open a [task](tasks/README.md).
 - **Deploying to a production box (queue worker + scheduler) →** [process/QUEUE_SETUP_PROD.md](process/QUEUE_SETUP_PROD.md) — hand the PDF twin to DevOps.
+- **Deploying the backend →** [process/BACKEND_DEPLOY.md](process/BACKEND_DEPLOY.md).
 - **Cloning this baseline into a new project →** [process/CLONE_CHECKLIST.md](process/CLONE_CHECKLIST.md).
 
 ## Conventions

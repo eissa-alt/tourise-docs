@@ -3,7 +3,25 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-15 (latest): Task 041 security wave 1 code complete, waiting for release.** 22 of 23 items done or
+**2026-10-19 (latest): production backend confirmed on `969b2fd`; `config:cache` made safe on `dev`; a
+backend deploy list.** Status review with the owner, one item at a time; item 1 (production backend) done.
+
+- **Production backend** pulled by the owner to `main` `969b2fd` (B9) on 2026-10-19. Checked the same day:
+  `/api/admin/roles/select` answers 401 "Unauthenticated.", `/api/upload` 405 with no file or trace. The server
+  has no config or route cache.
+- **Found and fixed:** six `env()` reads outside `config/` (root admin login alert, the bulk mailer check for
+  automation emails, the speaker and sponsor site refresh), so `config:cache` would have broken them with no
+  error. Backend `04a0a5e`, PR #69 (`5d2b23b`), on `dev`, **not on `main`**: don't run `config:cache` on
+  production until it is. Same `.env` names, no server change. Branch deleted.
+- **New [process/BACKEND_DEPLOY.md](process/BACKEND_DEPLOY.md):** the owner's commands, all as `www-data`, and the
+  server facts: PHP 8.5.4 (command line and `php8.5-fpm`; local is 8.2), the server's own `composer.lock` from
+  16 Aug, OPcache on defaults.
+- **Open:** PHPStan fails on `dev` with 5 errors not from this work (3 relation errors in
+  `DashboardStatsController`, two ignore entries that no longer match), so `composer qa` is red.
+  [RELEASE_RUNBOOK_WAVE_1](security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.md) runs the backend steps
+  without `sudo -u www-data`; align it with the deploy list before the release.
+
+**2026-10-15: Task 041 security wave 1 code complete, waiting for release.** 22 of 23 items done or
 closed, one at a time with the owner checking each (2026-10-14 to 10-15).
 
 - **On `security/wave-1`** (backend, admin, frontend; pushed as backup, **not merged**): B3 admin setup link from
