@@ -1,0 +1,280 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · CRM Plan</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · CRM Plan · 19 October 2026"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+strong { color: #111; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.6pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout p:last-child { margin-bottom: 0; }
+.callout.warn { background: #FFF6EC; border-left-color: #F28A2C; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.2pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFBFD; }
+td.num, th.num { width: 8mm; text-align: center; font-weight: 700; }
+td.num { color: #3C0DEB; }
+.rec { display: inline-block; background: #1EC8A0; color: #fff; font-size: 7.4pt; font-weight: 700;
+  border-radius: 2mm; padding: 0 1.6mm; margin-left: 1mm; letter-spacing: .3px; }
+.tag { display: inline-block; font-size: 7.4pt; font-weight: 700; border-radius: 2mm; padding: 0 1.6mm; letter-spacing: .3px; }
+.tag.biz { background: #FFE3EC; color: #B0063E; }
+.tag.dev { background: #E6E0FF; color: #2A08A8; }
+.tag.client { background: #FFEBD6; color: #9A4D00; }
+.part { margin-top: 10mm; font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+.break { page-break-before: always; }
+figure.shot { margin: 0 0 6mm 0; page-break-inside: avoid; }
+figure.shot img { width: 100%; border: 1px solid #D3DBE5; border-radius: 2mm; display: block; }
+figure.shot figcaption { font-size: 8.8pt; color: #4A4F5A; margin-top: 2mm; }
+td.ans { width: 22%; }
+th code { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.35); color: #fff; }
+.journey { display: flex; gap: 1.2mm; margin: 2mm 0 4mm 0; page-break-inside: avoid; }
+.journey div { flex: 1; text-align: center; font-size: 8.2pt; font-weight: 700; color: #fff; padding: 2mm 1mm; border-radius: 1.6mm; }
+.journey div small { display: block; font-weight: 400; font-size: 7pt; opacity: .9; }
+.j1{background:#8A90A0}.j2{background:#FF9B3C}.j3{background:#3C0DEB}.j4{background:#5B34F0}.j5{background:#7A5CF3}.j6{background:#FF0A5A}.j7{background:#1EC8A0}.j8{background:#0E9C7A}
+</style></head><body>
+<div class="head"><div class="eyebrow">Prospects · CRM</div><h1>CRM Plan</h1><p class="sub">A new Prospects section in the TOURISE 2027 admin: the people we may invite, where each one is in the system, and inviting them. Revised for the client's template v4.1. Plan only, nothing built yet. 19 October 2026.</p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+
+<h2>1. In short</h2>
+<p>The team keeps lists of people it may want at the event in Excel, and the sheet cannot tell whether a person has asked for an invitation, been invited, or registered. The <strong>Prospects</strong> section imports the client's CRM sheet (<code>TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx</code>) and adds what Excel cannot:</p>
+<ul>
+<li><strong>Tracking</strong>, the heart of it: for every person, where they are in the system (in CRM, requested, invited, sent, opened, registered, confirmed), with dates and a link to each record (part 3).</li>
+<li><strong>Sub-categories</strong> across the whole system: defined in Category settings, chosen with the category, carried as a tag on guests, invitations and the CRM (part 4).</li>
+<li><strong>Owners who are admins</strong>, notified of their reminders and of their people's progress, with Prospects set up in <strong>Roles</strong> and limited by category (part 5).</li>
+<li>The template's <strong>Invitation Channel, Security Clearance and Invitation Status</strong>, with their rules enforced (part 6).</li>
+<li>Tabs per category, search and filters, <strong>Invite to a collection</strong>, a report by owner, export, and who did what on every action.</li>
+</ul>
+<div class="callout"><p><strong>Decisions needed:</strong> nine points, listed with a space for the answer in the last part, <strong>Questions</strong>. Four of them need the client. Everything else is decided.</p></div>
+
+<p class="part">Part A · For the business</p>
+
+<h2>2. What v4.1 changes</h2>
+<table><thead><tr><th style="width:30%">In the template</th><th>In the plan</th></tr></thead><tbody>
+<tr><td><strong>Tier</strong> is 1 to 3 (Tier 4 removed)</td><td>Three values, admin-only, behind its own role box.</td></tr>
+<tr><td><strong>Category and Sub-category</strong> required, Sub-category under Category</td><td>Sub-categories become a system-wide feature (part 4).</td></tr>
+<tr><td><strong>Relationship Owner</strong> required; reassignments logged</td><td>An admin account; every change logged with old owner, new owner, who and when (part 5).</td></tr>
+<tr><td><strong>Invitation Channel</strong>: H.E.'s Office, MOFA, Royal Court, Other Ministries, Relationship Owner, CRM</td><td>Only <em>CRM</em> sends from the system; the others are recorded (part 6).</td></tr>
+<tr><td><strong>Security Clearance</strong>: Not Required, Not Submitted, Pending, Approved, Not Approved</td><td>Gates sending, as the template's rules say (part 6).</td></tr>
+<tr><td><strong>Invitation Status</strong> replaces Outreach Status: Not Sent, In Progress, Sent, Pending, Accepted, Declined</td><td>Follows the system where the system knows; the rest is the team's.</td></tr>
+<tr><td><strong>Sent Date and Sent By</strong> required once sent</td><td>So the CRM never sends twice.</td></tr>
+<tr><td><strong>Follow-up</strong>: owner, last contact, next reminder</td><td>Reminders notify the owner; overdue reads orange.</td></tr>
+<tr><td><strong>Possible duplicates</strong> on email, mobile, then name</td><td>Email or mobile refused; same name flagged (question 6).</td></tr>
+<tr><td><strong>No passport, ID, date of birth or photos</strong> (PDPL)</td><td>A file carrying such a column is refused.</td></tr>
+<tr><td>A grey <strong>example row</strong></td><td>Skipped on import.</td></tr>
+</tbody></table>
+
+<h2>3. Tracking: where each person is in the system</h2>
+<p>The first question the section answers. Each person has a journey, <strong>read live</strong> from the request, invitation and guest records it links to, never typed by hand:</p>
+<div class="journey"><div class="j1">In CRM<small>imported</small></div><div class="j2">Requested<small>pending · accepted</small></div><div class="j3">Invited<small>collection</small></div><div class="j4">Sent<small>system or office</small></div><div class="j5">Opened<small>delivered · opened</small></div><div class="j6">Registered<small>reg. number</small></div><div class="j7">Confirmed<small>attending</small></div></div>
+<table><thead><tr><th style="width:18%">Step</th><th style="width:38%">Reached when</th><th>Shown with</th></tr></thead><tbody>
+<tr><td><strong>In CRM</strong></td><td>Imported or added</td><td>Date, by whom, the import file</td></tr>
+<tr><td><strong>Requested</strong></td><td>A request has the email</td><td>Pending, accepted or rejected; the form; date</td></tr>
+<tr><td><strong>Invited</strong></td><td>An invitation exists, from the CRM or from a request</td><td>Collection, channel, who invited, date, the invitation link</td></tr>
+<tr><td><strong>Sent</strong></td><td>The system sent it, or a manual send was recorded</td><td>Date, and by the system or by whom (H.E.'s Office, MOFA …)</td></tr>
+<tr><td><strong>Delivered · Opened</strong></td><td>The email or message provider reports it</td><td>Date</td></tr>
+<tr><td><strong>Registered</strong></td><td>A guest registered with the invitation, or with the email</td><td>Registration number, category, sub-category, date, and the email used if it differs</td></tr>
+<tr><td><strong>Confirmed</strong></td><td>The guest is confirmed and attending</td><td>Guest status</td></tr>
+<tr><td><em>Declined · Rejected</em></td><td>The guest declined, or the request was rejected</td><td>Date, who</td></tr>
+</tbody></table>
+<ul>
+<li><strong>On the list:</strong> a <em>Tracking</em> column with the furthest step and its date, and the steps as dots, so a glance shows how far each person got. Filters such as <em>invited, not opened after 7 days</em> or <em>sent, not registered</em>.</li>
+<li><strong>On the person's page:</strong> the journey as a timeline at the top, each step opening its request, invitation or guest; then the team's activities and the history.</li>
+<li><strong>Tiles</strong> count the open tab as a funnel: in CRM → invited → sent → opened → registered → confirmed.</li>
+<li><strong>Tracked by link, not only by email:</strong> a person invited as <em>a@x.com</em> who registers as <em>a.b@y.com</em> still reads Registered.</li>
+<li><strong>Each move notifies the owner</strong> (part 5).</li>
+</ul>
+
+<h2>4. Sub-categories, across the system</h2>
+<ul>
+<li><strong>Defined in Category settings:</strong> each category gets a list of sub-categories (English and Arabic name, order, active). One in use is switched off, never deleted: records keep it, it is no longer offered. Seeded from the client's <em>Badge Categories</em> sheet (about 40, e.g. Dignitary: Head of State International, Ministers &amp; Excellencies International, Ambassadors).</li>
+<li><strong>Chosen with the category, wherever a category is chosen:</strong></li>
+</ul>
+<table><thead><tr><th style="width:34%">Where</th><th>How</th></tr></thead><tbody>
+<tr><td>Guests: Add, See more / profile, Change category</td><td>A second select beside the category, offering that category's sub-categories</td></tr>
+<tr><td>Invitations: new collection</td><td>The collection's default sub-category</td></tr>
+<tr><td>Invitations: Add people, the guest card, import</td><td>Per person, starting from the collection's default</td></tr>
+<tr><td>CRM: import, the person's page, bulk edit</td><td>A column, a field, a bulk action</td></tr>
+<tr><td>Registration</td><td>Not asked of the guest: a guest registering through an invitation takes the invitation's sub-category</td></tr>
+</tbody></table>
+<ul>
+<li><strong>A tag:</strong> a chip beside the category, a column and a filter on the guest list, the invitations and the CRM, in every export and in the history. A bulk action sets it for ticked guests.</li>
+<li><strong>Changing the category</strong> clears the sub-category and asks for the new one in the same step.</li>
+</ul>
+
+<h2>5. Owners, roles and notifications</h2>
+<ul>
+<li><strong>The Relationship Owner and the Follow-up Owner are admin accounts</strong> with the Prospects permission for the person's category. The picker offers only those admins. A blank Follow-up Owner means the Relationship Owner.</li>
+<li><strong>Set up in Roles</strong>, with the other modules: View, Create, Update, Delete, Invite, Export, Settings, Record History, Audit Trail, <strong>View tier</strong> and <strong>Can own prospects</strong>.</li>
+<li><strong>Per category:</strong> the role's category limits apply everywhere. An admin limited to Speakers sees, imports, owns, invites, reports on and exports Speakers only. Moving a person to a category their owner cannot see asks for a new owner.</li>
+</ul>
+<table><thead><tr><th style="width:52%">Notification</th><th>Goes to</th></tr></thead><tbody>
+<tr><td>Made owner of a person (or of many, as one count)</td><td>The new owner</td></tr>
+<tr><td>Next Reminder Date is today; it has passed (once a day while overdue)</td><td>The follow-up owner, else the relationship owner</td></tr>
+<tr><td>Tracking moves: sent, opened, registered, confirmed, declined</td><td>The same</td></tr>
+<tr><td>One of your people files a request</td><td>The same</td></tr>
+<tr><td>Imports, edits, deletes</td><td>Admins who follow Prospects in their notification settings</td></tr>
+</tbody></table>
+<p>In the admin bell, and by email for those who turn it on.</p>
+
+<h2>6. Channel, clearance and status</h2>
+<table><thead><tr><th style="width:30%">Rule</th><th>What the system does</th></tr></thead><tbody>
+<tr><td><strong>Only the CRM channel sends</strong></td><td>For H.E.'s Office, MOFA, Royal Court, Other Ministries and Relationship Owner, the invitation goes out elsewhere and is <strong>recorded</strong> (status, date, sent by). Once recorded, the CRM never sends its own.</td></tr>
+<tr><td><strong>H.E.'s Office</strong></td><td>Needs clearance <em>Approved</em> before <em>Sent</em>; <em>Not Required</em> is refused for it.</td></tr>
+<tr><td><strong>Not Submitted · Pending</strong></td><td>Nothing can be sent.</td></tr>
+<tr><td><strong>Not Approved</strong></td><td>Blocked, with "escalate to Fahad".</td></tr>
+<tr><td><strong>Invitation Status</strong></td><td><em>Sent</em> is set when the CRM sends, or with the recorded date and sender; <em>Accepted</em> and <em>Declined</em> as question 2 decides; <em>In Progress</em> and <em>Pending</em> stay the team's.</td></tr>
+</tbody></table>
+<p>Checked on the server, in bulk too: a bulk invite of 200 with 30 blocked invites 170 and lists the 30 with the reason for each.</p>
+
+<h2>7. Decisions with options</h2>
+
+<h3>7.1 Accepted and registration <span class="tag biz">BUSINESS</span></h3>
+<p>The template says <em>Accepted opens registration through the CRM</em>: the guest accepts, then gets the registration email. Today our invitation email <em>is</em> the registration link.</p>
+<table><thead><tr><th style="width:26%">Option</th><th>What happens</th><th style="width:30%">Trade-off</th></tr></thead><tbody>
+<tr><td><strong>A. Accepted = registered</strong> <span class="rec">RECOMMENDED</span></td><td>The invitation stays the registration link; the status reads Accepted once they register, Declined when they say no.</td><td>No new step for the guest; the client's two steps become one.</td></tr>
+<tr><td><strong>B. Two steps</strong></td><td>The invitation asks accept or decline first; Accepted sends a second email with the link.</td><td>Follows the wording; a new page and email, and every guest clicks twice.</td></tr>
+<tr><td><strong>C. Manual</strong></td><td>Accepted is set by hand (by phone, through an office); setting it sends the registration invitation.</td><td>Fits invitations sent outside the system.</td></tr>
+</tbody></table>
+<p>A and C can live together: CRM-channel invitations follow A, manual channels follow C.</p>
+
+<h3>7.2 Sub-category and templates <span class="tag biz">BUSINESS</span></h3>
+<p>The client's Field List says the sub-category "sets the exact template (e.g. Ministers &amp; Excellencies Local)".</p>
+<table><thead><tr><th style="width:26%">Option</th><th>What happens</th><th style="width:30%">Trade-off</th></tr></thead><tbody>
+<tr><td><strong>A. A tag now</strong> <span class="rec">RECOMMENDED</span></td><td>Shown, filtered, exported, carried to the guest. The category still picks the form and emails.</td><td>What was asked; small. Per-sub-category templates wait.</td></tr>
+<tr><td><strong>B. Template per sub-category</strong></td><td>A sub-category may have its own invitation, registration and confirmation templates; empty uses the category's.</td><td>Follows the Field List; more to build and to set up.</td></tr>
+</tbody></table>
+
+<h3>7.3 Is a sub-category required? <span class="tag biz">BUSINESS</span></h3>
+<p>The CRM requires one. <strong>Recommended:</strong> required wherever the chosen category has sub-categories defined, optional where it has none.</p>
+
+<h3>7.4 Duplicates <span class="tag biz">BUSINESS</span></h3>
+<table><thead><tr><th style="width:26%">Option</th><th>What happens</th><th style="width:30%">Trade-off</th></tr></thead><tbody>
+<tr><td><strong>A. Refuse and flag</strong> <span class="rec">RECOMMENDED</span></td><td>Same email or mobile: refused, naming the existing CRM ID. Same name, other email: imported and flagged <em>Possible duplicate</em> for an admin to check.</td><td>Nothing merged by mistake; two records until one is deleted.</td></tr>
+<tr><td><strong>B. A merge tool</strong></td><td>A flagged pair is merged into one record with both histories.</td><td>What the template asks; a merge across activities, invitations and history to get right.</td></tr>
+</tbody></table>
+
+<h3>7.5 After registration: one record or two <span class="tag biz">BUSINESS</span></h3>
+<table><thead><tr><th style="width:26%">Option</th><th>What happens</th><th style="width:30%">Trade-off</th></tr></thead><tbody>
+<tr><td><strong>A. Two copies</strong></td><td>The CRM keeps its copy of the shared fields; the guest has its own.</td><td>Nothing to build, but they drift.</td></tr>
+<tr><td><strong>B. Linked, the guest wins</strong> <span class="rec">RECOMMENDED</span></td><td>The CRM entry stays, linked; the shared fields are shown from the guest. The CRM keeps tier, owner, channel, clearance, status, source, activities.</td><td>One truth per field; the owner report still counts registered people.</td></tr>
+<tr><td><strong>C. Move to Guests</strong></td><td>The CRM entry is deleted on registration.</td><td>The CRM-only fields need new guest fields or are lost.</td></tr>
+</tbody></table>
+
+<h3>7.6 Prefilled registration <span class="tag client">CLIENT</span></h3>
+<p>Should someone invited from the CRM find the registration form already holding what the CRM knows? <strong>A.</strong> What invitations hold today (prefix, names, email, mobile, company, job title) · <strong>B.</strong> Every shared field, still editable <span class="rec">RECOMMENDED IF YES</span> · <strong>C.</strong> Nothing.</p>
+
+<h3>7.7 Needed from the client <span class="tag client">CLIENT</span></h3>
+<div class="callout warn">
+<p><strong>The dropdown values.</strong> Every dropdown in v4.1 reads <code>#REF!</code> again: the sheets holding the lists were deleted. The Field List and Status Definitions give most values; still missing: <strong>Source List</strong>, <strong>Activity Type</strong>, <strong>Outcome</strong> and the <strong>industry hierarchy</strong> with EG's proposals. The admin's <em>Download template</em> will build the same columns with working dropdowns.</p>
+<p><strong>The template disagrees with itself.</strong> The Field List has Follow-up Owner and Last Contact Date, the Contacts sheet does not; the Contacts sheet has <em>Follow-up sent</em> and <em>Previous category</em>, the Field List does not; the Read Me counts 36 fields.</p>
+<p><strong>Sub-event Invitations</strong> is listed as a system field. What are sub-events? Left out of the first build until known.</p>
+</div>
+
+<h3>7.8 Already decided</h3>
+<table><thead><tr><th class="num">#</th><th>Decision</th></tr></thead><tbody>
+<tr><td class="num">1</td><td>A section of its own, not part of Nominations.</td></tr>
+<tr><td class="num">2</td><td>Matched to the system by email (lower-cased), and by the invitation the CRM sent.</td></tr>
+<tr><td class="num">3</td><td>Two statuses side by side: tracking (the system's) and the team's Invitation Status.</td></tr>
+<tr><td class="num">4</td><td>The columns are the client's v4.1 <em>Contacts</em> sheet; its <em>Activity Log</em> imports too; <em>Tier Sign-off</em> stays the client's approval step, its reference recorded on the import.</td></tr>
+<tr><td class="num">5</td><td>A tab per category; inviting picks the collection, from any tab.</td></tr>
+<tr><td class="num">6</td><td>Importing never sends. A mobile-only person can be invited by SMS or WhatsApp.</td></tr>
+<tr><td class="num">7</td><td>Every action records the admin who did it.</td></tr>
+<tr><td class="num">8</td><td>The shared fields use the guest table's own names and values, now including the sub-category.</td></tr>
+<tr><td class="num">9</td><td>Sub-categories system-wide, defined in Category settings, a tag (part 4).</td></tr>
+<tr><td class="num">10</td><td>Owners are admin accounts; Prospects in Roles, limited by category; owners notified (part 5).</td></tr>
+<tr><td class="num">11</td><td>Tracking is the heart of the section (part 3).</td></tr>
+<tr><td class="num">12</td><td>Channel and clearance rules enforced on the server (part 6).</td></tr>
+</tbody></table>
+
+<h2>8. The columns</h2>
+<p>The 37 columns of the v4.1 <em>Contacts</em> sheet. <strong>Same as registration</strong> means the guest record already holds the field with the same values.</p>
+<table><thead><tr><th style="width:20%">Group</th><th>Columns</th><th style="width:26%">Same as registration</th></tr></thead><tbody>
+<tr><td><strong>Identity</strong></td><td>CRM ID (blank = new, filled = update) · Prefix · First and Last Name · Arabic Name · Job Title · Company · Company Location · Email · Mobile · Gender · Nationality · Country of Residence · Region (from the country)</td><td>All but CRM ID and Company Location</td></tr>
+<tr><td><strong>Classification</strong></td><td>Sector · Industry · Sub-industry · Seniority Level · Category · Sub-category · Tier (1–3)</td><td>All but Tier</td></tr>
+<tr><td><strong>Relationship &amp; Source</strong></td><td>Source List · List Provided By · Relationship Owner</td><td>CRM only</td></tr>
+<tr><td><strong>Invitation</strong></td><td>Invitation Channel · Security Clearance · Invitation Status · Sent Date · Sent By</td><td>CRM only</td></tr>
+<tr><td><strong>Follow-up</strong></td><td>Follow-up Owner · Last Contact Date · Next Reminder Date</td><td>CRM only</td></tr>
+<tr><td><strong>History</strong></td><td>History / Source · Received By · Previous Engagement · Previous Category · Notes</td><td>CRM only</td></tr>
+<tr><td><strong>System</strong> (never imported)</td><td>Tracking / Registration Status · Registration Link Sent · Tier Sign-off Reference · Owner History · Possible Duplicate · Last Updated / By</td><td>Read from the system</td></tr>
+</tbody></table>
+
+<h2>9. Search and filters</h2>
+<p>One search box over name (English and Arabic), email, mobile, company, job title and CRM ID. Filters combine, stay in the page address, and apply to the export.</p>
+<table><thead><tr><th style="width:26%">Group</th><th>Filters</th></tr></thead><tbody>
+<tr><td><strong>Tracking</strong></td><td>Each step · not opened after N days · sent, not registered · Invited from CRM · Collection</td></tr>
+<tr><td><strong>The team's follow-up</strong></td><td>Invitation Status · Channel · Security Clearance · Relationship Owner · Follow-up Owner · Tier · Reminder overdue or this week · Last contact · No activity yet</td></tr>
+<tr><td><strong>Who they are</strong></td><td>Category (also the tabs) · Sub-category · Sector · Industry · Sub-industry · Seniority · Gender</td></tr>
+<tr><td><strong>Where they are</strong></td><td>Nationality · Country of Residence · Region · Company Location</td></tr>
+<tr><td><strong>Where they came from</strong></td><td>Source List · List Provided By · History / Source · Import file · Date added · Possible duplicate</td></tr>
+</tbody></table>
+
+<h2 class="break">10. How it will look</h2>
+<p>Drawn inside the real TOURISE admin with sample people, before v4.1: the <em>Outreach Status</em> column shown here becomes <em>Invitation Status</em>, and the <em>In TOURISE</em> column becomes <em>Tracking</em> with its steps. The details may move during the build.</p>
+<figure class="shot"><img src="prospects-mockup.png" alt="The Prospects list"><figcaption><strong>The list.</strong> Tiles count the open tab (each is a filter); search and filters; people ticked, with <em>Invite to a collection</em>; the status changed in the cell; the system status with <em>Open ↗</em>; the category tabs at the bottom, like sheets in Excel.</figcaption></figure>
+<figure class="shot"><img src="prospects-invite-dialog.png" alt="Invite to a collection"><figcaption><strong>Invite to a collection.</strong> The admin picks a collection (or makes one, now with a sub-category); it decides the category, channel and template. The dialog says how many will be invited and skipped, and why.</figcaption></figure>
+
+<p class="part break">Part B · For developers</p>
+
+<h2>11. Approach</h2>
+<ul>
+<li><strong>Tracking is computed, never stored:</strong> through the link first (<code>prospects.invitation_id</code> → invitation → <code>guests.code_id</code>), then by lower-cased email over guests, invitations and requests; furthest step wins; filtered in SQL with <code>EXISTS</code>. A stored copy would need updating from four modules.</li>
+<li><strong>Sub-categories:</strong> <code>sub_categories</code> (<code>category_id</code>, <code>name_en</code>, <code>name_ar</code>, <code>sort_order</code>, <code>is_active</code>) and a nullable <code>sub_category_id</code> on <code>guests</code>, <code>invitations</code>, <code>invitation_collections</code>, <code>prospects</code>; the server checks it belongs to the record's category. The guest's three save paths (public store, admin create, admin update) each take it, tested through HTTP.</li>
+<li><strong>Inviting goes through Invitations:</strong> the body of <code>addGuests()</code> moves into a service both call; invitations made here carry <code>created_via = 'prospect'</code>.</li>
+<li><strong>Owners:</strong> <code>relationship_owner_id</code> and <code>follow_up_owner_id</code> are admin ids; reassignments are activity entries. A daily scheduled job raises due and overdue reminders; tracking moves notify through <code>AdminActivityFeed</code>.</li>
+<li><strong>Roles:</strong> a <code>prospects</code> feature in <code>AdminPermissions</code>, with the role's category limits applied to every query.</li>
+<li><strong>The template is generated by the system</strong> with working dropdowns (dependent Category → Sub-category, Industry → Sub-industry); columns read by heading, so the client's file still parses.</li>
+</ul>
+
+<h2>12. Build order</h2>
+<table><thead><tr><th class="num">#</th><th style="width:30%">Step</th><th>Contains</th></tr></thead><tbody>
+<tr><td class="num">0</td><td><strong>Sub-categories</strong></td><td>Table and Category settings; the field on guests, invitations, collections; the select on every form and import; inherited at registration; column, filter, bulk set, export</td></tr>
+<tr><td class="num">1</td><td><strong>Import and records</strong></td><td>Tables, settings lists, template, import with CRM ID update, tabs, record, edit, bulk edit, Roles with category limits, audit</td></tr>
+<tr><td class="num">2</td><td><strong>Tracking</strong></td><td>The journey lookup, column with steps, filters, funnel tiles, timeline, links; the <code>invitations.email</code> index</td></tr>
+<tr><td class="num">3</td><td><strong>Inviting</strong></td><td>Shared minting service, channel and clearance rules, recording manual invitations, bulk results with reasons</td></tr>
+<tr><td class="num">4</td><td><strong>Follow-up and report</strong></td><td>Activities, owners' reminders and the daily check, owner notifications, Activity Log sheet, report by owner</td></tr>
+<tr><td class="num">5</td><td><strong>Export</strong></td><td>A tab or the filtered table, every column and the tracking step</td></tr>
+</tbody></table>
+<p>Each step merges on its own. Step 1 waits on the client's lists (7.7) only for the columns that use them.</p>
+
+<h2>13. Out of scope</h2>
+<ul>
+<li>Matching by mobile or name for tracking (name only flags a possible duplicate); merging, unless 7.4 B.</li>
+<li>The Tier Sign-off approval inside the system; sub-event invitations; emailing prospects without inviting them (that is Nominations).</li>
+<li>Any public route except registration taking the invitation's sub-category; the mobile app.</li>
+</ul>
+
+<h2 class="break">14. Questions</h2>
+<p>Everything waiting on an answer. The recommended answer is what will be built if nobody says otherwise.</p>
+<table><thead><tr><th class="num">#</th><th style="width:32%">Question</th><th style="width:11%">For</th><th>Options</th><th style="width:14%">Recommended</th><th class="ans">Answer</th></tr></thead><tbody>
+<tr><td class="num">1</td><td>The values of <strong>Source List, Activity Type, Outcome</strong> and the <strong>industry hierarchy</strong> (7.7)</td><td><span class="tag client">CLIENT</span></td><td>Send the lists; kept by admins in Settings</td><td>Admin-kept lists</td><td></td></tr>
+<tr><td class="num">2</td><td>Does <strong>Accepted</strong> come before registration? (7.1)</td><td><span class="tag biz">BUSINESS</span></td><td>A. Accepted = registered · B. Two steps · C. Manual</td><td>A, with C for manual channels</td><td></td></tr>
+<tr><td class="num">3</td><td>Does a <strong>sub-category choose the templates</strong>? (7.2)</td><td><span class="tag biz">BUSINESS</span></td><td>A. A tag now · B. Template per sub-category</td><td>A</td><td></td></tr>
+<tr><td class="num">4</td><td>Is a <strong>sub-category required</strong> outside the CRM? (7.3)</td><td><span class="tag biz">BUSINESS</span></td><td>Required when the category has some · Always · Never</td><td>When the category has some</td><td></td></tr>
+<tr><td class="num">5</td><td>After a person <strong>registers</strong>, where does their data live? (7.5)</td><td><span class="tag biz">BUSINESS</span></td><td>A. Two copies · B. Linked, the guest wins · C. Move to Guests</td><td>B</td><td></td></tr>
+<tr><td class="num">6</td><td><strong>Duplicates</strong>: flag only, or merge? (7.4)</td><td><span class="tag biz">BUSINESS</span></td><td>A. Refuse and flag · B. A merge tool</td><td>A</td><td></td></tr>
+<tr><td class="num">7</td><td>Should the <strong>registration form be prefilled</strong>? (7.6)</td><td><span class="tag client">CLIENT</span></td><td>A. Today's fields · B. Every shared field · C. Nothing</td><td>B, if yes</td><td></td></tr>
+<tr><td class="num">8</td><td>Which is right where the <strong>Contacts sheet and the Field List disagree</strong>? (7.7)</td><td><span class="tag client">CLIENT</span></td><td>Follow-up Owner, Last Contact Date, Follow-up sent, Previous category</td><td>Keep all four</td><td></td></tr>
+<tr><td class="num">9</td><td>What are <strong>sub-event invitations</strong>? (7.7)</td><td><span class="tag client">CLIENT</span></td><td>Explain, or drop the field</td><td>Left out for now</td><td></td></tr>
+</tbody></table>
+
+<div class="callout"><p><strong>Full detail</strong> (every column, import rule and test case): <code>tourise-docs/tasks/054-prospects/TASK.md</code>.</p></div>
+</body></html>
