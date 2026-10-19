@@ -1,7 +1,7 @@
 # Task 054: Prospects (a CRM for people we may invite)
 
 - **Status:** `todo`: plan only, nothing built. Revised 2026-10-19 around the client's
-  `TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx` (replaces v3 and v4), and the owner's answer on
+  [`TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx`](../../client/CRM_PLAN/TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx) (replaces v3 and v4), and the owner's answer on
   sub-categories. Points that wait on the owner or the client are under *Open*.
 - **Opened:** 2026-10-13
 - **Owner:** unassigned
