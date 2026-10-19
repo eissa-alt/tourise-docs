@@ -3,7 +3,7 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-19 (latest): security wave 1 and the pentest fixes merged to `dev` and `main`, deploy pending;
+**2026-10-19 (latest): security wave 1 and the pentest fixes merged to `dev` and `main` and deployed;
 production backend confirmed on `969b2fd`; `config:cache` made safe; a backend deploy list.** Status review with
 the owner, one item at a time; items 1 to 4 done.
 
@@ -14,6 +14,11 @@ the owner, one item at a time; items 1 to 4 done.
   owner adds only `ADMIN_PANEL_URL` to the `.env` (reCAPTCHA enforced from day one, `LOG_LEVEL` stays `error`; see
   the [Task 041](tasks/041-security-port-wave-1/TASK.md) Deploy checklist). Then the check script, the STA response
   with the release date, Haboob's retest. `security/b16-trusted-proxies` stays parked.
+- **Deployed the same day** by the owner, frontend, backend, admin (Next.js 15.5.28: npm on the servers, not yarn).
+  The check script passed 9 of 9 against the live API, `app.debug` is `false`, `app.admin_url` is set; the owner's
+  browser checks (admin writes, forgot-password link, exports, a registration) were under way. The triage and the
+  tracker carry the release date. The STA response is ready to send, cut down by the owner: addressed to STA only
+  (no Haboob), dated 19 Oct, findings shortened, no status box, no further measures, retest or change references.
 
 - **Production backend** pulled by the owner to `main` `969b2fd` (B9) on 2026-10-19. Checked the same day:
   `/api/admin/roles/select` answers 401 "Unauthenticated.", `/api/upload` 405 with no file or trace. The server
