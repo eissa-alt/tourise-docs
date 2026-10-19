@@ -3,12 +3,23 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-19 (latest): production backend confirmed on `969b2fd`; `config:cache` made safe on `dev`; a
-backend deploy list.** Status review with the owner, one item at a time; item 1 (production backend) done.
+**2026-10-19 (latest): security wave 1 and the pentest fixes merged to `dev` and `main`, deploy pending;
+production backend confirmed on `969b2fd`; `config:cache` made safe; a backend deploy list.** Status review with
+the owner, one item at a time; items 1 to 4 done.
+
+- **Release (13:55):** `security/wave-1` (with `dev` merged in and the gates rerun) into `dev`, then `dev` into
+  `main`: backend `3972bc5` (PR #71), admin `171758f` (PR #67), frontend `f821deb` (PR #20); `main` = `dev`. Carries
+  Task 041 wave 1, pentest M-001 to M-005 and the `env()` fix. Deploy per
+  [RELEASE_RUNBOOK_WAVE_1](security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.md): frontend, backend, admin. The
+  owner adds only `ADMIN_PANEL_URL` to the `.env` (reCAPTCHA enforced from day one, `LOG_LEVEL` stays `error`; see
+  the [Task 041](tasks/041-security-port-wave-1/TASK.md) Deploy checklist). Then the check script, the STA response
+  with the release date, Haboob's retest. `security/b16-trusted-proxies` stays parked.
 
 - **Production backend** pulled by the owner to `main` `969b2fd` (B9) on 2026-10-19. Checked the same day:
   `/api/admin/roles/select` answers 401 "Unauthenticated.", `/api/upload` 405 with no file or trace. The server
   has no config or route cache.
+- **Admin and frontend on production = `main`** (owner, 2026-10-19): admin `f66ed55`, frontend `87b6853`. So
+  the 3-day admin login (Task 053), the 12 and 13 Oct admin features and the 7 Oct social channels revert are live.
 - **Found and fixed:** six `env()` reads outside `config/` (root admin login alert, the bulk mailer check for
   automation emails, the speaker and sponsor site refresh), so `config:cache` would have broken them with no
   error. Backend `04a0a5e`, PR #69 (`5d2b23b`), on `dev`, **not on `main`**: don't run `config:cache` on

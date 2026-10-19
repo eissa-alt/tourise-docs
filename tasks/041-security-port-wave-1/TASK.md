@@ -144,12 +144,19 @@ The trusted-proxy code is inert, so it can go on the branch freely; setting its 
 - 2026-10-15: **L9 closed without a code change** (owner): there is no mobile development cycle and no mobile team to confirm with yet, so it cannot be done now. Deferred, not dropped: when mobile work starts, send the message kept in the 2026-10-14 L9 entry above (401 means back to the email + OTP login; full `id|secret` tokens; does a guest's QR hold their login token). Progress mark for the central refresh: `[-]`.
 - 2026-10-15: **B16 built, then parked on its own branch** by the owner ("a lot of changes, I can't risk it") until a full test environment exists: `security/b16-trusted-proxies` in backend (`1dd9f53`: `config/trustedproxy.php` reading `TRUSTED_PROXIES`, `TrustProxies` defers to it, `TrustedProxiesTest` 4) and frontend (`68e2765`: `utils/forwarded-for.ts`, the visitor's address on the 11 `getServerSideProps` API calls). Both branch from `dev`, independent of `security/wave-1`, not pushed. Inert until devops sets `TRUSTED_PROXIES`. Backend suite 1,259 pass both ways; frontend type-check, ESLint, Prettier, build green.
 - 2026-10-15: **Branches pushed to GitHub as a backup** at the owner's request, not merged: `security/wave-1` (backend, admin, frontend) and `security/b16-trusted-proxies` (backend, frontend). Compare links when ready to merge: `https://github.com/eissa-alt/<repo>/compare/dev...security/wave-1`. The "(not pushed)" in the entries above was true when written.
+- 2026-10-19: **Merged to `dev` and `main`** (owner, 13:55), together with the pentest fixes already on `dev` and the `env()` fix (backend `04a0a5e`, `config:cache` now safe). Before merging, `origin/dev` was merged into each `security/wave-1` (backend `94f1276`, admin `b85b4b9`; frontend had nothing to take) and the gates rerun on the result: backend 1,255 pass with debug on and off, Pint clean, PHPStan only the 5 errors `dev` already had; admin type-check, `check:rbac`, build; frontend type-check, build. `main`: backend `3972bc5` (PR #71), admin `171758f` (PR #67), frontend `f821deb` (PR #20). Production `.env`: `ADMIN_PANEL_URL` only (owner's choice, see the Deploy checklist). Deploy not confirmed yet.
 
 ## Deploy checklist (security/wave-1)
 
 Collected item by item, for the day `security/wave-1` is merged and deployed. Tell the owner before deploying.
 
 **The whole release, in order (frontend, backend, admin), with the commands:** [security/RELEASE_RUNBOOK_WAVE_1](../../security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.md) ([pdf](../../security/RELEASE_RUNBOOK_WAVE_1/RELEASE_RUNBOOK_WAVE_1.pdf)). The notes below are the per-item detail behind it.
+
+**Owner's choice for the release (2026-10-19):** the production `.env` gets `ADMIN_PANEL_URL` only, as in pep-v2.
+No `GOOGLE_RECAPTCHA_ENFORCE_SCORE=false` (scores below 0.3 refused from day one), no `GOOGLE_RECAPTCHA_HOSTNAMES`,
+and `LOG_LEVEL` stays `error`, so `recaptcha.verify` lines (info) are not written. If someone reports being blocked:
+`GOOGLE_RECAPTCHA_ENFORCE_SCORE=false` and `LOG_LEVEL=info`, then `config:cache` and `queue:restart`. Run backend
+commands as `www-data` ([process/BACKEND_DEPLOY](../../process/BACKEND_DEPLOY.md)) and PM2 with `sudo`.
 
 **After every backend deploy:** `scripts/post-deploy-security-check.sh` from the backend folder (default origin `https://api-register.tourise.com`); every line must be OK, then `php artisan config:show app.debug` must print `false`.
 
