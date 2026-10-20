@@ -1,11 +1,11 @@
 # Task 056: Company Location, Sector and Tier on the guest
 
-- **Status:** `in-progress`: built on `feat/system-categories` in all three apps, committed locally, not
+- **Status:** `in-progress`: built on `feat/crm-foundations` in all three apps, committed locally, not
   pushed, not seen in a browser yet (2026-10-20). See *Log*.
 - **Opened:** 2026-10-20
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin + frontend (the public forms)
-- **Branch(es):** `feat/system-categories`, the Task 055 branch, in `tourise-backend` and `tourise-admin`
+- **Branch(es):** `feat/crm-foundations`, the Task 055 branch, in `tourise-backend` and `tourise-admin`
   (owner, 2026-10-20: same branch); a branch of that name off `dev` (`--no-track`) in `tourise-frontend`
 
 ## Goal
@@ -93,6 +93,8 @@ Each step merges on its own.
   - **Where the build differs from the plan:** the exports write the stored keys (`international`,
     `public_sector`, `tier_2`), as they write gender and industry; the data coverage test expects it.
     Five form files carry the ten forms (VIP, the three dignitary attendants and Moderator wrap another).
+- 2026-10-20: branch renamed `feat/system-categories` to `feat/crm-foundations` in all three apps (owner), before
+  the first push: the branch stays open for the CRM requirements as they close, merged with `dev` as it goes.
 
 ## Definition of Done
 

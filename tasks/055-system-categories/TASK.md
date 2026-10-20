@@ -1,11 +1,11 @@
 # Task 055: System Categories (a list under each category)
 
-- **Status:** `in-progress`: built on `feat/system-categories` (backend + admin), committed locally, not
+- **Status:** `in-progress`: built on `feat/crm-foundations` (backend + admin), committed locally, not
   pushed, not seen in a browser yet (2026-10-20). See *Log* and *Deploy*.
 - **Opened:** 2026-10-20
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin (the public site needs no change)
-- **Branch(es):** `feat/system-categories` in `tourise-backend` + `tourise-admin`, off `dev` (`--no-track`)
+- **Branch(es):** `feat/crm-foundations` in `tourise-backend` + `tourise-admin`, off `dev` (`--no-track`)
 
 ## Goal
 
@@ -162,7 +162,7 @@ Newest at the bottom.
 - 2026-10-20: decision 11 changed: invitations follow the category's flow (set on the collection, changed
   per invitation afterwards), not per-person entry on the guest card. Open for Task 054: whether CRM
   invitations keep each person's own System Category or take the collection's.
-- 2026-10-20: built, every step committed locally on `feat/system-categories` in each repo (owner's go,
+- 2026-10-20: built, every step committed locally on `feat/crm-foundations` in each repo (owner's go,
   working alone). Gates green at each step: backend `composer qa` (1306 tests at the end), admin
   `tsc` + `eslint` + `yarn build` + `yarn check:rbac`.
   - **Step 0** (backend `e3adc52`, `0c4b831`): PHPStan green. The dashboard's guests-per-badge endpoint
@@ -183,6 +183,8 @@ Newest at the bottom.
   - **Where the build differs from the plan:** a new column goes LAST in each export (the house rule:
     saved import mappings keep their columns, and the letter-based formats stay put), not beside Category;
     the visa and scans exports are left out (see *Deferred*).
+- 2026-10-20: branch renamed `feat/system-categories` to `feat/crm-foundations` in all three apps (owner), before
+  the first push: the branch stays open for the CRM requirements as they close, merged with `dev` as it goes.
 
 ## Deploy
 
