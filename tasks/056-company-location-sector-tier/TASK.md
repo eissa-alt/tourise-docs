@@ -1,6 +1,7 @@
 # Task 056: Company Location, Sector and Tier on the guest
 
-- **Status:** `in-progress`: plan approved 2026-10-20; being built.
+- **Status:** `in-progress`: built on `feat/system-categories` in all three apps, committed locally, not
+  pushed, not seen in a browser yet (2026-10-20). See *Log*.
 - **Opened:** 2026-10-20
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin + frontend (the public forms)
@@ -79,14 +80,27 @@ Each step merges on its own.
 ## Log
 
 - 2026-10-20: opened, with the owner's decisions 1 to 12. Approved; built on the Task 055 branch.
+- 2026-10-20: built, each step committed locally. Gates green: backend `composer qa` (1315 tests), admin
+  and frontend `tsc` + `eslint` + `yarn build` (+ `check:rbac` on admin).
+  - **Step 1** (backend `ede2db5`): migration `2026_10_20_000004`; `App\Support\GuestFieldValues` (the
+    lists, `tierVisibleTo()`, the export columns); every write path; the `view_tier` box in resources,
+    filters (the generic has / has no / duplicate filters too), exports and the dashboard.
+  - **Step 2** (frontend `679f45a`): the two fields on the five form files behind the ten in use; the
+    sector list to two values.
+  - **Step 3** (admin `c052749`): mandatory-fields options, the five admin forms and See more, Tier in the
+    guest wrapper, collection form, collection edit, single edit, Update bulk, list columns and filters,
+    the dashboard breakdown (Sector shown for the first time), the Roles label.
+  - **Where the build differs from the plan:** the exports write the stored keys (`international`,
+    `public_sector`, `tier_2`), as they write gender and industry; the data coverage test expects it.
+    Five form files carry the ten forms (VIP, the three dignitary attendants and Moderator wrap another).
 
 ## Definition of Done
 
 - [ ] Code merged to `dev` in backend, admin and frontend
-- [ ] EN + AR translations in the same commit
-- [ ] Quality gate green (backend `composer qa`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`;
+- [x] EN + AR translations in the same commit
+- [x] Quality gate green (backend `composer qa`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`;
       frontend `yarn type-check` + `yarn build`)
-- [ ] The cases above covered by backend tests, through HTTP
+- [x] The cases above covered by backend tests, through HTTP
 - [ ] Docs updated (this TASK.md, the index row)
-- [ ] Mobile contract checked (nothing exposed)
+- [x] Mobile contract checked (nothing exposed)
 - [ ] Seen working in a browser, by the owner
