@@ -384,7 +384,7 @@ may edit a guest or an invitation may set its sub-category.
 
 Each step is mergeable alone.
 
-0. **Sub-categories** (`feat/sub-categories`): table and Category settings; `sub_category_id` on guests,
+0. **Sub-categories**, built as [Task 055](../055-system-categories/TASK.md) ("System Categories", 2026-10-20) (`feat/sub-categories`): table and Category settings; `sub_category_id` on guests,
    invitations, collections; the dependent select on the guest forms, See more, Change category, the
    collection form, Add people, the guest card and the imports; inherited at registration; column, filter,
    bulk set and export on the guest and invitation lists. Tests through HTTP on the three guest save paths.

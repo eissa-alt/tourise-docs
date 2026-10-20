@@ -1,6 +1,7 @@
 # Task 055: System Categories (a list under each category)
 
-- **Status:** `todo`: plan, waiting for the owner's approval. Nothing built.
+- **Status:** `in-progress`: built on `feat/system-categories` (backend + admin), committed locally, not
+  pushed, not seen in a browser yet (2026-10-20). See *Log* and *Deploy*.
 - **Opened:** 2026-10-20
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin (the public site needs no change)
@@ -83,6 +84,10 @@ Category until the import rework adds the column.
 - **Workforce** and **Exhibitor**: left until requested; they need their own categories first.
 - **Templates per System Category** (the client's "sets the exact template").
 - **The guest Excel import column.**
+- **A System Category filter on the invitation listings.** They have no category filter to sit beside.
+- **The visa export** keeps its fixed 21 columns (the e-visa format), and **the scans export** keeps the
+  category name it stores.
+- **The dashboard's export workbook** and **the invitation charts** are not split by System Category.
 
 ## Database (all additive, nullable, no backfill)
 
@@ -157,12 +162,44 @@ Newest at the bottom.
 - 2026-10-20: decision 11 changed: invitations follow the category's flow (set on the collection, changed
   per invitation afterwards), not per-person entry on the guest card. Open for Task 054: whether CRM
   invitations keep each person's own System Category or take the collection's.
+- 2026-10-20: built, every step committed locally on `feat/system-categories` in each repo (owner's go,
+  working alone). Gates green at each step: backend `composer qa` (1306 tests at the end), admin
+  `tsc` + `eslint` + `yarn build` + `yarn check:rbac`.
+  - **Step 0** (backend `e3adc52`, `0c4b831`): PHPStan green. The dashboard's guests-per-badge endpoint
+    failed on every call (a query used as a relation, and a `guests.status` column that does not exist);
+    the owner chose to repair it rather than remove it, for the badge printing work. It now counts per
+    category, then per badge, behind the category chart's box.
+  - **Step 1** (backend `dbb83e9`, `9d09b15`): the table, the fields, `SubCategoryRule`, the list saved
+    with the category form (one audit row, clone copies), `admin/categories/{id}/sub-categories/select`,
+    the nine places, Change category fixed.
+  - **Step 2** (backend `9ef3efb`, admin `1b3a77a`): Category settings tab, guest create / edit,
+    Change category, See more, guest list column and filter ("No System Category"), seven guest exports
+    (last column), automations.
+  - **Step 3** (backend `9a9c6a8`, admin `6a72987`): collection create / edit, single edit, bulk Update,
+    Move, Extract, Add people, Invite someone (`admin/dignitary-parties/roles`), listings, three
+    invitation exports.
+  - **Step 4** (backend `775d0c8`, admin `c446a24`, `0b6fd72`): request category default and the Accept
+    override; dashboard filter and the category chart split (`/dashboard/guests/sub-categories`).
+  - **Where the build differs from the plan:** a new column goes LAST in each export (the house rule:
+    saved import mappings keep their columns, and the letter-based formats stay put), not beside Category;
+    the visa and scans exports are left out (see *Deferred*).
+
+## Deploy
+
+- `php artisan migrate`: `2026_10_20_000001` to `000003`, all additive. Nothing to backfill.
+- No new permission box: the list is edited by whoever may edit categories.
+- After deploy, a Super Admin enters the lists in Category settings → System Categories (the client's
+  sheet is in `client/CRM_PLAN_V2/`). Until a category has a list, nothing changes for it.
+- Change category now refuses an inactive category, a guest outside the admin's access, and a category
+  the admin may not use (Super Admins unaffected): tell the team.
+- The mobile app is not affected (no field exposed to it).
 
 ## Definition of Done
 
 - [ ] Code merged to `dev` in backend and admin
-- [ ] EN + AR translations in the same commit
-- [ ] Quality gate green (backend `composer qa`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
-- [ ] The cases above covered by backend tests, through HTTP
+- [x] EN + AR translations in the same commit
+- [x] Quality gate green (backend `composer qa`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
+- [x] The cases above covered by backend tests, through HTTP
 - [ ] Docs updated (this TASK.md, the index row, Task 054's step 0 pointing here)
-- [ ] Mobile contract checked (nothing exposed; no notice needed unless that changes)
+- [x] Mobile contract checked (nothing exposed; no notice needed unless that changes)
+- [ ] Seen working in a browser, by the owner
