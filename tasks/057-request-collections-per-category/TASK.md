@@ -196,6 +196,10 @@ First build (replaced by the above):
   revision and the requests list). Gates: backend 1323 tests, Pint, PHPStan; admin `tsc`, `eslint`,
   `check:rbac`, `yarn build` (built from a copy, the owner's dev server running). The owner merges
   `feat/crm-foundations` once the CRM is final.
+- 2026-10-21: the owner, on the edit form: **a targeted collection's sub-category, tier, uses, prefill and lock
+  are locked for now** (shown greyed with a note; the backend keeps what it was made with), as a change would
+  reach only invitations made later. Email and account stay editable (the form can apply them to its
+  invitations). Backend `f12f304`, admin `e086aa5`.
 
 ## Definition of Done
 
