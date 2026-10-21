@@ -96,6 +96,10 @@ Each step merges on its own.
 - 2026-10-20: branch renamed `feat/system-categories` to `feat/crm-foundations` in all three apps (owner), before
   the first push: the branch stays open for the CRM requirements as they close, merged with `dev` as it goes.
 
+- 2026-10-21: found while building Task 054: a tier change shows in a guest's History and in the invitations' (and
+  now the CRM's) audit trails to any admin who can open them, with or without View tier. The owner chose to leave
+  it as it is.
+
 ## Definition of Done
 
 - [ ] Code merged to `dev` in backend, admin and frontend
