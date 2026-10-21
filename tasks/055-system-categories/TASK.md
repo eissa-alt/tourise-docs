@@ -195,6 +195,13 @@ Newest at the bottom.
 - Change category now refuses an inactive category, a guest outside the admin's access, and a category
   the admin may not use (Super Admins unaffected): tell the team.
 - The mobile app is not affected (no field exposed to it).
+- 2026-10-21: **renamed in English to "Sub-category" / "Sub-categories"** (owner: "sub category is more
+  convenient"), on every admin label, the backend messages and the export column heading (not on production
+  yet, so no saved mapping reads it). Arabic stays "النوع الفرعي"; the code name stays `sub_category`. Older
+  entries above say "System Category" for the same thing.
+- 2026-10-21: the sub-category dropdown stays hidden before a category and for a category without a list, as
+  decided, **except in the targeted collection form** (Task 057), where it is always shown, greyed with "Pick a
+  category first" / "No sub-categories for this category" (`alwaysShow` on the shared select).
 
 ## Definition of Done
 

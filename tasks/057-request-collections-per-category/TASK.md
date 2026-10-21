@@ -1,7 +1,7 @@
 # Task 057: Request collections per category
 
-- **Status:** `in-progress`: built on `feat/crm-foundations` in backend and admin, committed locally, not
-  pushed, not seen in a browser yet (2026-10-21). See *Log*.
+- **Status:** `in-progress`: revised (R1 to R5) and pushed on `feat/crm-foundations` (backend, admin), seen by
+  the owner in a browser on their local copy (2026-10-21). Merged with the rest of the CRM work. See *Log*.
 - **Opened:** 2026-10-21
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -41,9 +41,38 @@ All 2026-10-21, with the owner.
 | 9 | **A mixed selection without the override:** rows whose category already has a request collection go in; rows whose category has none are reported as failed ("accept one of them on its own first"). Production has one request category, so this is rare. |
 | 10 | **Production:** the owner deletes the two current collections ("Request" and "Request An Invitation ( to be deleted)", 0 invitations each) in phpMyAdmin; there is no delete in the admin. The first accept into General Registration then makes its collection and asks for the template. |
 
+## Revision: targeted collections, no default (2026-10-21)
+
+The owner tried the first build the same night and changed the flow: the template fields inside the
+accept dialog were poor UX, and accepting should never follow a default. These replace decisions 3, 5 and
+9, and narrow 1 (a collection is no longer made by accepting).
+
+| # | Decision |
+|---|---|
+| R1 | **"Create targeted collection"**, a button on the Invitation Requests page (beside Request Categories). Its form: the category (only categories without one), its sub-category (from that category's list, required when it has one, always shown in the form; owner, 2026-10-21), channel (greyed when it has no enabled account), template (required), sending account (enabled accounts only, refused otherwise), tier (with the View tier box), usage type, uses, prefill, lock. It makes that category's "From invitation requests" collection, named "Invitation requests - <category>" (renamed in Collections if wanted). Still one per category. |
+| R2 | **No default on accept.** The accept dialog asks only for the **targeted collection** (only those made by the button, showing the email and sub-category each gives). The sub-category is the collection's, not picked on accept (owner, 2026-10-21, replacing option A's per-accept change); one person's is changed on their invitation afterwards, as their category is. One choice covers the whole selection, so a mixed selection is no longer a case. The dialog creates nothing; a "Create targeted collection" link in it opens the same form. |
+| R3 | **The collection decides everything about the invitation:** category, channel, template, account, tier, usage type, uses, prefill, lock. `invitation_collections` gains `uses`, `prefilldata`, `lock_data`; they are edited in Collections for a targeted collection. |
+| R4 | **The request category is only the form and the applicant's emails:** basic information, form fields, email code, the holding and decline emails. The SMTP account moves up beside them, shown once in "When a request is submitted" ("also sends the rejection email"). **"Where they are invited" and "Invitation settings" go**: `target_category_id`, `target_sub_category_id`, `channel`, `sms_config_id`, `whatsapp_config_id`, `usage_type`, `uses`, `prefilldata`, `lock_data` dropped. |
+| R5 | The request categories list loses its target category column. |
+
 ## Build order
 
 Each step merges on its own.
+
+**Rework (the revision):**
+
+- **Backend.** Migration `2026_10_21_000002`: drop the R4 columns (the System Category's key first), add
+  `uses`, `prefilldata`, `lock_data` to `invitation_collections`. `GET` and `POST
+  admin/invitation-requests/targeted-collections` (list for the dialog; create, one per category,
+  `invitation_requests,update`). Accept and bulk take `invitation_collection_id` (a targeted collection)
+  and `sub_category_id`; the invitation takes everything else from the collection. The collection update
+  saves `uses`, `prefilldata`, `lock_data` for a targeted collection. `target-collection`, the
+  `collection` body and `RequestCollections::newSettings` / `startingValues` go. Tests rewritten.
+- **Admin.** The button and its form (a modal); the accept dialog rebuilt (collection, System Category,
+  the link); the request category form (two sections out, SMTP moved up); the list column out; the
+  collection edit form shows uses, prefill and lock for a targeted collection. EN + AR.
+
+**First build (kept where the revision does not replace it):**
 
 1. **Backend.**
    - Migration: drop `invitation_collection_id`, `email_template_id`, `sms_template_id` and
@@ -72,6 +101,23 @@ Each step merges on its own.
 
 ## Cases (backend tests, through HTTP)
 
+After the revision:
+
+1. Creating a targeted collection makes it with the category, channel, template, account and link
+   settings; a second one for the same category, or one without a template, is refused.
+2. The list returns only targeted collections, with the email each sends.
+3. Accepting needs a targeted collection: none, a manual one or a dignitary one is refused.
+4. The invitation takes the category, channel, template, account, tier, usage type, uses, prefill and
+   lock from the collection, and the System Category from the dialog (required when the category has a
+   list, refused when it is not that category's).
+5. A bulk files every row into the chosen collection.
+6. A template changed on the collection in Collections is what the next accept sends; its uses, prefill
+   and lock are editable there.
+7. A targeted collection's category cannot be changed; its System Category is not required.
+8. The request category saves without a target, channel or link settings.
+
+First build (replaced by the above):
+
 1. The first accept into a category with no request collection and no template is refused with
    `collection_needed`; with a template it makes the collection (type, category, channel, template,
    account, name) and files the invitation in it, sent with that template.
@@ -89,9 +135,17 @@ Each step merges on its own.
 
 - The owner deletes the two current collections in phpMyAdmin (either side of the deploy; both have 0
   invitations). If someone accepts before the new code is live, the old code makes a new "Request"
-  collection, and the new code takes it as General Registration's.
-- `php artisan migrate` (drops the four request category columns).
-- Tell the team: the first accept into each category asks for the invitation template.
+  collection; delete it too, or create the targeted collections fresh.
+- `php artisan migrate` (both migrations: the request category columns go, the collection gains its link
+  settings).
+- Create a targeted collection for each category requests are accepted into (Invitation Requests, "Create
+  targeted collection"), before the first accept. Tell the team: accepting now asks which one.
+- **What the migrations remove on production is settings, not data.** No guest, request or invitation
+  changes; the pending requests stay pending. Production's "Request" request category today (dump of
+  2026-10-19), to recreate as the General Registration targeted collection: target **General
+  Registration**, no System Category, channel **email**, invitation email **"General Registration -
+  Invitation Email"**, SMTP **"TOURISE 2027 - Request An Invitation"** (stays on the request category for
+  the holding and decline emails), **single** use, **prefill on**, **lock off**.
 
 ## Log
 
@@ -113,13 +167,42 @@ Each step merges on its own.
     dignitary collections. EN + AR.
   - **Where the build differs from the plan:** the dialog says "this category" rather than naming it; a
     mixed selection gets a one-line note that rows into a category with no collection are skipped.
+- 2026-10-21: pushed (`feat/crm-foundations` in the three apps; owner merges once the whole CRM is final).
+  The owner tried it in the browser and revised the flow: decisions R1 to R5 (targeted collections made
+  by a button, no default on accept, the collection holds the link settings, the request category only
+  the form and the applicant's emails). Also seen: the dialog showed the mixed-selection line for a single
+  request (it lost the request's category); the rework removes that line.
+- 2026-10-21: rework built, uncommitted. Backend: migration `2026_10_21_000002`;
+  `TargetedCollectionsController` (`GET` / `POST admin/invitation-requests/targeted-collections`, enabled
+  accounts only, one per category); accept and bulk take `invitation_collection_id` + `sub_category_id`
+  (absent: the collection's default); the collection update saves uses, prefill, lock for a targeted one;
+  `RequestCollections` reduced to `for`, `find`, `make`, `uses`. Tests: `RequestCollectionsTest` rewritten
+  (11), three Task 055 accept tests folded into one; 1323 pass, Pint + PHPStan clean. Admin: the "Create
+  targeted collection" button and modal (also opened from the accept dialog), the accept dialog rebuilt,
+  the request category form down to form + emails with SMTP moved up, the list's target column out,
+  uses / prefill / lock on a targeted collection's edit form, `toHideIds` on the category picker; the
+  reject confirm no longer titled "Accept" for a bulk reject (it only knew `'reject'`); 13 translation
+  keys left unused removed. `tsc`, `eslint`, `prettier`, `check:rbac` green; `yarn build` waits for the
+  owner's dev server.
+- 2026-10-21: after trying it, the owner took the sub-category out of the accept dialog: the targeted collection's
+  is given to everyone accepted into it (required on a targeted collection whose category has a list, in its
+  create form, always shown there, and its edit form; a dignitary collection still needs none). An accept
+  whose collection's sub-category no longer fits is refused, naming the collection to fix. Also: the requests
+  list in the nominations style (rounded checkboxes, icon actions, the selection card; "Move to category"
+  hidden for now), the reject confirm shows the count, the category form's tabs smaller and its Save guard
+  fixed (a double click sent two saves).
+- 2026-10-21: committed and pushed. Backend `50420d3` (the sub-category rename), `5ebe4d5` (the revision);
+  admin `0c6bdfd` (rename), `e7c864a` (category form: one save per click, compact tab), `b4abd45` (the
+  revision and the requests list). Gates: backend 1323 tests, Pint, PHPStan; admin `tsc`, `eslint`,
+  `check:rbac`, `yarn build` (built from a copy, the owner's dev server running). The owner merges
+  `feat/crm-foundations` once the CRM is final.
 
 ## Definition of Done
 
 - [ ] Code merged to `dev` in backend and admin
 - [x] EN + AR translations in the same commit
-- [ ] Quality gate green (backend `composer qa`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
+- [x] Quality gate green (backend `composer qa`; admin `yarn type-check` + `yarn build` + `yarn check:rbac`)
 - [x] The cases above covered by backend tests, through HTTP
 - [ ] Docs updated (this TASK.md, the index row)
 - [x] Mobile contract checked (admin routes only)
-- [ ] Seen working in a browser, by the owner
+- [x] Seen working in a browser, by the owner
