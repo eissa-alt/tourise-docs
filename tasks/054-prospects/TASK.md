@@ -2,7 +2,9 @@
 
 - **Status:** `in-progress`: step 1 (import and records) built 2026-10-21 on `feat/crm-foundations` and reworked
   the same night to its revision 2 (old data is reference, supporting lists, owners as text), uncommitted, not seen
-  in a browser ([STEP_1_PLAN.md](STEP_1_PLAN.md)). Before that, plan only for the CRM itself. Its build step 0 is done as Tasks 055 to 057
+  in a browser ([STEP_1_PLAN.md](STEP_1_PLAN.md)). Step 3 (inviting) built 2026-10-22
+  ([STEP_3_PLAN.md](STEP_3_PLAN.md)). Revision 3, the CRM on the system's fixed lists with the category limits
+  back, built 2026-10-24, uncommitted ([FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md), decisions 41 to 44). Before that, plan only for the CRM itself. Its build step 0 is done as Tasks 055 to 057
   (sub-categories; Company Location, Sector and Tier; targeted collections), and the plan was brought up to
   date with them on 2026-10-21. Based on the client's
   [`TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx`](../../client/CRM_PLAN_V1/TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx) (replaces v3 and v4). Points that wait on the owner or the client are under *Open*.
@@ -66,6 +68,12 @@ names and values (decision 12).
 | 36 | 10-21 | **Invitation emails record when they are delivered, opened and clicked** (was *Open* 16, A), the way nomination emails do (Task 051, `NominationEmail::recordMailtrapEvent`): three date columns on `invitation_emails`, set by the same Mailtrap webhook that sets the yes / no today. Production has 0 invitations, so nothing is lost. SMS and WhatsApp have no delivery information: their journey goes from *Sent* to *Registered*. Step 2. |
 | 37 | 10-21 | **Named "CRM", each person a "contact"** (was *Open* 17, A), the client's words (sheet *Contacts*, "CRM ID"). Menu item and page title **CRM**; one person a **contact** ("Add contact", "Import contacts"), "CRM contact" where "contact" alone could be confused with "Contact information" or "Points of contact"; Roles boxes under **CRM**; tables `crm_*` (`crm_contacts`). Arabic labels proposed with the step 1 plan. This file still says "prospect" in its older text: read it as "CRM contact". The task folder keeps its name. |
 | 38 | 10-21 | **Step 1, revision 2: old data is reference** ([STEP_1_PLAN.md](STEP_1_PLAN.md), points 1 to 9, with the owner after the team's notes). Most of a contact is kept as the files wrote it, in sixteen read-only **supporting lists**; the team works on the operational columns; the Invitation Status is moved by the system (the team sets Not Sent, In Progress, Pending); Sent Date and Sent By come from the invitation. For step 1 it overrides decisions 6 (Category is as written, not a system category), 12 (no shared keys with the guest), 20 (owners are text for now; the admin-account version and its notifications wait for step 4), 22 (**no per-admin category limits until this year's Category, step 3**: *Before release*) and 26 (Industry is as written). Built 2026-10-21. |
+| 39 | 10-22 | **The collection decides, as for requests** ([STEP_3_PLAN.md](STEP_3_PLAN.md)): a CRM invitation takes the targeted collection's category, sub-category, tier, channel, template, account and link settings. Replaces decision 33 (2) and (3). |
+| 40 | 10-22 | **Add only, or Add and send** ([STEP_3_PLAN.md](STEP_3_PLAN.md)): the contact moves to In Progress, and to Sent only when its invitation is actually sent. |
+| 41 | 10-24 | **Revision 3: a value not on the system's list refuses the file**, each cell named ([FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md)). No auto-mapping and no assumptions: only case and extra spaces are ignored ("H.E" is not "H.E.", "Saudi" is not Saudi Arabia). Replaces decision 38's supporting lists for every list the system has; restores decisions 6, 12, 22 and 26 for those fields. |
+| 42 | 10-24 | **Source List and List Provided By are the team's lists in CRM, Lists** ("Add value" back); **History / Source is fixed** to the template's 4 values. |
+| 43 | 10-24 | **Delegate, Workforce and Exhibitor wait for the client**; until then a file naming them is refused. |
+| 44 | 10-24 | **The industry list stays in code**, the system's 18, with a backend copy; the client's 21 waits for their sign-off. |
 
 ## Open
 
@@ -511,12 +519,24 @@ Each step is committed on its own on `feat/crm-foundations`; the branch merges o
   `check:rbac` and `yarn build` (from a copy) green. Not seen in a browser: needs the three migrations locally.
 - 2026-10-22: the three CRM migrations run on the local `tourise_clean` (owner's go): four empty tables, the 16 list
   value keys and the unique list index in place. Not seen in a browser yet.
+- 2026-10-22: step 3 (inviting from the CRM) planned and built ([STEP_3_PLAN.md](STEP_3_PLAN.md), decisions 39
+  and 40).
+- 2026-10-24: revision 3, the CRM on the system's fixed lists (decisions 41 to 44, the team's request of 10-22),
+  planned with the owner and built on `feat/crm-foundations`, uncommitted ([FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md)):
+  one migration (`2026_10_24_000001`, empties the CRM's test data); each list matched exactly, nothing created;
+  Sub-category under its Category, Sub-industry under its Industry; Region from the country; CRM, Lists keeps the
+  team's two lists with Add value; **the category limits are back** (decision 22). Backend `composer qa` green
+  (1,369 tests); admin type-check, ESLint, `check:rbac` and `yarn build` (from a copy) green. The seven test sets
+  rebuilt with the system's values and checked against the real rules. Migrations `2026_10_22_000002` (photo) and
+  `2026_10_24_000001` run on the local `tourise_clean` (owner's go): the CRM tables empty. Not seen in a browser.
 
 ## Before release (critical)
 
-- **No per-admin category limits in the CRM until step 3** (owner, 21 Oct; [STEP_1_PLAN.md](STEP_1_PLAN.md),
-  revision 2, point 8): everyone with a CRM box in Roles sees every contact. Tick the CRM boxes only for the CRM
-  team; tell the team at deploy; restore the limits (decision 22) when contacts get this year's Category.
+- ~~No per-admin category limits in the CRM~~: **closed by revision 3** (2026-10-24,
+  [FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md) section 4). Contacts hold a system Category, and each admin sees and
+  writes only the contacts in their own categories, as on Guests (decision 22).
+- **The team's two lists first:** after deploy, the Source List and List Provided By values go into CRM, Lists before
+  the first import (an import takes only values already there, decision 42).
 - **Upload size:** a 2,000-row import's request body can pass 1 MB (nginx's default `client_max_body_size`). Check it,
   and PHP's `post_max_size`, on the server before the first big import ([STEP_1_PLAN.md](STEP_1_PLAN.md), *Before
   deploy*).
@@ -528,5 +548,5 @@ Each step is committed on its own on `feat/crm-foundations`; the branch merges o
 - [ ] Quality gate green (backend `pint --test` + `php artisan test`; admin type-check + production build)
 - [ ] The cases above covered by backend tests, through HTTP
 - [ ] Docs updated (this TASK.md, the index row)
-- [ ] Roles: the CRM boxes ticked on the roles that need them, after deploy (the CRM team only, until the category
-  limits return: *Before release*)
+- [ ] Roles: the CRM boxes ticked on the roles that need them, after deploy (each role sees its own categories'
+  contacts, decision 22)

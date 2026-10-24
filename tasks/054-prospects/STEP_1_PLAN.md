@@ -1,6 +1,7 @@
 # Task 054, step 1: import and records (plan)
 
-- **Status:** revision 2 **built 2026-10-21**, uncommitted on `feat/crm-foundations` (backend, admin); docs
+- **Status:** **revision 3 built 2026-10-24** (the fixed lists, [FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md)), on top
+  of revision 2, which was **built 2026-10-21**, uncommitted on `feat/crm-foundations` (backend, admin); docs
   uncommitted on `main`. Backend `composer qa` green (Pint, PHPStan, 1,352 tests); admin `tsc`, ESLint (CRM files),
   `check:rbac` and `yarn build` (from a copy) green. Migrations run on the local `tourise_clean` 2026-10-22 (so no
   longer edited in place). **Not seen in a browser yet.** The sections after *Revision 2* describe what was built.
@@ -11,11 +12,13 @@
 
 ## Revision 2 (2026-10-21 evening): old data is reference
 
-> **CRITICAL (owner, 21 Oct): in step 1 the CRM has no per-admin category limits.** A contact's Category is as the
-> file wrote it, not a system category, so `admins.category_ids` cannot apply. **Everyone with a CRM box in Roles
-> sees every contact.** Give the CRM boxes only to the CRM team, and tell the team so at deploy. The limits come
-> back when each contact gets this year's (system) Category, planned with step 3. Do not release the CRM to other
-> roles before that.
+> **Revision 3 (2026-10-24) replaces the supporting lists and the old CRITICAL note.** The CRM uses the system's
+> own lists (Titles, Countries, Categories and Sub-categories, the forms' lists), matched exactly, nothing created
+> by an import (decisions 41 to 44); only Source List and List Provided By stay in CRM, Lists, kept by the team.
+> Contacts hold a system Category, so **each admin sees and writes only the contacts in their own categories**, as on
+> Guests (decision 22). See [FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md). The rest of this file describes revision 2
+> as built: where it speaks of supporting lists, values as the files wrote them, or no category scope, read
+> revision 3.
 
 **Why:** the team's notes. 20,000+ records will arrive in many batches of 2,000+, mostly bulk old data (last
 year's registrations, older lists). Last year's category, tier, industry, prefix or anything else is not this
@@ -102,7 +105,7 @@ here: as built there is no category scope at all, per the CRITICAL note and poin
   template*.
 - **Settings:** the sixteen supporting lists: add a value; switch one off only when no contact holds it; switch it
   on again.
-- **Roles:** the CRM boxes. **No per-admin category limit** (the CRITICAL note above).
+- **Roles:** the CRM boxes. Revision 2 had no per-admin category limit; revision 3 brings it back (the note above).
 - **History and audit trail** on every change.
 
 **Left for later steps:** tracking and the system status (step 2); inviting, CRM collections, "Mark as sent by
@@ -243,7 +246,8 @@ row, this year's come from the invitation.
 duplicate*), `delete`, `settings` (the lists), `record_history`, `audit_trail`. **`own` removed** with owners as
 admin accounts. Tier uses *View tier* (decision 29). `check:rbac` reads `tourise-backend`: all 41 menu links agree.
 
-**CRITICAL:** these boxes show every contact in step 1. Tick them for the CRM team only.
+Since revision 3 these boxes show only the contacts in the admin's own categories (decision 22); a Super Admin sees
+all.
 
 ## The admin API (`admin/crm`, admin-only, not part of the mobile contract)
 
@@ -327,7 +331,7 @@ admin accounts. Tier uses *View tier* (decision 29). `check:rbac` reads `tourise
 
 1. Backend: `php artisan migrate` (`2026_10_21_000003` to `000005`: four new tables, nothing else changes).
 2. A Super Admin has every CRM box; for anyone else tick the CRM boxes in Roles (and *View tier* to see Tier).
-   Every box holder sees every contact (CRITICAL note).
+   Each box holder sees the contacts in their own categories (revision 3).
 3. CRM, Imports, *Import contacts*: choose any file (or *Download template* and fill a few rows), check the
    mapping, set Source List and List Provided By as defaults if the file has no such columns, *Check the file*,
    read the summary, *Import*.
@@ -336,7 +340,8 @@ admin accounts. Tier uses *View tier* (decision 29). `check:rbac` reads `tourise
 
 ## Before deploy
 
-- **The CRITICAL note:** CRM boxes for the CRM team only; tell the team.
+- **The team's two lists:** add the Source List and List Provided By values in CRM, Lists before the first import
+  (revision 3, decision 42).
 - **Upload size:** a 2,000-row file's request body can pass 1 MB, nginx's default `client_max_body_size`; check it
   (and PHP's `post_max_size`) on the server, or split files.
 - **Roles:** the old `own` box no longer exists; nothing to untick (it was never deployed).
