@@ -134,5 +134,11 @@ What the build added to the plan, or settled on the way:
   2026-10-24), each with a "not on the list" file (`20` in the real-scenario sets, `25` in the others: "H.E",
   "Saudi", "KSA", "Delegate", "Private"…, all refused). Each build checks every list cell against the lists, and the
   checkers load the same lists into the test database.
+- **After a review (2026-10-24):** the category limits also cover an import row's CRM ID (another category's
+  reads as unknown), a contact's photo and its History. Nationality is named as the registration forms name it
+  (`nationality_name_en`: "Russian Federation", "Korea, South"), Country of Residence as the country list does
+  ("Russia"). A Sub-category or Sub-industry is read after its parent wherever the file puts it, and its column is
+  asked for only through a row whose parent has values under it. A file default not on its list is refused once.
+  A switched-off category's sub-categories are not offered. Settings counts every contact holding a value.
 - **Found in the local data:** two switched-on titles are both named "H.E.", so the sample's Title dropdown shows it
   twice and a file's "H.E." lands on the first by order. Worth tidying in Titles.
