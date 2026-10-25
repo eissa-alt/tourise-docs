@@ -134,8 +134,9 @@ view per card, and a click on a bar filters the page.
 - **Top:** the title, "Data as of", **Print report**.
 - **Filters:** the tab's own, the same as its Data view, kept in the address, so moving between Dashboard and Data
   keeps them.
-- **Figures:** the Tracking tiles (All, Not invited, Invited, Sent, Not delivered, Accepted, Registered, Confirmed,
-  Declined, Checked in), each one filtering.
+- ~~**Figures:** the Tracking tiles~~: taken off the dashboards and off both tabs' Data too (owner, 2026-10-25,
+  after seeing them); the Status filter does their work. The table's read still counts them (Tracking's tests
+  cover it), unused by the screens.
 - **One card per list,** with the count on each bar:
   - **Contacts (17):** Category, Sub-category, Tier (only with View tier), Seniority Level, Sector, Industry,
     Sub-industry, Company Location, Country of Residence, Region, Nationality, Gender, Source List, List Provided By,
