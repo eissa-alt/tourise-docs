@@ -1,7 +1,7 @@
 # Task 059: CRM Speakers tab, an import and a dashboard per tab
 
-- **Status:** `todo`: the team's requests received 2026-10-25. Questions first (one at a time), then a plan for
-  review, then code.
+- **Status:** `built, uncommitted` (2026-10-25): decisions 1 to 15 and the plan ([PLAN.md](PLAN.md)) approved; built
+  on `feat/crm-foundations` in backend and admin, gates green, not committed, not seen in a browser yet.
 - **Opened:** 2026-10-25
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -29,7 +29,15 @@
   count contacts per step; a dashboard would add the lists.
 - **Steps 4 and 5 are on hold** (owner, 2026-10-25).
 
-## Questions for the owner (to ask one at a time)
+## Answers (2026-10-25)
+
+All six questions are answered; the decisions (1 to 15) are in [PLAN.md](PLAN.md). In short: speakers are their own
+record in their own tab, one per person, with the team's sheet's fields (Session a dropdown, every field required for
+now); status is Tracking; the passport stays with the registration; one person in one tab only; boxes by tab and
+dashboard; an import per tab; dashboards like the main ones; the CRM photo in the edit form with drag and drop (the
+Guest Picture unchanged); Imtinan's edit changes on hold. The final tab names come from the owner.
+
+## Questions for the owner (as opened)
 
 1. **What is a speaker in the CRM?** A contact whose Category is Speaker, shown in its own tab (the same record,
    filtered), or its own kind of record with columns of its own (session, topic, bio…) and its own template?
@@ -56,12 +64,22 @@
 ## Log
 
 - 2026-10-25: opened from the team's requests, for a new session. Nothing decided or built.
+- 2026-10-25: the owner explained the requests and gave the team's sheet (`docs/client/CRM_PLAN_V2/Speaker_Required_Fields (2).xlsx`);
+  questions answered one at a time (decisions 1 to 15); [PLAN.md](PLAN.md) written for review, with my defaults
+  (a to g) to correct.
+- 2026-10-25: plan approved (owner: "use whatever seems fit"; the team's feedback after `testing`). Built: backend
+  (migration `2026_10_25_000002`, the speakers' columns, lists, rules, import, template, routes, two dashboard
+  reads, the boxes; "headshot" refused in imports) and admin (Contacts | Speakers | Settings, each tab Dashboard ->
+  Data, the speakers' table, window and form, the photo box with drag and drop in both forms, an import per tab
+  with its past imports, the speakers' lists in Settings, EN + AR). Gates green; the speakers' import test set
+  built and checked. Uncommitted.
 
 ## Definition of Done
 
-- [ ] Questions answered; plan written and approved
-- [ ] Code on `feat/crm-foundations` in backend and admin, then merged into `testing`
-- [ ] EN + AR translations in the same commit
-- [ ] Quality gate green (backend `composer qa`; admin type-check, `check:rbac`, `yarn build`)
-- [ ] The import test sets rebuilt if the import changes
-- [ ] Docs updated (this TASK.md, the index row)
+- [x] Questions answered; plan written and approved
+- [ ] Code on `feat/crm-foundations` in backend and admin (built, uncommitted), then merged into `testing`
+- [x] EN + AR translations (to go in the same commit)
+- [x] Quality gate green (backend `composer qa`; admin type-check, ESLint, `check:rbac`, `yarn build` from a copy)
+- [x] The import test sets: the contacts' unchanged; a speakers' set added and checked
+- [x] Docs updated (this TASK.md, PLAN.md, the index row)
+- [ ] Browser check by the owner
