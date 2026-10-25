@@ -211,4 +211,8 @@ link (Task 058); CRM steps 4 and 5; the parked fields (decision 6). **Mobile:** 
 - **The speakers' import test set:** `~/Projects/ALT/127-tourise/crm_import_tests/eissa-test-cases-speakers` (8
   files, README and PDF), built by `tools/make-crm-speakers-cases.php`, checked through the real API by
   `tools/CrmSpeakerCasesServerCheck.php`: all 8 as the README says (2026-10-25).
+- **No Speaker category for contacts** (owner, 2026-10-25, to confirm with the team): the system's Speaker category
+  and its sub-categories are left out of the contacts' Category everywhere (filter, form, bulk edit, import and its
+  sample); a contact given it is refused with "Speakers go in the Speakers tab". Moderator stays. The contacts'
+  import test sets use Category Speaker in a few rows: to rebuild once the team confirms.
 
