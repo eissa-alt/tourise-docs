@@ -74,6 +74,7 @@ names and values (decision 12).
 | 42 | 10-24 | **Source List and List Provided By are the team's lists in CRM, Lists** ("Add value" back); **History / Source is fixed** to the template's 4 values. |
 | 43 | 10-24 | **Delegate, Workforce and Exhibitor wait for the client**; until then a file naming them is refused. |
 | 44 | 10-24 | **The industry list stays in code**, the system's 18, with a backend copy; the client's 21 waits for their sign-off. |
+| 45 to 50 | 10-25 | **Step 2, Tracking** ([STEP_2_PLAN.md](STEP_2_PLAN.md)): link only, no email matching (45); the CRM ID shown in Guests and Invitations (46); notifications wait for step 4 (47); one column (48); Confirmed and Declined from the guest's attendance answer, then Checked in (49); the shorter journey In CRM → Invited → Sent → Registered → Confirmed → Checked in, the email's delivery and opening as details (50). |
 
 ## Open
 
@@ -529,6 +530,10 @@ Each step is committed on its own on `feat/crm-foundations`; the branch merges o
   (1,369 tests); admin type-check, ESLint, `check:rbac` and `yarn build` (from a copy) green. The seven test sets
   rebuilt with the system's values and checked against the real rules. Migrations `2026_10_22_000002` (photo) and
   `2026_10_24_000001` run on the local `tourise_clean` (owner's go): the CRM tables empty. Not seen in a browser.
+- 2026-10-25: step 2 (Tracking) decided with the owner (45 to 50) and built on `feat/crm-foundations`, uncommitted
+  ([STEP_2_PLAN.md](STEP_2_PLAN.md)). Migration `2026_10_25_000001` (invitation emails keep their event times and
+  bounces) run on the local `tourise_clean`. Backend `composer qa` green (1,381 tests); admin type-check, ESLint,
+  `check:rbac`, `yarn build` (from a copy) green. Not seen in a browser.
 
 ## Before release (critical)
 
