@@ -1,7 +1,8 @@
 # Task 059: CRM Speakers tab, an import and a dashboard per tab
 
-- **Status:** `built, uncommitted` (2026-10-25): decisions 1 to 15 and the plan ([PLAN.md](PLAN.md)) approved; built
-  on `feat/crm-foundations` in backend and admin, gates green, not committed, not seen in a browser yet.
+- **Status:** `pushed, not on testing` (2026-10-25): decisions 1 to 15 and the plan ([PLAN.md](PLAN.md)) approved;
+  built, committed and pushed on `feat/crm-foundations` (backend to `31c9340`, admin to `40e43e3`), gates green. Next:
+  the PRs into `testing`, then `migrate` on the testing server and the new boxes ticked in Roles.
 - **Opened:** 2026-10-25
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin
@@ -73,13 +74,20 @@ Guest Picture unchanged); Imtinan's edit changes on hold. The final tab names co
   Data, the speakers' table, window and form, the photo box with drag and drop in both forms, an import per tab
   with its past imports, the speakers' lists in Settings, EN + AR). Gates green; the speakers' import test set
   built and checked. Uncommitted.
+- 2026-10-25: after the owner's look in the browser: the Tracking tiles taken off the dashboards and both tables;
+  the charts built once per answer (they flickered); CRM Settings' lists scroll beside their values; the Speaker
+  category left out of the contacts' Category (to confirm with the team); a photo can be dropped on the window's
+  avatar too. A one-page CRM, then a one-page Dashboard / Data per tab, were tried and discarded the same day (the
+  owner keeps `/crm/data` and `/crm/speakers/data`). Committed and pushed (backend `ea3371a`, `c72e38e`,
+  `31c9340`; admin `804fb2c`, `c228efb`, `40e43e3`), with Tracking under them.
 
 ## Definition of Done
 
 - [x] Questions answered; plan written and approved
-- [ ] Code on `feat/crm-foundations` in backend and admin (built, uncommitted), then merged into `testing`
-- [x] EN + AR translations (to go in the same commit)
+- [x] Code on `feat/crm-foundations` in backend and admin, committed and pushed
+- [ ] Merged into `testing`; `migrate` on the testing server; the new boxes ticked in Roles
+- [x] EN + AR translations in the same commit
 - [x] Quality gate green (backend `composer qa`; admin type-check, ESLint, `check:rbac`, `yarn build` from a copy)
 - [x] The import test sets: the contacts' unchanged; a speakers' set added and checked
 - [x] Docs updated (this TASK.md, PLAN.md, the index row)
-- [ ] Browser check by the owner
+- [x] Browser check by the owner (2026-10-25, the fixes above)
