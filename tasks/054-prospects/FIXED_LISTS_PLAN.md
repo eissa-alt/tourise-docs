@@ -140,5 +140,9 @@ What the build added to the plan, or settled on the way:
   ("Russia"). A Sub-category or Sub-industry is read after its parent wherever the file puts it, and its column is
   asked for only through a row whose parent has values under it. A file default not on its list is refused once.
   A switched-off category's sub-categories are not offered. Settings counts every contact holding a value.
+- **2026-10-25 (owner):** CRM Settings also shows every system list **read-only** under the team's two (English and
+  Arabic names, the parent, Region for countries, a search), for whoever cleans a client's file. **CRM ID is back as
+  the sample's first column**, as in the client's v4.1: empty adds a contact, filled updates it (decision 28 stays: an
+  email already in the CRM on a row without a CRM ID is refused).
 - **Found in the local data:** two switched-on titles are both named "H.E.", so the sample's Title dropdown shows it
   twice and a file's "H.E." lands on the first by order. Worth tidying in Titles.
