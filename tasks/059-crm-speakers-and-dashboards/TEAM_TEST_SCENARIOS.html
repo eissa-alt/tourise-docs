@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>TOURISE 2027 · CRM: team test scenarios</title><style>
+@page { size: A4; margin: 16mm 16mm 17mm 16mm;
+  @bottom-left { content: "TOURISE 2027 · CRM team test scenarios"; font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: Arial, sans-serif; font-size: 7.6pt; color: #8A90A0; }
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #212121; font-size: 10.3pt; line-height: 1.55; margin: 0; }
+.head { padding-bottom: 2mm; margin-bottom: 6mm; }
+.eyebrow { font-size: 8pt; font-weight: 700; letter-spacing: 2.2px; color: #3C0DEB; text-transform: uppercase; }
+h1 { font-size: 25pt; line-height: 1.12; margin: 3mm 0 3mm 0; color: #111; letter-spacing: -.5px; font-weight: 800; }
+.sub { font-size: 11pt; color: #4A4F5A; margin: 0; }
+.meta { font-size: 8.4pt; color: #8A90A0; margin: 2.5mm 0 0 0; }
+.meta strong { color: #4A4F5A; }
+.band { display: flex; height: 3px; margin-top: 5mm; }
+.band i { flex: 1; } .band i:nth-child(1){background:#3C0DEB} .band i:nth-child(2){background:#FF0A5A}
+.band i:nth-child(3){background:#1EC8A0} .band i:nth-child(4){background:#FF9B3C}
+h2 { font-size: 14.5pt; color: #111; margin: 8mm 0 3mm 0; font-weight: 800; letter-spacing: -.2px;
+  border-bottom: 1.2px solid #D3DBE5; padding-bottom: 1.5mm; page-break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 6mm 0 2mm 0; font-weight: 700; color: #111; page-break-after: avoid; }
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin: 0 0 1.4mm 0; }
+strong { color: #111; }
+a { color: #3C0DEB; text-decoration: none; }
+.nw { white-space: nowrap; }
+code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F1F3F8;
+  border: 1px solid #E2E6EE; border-radius: 3px; padding: 0 1.2mm; overflow-wrap: anywhere; }
+.ascii { background: #F7F8FB; border: 1px solid #E2E6EE; border-radius: 2mm; padding: 3mm 4mm;
+  font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.4pt; white-space: pre-wrap;
+  color: #212121; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout { background: #F3F0FF; border-left: 3px solid #3C0DEB; border-radius: 2mm;
+  padding: 3mm 4mm; margin: 0 0 4mm 0; page-break-inside: avoid; }
+.callout.warn { background: #FFF7ED; border-left-color: #FF9B3C; }
+.callout.danger { background: #FFF1F5; border-left-color: #FF0A5A; }
+.callout p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm 0; font-size: 9.2pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th { background: #3C0DEB; color: #fff; text-align: left; font-weight: 700; padding: 2mm 2.4mm; }
+td { border-bottom: 1px solid #E2E6EE; padding: 2mm 2.4mm; vertical-align: top; overflow-wrap: break-word; }
+tr:nth-child(even) td { background: #FAFBFD; }
+.pill { display: inline-block; font-size: 7.2pt; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  padding: .5mm 2mm; border-radius: 1mm; white-space: nowrap; background: #F1F3F8; color: #5A606C; }
+.pill-critical { background: #FFE3EC; color: #C2003F; }
+.pill-high     { background: #FFEBD9; color: #B0560A; }
+.pill-medium   { background: #FFF4D6; color: #8A6100; }
+.pill-low      { background: #EFF3FF; color: #3C0DEB; }
+.pill-open     { background: #FFF1F5; color: #C2003F; }
+.pill-decision { background: #FFF7ED; color: #9A5B0A; }
+.pill-partial  { background: #FFF4D6; color: #8A6100; }
+.pill-fixed, .pill-closed, .pill-verified { background: #E3F8F1; color: #0E7A5F; }
+.pill-code, .pill-ops { background: #F3F0FF; color: #3C0DEB; }
+</style></head><body><div class="head"><div class="eyebrow">CRM</div><h1>CRM: team test scenarios</h1><p class="sub">Everything on feat/crm-foundations, now on testing: what to test and what each step should show</p><p class="meta">Server: <strong>testing</strong> &nbsp;·&nbsp; Date: <strong>2026-10-26</strong></p><div class="band"><i></i><i></i><i></i><i></i></div></div>
+<p>Everything below is on the <strong>testing server</strong> now (the <code>feat/crm-foundations</code> work: the CRM with Tracking, Speakers and the dashboards, and the changes around it in Categories, Invitation Requests, Invitations, Guests and the registration forms). Test with your own test inboxes only, and note anything that does not match the <strong>Expected</strong> column (a screenshot helps).</p>
+<p><strong>Your test files</strong> (one set each, with its own README and PDF):</p>
+<table><thead><tr><th>Tester</th><th>Contacts</th><th>Speakers</th></tr></thead><tbody><tr><td>Eissa</td><td><code>eissa-test-cases-real-scenarios</code></td><td><code>eissa-test-cases-speakers</code></td></tr><tr><td>Rawand</td><td><code>rawand-test-cases-real-scenarios.zip</code></td><td><code>rawand-test-cases-speakers.zip</code></td></tr><tr><td>Imtinan</td><td><code>imtinan-test-cases-real-scenarios.zip</code></td><td><code>imtinan-test-cases-speakers.zip</code></td></tr></tbody></table>
+<p>No address is shared between testers, so everyone can import into the same CRM.</p>
+<p><strong>Before you start (once, by an admin):</strong></p>
+<ol><li><strong>CRM, Settings:</strong> add the Source List and List Provided By values your README lists. A contacts file that names a value not on the list is refused.</li><li><strong>Roles:</strong> for any role other than Super Admin, tick the CRM boxes it needs: View, Create, Update, Delete, Invite, View dashboard (Contacts), and the speakers' ones (View speakers, Add and import speakers, Edit speakers, Delete speakers, Invite speakers, View speakers dashboard).</li></ol>
+<h2>1. Tabs and pages</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>1.1</td><td>Open <strong>CRM</strong> from the sidebar</td><td>The tabs <strong>Contacts, Speakers, Settings</strong>; Contacts opens on its <strong>Dashboard</strong>. No Imports tab.</td></tr><tr><td>1.2</td><td>Click <strong>Data</strong>, then <strong>Dashboard</strong></td><td>The table, then the charts. Filters set on one stay on the other.</td></tr><tr><td>1.3</td><td>Open <strong>Speakers</strong></td><td>Its own Dashboard and Data, with the speakers' columns and filters only.</td></tr><tr><td>1.4</td><td>Log in with a role that has only the speakers' boxes</td><td>Only the Speakers tab (and Settings if ticked); the Contacts pages are not reachable.</td></tr></tbody></table>
+<h2>2. Contacts: add, edit and lists</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>2.1</td><td><strong>Add contact</strong> with a required field empty</td><td>Refused, each field named; required fields are marked as in the client's sheet. Email or Mobile: one is enough.</td></tr><tr><td>2.2</td><td>Pick a <strong>Category</strong></td><td>Its <strong>Sub-category</strong> is asked only when it has some, and offers only those under it. Industry and Sub-industry the same.</td></tr><tr><td>2.3</td><td>Pick a <strong>Country of Residence</strong></td><td><strong>Region</strong> fills itself (MENA, Europe...).</td></tr><tr><td>2.4</td><td>Every list field (Title, Nationality, Sector, Seniority, Tier...)</td><td>A dropdown of the system's own values, the same as on Guests. Tier only for a role with <strong>View tier</strong>.</td></tr><tr><td>2.5</td><td>Edit a cell in the table, or a field in the contact's window</td><td>Saved in place; a wrong value refused with the reason.</td></tr><tr><td>2.6</td><td><strong>Columns</strong></td><td>Hide and show columns; kept for you.</td></tr><tr><td>2.7</td><td><strong>Edit selected</strong> (bulk) on a few contacts</td><td>One change to all; those the rules stop are listed with the reason.</td></tr><tr><td>2.8</td><td>A role limited to some categories</td><td>Sees and edits only those categories' contacts; another category is refused.</td></tr><tr><td>2.9</td><td><strong>History</strong> in a contact's window; <strong>Audit trail</strong> on the page</td><td>Each change, who and when.</td></tr></tbody></table>
+<h2>3. Contacts import (CRM, Contacts, Data, Import contacts)</h2>
+<p>Follow your <strong>real-scenarios README</strong>, file by file. The points that changed recently:</p>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>3.1</td><td>Import <code>01</code> and <code>02</code> first</td><td>Clean, then imported (8 each). They show in Contacts, never in Speakers.</td></tr><tr><td>3.2</td><td>Check <code>03-speakers-programme</code></td><td><strong>Refused</strong>: "Speakers go in the Speakers tab, not in Contacts." on each Speaker row (one message per row); the Moderator row is fine. Nothing imported.</td></tr><tr><td>3.3</td><td>Check <code>20-not-on-the-list</code></td><td>16 problems, one per row, each naming the cell; row 15 says "Speakers go in the Speakers tab".</td></tr><tr><td>3.4</td><td>Choose <code>17-pdpl-columns</code></td><td>Refused on the page: passport, ID, date of birth and photo (or headshot) columns are never imported.</td></tr><tr><td>3.5</td><td>Any value written differently from the list ("Saudi", "H.E" without the dot)</td><td>Refused, naming the cell. Only upper/lower case and extra spaces are ignored.</td></tr><tr><td>3.6</td><td>Below the import form</td><td>The <strong>past imports</strong> of Contacts only.</td></tr></tbody></table>
+<h2>4. Speakers import (CRM, Speakers, Data, Import speakers)</h2>
+<p>Follow your <strong>speakers README</strong> in order (01 to 08), into a CRM with no speakers yet.</p>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>4.1</td><td><code>01-happy-path</code>: Check, then Import</td><td>6 speakers added, Status <strong>Not Sent</strong>, shown in Speakers only.</td></tr><tr><td>4.2</td><td><code>02</code> to <code>05</code></td><td>Each refused as the README says: missing cells (every column is required for now), values not on the lists, repeats, an email already in the CRM.</td></tr><tr><td>4.3</td><td><code>06-update-by-crm-id</code></td><td>2 speakers updated; the empty cells change nothing.</td></tr><tr><td>4.4</td><td><code>07</code> and <code>08</code>: the team's own Speaker Required Fields sheet</td><td>07 refused on the page (headshot, Passport); 08 refused because <strong>Speaker</strong> is one name: the sample has First Name and Last Name.</td></tr><tr><td>4.5</td><td><strong>Download sample</strong></td><td>The speakers' template: every heading dark blue, dropdowns for Day, Pillar, Session, Type, Gender, Country, Continent and Official invite to be sent by (the system's Titles).</td></tr></tbody></table>
+<h2>5. Dashboards (both tabs)</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>5.1</td><td>Open each tab's Dashboard after importing</td><td>One card per dropdown list with the counts (Contacts: Category, Sub-category, Tier, Seniority, Sector, Industry, Country, Region, Nationality, Gender, Source List, Channel, Clearance and the rest; Speakers: Day, Pillar, Session, Type, Gender, Country, Continent, Official invite). No tiles.</td></tr><tr><td>5.2</td><td>Switch <strong>Chart / Table</strong></td><td>The same numbers as bars, then as a table with shares.</td></tr><tr><td>5.3</td><td>Click a bar</td><td>The page filters to that value; click it again to lift it. <strong>Data</strong> then shows the same contacts.</td></tr><tr><td>5.4</td><td>Apply a filter (e.g. Tier 1)</td><td>Every card counts only those.</td></tr><tr><td>5.5</td><td>Watch the page load</td><td>The charts draw once, no flicker.</td></tr><tr><td>5.6</td><td><strong>Print report</strong></td><td>A clean landscape report of the cards.</td></tr></tbody></table>
+<h2>6. Speakers: table, window and form</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>6.1</td><td>Speakers, Data</td><td>The sheet's columns in its order (Day, Pillar, Session, Keyword, Type, Option #, First and Last Name, ...).</td></tr><tr><td>6.2</td><td>Filters</td><td>Search, Day, Pillar, Session, Type, Status always shown; more under <strong>+ Add filter</strong>.</td></tr><tr><td>6.3</td><td>Edit a cell in the table</td><td>Saved in place; a wrong value is refused with the reason.</td></tr><tr><td>6.4</td><td>Open a speaker (the eye)</td><td>Cards: Session, Speaker, Invitation, Contact person, Profile, History.</td></tr><tr><td>6.5</td><td><strong>Add speaker</strong> with a field empty</td><td>Refused: every field is required for now, each named.</td></tr><tr><td>6.6</td><td>Edit selected (bulk)</td><td>Status, the two owners, or any of the speakers' lists, for many at once.</td></tr></tbody></table>
+<h2>7. Photo, with drag and drop</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>7.1</td><td>Edit a contact or a speaker, drop an image on <strong>Photo</strong></td><td>Uploaded at once; it shows in the form and the window.</td></tr><tr><td>7.2</td><td>Open the window, drop an image on the <strong>round photo</strong></td><td>Uploaded; a blue ring while dragging.</td></tr><tr><td>7.3</td><td><strong>Add</strong> a contact or speaker with a photo dropped</td><td>The photo is saved right after the record.</td></tr><tr><td>7.4</td><td>Drop a PDF, or an image over 5 MB</td><td>Refused with a message; JPG, PNG and WebP only.</td></tr></tbody></table>
+<h2>8. One person, one place</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>8.1</td><td>Add a speaker with an email already on a contact</td><td>Refused: "This email is already on CRM contact C-...".</td></tr><tr><td>8.2</td><td>Add a contact with an email already on a speaker</td><td>Refused: "This email is already on CRM speaker C-...".</td></tr><tr><td>8.3</td><td>Contacts: Category filter, form and bulk edit</td><td>No <strong>Speaker</strong> category (speakers have their own tab). Moderator is still there for now.</td></tr><tr><td>8.4</td><td>Same name, other email, in either tab</td><td>Saved, marked as a possible duplicate.</td></tr></tbody></table>
+<h2>9. Tracking and Invite (both tabs)</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>9.1</td><td><strong>Create targeted collection</strong>, then tick records and <strong>Invite</strong> (Add and send)</td><td>The Status column moves to <strong>Invited</strong>, then <strong>Sent</strong> once the email goes.</td></tr><tr><td>9.2</td><td>Register with the invitation's link (your test inbox)</td><td>Status <strong>Registered</strong>.</td></tr><tr><td>9.3</td><td>Answer "Will you attend?" yes / no</td><td><strong>Confirmed</strong> / <strong>Declined</strong>.</td></tr><tr><td>9.4</td><td>Check the guest in at the event</td><td><strong>Checked in</strong>.</td></tr><tr><td>9.5</td><td>Open the record's window</td><td>The journey with each step's date; the email's delivery and opening under Sent.</td></tr><tr><td>9.6</td><td>Guests and Invitations</td><td>The guest or invitation shows <strong>CRM C-...</strong>, opening the contact or speaker.</td></tr><tr><td>9.7</td><td>Status filter; "sent, not opened after N days"; "sent, not registered"</td><td>Each finds the right records.</td></tr></tbody></table>
+<h2>10. Settings</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>10.1</td><td>CRM, Settings</td><td>Source List and List Provided By (add, switch off); below, the system's lists read-only, then the speakers' lists read-only.</td></tr><tr><td>10.2</td><td>Click a list low down</td><td>Its values open beside it, in view; the list of lists scrolls on its own.</td></tr></tbody></table>
+<h2>11. Sub-categories (Categories)</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>11.1</td><td>Categories, a category's <strong>Sub-categories</strong></td><td>Add, rename, switch on and off; one save per click.</td></tr><tr><td>11.2</td><td>Guests, Invitations, Invitation Requests</td><td>Each record carries its Sub-category beside its Category; lists, filters and exports show it.</td></tr><tr><td>11.3</td><td>The main <strong>Dashboard</strong></td><td>Filters by Sub-category, and splits a category by its sub-categories.</td></tr></tbody></table>
+<h2>12. Invitation Requests and targeted collections</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>12.1</td><td><strong>Accept</strong> a request</td><td>You pick the <strong>targeted collection</strong> it goes into (one request collection per category); the invitation lands there.</td></tr><tr><td>12.2</td><td>Create a targeted collection, then try to change its sub-category, tier or link settings</td><td>Locked once made: the collection decides them for every invitation in it.</td></tr><tr><td>12.3</td><td>Open an accepted request's (or a CRM) invitation link</td><td>The registration form opens.</td></tr></tbody></table>
+<h2>13. Invitations</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>13.1</td><td>A collection's page</td><td>A bulk bar as on the other modules; <strong>Select all matching</strong> ticks every invitation the filters find.</td></tr><tr><td>13.2</td><td>An invitation made from the CRM</td><td>Shows <strong>CRM C-...</strong>, opening the contact or speaker.</td></tr></tbody></table>
+<h2>14. Guests and the registration forms</h2>
+<table><thead><tr><th>#</th><th>Do</th><th>Expected</th></tr></thead><tbody><tr><td>14.1</td><td>Guests: add, edit, list, filters</td><td><strong>Company Location</strong> (Local / International), <strong>Sector</strong> (Public / Private) and <strong>Tier</strong> (with View tier only).</td></tr><tr><td>14.2</td><td>The public registration form (frontend)</td><td>Company Location and Sector asked as <strong>dropdowns</strong>, not radio buttons; saved on the guest.</td></tr></tbody></table>
+<h2>Not in this round</h2>
+<ul><li><strong>Save the Date</strong> (two columns) and <strong>Follow Up Status</strong>: parked, waiting for the client and the team.</li><li><strong>Moderator</strong> in the contacts' Category: still allowed; to confirm with the team.</li><li><strong>Imtinan's edit-form changes</strong>: on hold.</li><li>CRM steps 4 (activities, reminders, notifications) and 5 (export): on hold.</li></ul>
+</body></html>
