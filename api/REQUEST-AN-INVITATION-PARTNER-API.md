@@ -156,7 +156,7 @@ says so. No other fields are accepted — anything not on this list is ignored.
 | `404` | No category at that slug. |
 | `410` | The category exists but is closed. |
 | `409` | That address is already on file — nothing new created. `reason` is `already_registered` (already a guest) or `already_requested` (an earlier request, whatever its outcome). |
-| `422` | Validation failed — `errors` names the fields. |
+| `422` | Validation failed — `errors` names the fields. A missing or wrong email code answers `reason: otp_invalid` (section 3). |
 | `429` | Rate limited (60/min per key). |
 
 `409` is an answer to show the applicant, not a fault to retry: tell them the
@@ -165,32 +165,49 @@ checked against both the guest list and every earlier request, so one person is
 never in the queue twice. `duplicate` in the `201` body is always `false` and
 kept only so existing integrations do not break.
 
-## 3. Email OTP
+## 3. Email code
 
-A request category can ask the applicant to type back a code emailed to the
-address they entered (`with_email_otp`, set per category in the admin and
-reported by the field list).
+A request category can ask the applicant to prove their address with a code we
+email them (`with_email_otp`, set per category in the admin and reported by the
+field list). It applies on a partner's form too: when the category asks for it,
+a request filed with a key and no valid code is refused.
 
-**It applies to our own form only.** `InvitationRequestsController@createRequest`
-checks the code when `with_email_otp && ! $fromPartner` — a request carrying a
-key skips it, whatever the category says, and an `otp_token` sent with a key is
-ignored. The key is the trust; a partner's server has no inbox of the
-applicant's to read.
+**On a partner's form**, with the key:
 
-On our form:
+1. `POST /api/request-an-invitation/{slug}/send-code` with `{email, lang}`
+   (`lang` is `en` or `ar`, `en` if left out). We email the applicant a
+   **6-digit code**, with no link: they type it into your form. The code goes
+   from us to their inbox only; no response carries it.
 
-1. `POST /api/guests/email-verification` — `{email, recaptcha}` emails an
-   8-character code and replaces any live code for that address.
-2. `POST /api/guests/email-confirmation` — `{token, recaptcha}` answers
-   `200 {status: success, token}` or `404 {error: "wrong token"}`.
-3. The request is posted with `otp_token`, checked against **the address it was
-   sent to**, so a code obtained for one address cannot file under another.
-4. Filing spends every code for that address (`email_verifications` row
-   deleted). A second request needs a fresh code.
+   | Code | Meaning |
+   |---|---|
+   | `200` | Sent. `{"status": "success", "data": {"otp_required": true}}`. `otp_required` says whether filing will ask for the code: a category with the check off still sends one if asked. |
+   | `409` | The address is already on file (`reason` `already_registered` or `already_requested`). Answered before any email is spent. |
+   | `429` | `reason: cooldown`, with `retry_after` in seconds: a code went to this address less than a minute ago, and nothing was sent. The per-key limit above answers `429` too. |
+   | `404`, `410`, `422` | As for filing. |
 
-Both OTP calls require reCAPTCHA and share the site-wide `sensitive-api`
-ceiling of 300/min. A partner who wants the same proof on their own form needs
-a reCAPTCHA site key registered for their domain — ours is not.
+2. File the request (section 2) with what the applicant typed as `otp_token`.
+   Spaces and dashes are ignored: "482 913" is "482913".
+3. A wrong, expired, used or locked code answers `422` with
+   `reason: otp_invalid`, and nothing is filed.
+
+The code:
+
+- fits only **the address it was sent to**: a code obtained for one address
+  cannot file under another;
+- lasts **10 minutes**;
+- allows **5 wrong tries**; after that it is dead and a new one is needed;
+- goes out at most **once a minute** per address; asking again after that
+  replaces the live code;
+- is spent by filing: a second request needs a fresh code.
+
+**On our own form** the same email also carries a "Verify email" button (the
+magic link). Whichever the applicant uses first proves the address, and the form
+then submits a one-time ticket instead of the code. A partner's applicant never
+sees the button. Our form's calls (`POST /api/guests/email-verification`,
+`POST /api/guests/email-confirmation`, `GET /api/guests/verify-email`,
+`GET /api/guests/email-verification/status`) serve our own pages and are not
+part of this API.
 
 ## 4. After the request is filed
 
