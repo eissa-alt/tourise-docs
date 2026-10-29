@@ -71,12 +71,25 @@ forwards a link.
   applies through **`GuestAccessScope::apply()`**, the query twin of `denies()`. ⚠️ That rule now
   lives in **three** places (`GuestsController::applyAdminGuestAccessFilter`, `DashboardStatsController`,
   `GuestAccessScope`) — change all three together.
-- **The registration-code field survives only for an invitation tied to no dignitary** (e.g. one made
-  by hand on the Invitations screen). Through the dignitary's invitations it is never asked.
+- **Name only, from the invitation** (owner, 2026-10-29; supersedes the manual fallback).
+  Delegation, Security and Protocol show the dignitary's name as read-only text in the form and
+  review. Neither the name nor registration code is entered by the registrant. An ordinary
+  invitation with no dignitary link has no accompanying block; reopening an existing registration
+  preserves and displays its saved name. The server still records the registration code internally.
 - **Sidebar:** *Invitation Requests* is its own item beside *Invitations*, no longer a submenu
   (owner); both, and *Dignitary Parties*, sit in Overview.
 
 ## Log
+
+- 2026-10-29 — frontend `84b1efe`, backend tests `339d78c`, merged and pushed to `testing`.
+  Removed the manual name/code inputs, their prompt, the registration-code display and the
+  accompanying section's review Edit link. All three role forms share this implementation.
+  No backend runtime change: the invitation already supplies and enforces the dignitary.
+  Expanded tests across Delegation, Security and Protocol: invitation metadata, registration
+  without manual fields, posted values overridden, and admin-created party invitations.
+  `DignitaryPartiesTest`: **26 pass, 117 assertions**; Pint, frontend type check, targeted ESLint
+  and production build passed (existing build warnings remain). Rendered the actual accompanying
+  section and verified the name appears without inputs, registration code or manual-entry prompt.
 
 - 2026-09-21 — backend `ea4844b` — migration `2026_09_21_000002`, `App\Services\DignitaryParty`,
   `party_invites` on the public store, `invited_by` on verify-invitation, `{{ dignitary_name }}`,
