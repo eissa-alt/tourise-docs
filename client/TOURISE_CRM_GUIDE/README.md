@@ -4,6 +4,10 @@
 `TOURISE_CRM_GUIDE.pdf` whenever it changes. The guide includes the latest
 CRM work merged into `testing`, including Eissa's changes through 29 October.
 
+The dashboard now shows current status tiles without an In CRM tile or filter
+option. The Invitation funnel panel was removed. Total contacts still includes
+every contact, and old In CRM filter links are cleared when opened.
+
 This revision covers:
 
 - Added for an invitation created but not sent; Sent only after sending.
@@ -22,7 +26,10 @@ Screenshots predate this revision; the guide explicitly identifies this.
 Current text and the replacement cases table take precedence over old labels
 in screenshots. A new screenshot capture is still needed to refresh the images.
 
-Verified against admin `7ce52e6` and backend `ce6e14e` on `testing`.
+The initial edition was verified against admin `7ce52e6` and backend
+`ce6e14e` on `testing`. The dashboard follow-up is admin `916c47b`: build,
+ESLint, type checking and RBAC validation passed; eight saved-filter cases
+and a rendered component preview were checked.
 The backend change adds three regression tests; no runtime registration change
 was needed. The focused suite passed 66 tests / 555 assertions with debug on
 and off. Admin type checking, RBAC validation and the production build passed.
