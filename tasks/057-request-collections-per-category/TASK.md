@@ -1,7 +1,9 @@
 # Task 057: Request collections per category
 
-- **Status:** `in-progress`: revised (R1 to R5) and pushed on `feat/crm-foundations` (backend, admin), seen by
-  the owner in a browser on their local copy (2026-10-21). Merged with the rest of the CRM work. See *Log*.
+- **Status:** `done`: revised (R1 to R5), seen by the owner (2026-10-21), merged into `testing` 2026-10-22 with
+  `feat/crm-foundations` (backend PRs #72 to #75, admin #68 to #71). On `main` since 2026-10-27 (`crm/to-main`: backend PR #86, admin #80, frontend #31) and live on production since the 2026-10-29 release (backend `bd169df`). Several targeted
+  collections per category, each with its own name, came 2026-10-27 (`feat/targeted-collection-name`, backend PR #93,
+  admin #88). See *Log*.
 - **Opened:** 2026-10-21
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin

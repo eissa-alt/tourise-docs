@@ -1,7 +1,7 @@
 # Task 056: Company Location, Sector and Tier on the guest
 
-- **Status:** `in-progress`: built on `feat/crm-foundations` in all three apps, committed locally, not
-  pushed, not seen in a browser yet (2026-10-20). See *Log*.
+- **Status:** `done`: merged into `testing` 2026-10-22 with `feat/crm-foundations` (backend PRs #72 to #75, admin
+  #68 to #71, frontend #21). On `main` since 2026-10-27 (`crm/to-main`: backend PR #86, admin #80, frontend #31) and live on production since the 2026-10-29 release (backend `bd169df`). Built 2026-10-20; see *Log*.
 - **Opened:** 2026-10-20
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin + frontend (the public forms)

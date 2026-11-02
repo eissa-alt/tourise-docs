@@ -200,7 +200,7 @@ imported**: the Tier on *Contacts* is what lands, and the CRM admin records the 
 | # | Date | Decision |
 |---|---|---|
 | 17 | 10-19 | **Only the CRM channel sends from the system.** For H.E.'s Office, MOFA, Royal Court, Other Ministries and Relationship Owner, the invitation goes out elsewhere and is **recorded** in the CRM (status, sent date, sent by). A recorded invitation stops the CRM sending its own, until the team marks the person *Accepted* (decision 30). |
-| 18 | 10-19 | **Clearance gates sending.** H.E.'s Office needs *Approved* before the status can move to *Sent*; *Not Required* is refused for that channel; *Not Submitted* and *Pending* block any send; *Not Approved* blocks it and shows "escalate to Fahad". Enforced on the server, in bulk too. |
+| 18 | 10-19 | **Clearance gates sending.** H.E.'s Office needs *Approved* before the status can move to *Sent*; *Not Required* is refused for that channel; *Not Submitted* and *Pending* block any send; *Not Approved* blocks it and shows "escalate to Fahad". Enforced on the server, in bulk too. **Changed:** an empty clearance does not block (owner, 2026-10-28); the H.E.'s Office parts are dropped (owner, 2026-11-01: H.E.'s Office is a channel like the others, any clearance allowed). *Not Submitted*, *Pending* and *Not Approved* still block CRM Invite. |
 | 19 | 10-19 | **Invitation Status follows the system where the system knows** (replaces open 2 of v3): *Sent* is set when the CRM sends; a manual channel sets *Sent* with date and sender; *Accepted* / *Declined* per decision 30. *In Progress* and *Pending* stay the team's. |
 
 The **Status Definitions** sheet's wording is shown as help beside each value.

@@ -1,8 +1,9 @@
 # Task 059: CRM Speakers tab, an import and a dashboard per tab
 
-- **Status:** `pushed, not on testing` (2026-10-25): decisions 1 to 15 and the plan ([PLAN.md](PLAN.md)) approved;
-  built, committed and pushed on `feat/crm-foundations` (backend to `31c9340`, admin to `40e43e3`), gates green. Next:
-  the PRs into `testing`, then `migrate` on the testing server and the new boxes ticked in Roles.
+- **Status:** `done`: decisions 1 to 15 and the plan ([PLAN.md](PLAN.md)) approved; built on `feat/crm-foundations`
+  (backend to `31c9340`, admin to `40e43e3`), merged into `testing` 2026-10-25 and 2026-10-26 (backend PRs #76 to #79,
+  admin #72 to #74). On `main` since 2026-10-27 (`crm/to-main`: backend PR #86, admin #80, frontend #31) and live on production since the 2026-10-29 release (backend `bd169df`). Since 2026-10-27 speakers are Speaker-category contacts on the
+  Contacts tab too (Imtinan's master dashboard, backend PR #85, admin #79).
 - **Opened:** 2026-10-25
 - **Owner:** unassigned
 - **Sub-app(s):** backend + admin

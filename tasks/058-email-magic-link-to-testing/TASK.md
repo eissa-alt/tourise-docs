@@ -1,7 +1,9 @@
 # Task 058: The email magic link, merged onto testing
 
-- **Status:** `in-progress`: merge branches made and pushed 2026-10-25 (see *Branches*); the merge itself is
-  Imtinan's, with the open questions below. Nothing merged into `testing` yet.
+- **Status:** `done` (merged; the open questions below not re-checked since): merged into `testing` 2026-10-26
+  (`merge/email-magic-link`: backend PR #80, admin #75, frontend #22, then frontend #29), into `main` 2026-10-27
+  (`magic-link/to-main`: backend #89, admin #83, frontend #33), live on production since the 2026-10-29 release
+  (backend `bd169df`).
 - **Opened:** 2026-10-25
 - **Owner:** Imtinan (the merge and the questions), Eissa (review, the PR into `testing`)
 - **Sub-app(s):** backend + admin + frontend
