@@ -103,6 +103,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 061 | [london-reception](061-london-reception/TASK.md) | done (Imtinan): on `main` 2026-10-26 to 28, live. The London Reception category and RSVP form, its own yes/no question kept apart from attendance, and a temporary RSVP dashboard behind its own Roles box. Recorded from her commits, to check by her. |
 | 062 | [industry-list-final](062-industry-list-final/TASK.md) | done: on `main` 2026-10-29, live. The team's final industry list in the three apps: four renamed (keys kept), three new industries, International Organizations under 13 more. Arabic drafts to check by the team. |
 | 063 | [admin-tab-titles](063-admin-tab-titles/TASK.md) | in-progress: on `testing` 2026-11-02 (admin PR #126), not on `main` yet. Each admin tab names its section ("Tourise \| Guests", "Tourise \| Emails · Templates") from the sidebar's names, in the admin's language; all 179 pages covered. |
+| 064 | [email-template-bulk-tests](064-email-template-bulk-tests/TASK.md) | in-progress: pushed on `feat/email-templates-bulk-test` (backend `232bacd`, admin `a374841`, 2026-11-02), PRs into `testing` next. Tick email templates and send tests in English, Arabic or both to several team members in one click; queued, admins only, 50 templates and 10 people a click. |
 
 _Add a row per task as you open it; newest at the bottom._
 
