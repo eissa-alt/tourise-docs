@@ -1,19 +1,21 @@
 # Task 054: CRM (contacts we may invite; called Prospects until 2026-10-21)
 
-- **Status:** `in-progress`: step 1 (import and records) built 2026-10-21 on `feat/crm-foundations` and reworked
-  the same night to its revision 2 (old data is reference, supporting lists, owners as text), uncommitted, not seen
-  in a browser ([STEP_1_PLAN.md](STEP_1_PLAN.md)). Step 3 (inviting) built 2026-10-22
-  ([STEP_3_PLAN.md](STEP_3_PLAN.md)). Revision 3, the CRM on the system's fixed lists with the category limits
-  back, built 2026-10-24, uncommitted ([FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md), decisions 41 to 44). Before that, plan only for the CRM itself. Its build step 0 is done as Tasks 055 to 057
-  (sub-categories; Company Location, Sector and Tier; targeted collections), and the plan was brought up to
-  date with them on 2026-10-21. Based on the client's
-  [`TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx`](../../client/CRM_PLAN_V1/TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx) (replaces v3 and v4). Points that wait on the owner or the client are under *Open*.
+- **Status:** `in-progress`, **live on production**: steps 1 to 3 and 5 (import and records, Tracking, inviting,
+  export), the Activity Log, the team's fixes of 28 and 29 October and the 1 to 2 November changes are on `main`
+  and deployed (the 2026-10-29 release, backend `bd169df`; the 2026-11-02 deploy, migrations to
+  `2026_11_02_000001`). Step 4 (notifications) in part: follow-up bells (decision 56). What was built after
+  2026-10-25 is under *Log* and decisions 51 to 71; the plans ([STEP_1_PLAN.md](STEP_1_PLAN.md),
+  [STEP_2_PLAN.md](STEP_2_PLAN.md), [STEP_3_PLAN.md](STEP_3_PLAN.md), [FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md))
+  are as built then. *Open* was not re-checked after 2026-10-25. Imtinan's entries were written from her commits,
+  for her to check. Based on the client's
+  [`TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx`](../../client/CRM_PLAN_V1/TOURISE_CRM_Fields_and_Import_Template_v4.1.xlsx),
+  then the team's FINAL template (28 columns, 2026-10-28). The client-facing guide is
+  [`client/TOURISE_CRM_GUIDE`](../../client/TOURISE_CRM_GUIDE/README.md) (Imtinan, to 2026-10-29).
 - **Opened:** 2026-10-13
-- **Owner:** unassigned
-- **Sub-app(s):** backend + admin
-- **Branch(es):** `feat/crm-foundations` in `tourise-backend` + `tourise-admin` (+ `tourise-frontend`), the
-  branch Tasks 055 to 057 are on. The owner merges it once, when the whole CRM is final (2026-10-21);
-  `origin/dev` is merged into it whenever `dev` moves.
+- **Owner:** Eissa and Imtinan
+- **Sub-app(s):** backend + admin (+ frontend for the registration's side)
+- **Branch(es):** `feat/crm-foundations` (to 2026-10-26), `crm-foundations-2` (2026-10-26 and 27), then one branch
+  per change from `testing` (named in the *Log*); `testing` into `main` per release. `dev` is no longer used.
 
 ## Goal
 
@@ -75,6 +77,27 @@ names and values (decision 12).
 | 43 | 10-24 | **Delegate, Workforce and Exhibitor wait for the client**; until then a file naming them is refused. |
 | 44 | 10-24 | **The industry list stays in code**, the system's 18, with a backend copy; the client's 21 waits for their sign-off. |
 | 45 to 50 | 10-25 | **Step 2, Tracking** ([STEP_2_PLAN.md](STEP_2_PLAN.md)): link only, no email matching (45); the CRM ID shown in Guests and Invitations (46); notifications wait for step 4 (47); one column (48); Confirmed and Declined from the guest's attendance answer, then Checked in (49); the shorter journey In CRM → Invited → Sent → Registered → Confirmed → Checked in, the email's delivery and opening as details (50). |
+| 51 | 10-26 | **A title in use cannot be deleted**: Titles get Delete, refused with what uses the title (guests, invitations, drafts, nominees, CRM contacts), as Guest Statuses. |
+| 52 | 10-27 | **Speakers are Speaker-category contacts** (Imtinan's master dashboard, the owner's "all will be contact"): their own columns move to `crm_speaker_details`; the kind follows the category. Replaces Task 059's separate records. |
+| 53 | 10-27 | **The CRM reads the whole system** (Imtinan): everyone invited, requesting, registering or imported in Guests is one linked contact, matched by link or email (reverses 45); a registration updates the contact (the guest wins). |
+| 54 | 10-27 | **Several targeted collections per category**, each with a unique name the admin types (Task 057). |
+| 55 | 10-27 | **Activity Log, first version**: type, outcome, date, notes and a next reminder; no On Behalf Of, import or reminders yet. Files on an entry since 10-29 (5 files, 5 MB each). |
+| 56 | 10-27 | **Follow-up bells** (Imtinan): a bell beside a contact that needs following up, a daily check, settings in CRM Settings. The system's own lines stay out of the admin bell (owner). |
+| 57 | 10-28 | **A request enters the CRM only once accepted** (Imtinan), with a one-time cleanup in CRM Settings. |
+| 58 | 10-28 | **The FINAL template** (the team): 28 columns in its order, required headings red; the contacts import **only adds** (an email already there is refused, naming who added it); 5,000 rows a file; Received By gone; List Provided By typed. |
+| 59 | 10-28 | **Export** of the ticked or filtered rows, in the import's columns (own Export boxes), and an **Export log** of every export in the system. |
+| 60 | 10-28 | **A contact is changed through Edit**, with a confirmation listing the changes; no editing in the table; See more read only (the team). Partly reversed by 68. |
+| 61 | 10-29 | **Partial import**: the good rows go in, the rest come back as an Excel with an Import problems column; red cells can be fixed and rows deleted in the preview. |
+| 62 | 10-29 | **Update contacts by import**, by CRM ID, from the Export's file; an empty cell changes nothing; own box. |
+| 63 | 10-29 | **Delete is Archive** (the client): an archived contact keeps its email; a file meeting it says to bring it back (a Bring back button in the preview); a new registration, invitation or accepted request brings it back by itself (the team chose A); Delete permanently from the Archive page. |
+| 64 | 10-29 | **A CRM ID is never given again**, even after Delete permanently; contacts and speakers share one numbering (`last_crm_number`). |
+| 65 | 10-29 | **History / Source and Source List (File Name) are typed** (revert by migration if the client asks); an import keeps a Relationship Owner who is no admin as written (B). Replaces 42. |
+| 66 | 11-01 | **Point of Contact** (Imtinan): an admin who takes over the owner's notifications and the own-contacts scope; Relationship Owner is plain text. Replaces 20 and the owner part of 65. |
+| 67 | 11-01 | **Dignitary parties in the CRM** (Imtinan): members linked to their dignitary, the dignitary chosen per person on Invite, an optional Dignitary column in the import ([Task 039](../039-dignitary-parties/TASK.md)). |
+| 68 | 11-01 | **Edit in See more** back behind its own boxes (`quick_edit`, `speakers_quick_edit`, with Update): the pencils and the photo upload. |
+| 69 | 11-01 | **H.E.'s Office is a channel like the others**: its clearance rule is dropped (see 18); the dashboard's clearance card counts every contact. |
+| 70 | 11-01 | **Invitation Channel is the team's list in CRM Settings** (the client): the six channels its first values, with an Arabic name, more added by the team; contacts keep holding a code; CRM locked on. |
+| 71 | 11-01 | **Manually Sent**: the team may set Sent when the channel is not CRM (decision 19's manual send, back). |
 
 ## Open
 
@@ -535,16 +558,55 @@ Each step is committed on its own on `feat/crm-foundations`; the branch merges o
   bounces) run on the local `tourise_clean`. Backend `composer qa` green (1,381 tests); admin type-check, ESLint,
   `check:rbac`, `yarn build` (from a copy) green. Not seen in a browser.
 
+- 2026-10-26: Titles Delete (decision 51, backend PR #79, admin #74), the last of `feat/crm-foundations`; the
+  CRM continues on `crm-foundations-2`. Urgent multiple-use invitation fix on `main` ([Task 043](../043-guest-list-is-the-quantity/TASK.md)).
+- 2026-10-27 (Imtinan): the master dashboard and speakers as Speaker-category contacts (52; backend PR #85, admin
+  #79), Relationship Owner from the admins and the dashboard as donuts, bars and lines (#88, #82), **the CRM reads
+  the whole system** (53; #90, #86), follow-up bells and statuses (56; #91, #87), Guests links open the table
+  (#92), fewer dashboard cards (admin #90). The CRM went to `main` (`crm/to-main`, backend #86, admin #80).
+- 2026-10-27 (Eissa): Activity Log (55) and the edit form laid out as See more (on `crm-foundations-2`, backend
+  #87, admin #81 and #84); targeted collection names (54; backend #93, admin #88); bell gaps (backend #94, admin
+  #89: texts, system lines out of the bell, one History line per activity).
+- 2026-10-28 (Eissa): Export (59; backend #96, admin #92) and the Export log (backend #98, admin #94); the team's
+  first list of fixes on `feat/crm-fixes-improvements` (backend #100 then #110, admin #100 then #108): the FINAL
+  template (58), 5,000 rows, the sample's Sub-category following its Category in Excel, Source List renamed, Email
+  required, Received By and inline table editing gone, Edit with a confirmation (60), the popup before the
+  sample, "added by" on a refused email, the record's origin in History.
+- 2026-10-28 (Imtinan): requests enter only once accepted and the cleanup (57; backend #106, #108, admin #106),
+  Total contacts and the bell's tip (admin #95).
+- 2026-10-29 (Eissa, `feat/crm-fixes-improvements` and `-2`, backend #110, #113 to #117, admin #108, #111 to #116):
+  partial import and fixing in the preview (61), Update contacts (62), Activity Log files, Archive (63), CRM ID
+  never reused (64), preview polish (problem rows orange, fixed cells green, Delete a row with a confirmation),
+  owner kept as written, History / Source and Source List typed (65), the labels in messages (backend #119).
+- 2026-10-29 (Imtinan): the dashboard's tracking step from 115 s to 0.4 s at 1,000 contacts (backend #111, index
+  migration `2026_10_29_000005`), the form's dropdowns no longer clipped (admin #109), the funnel and the In CRM filter
+  removed and "Invited" read "Added" (on `testing` directly).
+- 2026-10-29: **release** to `main` (`release/crm-2026-10-29`: backend #116, admin #115; frontend #39), then the
+  evening's follow-ups (backend #117 to #122, admin #116 to #119, frontend #40 and #41), and **production** (backend
+  `bd169df` with 8 migrations, then the evening's `main`). The final industry list
+  the same evening ([Task 062](../062-industry-list-final/TASK.md)).
+- 2026-11-01 (Imtinan): Point of Contact (66) and dignitary parties in the CRM (67): backend #123 to #127, admin
+  #120 to #122; migrations `2026_11_01_000001` (Point of Contact, moves each owner link to it, drops
+  `relationship_owner_id`), `100001`, `200001`, `200002`.
+- 2026-11-02 (Eissa, `feat/crm-tasks-2026-11-01`, backend #128, admin #124): Edit in See more (68), H.E.'s Office
+  (69), Invitation Channel in Settings (70; migration `2026_11_02_000001`, reversible: contacts on a channel added
+  in Settings lose it), Manually Sent (71). `testing` into `main` (backend #129, admin #125); **deployed** the same
+  day (5 migrations).
+
 ## Before release (critical)
 
 - ~~No per-admin category limits in the CRM~~: **closed by revision 3** (2026-10-24,
   [FIXED_LISTS_PLAN.md](FIXED_LISTS_PLAN.md) section 4). Contacts hold a system Category, and each admin sees and
   writes only the contacts in their own categories, as on Guests (decision 22).
-- **The team's two lists first:** after deploy, the Source List and List Provided By values go into CRM, Lists before
-  the first import (an import takes only values already there, decision 42).
-- **Upload size:** a 2,000-row import's request body can pass 1 MB (nginx's default `client_max_body_size`). Check it,
-  and PHP's `post_max_size`, on the server before the first big import ([STEP_1_PLAN.md](STEP_1_PLAN.md), *Before
-  deploy*).
+- ~~The team's two lists first~~: **gone**, Source List and List Provided By are typed (decisions 58 and 65).
+  Instead, a **new Invitation Channel** goes into CRM Settings before a file names it (decision 70).
+- **Upload size:** a 5,000-row import's request body passes 1 MB (nginx's default `client_max_body_size`); 5,000
+  rows took about 22 seconds to check and 23 to import on the test database. Check nginx, PHP's `post_max_size`,
+  `max_execution_time` and memory with a real file before the first big import ([STEP_1_PLAN.md](STEP_1_PLAN.md),
+  *Before deploy*).
+- **Roles after each deploy:** the new boxes start unticked: Export and Speakers export (59), the Archive's view
+  and delete for both tabs (63), Update contacts by import (62), Edit in See more for both tabs (68), and Export
+  log's view and export (feature `export_logs`).
 
 ## Definition of Done
 

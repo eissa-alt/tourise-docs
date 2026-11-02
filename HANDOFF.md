@@ -3,7 +3,51 @@
 > Rolling pointer, overwritten each session. For the durable record see the per-task `TASK.md`,
 > `decisions/LEDGER.md`, and `upgrades/UPGRADE_SUMMARY.md`. Full plan: `upgrades/CYAN_FEATURE_PARITY_MASTER_PLAN.md`.
 
-**2026-10-19 (latest): security wave 1 and the pentest fixes merged to `dev` and `main` and deployed;
+**2026-11-02 (latest): the CRM is live; `testing` = `main` (backend, admin); production deployed 2026-10-29 and
+2026-11-02.** This entry covers 2026-10-20 to 2026-11-02, the gap after the 2026-10-19 entry below, written on
+2026-11-02 from `git log` in the three apps (both authors). Imtinan's items were written from her commits, for her
+to check.
+
+- **Branches now:** `testing` (the team checks there) and `main` (production). `dev` is no longer used (191 commits
+  behind `main` in the backend). New work: a branch from `testing` (`--no-track`, first push `-u`), a PR into
+  `testing`, then `testing` into `main`. PRs are opened from plain compare links, never `gh`.
+- **State (2026-11-02):** backend `main` `c051c28` and admin `main` `aaa6fa4`, each the same content as `testing`.
+  Frontend `main` `85b93e0`; its `testing` is one commit ahead (Imtinan's dignitary form success page, `a4b4025`).
+- **Production:** backend released 2026-10-29 (`bd169df` with 8 migrations, then that evening's `main`) and
+  2026-11-02 (`c051c28`, 5 migrations: `2026_11_01_000001`, `100001`, `200001`, `200002`, `2026_11_02_000001`),
+  then `config:cache`, `route:cache`, `queue:restart`. The `env()` fix (PR #69) is on `main`, so `config:cache` is
+  safe now. Admin built on 2026-11-01 (Arial); the 2026-11-02 admin build was under way. The servers' GitHub token
+  lives in each repo's remote URL (renewed 2026-11-01; the backend's set as `www-data`).
+- **What shipped, by task:** [055](tasks/055-system-categories/TASK.md) sub-categories,
+  [056](tasks/056-company-location-sector-tier/TASK.md) Company Location, Sector and Tier,
+  [057](tasks/057-request-collections-per-category/TASK.md) targeted collections (named, several per category since
+  10-27); [054](tasks/054-prospects/TASK.md) **the CRM**: import and records, Tracking, Invite, export, Activity Log,
+  the team's fixes (FINAL template, partial and update import, Archive, CRM ID never reused, typed fields), Point of
+  Contact, dignitary parties, Edit in See more, Invitation Channel in Settings, Manually Sent (decisions 51 to 71,
+  the Log); [058](tasks/058-email-magic-link-to-testing/TASK.md) the email magic link;
+  [059](tasks/059-crm-speakers-and-dashboards/TASK.md) CRM speakers and dashboards;
+  [061](tasks/061-london-reception/TASK.md) London Reception (Imtinan); [062](tasks/062-industry-list-final/TASK.md)
+  the final industry list; small fixes noted in [043](tasks/043-guest-list-is-the-quantity/TASK.md) (multiple-use
+  invitations), [034](tasks/034-tourise-form-shapes/TASK.md) (Passport Copy images only, ID Type and the consent form,
+  the social channels picker back), [049](tasks/049-system-email-templates/TASK.md) (Arial) and
+  [039](tasks/039-dignitary-parties/TASK.md) (dignitary parties in the CRM).
+- **Roles after deploy (new boxes start unticked):** Titles delete; CRM Export and Speakers export; the Archive's
+  view and delete (both tabs); Update contacts by import; Edit in See more (both tabs); Export log view and export;
+  London Reception dashboard.
+- **Open:**
+  - **Imtinan:** check the entries written from her commits (054 decisions 52, 53, 56, 57, 66, 67; 060; 061); her
+    unmerged branches: `feat/sub-events` ([060](tasks/060-sub-events/TASK.md)), and from 19 and 20 Oct
+    `feat/guest-live-status` (backend 3, admin 40 commits), `feat/guest-profile` (admin 35),
+    `feat/admin-forms-ui` (admin 13), `feat/party-invite-fields` (backend 1): still wanted or dropped?
+  - **The team:** the Arabic drafts of the new industry names (062); the 1 to 2 Nov WhatsApp update.
+  - Frontend: the dignitary success page to `main` when wanted.
+  - `SocialChannelsTest`: 10 failures, test-only (its reCAPTCHA fake answers without a score).
+  - Test files outside the repo (`~/Projects/ALT/127-tourise/crm_imports_test`): the v2 sets write the four old
+    industry names; the free-text sets need a rebuild for Point of Contact and the channel list.
+  - Not re-checked: 054's *Open* (since 10-25), 058's open questions.
+  - The 19 Oct entry's *Open* is closed: PHPStan is green on `main` (checked 2026-11-02).
+
+**2026-10-19: security wave 1 and the pentest fixes merged to `dev` and `main` and deployed;
 production backend confirmed on `969b2fd`; `config:cache` made safe; a backend deploy list.** Status review with
 the owner, one item at a time; items 1 to 4 done.
 

@@ -155,6 +155,11 @@ code.
   stopped before resolving anything (nothing committed). The owner's call: Imtinan does the merge. Branches
   `merge/email-magic-link` made from `origin/testing` and pushed in all three apps; her branch untouched. The plan
   and questions 1 and 2 were sent to her on WhatsApp.
+- 2026-10-26: merged into `testing` (`merge/email-magic-link`: backend PR #80, admin #75, frontend #22, then #29).
+- 2026-10-27: the CRM went to `main` with the magic link **reverted** (`crm/to-main`), then the revert was reverted
+  and the magic link reached `main` too (`magic-link/to-main`: backend #89, admin #83, frontend #33) (Imtinan).
+  The code screen lost its Paste code button and its link line the same day (`fix/code-screen-no-paste-no-link`,
+  frontend #32, Imtinan). Live since the 2026-10-29 release.
 
 ## Definition of Done
 

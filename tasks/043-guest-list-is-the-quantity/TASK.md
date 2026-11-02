@@ -104,6 +104,11 @@ difference: pep hid the Multiple usage type, and tourise keeps it.
   its own `onChange`, which react-hook-form runs before it publishes the value, so the other mode never
   shows while the dialog is open.
 - 2026-09-27: still open from the list above: the form's orphaned **edit** mode.
+- 2026-10-26: **urgent fix (Eissa).** Creating a **multiple-use** collection had failed since 2026-09-23: the
+  store rule asked for `guests_list` on every usage type, and a shared link sends none. `exclude_if:usage_type,multiple`
+  in front of the rule, plus a test (`fix/multiple-use-invitation`, backend PR #82 into `main`, then into `testing`
+  with the main backport the same day). Live since the same day (backend pull, no migration). Not done: a hand-made
+  multiple-use request with a malformed `guests_list` answers 500 instead of 422 (not reachable from the admin).
 
 ## Decisions
 

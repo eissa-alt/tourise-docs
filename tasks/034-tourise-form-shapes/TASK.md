@@ -70,6 +70,13 @@ been saved against the old values, so no data migration was needed.
   `tourise_private` added). Checked the dev DB first — **0 categories** referenced either old
   value, so nothing had to be migrated. Public is listed above Private in the category dropdown.
   Gates re-run green after the rename.
+- 2026-10-27: **Passport Copy takes images only (Eissa).** The onboarding upload (speaker form, complete data)
+  offered PDF for Passport Copy, which the registration refuses ("invalid extension"); the owner chose no PDF, so
+  the field asks for an image (`fix/passport-copy-no-pdf`, frontend PR #34, one line). Live since 2026-10-29.
+- 2026-10-28: **Speaker and Moderator ask ID Type and agree to the Speaker / Moderator Consent Form (Imtinan;
+  to check by Imtinan).** `feat/owner-batch-1028` (backend PR #101, admin #101, frontend #36), with the admin's
+  speaker and moderator forms. The **social channels picker** came back with its backend the same day
+  (`merge/social-channels-2026-10-28`, backend PR #103, admin #103, frontend #38). Both live since 2026-10-29.
 
 ## Field map (what reuses what)
 

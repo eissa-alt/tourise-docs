@@ -105,6 +105,14 @@ forwards a link.
 - All pushed to `dev`. Verified locally with Playwright on each screen; the dignitary's own submit
   could not be driven in a browser locally (reCAPTCHA) and is covered over HTTP by the tests.
 - Flow walkthrough with screenshots, for the team: https://claude.ai/artifact/PSJaN91D7zzhWcoR1tQcLm
+- 2026-11-01: **dignitary parties reach the CRM (Imtinan; to check by Imtinan).** A Delegation, Security or
+  Protocol contact is linked to its dignitary contact (its party role follows its category), the CRM invite asks
+  the dignitary per person, Dignitary Parties shows the people invited from the CRM and the party size, resend is
+  by email only, and the CRM import takes an optional Dignitary column (by CRM ID or email, never by name). Backend
+  PRs #123 to #127, admin #120 to #122; migrations `2026_11_01_100001`, `200001`, `200002`. See Task 054, decision 67.
+  On `main` and live on production since 2026-11-02.
+- 2026-11-01: the dignitary form's success page says who was already in the system and is in the party (frontend
+  `a4b4025`, PR #42, Imtinan): on `testing` only, **not on `main`**.
 
 ## Open
 

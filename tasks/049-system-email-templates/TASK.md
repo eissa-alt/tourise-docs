@@ -38,6 +38,11 @@ became rows in `email_templates` and open in the same Waypoint builder as every 
 - 2026-09-12 — backend `c92ab56`, admin `1f0ee8e`. Both committed on `dev`, **not pushed**.
   Backend was re-committed after pulling a teammate's `f6e49ac` (equipment Word form); zero file
   overlap, gates re-run on the merged tree.
+- 2026-09-13 (recorded late): **Helvetica** font option in the email builder (admin `caf96e3`): the library knows
+  nine font names, so a tenth rides on the block wrapper and on the document shell's save pass.
+- 2026-11-01: **Arial** font option the same way (admin `a7f8fe2`, `hotfix/email-editor-arial` from `main`: PR #123
+  into `main`, merged into `testing` directly as `6862fca` on the owner's word). Shows as ARIAL in every Font Family
+  picker (document, text, heading, button): Arial, then Helvetica, then any sans-serif.
 
 ## Decisions
 
