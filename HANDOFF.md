@@ -32,7 +32,7 @@ to check.
   the social channels picker back), [049](tasks/049-system-email-templates/TASK.md) (Arial) and
   [039](tasks/039-dignitary-parties/TASK.md) (dignitary parties in the CRM).
 - **After the deploy, 2026-11-02:** [063](tasks/063-admin-tab-titles/TASK.md) each admin tab names its section
-  (admin `80508ff` on `feat/admin-tab-titles`, not pushed yet).
+  (admin PR #126 into `testing`, not on `main` yet).
 - **Roles after deploy (new boxes start unticked):** Titles delete; CRM Export and Speakers export; the Archive's
   view and delete (both tabs); Update contacts by import; Edit in See more (both tabs); Export log view and export;
   London Reception dashboard.

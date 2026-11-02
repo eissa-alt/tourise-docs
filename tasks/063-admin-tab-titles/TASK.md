@@ -1,7 +1,6 @@
 # Task 063: Admin tab titles
 
-- **Status:** `in-progress`: built and committed on `feat/admin-tab-titles` (admin `80508ff`, 2026-11-02), not
-  pushed yet.
+- **Status:** `in-progress`: merged into `testing` 2026-11-02 (admin PR #126, `55722e0`), not on `main` yet.
 - **Opened:** 2026-11-02
 - **Owner:** Eissa
 - **Sub-app(s):** admin
@@ -33,6 +32,7 @@ to name its section: "Tourise | Templates", "Tourise | Guests" and so on.
 ## Log
 
 - 2026-11-02: asked, built, type-check and ESLint green, committed (admin `80508ff`).
+- 2026-11-02: merged into `testing` (admin PR #126, `55722e0`). Next: `testing` into `main`, then the admin build.
 
 ## Open
 
@@ -42,7 +42,8 @@ to name its section: "Tourise | Templates", "Tourise | Guests" and so on.
 
 ## Definition of Done
 
-- [ ] Merged into `testing`, then `main`
+- [x] Merged into `testing`
+- [ ] Merged into `main`
 - [x] EN + AR translations in the same commit
 - [x] Type-check and ESLint green
 - [ ] This TASK.md set to `done`; the index row updated

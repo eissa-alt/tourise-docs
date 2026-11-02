@@ -102,7 +102,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 060 | [sub-events](060-sub-events/TASK.md) | in-progress (Imtinan): built on `feat/sub-events` in the three apps 2026-11-01, **not merged**. Sub-events with their own invitations, capacity and waitlist, a public RSVP page, Events in the CRM and on the guest, sends in the Email Logs, a London Reception import. Recorded from her commits, to check by her. |
 | 061 | [london-reception](061-london-reception/TASK.md) | done (Imtinan): on `main` 2026-10-26 to 28, live. The London Reception category and RSVP form, its own yes/no question kept apart from attendance, and a temporary RSVP dashboard behind its own Roles box. Recorded from her commits, to check by her. |
 | 062 | [industry-list-final](062-industry-list-final/TASK.md) | done: on `main` 2026-10-29, live. The team's final industry list in the three apps: four renamed (keys kept), three new industries, International Organizations under 13 more. Arabic drafts to check by the team. |
-| 063 | [admin-tab-titles](063-admin-tab-titles/TASK.md) | in-progress: committed on `feat/admin-tab-titles` (admin `80508ff`, 2026-11-02), not pushed. Each admin tab names its section ("Tourise \| Guests", "Tourise \| Emails · Templates") from the sidebar's names, in the admin's language; all 179 pages covered. |
+| 063 | [admin-tab-titles](063-admin-tab-titles/TASK.md) | in-progress: on `testing` 2026-11-02 (admin PR #126), not on `main` yet. Each admin tab names its section ("Tourise \| Guests", "Tourise \| Emails · Templates") from the sidebar's names, in the admin's language; all 179 pages covered. |
 
 _Add a row per task as you open it; newest at the bottom._
 
