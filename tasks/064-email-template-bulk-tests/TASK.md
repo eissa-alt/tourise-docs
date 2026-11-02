@@ -1,7 +1,6 @@
 # Task 064: Email template tests in bulk
 
-- **Status:** `in-progress`: committed and pushed on `feat/email-templates-bulk-test` (backend `232bacd`, admin
-  `a374841`, 2026-11-02); the PRs into `testing` are next.
+- **Status:** `in-progress`: merged into `testing` 2026-11-02 (backend PR #130, admin PR #127), not on `main` yet.
 - **Opened:** 2026-11-02
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -35,6 +34,8 @@ address a click. Make a test of many templates, in both languages, for several t
   the 10 known `SocialChannelsTest` failures, test-only). `TestEmailStaysInTheTeamTest` now 9 tests: the team-only
   checks through the new request, many at once (8 emails), one outsider stops all, the limits, the recipients.
   Admin: type-check and ESLint green. EN + AR (9 texts). Committed and pushed: backend `232bacd`, admin `a374841`.
+- 2026-11-02: merged into `testing` (backend PR #130, `150d375`; admin PR #127, `eaf1b73`). On the testing server:
+  backend pull, `route:cache`, `queue:restart` (new routes, no migration); admin build.
 
 ## Open
 
@@ -43,7 +44,8 @@ address a click. Make a test of many templates, in both languages, for several t
 
 ## Definition of Done
 
-- [ ] Merged into `testing`, then `main`
+- [x] Merged into `testing`
+- [ ] Merged into `main`
 - [x] EN + AR translations in the same commit
 - [x] Quality gate green (backend Pint, PHPStan, tests; admin type-check and ESLint)
 - [ ] Browser check by the owner
