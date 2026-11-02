@@ -104,6 +104,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 062 | [industry-list-final](062-industry-list-final/TASK.md) | done: on `main` 2026-10-29, live. The team's final industry list in the three apps: four renamed (keys kept), three new industries, International Organizations under 13 more. Arabic drafts to check by the team. |
 | 063 | [admin-tab-titles](063-admin-tab-titles/TASK.md) | in-progress: on `testing` 2026-11-02 (admin PR #126), not on `main` yet. Each admin tab names its section ("Tourise \| Guests", "Tourise \| Emails · Templates") from the sidebar's names, in the admin's language; all 179 pages covered. |
 | 064 | [email-template-bulk-tests](064-email-template-bulk-tests/TASK.md) | in-progress: on `testing` 2026-11-02 (backend PR #130, admin PR #127), not on `main` yet. Tick email templates and send tests in English, Arabic or both to several team members in one click; queued, admins only, 50 templates and 10 people a click. |
+| 065 | [close-registration](065-close-registration/TASK.md) | in-progress: pushed 2026-11-03 on `feat/close-registration` (backend `af69a68`, admin `ed19e0f`, frontend `cae2f89`), not on `testing` yet. A Registration Open / Closed switch on every category with its own closed message (EN + AR); closed, its links show the message and the server takes no registration. |
 
 _Add a row per task as you open it; newest at the bottom._
 

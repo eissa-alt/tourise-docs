@@ -35,6 +35,9 @@ to check.
   (admin PR #126 into `testing`, not on `main` yet).
   [064](tasks/064-email-template-bulk-tests/TASK.md) email template tests in bulk (backend + admin on
   backend PR #130 and admin PR #127 into `testing`, not on `main` yet).
+- **2026-11-03:** [065](tasks/065-close-registration/TASK.md) close registration per category (switch + EN/AR
+  message, for London Reception first); `feat/close-registration` pushed in backend `af69a68`, admin `ed19e0f`,
+  frontend `cae2f89`, not on `testing` yet. Deploy: migrate in the same line as the backend pull.
 - **Roles after deploy (new boxes start unticked):** Titles delete; CRM Export and Speakers export; the Archive's
   view and delete (both tabs); Update contacts by import; Edit in See more (both tabs); Export log view and export;
   London Reception dashboard.
