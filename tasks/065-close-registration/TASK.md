@@ -1,11 +1,12 @@
 # Task 065: Close registration per category
 
-- **Status:** `in-progress`: pushed 2026-11-03 on `feat/close-registration` (backend `af69a68`, admin `ed19e0f`,
-  frontend `cae2f89`), not merged into `testing` yet.
+- **Status:** `in-progress`: merged into `testing` 2026-11-03; for `main`, the same commits copied onto
+  `feat/close-registration-main` (backend `901e436`, admin `76f2dfa`, frontend `a6614a7`), PRs pending.
 - **Opened:** 2026-11-03
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin + frontend
-- **Branch(es):** `feat/close-registration` in `tourise-backend`, `tourise-admin` and `tourise-frontend` (from `testing`)
+- **Branch(es):** `feat/close-registration` in `tourise-backend`, `tourise-admin` and `tourise-frontend` (from `testing`);
+  `feat/close-registration-main` in the same three (from `main`, the commits copied with `cherry-pick -x`)
 
 ## Goal
 
@@ -54,6 +55,11 @@ plus the message per category.
   ESLint and Prettier green. EN + AR in the same change (admin 6 texts, frontend 2, backend 1).
 - 2026-11-03: the owner's browser check: message boxes only while Closed; the team asked for no title over their
   message. Committed and pushed: backend `af69a68`, admin `ed19e0f`, frontend `cae2f89`.
+- 2026-11-03: merged into `testing` by the owner. For production, only this task goes to `main` (owner's choice
+  over testing into main, which would also carry 063, 064, Imtinan's dignitary success page `a4b4025` and the
+  sub-events merge and its revert): `feat/close-registration-main` from `main`, the three commits copied (backend
+  `901e436`, admin `76f2dfa`, frontend `a6614a7`), each applied cleanly; backend Pint, PHPStan and the full suite,
+  admin and frontend type-check and ESLint, rerun on the copies.
 
 ## Open
 
@@ -63,7 +69,7 @@ plus the message per category.
 - **Deploy order matters:** run the migration right after the backend pull, in one line
   (`git pull && php artisan migrate --force`). Until it runs, the column is missing, the code reads it as empty and
   every category shows as Closed. A stricter check (only a category set to Closed is closed) was offered, not taken
-  before the push. No new routes, so no `route:cache`. Then the admin and frontend builds. Then, on production: open
+  before the push. No new routes, so no `route:cache` for this task alone. Then the admin and frontend builds. Then, on production: open
   the London Reception category, switch Registration to Closed, write the two messages, save.
 
 ## Definition of Done
