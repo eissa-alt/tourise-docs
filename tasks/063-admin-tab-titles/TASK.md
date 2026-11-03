@@ -1,7 +1,7 @@
 # Task 063: Admin tab titles
 
-- **Status:** `in-progress`: on `testing` and `main` 2026-11-03 (admin PR #135, testing into main), production
-  deploy next.
+- **Status:** `in-progress`: on `testing`, `main` and production 2026-11-04 (admin PR #135, testing into main);
+  `done` after the owner's look in the browser.
 - **Opened:** 2026-11-02
 - **Owner:** Eissa
 - **Sub-app(s):** admin
@@ -35,7 +35,8 @@ to name its section: "Tourise | Templates", "Tourise | Guests" and so on.
 - 2026-11-02: asked, built, type-check and ESLint green, committed (admin `80508ff`).
 - 2026-11-02: merged into `testing` (admin PR #126, `55722e0`). Next: `testing` into `main`, then the admin build.
 
-- 2026-11-03: `testing` into `main` (admin PR #135, `ec23120`); main equals testing. Production deploy next.
+- 2026-11-03: `testing` into `main` (admin PR #135, `ec23120`); main equals testing.
+- 2026-11-04: deployed to production (admin `b555755..df92c8b`, built and restarted).
 
 ## Open
 

@@ -1,7 +1,7 @@
 # Task 066: Social channels minimum per form
 
-- **Status:** `in-progress`: pushed 2026-11-04 on `fix/social-channels-minimum` (backend `17970ff`, admin `4c7a67f`,
-  frontend `3ac8efc`), PRs into `testing` next.
+- **Status:** `in-progress`: on `testing`, `main` and production 2026-11-04; `done` after the owner's browser check
+  (Speaker / Moderator take one channel, every other form asking for them needs two).
 - **Opened:** 2026-11-04
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin + frontend
@@ -32,14 +32,22 @@ next morning: "Only speakers and moderators must add at least 1, the rest of the
   for speaker and moderator, and its fake reCAPTCHA answer carries a score, which ends the 10 to 11 long-standing
   403 failures (test-only). Admin and frontend: type-check, ESLint, Prettier green. EN + AR: 2 texts per app.
 
+- 2026-11-04: committed and pushed (backend `17970ff`, admin `4c7a67f`, frontend `3ac8efc`); merged into
+  `testing` (backend PR #140, admin PR #138, frontend PR #52), after Imtinan's `fix/photo-errors-clear` (backend
+  PR #139, frontend PR #51: a refused photo or document on submit says which and why). Rechecked together on
+  testing: backend full suite 1,740 passed, none failing; admin and frontend type-check green. `testing` into `main`
+  (backend PR #141, admin PR #139, frontend PR #53); main equals testing. Deployed to production: backend
+  `fb09c0d..6a35e1e` + `queue:restart`, admin `df92c8b..a01f7aa`, frontend `d2c8358..bbe5fd1`, built and
+  restarted; her photo and document errors went live with it.
+
 ## Open
 
-- Deploy: no migration, no routes. Backend pull; admin and frontend builds.
+- The owner's browser check on production.
 
 ## Definition of Done
 
-- [ ] Merged into `testing`
-- [ ] Merged into `main`
+- [x] Merged into `testing`
+- [x] Merged into `main`
 - [x] EN + AR translations in the same commit
 - [x] Quality gate green (backend Pint, PHPStan, tests; admin and frontend type-check, ESLint)
 - [ ] Browser check by the owner

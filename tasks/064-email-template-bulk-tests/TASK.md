@@ -1,7 +1,7 @@
 # Task 064: Email template tests in bulk
 
-- **Status:** `in-progress`: on `testing` and `main` 2026-11-03 (backend PR #134, admin PR #135, testing into
-  main), production deploy next (`route:cache`, `queue:restart`).
+- **Status:** `in-progress`: on `testing`, `main` and production 2026-11-04 (backend PR #134, admin PR #135,
+  testing into main); `done` after the owner's browser check.
 - **Opened:** 2026-11-02
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -39,7 +39,8 @@ address a click. Make a test of many templates, in both languages, for several t
   backend pull, `route:cache`, `queue:restart` (new routes, no migration); admin build.
 
 - 2026-11-03: `testing` into `main` (backend PR #134 `5f28298`, admin PR #135 `ec23120`); main equals testing.
-  Production deploy next: backend pull, `route:cache`, `queue:restart`; admin build.
+- 2026-11-04: deployed to production: backend `11ad858..fb09c0d`, then `config:clear`, `route:clear`,
+  `cache:clear`, `queue:restart` (no migration); admin `b555755..df92c8b`, built and restarted.
 
 ## Open
 
