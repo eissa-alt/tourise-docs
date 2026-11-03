@@ -46,6 +46,12 @@ to check.
   on `testing`, `main` (backend PR #141, admin PR #139, frontend PR #53) and production 2026-11-04, together with
   Imtinan's `fix/photo-errors-clear` (refused photo or document says which and why). Production = main = testing:
   backend `6a35e1e`, admin `a01f7aa`, frontend `bbe5fd1` (testing's own merge ids differ, same code).
+- **2026-11-04:** [067](tasks/067-crm-speakers-import/TASK.md) CRM Speakers import on the team's new template
+  (Speaker as media name, Tier, Passport Number kept, add-only with an Update speakers import) and sessions as a list
+  the team keeps in CRM Settings, a speaker holding several session lines (Session, Type, Option #). Built on
+  `feat/crm-speakers-import`, gates green, pushed (backend `8407580`, admin `422c95c`); 3 migrations
+  (`2026_11_04_000001` to `000003`) run only on the owner's local database; new box **Update speakers by import**;
+  test files in `crm_imports_test/crm_speakers_tests`. Next: the owner's browser check, then PRs into `testing`.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
