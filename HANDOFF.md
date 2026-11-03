@@ -39,6 +39,16 @@ to check.
   message, for London Reception first); on `testing` and `main` 2026-11-03 (main alone via
   `feat/close-registration-main`: backend PR #135, admin PR #133, frontend PR #47); deployed to production
   2026-11-03 (with Imtinan's admin sub-filters fix, PR #131).
+- **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
+  before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
+  Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
+  admin `19d127b`, frontend `b045e6e`; code identical to before, testing into main checked to merge with no
+  conflict. Old testing kept as `backup/testing-2026-11-03` (backend `bce5b37`, admin `607192c`, frontend
+  `2cc1665`). **Never merge** anything made from the old testing (the backup, `feat/close-registration`,
+  `fix/extract-choose-sender`); a machine with the old testing resets (`git fetch origin && git reset --hard
+  origin/testing`), never `git pull`. Done on GitHub, the owner's machine and the testing server (its admin
+  `yarn.lock`, regenerated on the server, was dropped); Imtinan's machine next. Her `sub-events` branches are
+  untouched and now merge normally, no revert-the-revert.
 - **Roles after deploy (new boxes start unticked):** Titles delete; CRM Export and Speakers export; the Archive's
   view and delete (both tabs); Update contacts by import; Edit in See more (both tabs); Export log view and export;
   London Reception dashboard.

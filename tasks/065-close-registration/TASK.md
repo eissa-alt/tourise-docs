@@ -68,6 +68,10 @@ plus the message per category.
   before); both built and restarted. Still on `testing` only: 063, 064 and Imtinan's dignitary success page
   `a4b4025` (frontend).
 
+- 2026-11-03: `testing` rebuilt without Imtinan's sub-events merge and its revert (see HANDOFF): this task's
+  commits on the new testing are backend `c2d204b`, admin `c390d56`, frontend `b045e6e` (copies of `af69a68`,
+  `ed19e0f`, `cae2f89`); the old `feat/close-registration` branches carry the old history and must not be merged.
+
 ## Open
 
 - **Overlap with Imtinan's sub-events branch** ([060](../060-sub-events/TASK.md)): it has its own London closed
