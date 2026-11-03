@@ -1,6 +1,7 @@
 # Task 063: Admin tab titles
 
-- **Status:** `in-progress`: merged into `testing` 2026-11-02 (admin PR #126, `55722e0`), not on `main` yet.
+- **Status:** `in-progress`: on `testing` and `main` 2026-11-03 (admin PR #135, testing into main), production
+  deploy next.
 - **Opened:** 2026-11-02
 - **Owner:** Eissa
 - **Sub-app(s):** admin
@@ -34,6 +35,8 @@ to name its section: "Tourise | Templates", "Tourise | Guests" and so on.
 - 2026-11-02: asked, built, type-check and ESLint green, committed (admin `80508ff`).
 - 2026-11-02: merged into `testing` (admin PR #126, `55722e0`). Next: `testing` into `main`, then the admin build.
 
+- 2026-11-03: `testing` into `main` (admin PR #135, `ec23120`); main equals testing. Production deploy next.
+
 ## Open
 
 - Arabic: the sidebar names Guests and Invitations both "الدعوات", so their tabs read the same. A translation fix,
@@ -43,7 +46,7 @@ to name its section: "Tourise | Templates", "Tourise | Guests" and so on.
 ## Definition of Done
 
 - [x] Merged into `testing`
-- [ ] Merged into `main`
+- [x] Merged into `main`
 - [x] EN + AR translations in the same commit
 - [x] Type-check and ESLint green
 - [ ] This TASK.md set to `done`; the index row updated

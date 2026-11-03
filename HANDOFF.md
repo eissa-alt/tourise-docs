@@ -32,9 +32,11 @@ to check.
   the social channels picker back), [049](tasks/049-system-email-templates/TASK.md) (Arial) and
   [039](tasks/039-dignitary-parties/TASK.md) (dignitary parties in the CRM).
 - **After the deploy, 2026-11-02:** [063](tasks/063-admin-tab-titles/TASK.md) each admin tab names its section
-  (admin PR #126 into `testing`, not on `main` yet).
-  [064](tasks/064-email-template-bulk-tests/TASK.md) email template tests in bulk (backend + admin on
-  backend PR #130 and admin PR #127 into `testing`, not on `main` yet).
+  (admin PR #126 into `testing`); [064](tasks/064-email-template-bulk-tests/TASK.md) email template tests in bulk
+  (backend PR #130, admin PR #127 into `testing`). Both on `main` 2026-11-03 (testing into main: backend PR #134,
+  admin PR #135, frontend PR #48, with Imtinan's extract choose-sender feature and dignitary success page
+  `a4b4025`); main equals testing. **Production deploy next:** backend pull + `route:cache` + `queue:restart` (no
+  migration), admin and frontend builds.
 - **2026-11-03:** [065](tasks/065-close-registration/TASK.md) close registration per category (switch + EN/AR
   message, for London Reception first); on `testing` and `main` 2026-11-03 (main alone via
   `feat/close-registration-main`: backend PR #135, admin PR #133, frontend PR #47); deployed to production

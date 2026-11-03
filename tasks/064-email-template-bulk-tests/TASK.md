@@ -1,6 +1,7 @@
 # Task 064: Email template tests in bulk
 
-- **Status:** `in-progress`: merged into `testing` 2026-11-02 (backend PR #130, admin PR #127), not on `main` yet.
+- **Status:** `in-progress`: on `testing` and `main` 2026-11-03 (backend PR #134, admin PR #135, testing into
+  main), production deploy next (`route:cache`, `queue:restart`).
 - **Opened:** 2026-11-02
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -37,6 +38,9 @@ address a click. Make a test of many templates, in both languages, for several t
 - 2026-11-02: merged into `testing` (backend PR #130, `150d375`; admin PR #127, `eaf1b73`). On the testing server:
   backend pull, `route:cache`, `queue:restart` (new routes, no migration); admin build.
 
+- 2026-11-03: `testing` into `main` (backend PR #134 `5f28298`, admin PR #135 `ec23120`); main equals testing.
+  Production deploy next: backend pull, `route:cache`, `queue:restart`; admin build.
+
 ## Open
 
 - The queue must be running on the server (it is for the other sends); a failed test email lands in `failed_jobs`
@@ -45,7 +49,7 @@ address a click. Make a test of many templates, in both languages, for several t
 ## Definition of Done
 
 - [x] Merged into `testing`
-- [ ] Merged into `main`
+- [x] Merged into `main`
 - [x] EN + AR translations in the same commit
 - [x] Quality gate green (backend Pint, PHPStan, tests; admin type-check and ESLint)
 - [ ] Browser check by the owner
