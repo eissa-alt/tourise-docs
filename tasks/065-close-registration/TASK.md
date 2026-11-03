@@ -1,7 +1,7 @@
 # Task 065: Close registration per category
 
-- **Status:** `in-progress`: merged into `testing` 2026-11-03; for `main`, the same commits copied onto
-  `feat/close-registration-main` (backend `901e436`, admin `76f2dfa`, frontend `a6614a7`), PRs pending.
+- **Status:** `in-progress`: on `testing` and `main` 2026-11-03 (main: backend PR #135, admin PR #133, frontend
+  PR #47); deployed to production 2026-11-03. Next: the London Reception switched to Closed with its messages.
 - **Opened:** 2026-11-03
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin + frontend
@@ -60,6 +60,13 @@ plus the message per category.
   sub-events merge and its revert): `feat/close-registration-main` from `main`, the three commits copied (backend
   `901e436`, admin `76f2dfa`, frontend `a6614a7`), each applied cleanly; backend Pint, PHPStan and the full suite,
   admin and frontend type-check and ESLint, rerun on the copies.
+- 2026-11-03: merged into `main` (backend PR #135 `11ad858`, admin PR #133 `b555755`, frontend PR #47 `cc8deba`);
+  main's code is the branch's, nothing else from `testing`.
+- 2026-11-03: deployed to production by the owner. Backend pulled `c051c28..11ad858`, then the migration (DONE; run
+  as a second step, not in one line, so for that moment every category read as Closed). Frontend pulled
+  `85b93e0..cc8deba`, admin `aaa6fa4..b555755` (which also brought Imtinan's sub-filters fix, PR #131, not deployed
+  before); both built and restarted. Still on `testing` only: 063, 064 and Imtinan's dignitary success page
+  `a4b4025` (frontend).
 
 ## Open
 
@@ -74,8 +81,8 @@ plus the message per category.
 
 ## Definition of Done
 
-- [ ] Merged into `testing`
-- [ ] Merged into `main`
+- [x] Merged into `testing`
+- [x] Merged into `main`
 - [x] EN + AR translations in the same commit
 - [x] Quality gate green (backend Pint, PHPStan, tests; admin and frontend type-check, ESLint)
 - [ ] Browser check by the owner
