@@ -41,6 +41,9 @@ to check.
   message, for London Reception first); on `testing` and `main` 2026-11-03 (main alone via
   `feat/close-registration-main`: backend PR #135, admin PR #133, frontend PR #47); deployed to production
   2026-11-03 (with Imtinan's admin sub-filters fix, PR #131).
+- **2026-11-04:** [066](tasks/066-social-channels-minimum/TASK.md) social channels minimum per form (the team:
+  1 for Speaker and Moderator, 2 for the rest; Imtinan's change had made it 1 everywhere, live on production);
+  `fix/social-channels-minimum` pushed (backend `17970ff`, admin `4c7a67f`, frontend `3ac8efc`), PRs into `testing` next.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,

@@ -105,6 +105,7 @@ cp -r _TEMPLATE NNN-short-slug      # NNN = next zero-padded number
 | 063 | [admin-tab-titles](063-admin-tab-titles/TASK.md) | in-progress: on `testing` and `main` 2026-11-03 (admin PR #135), production deploy next. Each admin tab names its section ("Tourise \| Guests", "Tourise \| Emails · Templates") from the sidebar's names, in the admin's language; all 179 pages covered. |
 | 064 | [email-template-bulk-tests](064-email-template-bulk-tests/TASK.md) | in-progress: on `testing` and `main` 2026-11-03 (backend PR #134, admin PR #135), production deploy next. Tick email templates and send tests in English, Arabic or both to several team members in one click; queued, admins only, 50 templates and 10 people a click. |
 | 065 | [close-registration](065-close-registration/TASK.md) | in-progress: on `testing`, `main` and production 2026-11-03 (main: backend PR #135, admin PR #133, frontend PR #47); London to be switched to Closed. A Registration Open / Closed switch on every category with its own closed message (EN + AR); closed, its links show the message and the server takes no registration. |
+| 066 | [social-channels-minimum](066-social-channels-minimum/TASK.md) | in-progress: pushed 2026-11-04 on `fix/social-channels-minimum` (backend `17970ff`, admin `4c7a67f`, frontend `3ac8efc`), PRs into `testing` next. Social channels: at least 1 on the Speaker and Moderator forms, at least 2 on every other form (the team), after Imtinan's change made it 1 everywhere. |
 
 _Add a row per task as you open it; newest at the bottom._
 
