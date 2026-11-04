@@ -46,6 +46,8 @@ to check.
   on `testing`, `main` (backend PR #141, admin PR #139, frontend PR #53) and production 2026-11-04, together with
   Imtinan's `fix/photo-errors-clear` (refused photo or document says which and why). Production = main = testing:
   backend `6a35e1e`, admin `a01f7aa`, frontend `bbe5fd1` (testing's own merge ids differ, same code).
+  Follow-up the same day (the team): Speaker / Moderator take **exactly** one channel; website + server on
+  `fix/social-channels-speaker-one` (backend `433a39c`, frontend `4711a04`), admin unchanged; PRs into `testing` next.
 - **2026-11-04:** [067](tasks/067-crm-speakers-import/TASK.md) CRM Speakers import on the team's new template
   (Speaker as media name, Tier, Passport Number kept, add-only with an Update speakers import) and sessions as a list
   the team keeps in CRM Settings, a speaker holding several session lines (Session, Type, Option #). Built on
