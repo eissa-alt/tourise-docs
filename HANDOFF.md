@@ -59,7 +59,8 @@ to check.
 - **2026-11-04:** [068](tasks/068-crm-tasks-2026-11-04/TASK.md) three requests on `feat/crm-tasks-2026-11-04`
   (backend, admin): Manually Accepted / Declined on a non-CRM channel (Manually Accepted invitable through the CRM),
   a name search on System templates, empty import files not shown. Gates green, pushed (backend `63c6a6c`, admin
-  `1f8c9d6`); no migration. Next: PRs into `testing`.
+  `1f8c9d6`); no migration. Merged into `testing` 2026-11-04 (backend PR #153, admin PR #145) after merging the new
+  `testing` in (Imtinan's invite rule kept). Next: testing server deploy.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,

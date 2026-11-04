@@ -1,7 +1,7 @@
 # Task 068: Manually Accepted / Declined, System templates search, empty import files not shown
 
-- **Status:** `in-progress`: built 2026-11-04 on `feat/crm-tasks-2026-11-04`, quality gates green, committed and
-  pushed (backend `6017301`, `63c6a6c`; admin `7b75d71`, `2cac99c`, `1f8c9d6`); PRs into `testing` next.
+- **Status:** `on testing`: merged into `testing` 2026-11-04 (backend PR #153 `078d780`, admin PR #145 `2c2f627`),
+  not `main`; testing server deploy next.
 - **Opened:** 2026-11-04
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -52,7 +52,7 @@ left ("No data").
 
 ## Quality gate
 
-Backend: Pint, PHPStan, 1,749 tests. Admin: type-check, ESLint, Prettier, `yarn build` (from a copy, the owner's dev
+Backend: Pint, PHPStan, 1,749 tests (1,767 after merging the new `testing`). Admin: type-check, ESLint, Prettier, `yarn build` (from a copy, the owner's dev
 server running), `check:rbac`.
 
 ## Log
@@ -62,6 +62,12 @@ server running), `check:rbac`.
   wording). Built on `feat/crm-tasks-2026-11-04`, gates green; committed and pushed on the owner's word, one commit
   per request (backend `6017301` Manually Accepted / Declined, `63c6a6c` empty files; admin `7b75d71`, `2cac99c`,
   `1f8c9d6`).
+- 2026-11-04: `testing` moved twice (Imtinan: guest archive, CRM title on the invitation, archiving releases
+  invitations). Admin: a translations conflict (both sides added keys), merged keeping both (`7e64ad9`). Backend: a
+  conflict in `CrmContactInviter` with Imtinan's `113cc8e`; merged keeping both rules (a released invitation can be
+  sent again; a Manually Accepted contact can be invited) plus a test for a released contact with an old Accepted
+  (`75be9da`, 1,767 tests). Checked: none of Imtinan's lines removed, no translation key lost. Merged into `testing`
+  (backend PR #153, admin PR #145).
 
 ## Definition of Done
 
@@ -69,5 +75,7 @@ server running), `check:rbac`.
 - [x] Committed and pushed on the owner's word
 - [x] EN + AR translations in the same change
 - [x] Quality gate green
-- [ ] Merged into `testing`; testing server: pull, `route:cache`, `queue:restart`, admin rebuild (no migration)
+- [x] Merged into `testing`
+- [ ] Testing server: pull, `migrate` (Imtinan's `2026_11_04_000005`, `000006`; none here), `config:cache`,
+  `route:cache`, `queue:restart`, admin rebuild
 - [x] Docs (this TASK.md, the index row, a HANDOFF line)
