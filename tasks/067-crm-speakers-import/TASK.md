@@ -1,9 +1,7 @@
 # Task 067: CRM Speakers import, the team's new template and sessions in CRM Settings
 
-- **Status:** `in-progress`: every question answered (2026-11-03 to 2026-11-04); **built 2026-11-04** on
-  `feat/crm-speakers-import`, quality gates green, **committed and pushed** (backend `8407580`, admin `422c95c`);
-  the three migrations run on the owner's local database. Next: the owner's browser check and the PRs into
-  `testing`.
+- **Status:** `on testing`: merged into `testing` 2026-11-04 (backend PR #144, admin PR #140) and deployed on the
+  testing server the same day; not `main`. Next: the box ticked in Roles, the team adds the sessions and checks.
 - **Opened:** 2026-11-03
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -214,6 +212,9 @@ sessions in CRM Settings (with Day, Pillar and Keyword) before importing speaker
 - 2026-11-04: pushed (backend `6a97e5d`, admin `8d381fc`, docs `b1e3902`) and **merged into `testing`** by the owner:
   backend PR #144 (`fe2a244`, beside the social-channels fix PR #142, no shared file), admin PR #140 (`6e3cf4a`).
   Not in `main`.
+- 2026-11-04: deployed on the testing server by the owner (backend `078d780`, admin `2c2f627`, frontend `2d50537`,
+  with Task 068 and Imtinan's guest archive): the 4 migrations ran with Imtinan's `000005` and `000006`; caches
+  cleared, `queue:restart`, admin rebuilt.
 
 ## Definition of Done
 
@@ -224,5 +225,6 @@ sessions in CRM Settings (with Day, Pillar and Keyword) before importing speaker
 - [x] New speakers test files for the three testers, built and checked
 - [ ] Browser check by the owner (the four migrations run locally 2026-11-04)
 - [x] Merged into `testing` 2026-11-04 (backend PR #144 `fe2a244`, admin PR #140 `6e3cf4a`)
-- [ ] On the testing server: `migrate` (4), caches, `queue:restart`, admin rebuild; the new box ticked in Roles
-- [ ] Docs updated (this TASK.md, the index row, a HANDOFF line)
+- [x] On the testing server 2026-11-04: `migrate` (4), caches, `queue:restart`, admin rebuild
+- [ ] The new box **Update speakers by import** ticked in Roles on testing
+- [x] Docs updated (this TASK.md, the index row, a HANDOFF line)

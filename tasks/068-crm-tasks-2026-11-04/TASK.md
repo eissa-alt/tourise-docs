@@ -1,7 +1,7 @@
 # Task 068: Manually Accepted / Declined, System templates search, empty import files not shown
 
 - **Status:** `on testing`: merged into `testing` 2026-11-04 (backend PR #153 `078d780`, admin PR #145 `2c2f627`),
-  not `main`; testing server deploy next.
+  not `main`; deployed on the testing server 2026-11-04.
 - **Opened:** 2026-11-04
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -76,6 +76,6 @@ server running), `check:rbac`.
 - [x] EN + AR translations in the same change
 - [x] Quality gate green
 - [x] Merged into `testing`
-- [ ] Testing server: pull, `migrate` (Imtinan's `2026_11_04_000005`, `000006`; none here), `config:cache`,
-  `route:cache`, `queue:restart`, admin rebuild
+- [x] Testing server 2026-11-04 (owner): pull, `migrate` (Imtinan's `000005`, `000006`; none here), caches cleared,
+  `queue:restart`, admin rebuild
 - [x] Docs (this TASK.md, the index row, a HANDOFF line)

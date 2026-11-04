@@ -54,13 +54,13 @@ to check.
   `feat/crm-speakers-import`, gates green, pushed (backend `8407580`, admin `422c95c`); 4 migrations
   (`2026_11_04_000001` to `000004`: the sessions list starting empty, the team adds them; Official invite to be sent
   by typed) run only on the owner's local database; new box **Update speakers by import**;
-  test files in `crm_imports_test/crm_speakers_tests`. Merged into `testing` 2026-11-04 (backend PR #144 `fe2a244`, admin PR #140 `6e3cf4a`), not `main`. Next: the
-  testing server (pull, `migrate` 4, caches, `queue:restart`, admin rebuild, tick the box), the team's check.
+  test files in `crm_imports_test/crm_speakers_tests`. Merged into `testing` 2026-11-04 (backend PR #144 `fe2a244`, admin PR #140 `6e3cf4a`), not `main`. On the
+  testing server 2026-11-04 (owner). Next: tick the box in Roles, the team adds the sessions and checks.
 - **2026-11-04:** [068](tasks/068-crm-tasks-2026-11-04/TASK.md) three requests on `feat/crm-tasks-2026-11-04`
   (backend, admin): Manually Accepted / Declined on a non-CRM channel (Manually Accepted invitable through the CRM),
   a name search on System templates, empty import files not shown. Gates green, pushed (backend `63c6a6c`, admin
   `1f8c9d6`); no migration. Merged into `testing` 2026-11-04 (backend PR #153, admin PR #145) after merging the new
-  `testing` in (Imtinan's invite rule kept). Next: testing server deploy.
+  `testing` in (Imtinan's invite rule kept). On the testing server 2026-11-04 (owner).
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
