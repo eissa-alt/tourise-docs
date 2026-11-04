@@ -37,13 +37,14 @@ speaker can be in several sessions. The Contacts import is the reference for eve
 | 4 | Status columns | Status works **the same as contacts** (Tracking). Status, Invitation Status, Save the Date Invitations, Save the Date Status and Follow Up Status leave the template. An old file's cells stay with the row only, as today. |
 | 5 | Follow up | Stays **Yes / No**. The team's "Follow Up Call/Text by" heading is read as Follow up. |
 | 6 | Lists | Day, Pillar, Type and Continent stay the fixed lists we have, kept in code. Session moves to CRM Settings (decision 7). |
-| 7 | Sessions | **Sessions are a list the team keeps in CRM Settings.** Each session has its own Day, Pillar and Keyword. **A session's name is unique** (case and extra spaces aside). A speaker has **one or more session lines**, each **Session + Type + Option #** (the team chose C). |
+| 7 | Sessions | **Sessions are a list the team keeps in CRM Settings.** Each session has its own Day, Pillar and Keyword. **A session's name is unique** (case and extra spaces aside). A speaker has **one or more session lines**, each **Session + Type + Option #** (the team chose C). **The list starts empty**: the team adds the sessions (owner, 2026-11-04). |
 | 7b | Sessions in the import | The import takes **Session, Type and Option #**, all **required**, for one session line. **Each speaker once per file**, with exactly one session; a repeated email is refused. More sessions are added in Edit speaker. |
 | 8 | Speaker Email | Required, the **speaker's own**. An office or assistant email goes in Contact Email. |
 | 9 | Country | Files use the **CRM's country names** (the sample's dropdown). "USA", "UK", "KSA" are refused. |
 | 10 | CRM ID | **Like contacts:** no CRM ID in the speakers' file, which **only adds**. A person already in the CRM is refused with "already exists, added by X". Updates go through **Export, then Update import**, which gains a Speakers mode and its own box. Point of Contact stays an optional column. |
 | 11 | Hidden V13 tab | Not uploaded. |
 | 12 | Add / Edit form | **The form follows the file**, as for contacts: one list of required fields. |
+| 13 | Official invite to be sent by | **Free text** (owner, 2026-11-04): who sends the invitation ("CEO", "MOFA / HE"), as the team's own sheets write it. Replaces Task 059 decision 4 (the system's Titles), which their values never fit. Each speaker keeps its Title's name as text. |
 | - | Heading colours | Red = required, grey = optional (the team's note). |
 
 ## The speakers' file after this task
@@ -71,7 +72,7 @@ CRM ID (decision 10). Point of Contact stays beside the Relationship Owner, as t
 | 16 | Network to leverage | text | |
 | 17 | Speaker Email | email, one person in the CRM | yes |
 | 18 | Contact Person | text | |
-| 19 | Official invite to be sent by | the system's Titles | |
+| 19 | Official invite to be sent by | text (who sends it) | |
 | 20 | Contact Email | email | |
 | 21 | Invitation Sent by | text | |
 | 22 | Follow up | Yes / No | |
@@ -90,9 +91,8 @@ Still refused in every CRM file (PDPL): national ID, ID number, iqama, date of b
    `/admin/crm/sessions`: read with any CRM box, add / edit / switch off with `settings`, as the Settings lists.
 2. **Session lines:** a new table `crm_speaker_sessions` (speaker, session, Type, Option #), one line per speaker and
    session. Read and written through the speaker, so each change is in the speaker's History.
-3. **Data move (one migration):** the 57 sessions of `CrmFixedLists::SESSION` become CRM Settings sessions (English
-   and Arabic names as today, Day / Pillar / Keyword empty for the team to fill). Each speaker's Session, Type and
-   Option # become its first line. `down()` puts them back.
+3. **No data move:** the sessions list starts empty and the team adds its sessions (owner, 2026-11-04: "don't add
+   any from your side"). Production has no speakers; the test speakers on `testing` start without a session.
 4. **New speaker fields** on `crm_speaker_details`: `speaker_name` (Speaker) and `passport_number`. Tier uses the
    contact's own Tier column (speakers are contact rows).
 5. **The speakers' columns** (`CrmImportColumns::SPEAKER_COLUMNS`): the 25 above, the 11 required. The save rules,
@@ -105,7 +105,7 @@ Still refused in every CRM file (PDPL): national ID, ID number, iqama, date of b
 8. **Export, dashboard, filters:** sessions read through the lines (see defaults e to g); Tier and Passport Number
    added.
 9. **The sample:** the 25 headings in red / grey, dropdowns for Session (switched-on sessions), Type, Gender, Tier,
-   Country, Continent, Official invite, Follow up and Point of Contact.
+   Country, Continent, Follow up and Point of Contact.
 10. **Texts, EN + AR:** the server messages for sessions, and the Bring back message saying "archived speaker" for a
     speaker.
 
@@ -142,7 +142,7 @@ owner's dev server is running).
 
 | # | Default |
 |---|---|
-| a | A session's **Day, Pillar and Keyword are optional** in CRM Settings, so the 57 can start empty and the team fills them in. |
+| a | A session's **Day, Pillar and Keyword are optional** in CRM Settings: the team fills them in as it knows them. |
 | b | **Sessions can be renamed** (the name stays unique). **Switched off only while no speaker is in them**, never deleted, as Invitation Channel. |
 | c | The speakers' **old Day, Pillar and Keyword** (per speaker) stay in the database, unused and not shown; History keeps them. Nothing is copied into the sessions (no silent data edits). |
 | d | **Export:** one row per speaker; the Session, Type and Option # cells list each line, separated by " \| ". |
@@ -170,9 +170,10 @@ the Contacts import's rules; Tracking and Invite (one invitation per person, not
 
 ## Deploy (when it reaches a server)
 
-`migrate` (the two new tables, the data move, the two new columns), `config:cache`, `route:cache`, `queue:restart`;
-admin build and restart. Tick the new **Update speakers by import** box in Roles. The team checks the 57 sessions in
-CRM Settings and fills in their Day, Pillar and Keyword.
+`migrate` (four migrations: the two new tables, the two new columns, and Official invite to be sent by typed, each
+speaker keeping its Title's name), `config:cache`, `route:cache`,
+`queue:restart`; admin build and restart. Tick the new **Update speakers by import** box in Roles. The team adds its
+sessions in CRM Settings (with Day, Pillar and Keyword) before importing speakers: the list starts empty.
 
 ## Log
 
@@ -184,8 +185,8 @@ CRM Settings and fills in their Day, Pillar and Keyword.
 - 2026-11-04: **built** on `feat/crm-speakers-import`; committed and pushed on the owner's word (backend `8407580`,
   admin `422c95c`); the three migrations run on the owner's local database (batch 50, 57 sessions, no speaker to
   move).
-  - Backend: migrations `2026_11_04_000001` (`crm_sessions`, the 57 seeded), `000002` (`crm_speaker_sessions`, each
-    speaker's session moved to its first line) and `000003` (`speaker_name`, `passport_number`); `CrmSession`,
+  - Backend: migrations `2026_11_04_000001` (`crm_sessions`), `000002` (`crm_speaker_sessions`), `000003`
+    (`speaker_name`, `passport_number`) and `000004` (Official invite to be sent by typed, decision 13); `CrmSession`,
     `CrmSpeakerSession`, `CrmSpeakerSessions`; the speaker's `sessions` saved with it and said in History in words;
     the 25 columns; add-only import; the speakers' update import (box `speakers_update_import`); sessions in CRM
     Settings (`/admin/crm/sessions`); Export, filters, dashboard; EN + AR messages. `composer qa` green: Pint, PHPStan,
@@ -197,6 +198,19 @@ CRM Settings and fills in their Day, Pillar and Keyword.
     `check:rbac` green.
   - Test files: three sets of 8 files and Steps S, E, U, built and replayed through the API (every result as their
     README says), PDFs, the two zips.
+- 2026-11-04: after the owner's look at CRM Settings: **the sessions list starts empty** (owner: "don't add any
+  from your side, they will add"; no speakers on production). The migrations seed and move nothing; CRM Settings says
+  "No sessions yet"; the tests add the sessions they name; the testers' files use five sessions their README asks
+  them to add first. Gates green again (1,744 tests).
+- 2026-11-04: **Official invite to be sent by is free text** (decision 13): the team's sheets write who sends the
+  invitation, never a guest's title, so Task 059's Titles list never fit. Migration `2026_11_04_000004` copies each
+  speaker's Title name into the text and drops the link; Titles no longer count speakers. Form, See more, table,
+  template and import notes follow; the testers' files rebuilt (file 04 now 7 problems). Gates green (1,744 tests).
+  The migration ran on the owner's local database before they were asked (a slip, said at once; reversible with
+  `migrate:rollback --step=1`).
+- 2026-11-04: committed on the owner's word, not pushed: backend `6a97e5d` (empty list, typed field), admin `8b55c5c`
+  (the same, the Sessions search box) and `8d381fc` (CRM Settings' Follow-ups: a wider Daily check time box, the
+  owner's extra fix).
 
 ## Definition of Done
 
@@ -205,6 +219,6 @@ CRM Settings and fills in their Day, Pillar and Keyword.
 - [x] EN + AR translations in the same commit (in the change, to commit together)
 - [x] Quality gate green
 - [x] New speakers test files for the three testers, built and checked
-- [ ] Browser check by the owner (the three migrations run locally 2026-11-04)
+- [ ] Browser check by the owner (the four migrations run locally 2026-11-04)
 - [ ] Merged into `testing`; `migrate` on the testing server; the new box ticked in Roles
 - [ ] Docs updated (this TASK.md, the index row, a HANDOFF line)
