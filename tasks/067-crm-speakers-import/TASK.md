@@ -211,6 +211,9 @@ sessions in CRM Settings (with Day, Pillar and Keyword) before importing speaker
 - 2026-11-04: committed on the owner's word, not pushed: backend `6a97e5d` (empty list, typed field), admin `8b55c5c`
   (the same, the Sessions search box) and `8d381fc` (CRM Settings' Follow-ups: a wider Daily check time box, the
   owner's extra fix).
+- 2026-11-04: pushed (backend `6a97e5d`, admin `8d381fc`, docs `b1e3902`) and **merged into `testing`** by the owner:
+  backend PR #144 (`fe2a244`, beside the social-channels fix PR #142, no shared file), admin PR #140 (`6e3cf4a`).
+  Not in `main`.
 
 ## Definition of Done
 
@@ -220,5 +223,6 @@ sessions in CRM Settings (with Day, Pillar and Keyword) before importing speaker
 - [x] Quality gate green
 - [x] New speakers test files for the three testers, built and checked
 - [ ] Browser check by the owner (the four migrations run locally 2026-11-04)
-- [ ] Merged into `testing`; `migrate` on the testing server; the new box ticked in Roles
+- [x] Merged into `testing` 2026-11-04 (backend PR #144 `fe2a244`, admin PR #140 `6e3cf4a`)
+- [ ] On the testing server: `migrate` (4), caches, `queue:restart`, admin rebuild; the new box ticked in Roles
 - [ ] Docs updated (this TASK.md, the index row, a HANDOFF line)

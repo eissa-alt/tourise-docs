@@ -54,7 +54,8 @@ to check.
   `feat/crm-speakers-import`, gates green, pushed (backend `8407580`, admin `422c95c`); 4 migrations
   (`2026_11_04_000001` to `000004`: the sessions list starting empty, the team adds them; Official invite to be sent
   by typed) run only on the owner's local database; new box **Update speakers by import**;
-  test files in `crm_imports_test/crm_speakers_tests`. Next: the owner's browser check, then PRs into `testing`.
+  test files in `crm_imports_test/crm_speakers_tests`. Merged into `testing` 2026-11-04 (backend PR #144 `fe2a244`, admin PR #140 `6e3cf4a`), not `main`. Next: the
+  testing server (pull, `migrate` 4, caches, `queue:restart`, admin rebuild, tick the box), the team's check.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
