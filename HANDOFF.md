@@ -65,6 +65,12 @@ to check.
   template dropdown (admin only, `feat/email-template-search`): it uses `SearchableSelect` like the CRM form's Country
   and Nationality. Gates green, pushed (admin `6f2a68d`), merged into `testing`
   (admin PR #146 `74fcb04`). Next: testing server admin pull and rebuild.
+- **2026-11-05:** [070](tasks/070-london-answer-own-column/TASK.md) migrations `2026_11_05_000001` and `000002`
+  deleted (owner): the will_attend fill is the command `guests:fill-will-attend [--dry-run]` (London left out, also
+  anyone who came through a London invitation), and London registrations made before are not filled from their London
+  answer. Pushed: `fix/will-attend-fill-command` (from `testing`, `c041887`) and `fix/will-attend-fill-command-main`
+  (from `main`, `564a452`), gates green (1,790 / 1,782); PR into `testing` first, then `main`. Production:
+  after the pull, the dry run, then the command (1 guest on the 11:55 dump); no `migrate` needed for it.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
