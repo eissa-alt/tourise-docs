@@ -79,6 +79,10 @@ to check.
   backend `da90d12` pulled, 067's four migrations run (`2026_11_04_000001` to `000004`); admin `867001c` built and
   restarted. Testing server the same evening: backend `b552830` (nothing pending), admin `cfb0898` built; frontend
   already up to date. Both servers now run the same code. Next: tick **Update speakers by import** in Roles.
+- **2026-11-05 night:** [071](tasks/071-crm-dashboard-accepted-registered/TASK.md) the client's CRM dashboard notes 1
+  and 2: Accepted counts the CRM's Confirmed, Registered leaves out who answered No (read only, no migration). Built on
+  `fix/crm-dashboard-accepted-registered` (backend `cb882c1`, `da39eae`; admin `a39f7da`), gates green, pushed.
+  Note 3 (not delivered and reason) waits with the invitation email status work.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
