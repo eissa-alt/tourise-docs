@@ -1,8 +1,9 @@
 # Task 067: CRM Speakers import, the team's new template and sessions in CRM Settings
 
 - **Status:** `on main`: merged into `testing` 2026-11-04 (backend PR #144, admin PR #140), deployed on the testing
-  server the same day; on `main` 2026-11-05 (backend PR #165, admin PR #154). Next: the production deploy (below),
-  the box ticked in Roles, the team adds the sessions and checks.
+  server the same day; on `main` 2026-11-05 (backend PR #165, admin PR #154) and on production the same evening
+  (backend `da90d12`, the four migrations run; admin `867001c` built and restarted). Next: the box ticked in Roles,
+  the team adds the sessions and checks.
 - **Opened:** 2026-11-03
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin

@@ -1,8 +1,8 @@
 # Task 069: a search box on the invitation Email template dropdown
 
 - **Status:** `on main`: built 2026-11-05 on `feat/email-template-search`, quality gates green (admin `6f2a68d`);
-  merged into `testing` (admin PR #146 `74fcb04`) and on `main` 2026-11-05 (admin PR #154). Production admin
-  build next.
+  merged into `testing` (admin PR #146 `74fcb04`) and on `main` 2026-11-05 (admin PR #154); on production the same
+  evening (admin `867001c` built and restarted).
 - **Opened:** 2026-11-05
 - **Owner:** Eissa
 - **Sub-app(s):** admin
