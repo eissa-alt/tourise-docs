@@ -1,7 +1,7 @@
 # Task 071: the CRM dashboard's Accepted and Registered tiles
 
-- **Status:** `in-progress`: built 2026-11-05 on `fix/crm-dashboard-accepted-registered`, quality gates green,
-  committed and pushed; PRs into `testing` next.
+- **Status:** `on main`: merged into `testing` 2026-11-05 (backend PR #166 `5dcc77f`, admin PR #155 `ee6bc4b`) and
+  `main` (backend PR #167 `ec3a150`, admin PR #156 `3983afd`); production deploy next.
 - **Opened:** 2026-11-05
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
@@ -61,5 +61,5 @@ Admin: type-check, ESLint, Prettier green (`yarn build` not run: the owner's dev
 
 ## Next
 
-- Pushed 2026-11-05. The owner opens the PRs into `testing`, then `testing` into `main`; on each server: backend
-  pull + `queue:restart`, admin pull, build and restart. No migration.
+- On `testing` and `main` 2026-11-05 night. On each server: backend pull + `queue:restart`, admin pull, build and
+  restart. No migration.
