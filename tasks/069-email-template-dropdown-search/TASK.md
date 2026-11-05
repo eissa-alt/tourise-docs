@@ -1,7 +1,7 @@
 # Task 069: a search box on the invitation Email template dropdown
 
 - **Status:** `in-progress`: built 2026-11-05 on `feat/email-template-search`, quality gates green, committed and
-  pushed (admin `6f2a68d`); PR into `testing` next.
+  pushed (admin `6f2a68d`); merged into `testing` (admin PR #146 `74fcb04`), not `main`.
 - **Opened:** 2026-11-05
 - **Owner:** Eissa
 - **Sub-app(s):** admin
@@ -36,7 +36,7 @@ Admin: type-check, ESLint, Prettier, `yarn build` (from a copy, the owner's dev 
 ## Log
 
 - 2026-11-05: asked by the owner with a screenshot of the invitation form; built on `feat/email-template-search`;
-  committed and pushed on the owner's word (admin `6f2a68d`).
+  committed and pushed on the owner's word (admin `6f2a68d`); merged into `testing` (admin PR #146 `74fcb04`).
 
 ## Definition of Done
 
@@ -44,5 +44,6 @@ Admin: type-check, ESLint, Prettier, `yarn build` (from a copy, the owner's dev 
 - [ ] Browser check by the owner
 - [x] Committed and pushed on the owner's word
 - [x] Quality gate green
-- [ ] Merged into `testing`; testing server: admin pull and rebuild (no backend change)
+- [x] Merged into `testing` (admin PR #146)
+- [ ] Testing server: admin pull and rebuild (no backend change)
 - [x] Docs (this TASK.md, the index row, a HANDOFF line)

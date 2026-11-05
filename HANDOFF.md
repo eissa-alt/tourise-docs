@@ -63,7 +63,8 @@ to check.
   `testing` in (Imtinan's invite rule kept). On the testing server 2026-11-04 (owner).
 - **2026-11-05:** [069](tasks/069-email-template-dropdown-search/TASK.md) a search box on the invitation Email
   template dropdown (admin only, `feat/email-template-search`): it uses `SearchableSelect` like the CRM form's Country
-  and Nationality. Gates green, pushed (admin `6f2a68d`). Next: PR into `testing`.
+  and Nationality. Gates green, pushed (admin `6f2a68d`), merged into `testing`
+  (admin PR #146 `74fcb04`). Next: testing server admin pull and rebuild.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,
