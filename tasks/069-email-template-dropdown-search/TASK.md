@@ -24,8 +24,10 @@ starting with the typed letters and does not narrow the list. The CRM form's Cou
 - `components/shared/select/email-template-invitations-select.tsx` uses `SearchableSelect` instead of
   `CustomSelect`: type, and the list shows only the templates whose name contains the text. Same list, same value,
   same clear button where it had one.
-- The same dropdown, so the same search box, everywhere it is used: the invitation form, Resend, Extract invitations
-  (bulk) and Update invitations (bulk).
+- The same dropdown, so the same search box, everywhere it is used: 12 screens on `testing` (the invitation form and
+  the single invitation form, Resend, Extract and Update invitations in bulk, collections, targeted collection,
+  Categories, Request category, Automation, Dignitary parties, the template editor). Corrected 2026-11-05: this page
+  first said 4 (a cut-short search).
 - **Not touched:** the shared `CustomSelect` and the ~27 other dropdowns that also ask for search (owner: this
   dropdown only); the backend; no translations (the empty-search text already exists).
 
