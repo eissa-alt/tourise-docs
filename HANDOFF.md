@@ -72,6 +72,13 @@ to check.
   (from `main`, `564a452`), gates green (1,790 / 1,782); merged into `testing` (PR #162, `0f9be81`) and `main`
   (PR #163, `551d13e`). Production done the same evening: pulled `551d13e`, nothing pending, the command set 1
   guest to yes. Testing server: pull, dry run, command (no `migrate`).
+- **2026-11-05 evening, `testing` = `main` again** (same code in all three apps): `main` had its own copies of
+  Imtinan's 2026-11-04/05 work, so the `testing` into `main` PRs conflicted. `chore/main-into-testing` merged `main`
+  into `testing` keeping `testing`'s side (its code exactly): backend PR #164, admin PR #153; then `testing` into
+  `main`: backend PR #165 `da90d12`, admin PR #154 `867001c`. Tasks 067, 068, 069 are on `main` now. Production
+  deploy next: backend pull, `migrate` (067's `2026_11_04_000001` to `000004`, nothing else pending),
+  `config:cache`, `route:cache`, `queue:restart`; admin pull, build, restart; tick **Update speakers by import** in
+  Roles. Frontend: nothing.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
   Imtinan's sub-filters fix, her Extract choose-sender feature, PRs #136 / #134). New `testing`: backend `a2e183f`,

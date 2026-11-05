@@ -1,7 +1,8 @@
 # Task 068: Manually Accepted / Declined, System templates search, empty import files not shown
 
-- **Status:** `on testing`: merged into `testing` 2026-11-04 (backend PR #153 `078d780`, admin PR #145 `2c2f627`),
-  not `main`; deployed on the testing server 2026-11-04.
+- **Status:** `on main`: merged into `testing` 2026-11-04 (backend PR #153 `078d780`, admin PR #145 `2c2f627`),
+  deployed on the testing server 2026-11-04; on `main` 2026-11-05 (backend PR #165, admin PR #154). Production
+  deploy next.
 - **Opened:** 2026-11-04
 - **Owner:** Eissa
 - **Sub-app(s):** backend + admin
