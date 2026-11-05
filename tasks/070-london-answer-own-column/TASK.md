@@ -1,7 +1,7 @@
 # Task 070: the will_attend fill becomes a command; the London copy is dropped
 
-- **Status:** `merged`: into `testing` (PR #162, `0f9be81`) and `main` (PR #163, `551d13e`) 2026-11-05 20:29;
-  the server steps below are next.
+- **Status:** `done` on production 2026-11-05: merged into `testing` (PR #162, `0f9be81`) and `main` (PR #163,
+  `551d13e`) at 20:29; production pulled `551d13e`, nothing pending, the command set 1 guest to yes. Testing server next.
 - **Opened:** 2026-11-05
 - **Owner:** Eissa
 - **Sub-app(s):** backend
@@ -60,8 +60,9 @@ leaves only a record there.
 
 ## Next
 
-- Merged 2026-11-05 (testing PR #162, main PR #163). Next: production as above; on the testing server, `git pull`
-  and the dry run (no `migrate` for this).
+- Merged 2026-11-05 (testing PR #162, main PR #163). Production done the same evening: `migrate:status` showed
+  nothing pending, the dry run listed the 1 guest expected, the command set them to yes.
+- Next: the testing server, `git pull`, then the dry run and the command (no `migrate` for this).
 
 ## Quality gate
 
