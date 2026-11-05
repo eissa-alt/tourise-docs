@@ -1,6 +1,7 @@
 # Task 070: the will_attend fill becomes a command; the London copy is dropped
 
-- **Status:** `in-progress`: committed and pushed 2026-11-05, quality gates green; PRs into `testing` then `main`.
+- **Status:** `merged`: into `testing` (PR #162, `0f9be81`) and `main` (PR #163, `551d13e`) 2026-11-05 20:29;
+  the server steps below are next.
 - **Opened:** 2026-11-05
 - **Owner:** Eissa
 - **Sub-app(s):** backend
@@ -59,7 +60,7 @@ leaves only a record there.
 
 ## Next
 
-- The owner opens the PRs: `testing` first, then `main`. Then production as above; on the testing server, `git pull`
+- Merged 2026-11-05 (testing PR #162, main PR #163). Next: production as above; on the testing server, `git pull`
   and the dry run (no `migrate` for this).
 
 ## Quality gate

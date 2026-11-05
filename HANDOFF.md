@@ -69,7 +69,8 @@ to check.
   deleted (owner): the will_attend fill is the command `guests:fill-will-attend [--dry-run]` (London left out, also
   anyone who came through a London invitation), and London registrations made before are not filled from their London
   answer. Pushed: `fix/will-attend-fill-command` (from `testing`, `c041887`) and `fix/will-attend-fill-command-main`
-  (from `main`, `564a452`), gates green (1,790 / 1,782); PR into `testing` first, then `main`. Production:
+  (from `main`, `564a452`), gates green (1,790 / 1,782); merged into `testing` (PR #162, `0f9be81`) and `main`
+  (PR #163, `551d13e`). Production:
   after the pull, the dry run, then the command (1 guest on the 11:55 dump); no `migrate` needed for it.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
