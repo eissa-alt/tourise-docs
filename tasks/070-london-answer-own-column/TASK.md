@@ -1,7 +1,7 @@
 # Task 070: the will_attend fill becomes a command; the London copy is dropped
 
 - **Status:** `done` on production 2026-11-05: merged into `testing` (PR #162, `0f9be81`) and `main` (PR #163,
-  `551d13e`) at 20:29; production pulled `551d13e`, nothing pending, the command set 1 guest to yes. Testing server next.
+  `551d13e`) at 20:29; production pulled `551d13e`, nothing pending, the command set 1 guest to yes. Testing server pulled `b552830` the same evening, nothing pending.
 - **Opened:** 2026-11-05
 - **Owner:** Eissa
 - **Sub-app(s):** backend
@@ -55,14 +55,15 @@ from 3 to 16. The owner pulled `main` `27a1738` on production and did not run `m
 
 `000002`: nowhere that matters (not production, not the testing server, not the owner's local database; probably
 Imtinan's local one). `000001`: the owner's local database ran its first version (rolled back 2026-11-05 on the
-owner's yes, record only: its `down` was empty, the yes values stay); the testing server may have run it too, which
-leaves only a record there.
+owner's yes, record only: its `down` was empty, the yes values stay). The testing server never had either: it was on
+`078d780` (2026-11-04) until the evening pull straight to `b552830`, which no longer has them.
 
 ## Next
 
 - Merged 2026-11-05 (testing PR #162, main PR #163). Production done the same evening: `migrate:status` showed
   nothing pending, the dry run listed the 1 guest expected, the command set them to yes.
-- Next: the testing server, `git pull`, then the dry run and the command (no `migrate` for this).
+- Testing server 2026-11-05 evening: pulled `b552830`, nothing pending. The fill command there is optional (test
+  data); not run as far as known.
 
 ## Quality gate
 

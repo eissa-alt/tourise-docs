@@ -48,5 +48,5 @@ Admin: type-check, ESLint, Prettier, `yarn build` (from a copy, the owner's dev 
 - [x] Committed and pushed on the owner's word
 - [x] Quality gate green
 - [x] Merged into `testing` (admin PR #146)
-- [ ] Testing server: admin pull and rebuild (no backend change)
+- [x] Testing server 2026-11-05 evening: admin pulled `cfb0898` and built (no backend change)
 - [x] Docs (this TASK.md, the index row, a HANDOFF line)
