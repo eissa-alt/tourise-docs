@@ -82,7 +82,8 @@ to check.
 - **2026-11-05 night:** [071](tasks/071-crm-dashboard-accepted-registered/TASK.md) the client's CRM dashboard notes 1
   and 2: Accepted counts the CRM's Confirmed, Registered leaves out who answered No (read only, no migration). Built on
   `fix/crm-dashboard-accepted-registered` (backend `cb882c1`, `da39eae`; admin `a39f7da`), gates green; on `testing` (backend PR #166, admin PR #155) and `main`
-  (backend PR #167 `ec3a150`, admin PR #156 `3983afd`); servers next.
+  (backend PR #167 `ec3a150`, admin PR #156 `3983afd`); on production by 2026-11-07 (owner), testing server not
+  confirmed.
   Note 3 (not delivered and reason) waits with the invitation email status work.
 - **2026-11-03, `testing` rebuilt without the sub-events merge and its revert** (owner's plan): from the last commit
   before it (backend `150d375`, admin `eaf1b73`, frontend `785f254`), the later work copied back (close registration,
